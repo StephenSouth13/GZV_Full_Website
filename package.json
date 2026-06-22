@@ -1,0 +1,13 @@
+{
+  "name": "msc-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev-placeholder.cjs",
+    "build": "node scripts/build-dist.cjs",
+    "build:dev": "node scripts/build-dist.cjs",
+    "preview": "node scripts/dev-placeholder.cjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2"
+  }
+}
