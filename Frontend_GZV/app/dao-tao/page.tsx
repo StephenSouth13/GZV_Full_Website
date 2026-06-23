@@ -1,4 +1,4 @@
-//D:\MSC\msc_users\app\dao-tao\page.tsx
+//D:\gzv\gzv_users\app\dao-tao\page.tsx
 'use client';
 
 import { useState, useRef, useEffect } from "react";
@@ -53,8 +53,8 @@ export default function TrainingPage() {
   ];
 
   // ========== PHẦN ANIMATION ĐÃ FIX LỖI ==========
-  const mscSectionRef = useRef(null);
-  const isMscInView = useInView(mscSectionRef, { once: false, amount: 0.2 });
+  const gzvSectionRef = useRef(null);
+  const isgzvInView = useInView(gzvSectionRef, { once: false, amount: 0.2 });
 
   const controlsM = useAnimation();
   const controlsS = useAnimation();
@@ -77,7 +77,7 @@ export default function TrainingPage() {
     const sequence = async () => {
       // Chỉ chạy vòng lặp nếu component đang active và đang trong tầm nhìn
       while (isActive) {
-        if (!isMscInView) {
+        if (!isgzvInView) {
           await new Promise(resolve => setTimeout(resolve, 500));
           continue;
         }
@@ -111,7 +111,7 @@ export default function TrainingPage() {
       controlsS.stop();
       controlsC.stop();
     };
-  }, [isMscInView, controlsM, controlsS, controlsC]);
+  }, [isgzvInView, controlsM, controlsS, controlsC]);
 
 
   const cardVariant: Variants = {
@@ -166,8 +166,8 @@ export default function TrainingPage() {
         </div>
       </section>
 
-      {/* MSC CORE VALUES */}
-      <section ref={mscSectionRef} className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* gzv CORE VALUES */}
+      <section ref={gzvSectionRef} className="py-24 bg-gray-50 dark:bg-gray-900 overflow-hidden">
         <div className="container text-center max-w-5xl mx-auto">
           <div className="flex flex-col items-center justify-center space-y-4">
             <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white uppercase">
@@ -189,7 +189,7 @@ export default function TrainingPage() {
                 custom={index}
                 variants={cardVariant}
                 initial="hidden"
-                animate={isMscInView ? "visible" : "hidden"}
+                animate={isgzvInView ? "visible" : "hidden"}
               >
                 <h4 className={`text-xl font-bold ${value.color} mb-3 font-serif`}>{value.title}</h4>
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{value.description}</p>
@@ -203,8 +203,8 @@ export default function TrainingPage() {
       <section className="py-20 bg-white dark:bg-gray-800">
         <div className="container">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white font-serif">Tại sao chọn MSC Center?</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Những lợi ích vượt trội khi học tập tại MSC Center</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white font-serif">Tại sao chọn gzv Center?</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">Những lợi ích vượt trội khi học tập tại gzv Center</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
@@ -278,7 +278,7 @@ export default function TrainingPage() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
         <div className="container text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif uppercase tracking-tight">Sẵn sàng bắt đầu hành trình?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Để lại thông tin để được đội ngũ MSC tư vấn lộ trình phát triển phù hợp nhất.</p>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Để lại thông tin để được đội ngũ gzv tư vấn lộ trình phát triển phù hợp nhất.</p>
           <Link href="/lien-he">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 px-12 py-7 rounded-full font-bold text-lg shadow-xl uppercase tracking-widest">Đăng ký tư vấn miễn phí</Button>
           </Link>

@@ -30,7 +30,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      text: "Xin chào! Tôi là MSC Assistant 🤖\n\nTôi có thể giúp bạn:\n• Tìm hiểu về các khóa học\n• Thông tin về mentors\n• Hỗ trợ kỹ thuật\n• Tư vấn lộ trình học tập",
+      text: "Xin chào! Tôi là gzv Assistant 🤖\n\nTôi có thể giúp bạn:\n• Tìm hiểu về các khóa học\n• Thông tin về mentors\n• Hỗ trợ kỹ thuật\n• Tư vấn lộ trình học tập",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -51,7 +51,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
       id: "mentors",
       text: "👨‍🏫 Thông tin về mentors",
       response:
-        "MSC Center có đội ngũ mentors giàu kinh nghiệm:\n\n⭐ 50+ mentors chuyên nghiệp\n🏢 Từ các công ty hàng đầu\n🎓 Kinh nghiệm 5-15 năm\n💡 Chuyên môn đa dạng",
+        "gzv Center có đội ngũ mentors giàu kinh nghiệm:\n\n⭐ 50+ mentors chuyên nghiệp\n🏢 Từ các công ty hàng đầu\n🎓 Kinh nghiệm 5-15 năm\n💡 Chuyên môn đa dạng",
     },
     {
       id: "support",
@@ -65,7 +65,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
     greeting: [
       "Xin chào! Tôi có thể giúp gì cho bạn? 😊",
       "Chào bạn! Rất vui được hỗ trợ bạn hôm nay! 🌟",
-      "Hello! Tôi là MSC Assistant, sẵn sàng giúp đỡ bạn! 🤖",
+      "Hello! Tôi là gzv Assistant, sẵn sàng giúp đỡ bạn! 🤖",
     ],
     thanks: [
       "Không có gì! Tôi luôn sẵn sàng hỗ trợ bạn! 😊",
@@ -152,7 +152,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
     setMessages([
       {
         id: "welcome",
-        text: "Xin chào! Tôi là MSC Assistant 🤖\n\nTôi có thể giúp bạn:\n• Tìm hiểu về các khóa học\n• Thông tin về mentors\n• Hỗ trợ kỹ thuật\n• Tư vấn lộ trình học tập",
+        text: "Xin chào! Tôi là gzv Assistant 🤖\n\nTôi có thể giúp bạn:\n• Tìm hiểu về các khóa học\n• Thông tin về mentors\n• Hỗ trợ kỹ thuật\n• Tư vấn lộ trình học tập",
         sender: "bot",
         timestamp: new Date(),
       },
@@ -182,7 +182,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
             <CardTitle className="text-lg flex items-center gap-2">
               <Bot className="h-6 w-6" />
               <div>
-                <div className="font-semibold">MSC Assistant</div>
+                <div className="font-semibold">gzv Assistant</div>
                 <div className="text-xs text-blue-100">Trực tuyến</div>
               </div>
             </CardTitle>

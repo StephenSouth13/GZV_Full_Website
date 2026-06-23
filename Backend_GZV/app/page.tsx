@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\app\page.tsx
+//D:\gzv\Backend_gzv\app\page.tsx
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -127,7 +127,7 @@ export default function HomePage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-16">
       <header>
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Hệ thống Quản trị MSC</h1>
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Hệ thống Quản trị gzv</h1>
         <p className="text-slate-500 mt-1">Tổng quan nội dung nổi bật trên toàn hệ thống.</p>
       </header>
 

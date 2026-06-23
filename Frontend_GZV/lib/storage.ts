@@ -6,7 +6,7 @@ export interface StoredCartItem {
   quantity: number
 }
 
-const CART_STORAGE_KEY = 'msc-cart'
+const CART_STORAGE_KEY = 'gzv-cart'
 
 export function getCart(): StoredCartItem[] {
   if (typeof window === 'undefined') return []

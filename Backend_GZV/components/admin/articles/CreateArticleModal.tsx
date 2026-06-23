@@ -15,7 +15,7 @@ import {
   Sparkles, Layout, UserCheck, Type
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { MSCRichEditor } from '@/components/editor/MSCRichEditor'
+import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
 
 export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -130,7 +130,7 @@ const handleSubmit = async () => {
             <div className="p-2 bg-blue-600 rounded-lg">
               <Wand2 className="text-white h-5 w-5 animate-pulse" />
             </div>
-            <span className="font-bold text-slate-800 tracking-tight uppercase text-sm">MSC Content Studio</span>
+            <span className="font-bold text-slate-800 tracking-tight uppercase text-sm">gzv Content Studio</span>
             <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-600 border-blue-200">v3.0 PRO</Badge>
           </div>
 
@@ -162,13 +162,13 @@ const handleSubmit = async () => {
                 />
                 <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
                   <Globe className="h-3 w-3" />
-                  <span>mscenter.edu.vn/chia-se/</span>
+                  <span>gzventer.edu.vn/chia-se/</span>
                   <span className="text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{formData.slug || 'your-slug-here'}</span>
                 </div>
               </div>
 
               {/* Google Docs–style Rich Editor */}
-              <MSCRichEditor
+              <gzvRichEditor
                 value={formData.content}
                 onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
                 placeholder="Bắt đầu câu chuyện của bạn… (định dạng giống Google Docs)"

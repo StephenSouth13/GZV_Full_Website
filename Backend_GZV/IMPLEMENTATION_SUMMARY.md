@@ -2,14 +2,14 @@
 
 ## 🎉 Project Complete!
 
-A comprehensive, production-ready admin dashboard has been successfully built for MSC Center with complete dark mode support, responsive mobile design, and beautiful UI.
+A comprehensive, production-ready admin dashboard has been successfully built for gzv Center with complete dark mode support, responsive mobile design, and beautiful UI.
 
 ## 📦 What Was Built
 
 ### 1. **New Pages Created**
 
 #### `/admin/profile` - Profile Page
-- **File**: `Backend_MSC/app/admin/profile/page.tsx` (356 lines)
+- **File**: `Backend_gzv/app/admin/profile/page.tsx` (356 lines)
 - **Features**:
   - User profile header with avatar
   - Email, phone, location, website display
@@ -22,7 +22,7 @@ A comprehensive, production-ready admin dashboard has been successfully built fo
   - Animations with Framer Motion
 
 #### `/admin/settings` - Settings Page
-- **File**: `Backend_MSC/app/admin/settings/page.tsx` (526 lines)
+- **File**: `Backend_gzv/app/admin/settings/page.tsx` (526 lines)
 - **Tabs**:
   1. **Notifications** - Email, Push, SMS, Marketing, Security alerts
   2. **Security** - Password change, 2FA, logout all devices
@@ -66,7 +66,7 @@ A comprehensive, production-ready admin dashboard has been successfully built fo
 Admin Menu (all users):
 ├── Bảng điều khiển
 ├── Chương trình Đào tạo
-├── Quản lý MSCers
+├── Quản lý gzvers
 ├── Quản lý Mentors
 ├── Danh mục tác giả
 ├── Tin nhắn liên hệ
@@ -240,7 +240,7 @@ Desktop:   > 1024px (4 columns)
 
 ### Code Structure
 ```
-Backend_MSC/
+Backend_gzv/
 ├── app/
 │   └── admin/
 │       ├── dashboard/

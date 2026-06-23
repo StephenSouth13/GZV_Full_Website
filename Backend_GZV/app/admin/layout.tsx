@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\app\admin\layout.tsx
+//D:\gzv\Backend_gzv\app\admin\layout.tsx
 "use client"
 
 import { AdminLayout } from '@/components/admin/AdminLayout'

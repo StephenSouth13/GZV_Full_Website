@@ -80,7 +80,7 @@ const MentorsSection = () => {
             Ban Giảng Huấn
           </h2>
           <p className="section-description">
-            Đội ngũ Ban giảng huấn Mentoring & Coaching của MSC Center
+            Đội ngũ Ban giảng huấn Mentoring & Coaching của gzv Center
           </p>
         </motion.div>
 

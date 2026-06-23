@@ -1,13 +1,13 @@
 # Frontend Integration Guide
 
-This document explains how to integrate the frontend at `msc.edu.vn` with this backend API.
+This document explains how to integrate the frontend at `gzv.one` with this backend API.
 
 ## Overview
 
 The backend provides a REST API that the frontend can consume. The frontend and backend are separate applications that communicate via HTTP requests.
 
-- **Frontend**: `https://msc.edu.vn` (frontend application)
-- **Backend API**: `https://api.msc.edu.vn` (this project)
+- **Frontend**: `https://gzv.one` (frontend application)
+- **Backend API**: `https://api.gzv.one` (this project)
 
 ## Setup Steps
 
@@ -15,7 +15,7 @@ The backend provides a REST API that the frontend can consume. The frontend and 
 
 In your frontend `.env.local`:
 ```bash
-NEXT_PUBLIC_API_URL=https://api.msc.edu.vn
+NEXT_PUBLIC_API_URL=https://api.gzv.one
 ```
 
 ### 2. Implement Login
@@ -139,9 +139,9 @@ export const api = {
 ### 4. Update CORS Configuration
 
 The backend has CORS enabled for:
-- `https://msc.edu.vn`
-- `https://www.msc.edu.vn`
-- `https://app.msc.edu.vn`
+- `https://gzv.one`
+- `https://www.gzv.one`
+- `https://app.gzv.one`
 
 If using a different domain, update `ALLOWED_ORIGINS` in the backend `.env`:
 ```bash
@@ -197,12 +197,12 @@ For production:
 
 **Frontend `.env.production`:**
 ```bash
-NEXT_PUBLIC_API_URL=https://api.msc.edu.vn
+NEXT_PUBLIC_API_URL=https://api.gzv.one
 ```
 
 **Backend `.env`:**
 ```bash
-ALLOWED_ORIGINS=https://msc.edu.vn,https://www.msc.edu.vn
+ALLOWED_ORIGINS=https://gzv.one,https://www.gzv.one
 ```
 
 ## Database Schema
@@ -264,15 +264,15 @@ Test the API before integrating:
 
 ```bash
 # Check health
-curl https://api.msc.edu.vn/api/health
+curl https://api.gzv.one/api/health
 
 # Login
-curl -X POST https://api.msc.edu.vn/api/auth/login \
+curl -X POST https://api.gzv.one/api/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"user@test.com","password":"password"}'
 
 # Verify token
-curl https://api.msc.edu.vn/api/auth/verify \
+curl https://api.gzv.one/api/auth/verify \
   -H 'Authorization: Bearer <token>'
 ```
 
@@ -282,4 +282,4 @@ For integration help:
 - API Documentation: See `docs/API.md`
 - Database Schema: See `sql/README.md`
 - Issues: Create an issue in the repository
-- Contact: support@msc.edu.vn
+- Contact: support@gzv.one

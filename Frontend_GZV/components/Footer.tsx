@@ -59,7 +59,7 @@ const Footer = () => {
                             <div className="relative inline-block rounded-2xl p-4 transition-all duration-300 hover:shadow-xl bg-white">
                                 <Image
                                     src="/logo.webp"
-                                    alt="MSC Center - UEH University"
+                                    alt="gzv Center - UEH University"
                                     width={450}
                                     height={100}
                                     className="relative z-10 h-auto w-auto max-w-full md:max-w-[450px]"
@@ -69,13 +69,13 @@ const Footer = () => {
                         </Link>
 
                         <p className="text-white/80 mb-6 leading-relaxed max-w-md">
-                            MSC Center - Trung tâm Mentoring & Coaching tại Việt Nam
+                            GZV - GenZ VietNam Company
                         </p>
 
                         <div className="mt-6 bg-white/10 p-1 rounded-lg backdrop-blur-sm border border-white/20" style={{ maxWidth: 320 }}>
                             <div
                                 className="fb-page"
-                                data-href="https://www.facebook.com/msc.edu.vn"
+                                data-href="https://www.facebook.com/gzv.one"
                                 data-tabs="timeline"
                                 data-width="320"
                                 data-height="150"
@@ -85,10 +85,10 @@ const Footer = () => {
                                 data-show-facepile="true"
                             >
                                 <blockquote
-                                    cite="https://www.facebook.com/msc.edu.vn"
+                                    cite="https://www.facebook.com/gzv.one"
                                     className="fb-xfbml-parse-ignore"
                                 >
-                                    <a href="https://www.facebook.com/msc.edu.vn">MSC - Life Long Learning</a>
+                                    <a href="https://www.facebook.com/gzv.one">gzv - Life Long Learning</a>
                                 </blockquote>
                             </div>
                         </div>
@@ -119,7 +119,7 @@ const Footer = () => {
                                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
                                     <Mail className="h-5 w-5 text-white" />
                                 </div>
-                                <a href="mailto:msc.edu.vn@gmail.com" className="text-white/80 hover:text-white">Email: msc.edu.vn@gmail.com</a>
+                                <a href="mailto:gzv.one@gmail.com" className="text-white/80 hover:text-white">Email: gzv.one@gmail.com</a>
                             </div>
                         </div>
                     </motion.div>
@@ -149,11 +149,11 @@ const Footer = () => {
                         </form>
 
                         <div className="flex space-x-4">
-                            <Link href="https://www.facebook.com/msc.edu.vn" target="_blank" rel="noopener noreferrer"
+                            <Link href="https://www.facebook.com/gzv.one" target="_blank" rel="noopener noreferrer"
                                 className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#095095] transition-all duration-300">
                                 <Facebook className="h-5 w-5" />
                             </Link>
-                            <Link href="https://www.youtube.com/@MSCLifeLongLearning" target="_blank" rel="noopener noreferrer"
+                            <Link href="https://www.youtube.com/@gzvLifeLongLearning" target="_blank" rel="noopener noreferrer"
                                 className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-red-600 transition-all duration-300">
                                 <Youtube className="h-5 w-5" />
                             </Link>
@@ -170,7 +170,7 @@ const Footer = () => {
             <div className="relative z-10 border-t border-white/20 bg-[#074070]">
                 <div className="container mx-auto px-4 py-6">
                     <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left space-y-4 md:space-y-0">
-                        <p className="text-white/70 text-sm">© {new Date().getFullYear()} MSC Center. Phát triển bởi Phòng Công nghệ thông tin.</p>
+                        <p className="text-white/70 text-sm">© {new Date().getFullYear()} gzv Center. Phát triển bởi Phòng Công nghệ thông tin.</p>
                         <div className="flex space-x-6 text-sm">
                             <Link href="/chinh-sach-bao-mat" className="text-white/70 hover:text-white">Chính sách bảo mật</Link>
                             <Link href="/dieu-khoan-su-dung" className="text-white/70 hover:text-white">Điều khoản sử dụng</Link>

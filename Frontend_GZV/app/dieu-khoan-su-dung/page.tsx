@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
               Điều khoản sử dụng
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Quy định và điều kiện khi sử dụng dịch vụ đào tạo và phát triển kỹ năng của MSC Center
+              Quy định và điều kiện khi sử dụng dịch vụ đào tạo và phát triển kỹ năng của gzv Center
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
               Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
@@ -51,10 +51,10 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
                   <p>
-                    Chào mừng bạn đến với Trung tâm Kỹ năng Mekong (MSC Center). Bằng việc truy cập và sử dụng website hoặc dịch vụ của chúng tôi, bạn đồng ý tuân theo các điều khoản và điều kiện được quy định dưới đây.
+                    Chào mừng bạn đến với Trung tâm Kỹ năng Mekong (gzv Center). Bằng việc truy cập và sử dụng website hoặc dịch vụ của chúng tôi, bạn đồng ý tuân theo các điều khoản và điều kiện được quy định dưới đây.
                   </p>
                   <p>
-                    MSC Center cung cấp các dịch vụ đào tạo, coaching, mentoring và phát triển kỹ năng chuyên nghiệp. Việc sử dụng dịch vụ của chúng tôi đồng nghĩa với việc bạn chấp nhận toàn bộ các điều khoản này.
+                    gzv Center cung cấp các dịch vụ đào tạo, coaching, mentoring và phát triển kỹ năng chuyên nghiệp. Việc sử dụng dịch vụ của chúng tôi đồng nghĩa với việc bạn chấp nhận toàn bộ các điều khoản này.
                   </p>
                 </div>
               </motion.div>
@@ -77,7 +77,7 @@ export default function TermsOfServicePage() {
                     <li>Nhận chứng chỉ khi hoàn thành khóa học</li>
                     <li>Được hỗ trợ kỹ thuật và học thuật trong suốt quá trình học</li>
                     <li>Tiếp cận tài liệu học tập và video bài giảng</li>
-                    <li>Tham gia các hoạt động networking và sự kiện của MSC</li>
+                    <li>Tham gia các hoạt động networking và sự kiện của gzv</li>
                   </ul>
                   
                   <h3 className="text-lg font-semibold mt-6">2.2. Trách nhiệm của học viên</h3>
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
                     <li>Hoàn 100% học phí nếu hủy trước 7 ngày khai giảng</li>
                     <li>Hoàn 50% học phí nếu hủy từ 3-7 ngày trước khai giảng</li>
                     <li>Không hoàn tiền nếu hủy trong vòng 3 ngày trước khai giảng</li>
-                    <li>Hoàn tiền theo tỷ lệ nếu MSC hủy khóa học do lý do bất khả kháng</li>
+                    <li>Hoàn tiền theo tỷ lệ nếu gzv hủy khóa học do lý do bất khả kháng</li>
                   </ul>
                 </div>
               </motion.div>
@@ -159,7 +159,7 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="text-gray-700 dark:text-gray-300 space-y-4">
                   <p>
-                    Tất cả tài liệu, nội dung khóa học, video bài giảng thuộc quyền sở hữu trí tuệ của MSC Center và các đối tác. Học viên cam kết:
+                    Tất cả tài liệu, nội dung khóa học, video bài giảng thuộc quyền sở hữu trí tuệ của gzv Center và các đối tác. Học viên cam kết:
                   </p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Không sao chép, phân phối hoặc chia sẻ tài liệu cho bên thứ ba</li>
@@ -182,7 +182,7 @@ export default function TermsOfServicePage() {
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">6. Giới hạn trách nhiệm</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300 space-y-4">
-                  <p>MSC Center cam kết cung cấp dịch vụ chất lượng cao, tuy nhiên:</p>
+                  <p>gzv Center cam kết cung cấp dịch vụ chất lượng cao, tuy nhiên:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Không đảm bảo kết quả học tập cụ thể cho từng cá nhân</li>
                     <li>Không chịu trách nhiệm về thiệt hại gián tiếp hoặc hậu quả</li>
@@ -205,7 +205,7 @@ export default function TermsOfServicePage() {
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
                   <p>
-                    MSC Center có quyền cập nhật và thay đổi các điều khoản này bất cứ lúc nào. Các thay đổi sẽ được thông báo trên website và có hiệu lực ngay khi được đăng tải. Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.
+                    gzv Center có quyền cập nhật và thay đổi các điều khoản này bất cứ lúc nào. Các thay đổi sẽ được thông báo trên website và có hiệu lực ngay khi được đăng tải. Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.
                   </p>
                 </div>
               </motion.div>
@@ -222,8 +222,8 @@ export default function TermsOfServicePage() {
                   Nếu bạn có bất kỳ câu hỏi nào về điều khoản sử dụng, vui lòng liên hệ:
                 </p>
                 <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <p><strong>Trung tâm Kỹ năng Mekong (MSC Center)</strong></p>
-                  <p><strong>Email:</strong> msc.edu.vn@gmail.com</p>
+                  <p><strong>Trung tâm Kỹ năng Mekong (gzv Center)</strong></p>
+                  <p><strong>Email:</strong> gzv.one@gmail.com</p>
                   <p><strong>Điện thoại:</strong> (+84) 329 381 489</p>
                   <p><strong>Địa chỉ:</strong> 279 Nguyễn Tri Phương, Phường Diên Hồng, TP.Hồ Chí Minh</p>
                 </div>

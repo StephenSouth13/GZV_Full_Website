@@ -2,8 +2,8 @@
 import { supabase } from './supabase'
 
 export const MemberService = {
-  // 1. Lấy danh sách Mentor hoặc MSCer (Dùng cho trang danh sách và Dropdown chọn tác giả)
-  async getMembersByType(role: 'mentor' | 'mscer') {
+  // 1. Lấy danh sách Mentor hoặc gzver (Dùng cho trang danh sách và Dropdown chọn tác giả)
+  async getMembersByType(role: 'mentor' | 'gzver') {
     const { data, error } = await supabase
       .from('profiles')
       .select('id, name, title, avatar, role, slug, company')
@@ -15,7 +15,7 @@ export const MemberService = {
     return data;
   },
 
-  // 2. Lấy chi tiết một người (Dùng cho trang /mentors/[slug] hoặc /mscer/[id])
+  // 2. Lấy chi tiết một người (Dùng cho trang /mentors/[slug] hoặc /gzver/[id])
   async getMemberDetail(id: string) {
     const { data, error } = await supabase
       .from('profiles')
@@ -27,7 +27,7 @@ export const MemberService = {
     return data;
   },
 
-  // 3. CMS: Tạo mới hoặc Cập nhật hồ sơ (Dùng cho Modal Quản lý Mentor/MSCer)
+  // 3. CMS: Tạo mới hoặc Cập nhật hồ sơ (Dùng cho Modal Quản lý Mentor/gzver)
   async upsertMember(memberData: any) {
     const { data, error } = await supabase
       .from('profiles')

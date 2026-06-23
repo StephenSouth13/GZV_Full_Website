@@ -26,7 +26,7 @@ type Counts = {
   articles: number
   projects: number
   mentors: number
-  mscers: number
+  gzvers: number
   programs: number
   authors: number
   contactMessages: number
@@ -48,7 +48,7 @@ const initialCounts: Counts = {
   articles: 0,
   projects: 0,
   mentors: 0,
-  mscers: 0,
+  gzvers: 0,
   programs: 0,
   authors: 0,
   contactMessages: 0,
@@ -76,7 +76,7 @@ function AdminDashboardContent() {
       articles,
       projects,
       mentors,
-      mscers,
+      gzvers,
       programs,
       authors,
       contactMessages,
@@ -91,7 +91,7 @@ function AdminDashboardContent() {
       supabase.from("articles").select("id", { count: "exact", head: true }),
       supabase.from("projects").select("id", { count: "exact", head: true }),
       supabase.from("mentors").select("id", { count: "exact", head: true }),
-      supabase.from("mscers").select("id", { count: "exact", head: true }),
+      supabase.from("gzvers").select("id", { count: "exact", head: true }),
       supabase.from("programs").select("id", { count: "exact", head: true }),
       supabase.from("authors").select("id", { count: "exact", head: true }),
       supabase.from("contact_messages").select("id", { count: "exact", head: true }),
@@ -103,7 +103,7 @@ function AdminDashboardContent() {
       supabase.from("profiles").select("id,full_name,email,role,created_at").order("created_at", { ascending: false }).limit(4),
     ])
 
-    const failed = [profiles, articles, projects, mentors, mscers, programs, authors, contactMessages, unreadMessages, newMessages]
+    const failed = [profiles, articles, projects, mentors, gzvers, programs, authors, contactMessages, unreadMessages, newMessages]
       .find((result) => result.error)
 
     if (failed?.error) {
@@ -115,7 +115,7 @@ function AdminDashboardContent() {
       articles: articles.count ?? 0,
       projects: projects.count ?? 0,
       mentors: mentors.count ?? 0,
-      mscers: mscers.count ?? 0,
+      gzvers: gzvers.count ?? 0,
       programs: programs.count ?? 0,
       authors: authors.count ?? 0,
       contactMessages: contactMessages.count ?? 0,
@@ -167,7 +167,7 @@ function AdminDashboardContent() {
   }, [])
 
   const kpiData = useMemo(() => [
-    { title: "Người dùng", value: counts.profiles, change: `${counts.mscers} MSCers`, changeType: "neutral" as const, icon: Users, iconColor: "text-blue-600 dark:text-blue-400" },
+    { title: "Người dùng", value: counts.profiles, change: `${counts.gzvers} gzvers`, changeType: "neutral" as const, icon: Users, iconColor: "text-blue-600 dark:text-blue-400" },
     { title: "Tin liên hệ", value: counts.contactMessages, change: `${counts.unreadMessages} chưa đọc`, changeType: counts.unreadMessages > 0 ? "positive" as const : "neutral" as const, icon: Mail, iconColor: "text-amber-600 dark:text-amber-400" },
     { title: "Nội dung", value: counts.articles, change: `${counts.authors} tác giả`, changeType: "neutral" as const, icon: Newspaper, iconColor: "text-emerald-600 dark:text-emerald-400" },
     { title: "Dự án", value: counts.projects, change: `${counts.mentors} mentors`, changeType: "neutral" as const, icon: FolderOpen, iconColor: "text-purple-600 dark:text-purple-400" },

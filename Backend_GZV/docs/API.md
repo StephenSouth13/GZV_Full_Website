@@ -1,11 +1,11 @@
-# MSC Backend API Documentation
+# gzv Backend API Documentation
 
-This is the backend API documentation for the MSC project. The backend serves data to the frontend at `msc.edu.vn`.
+This is the backend API documentation for the gzv project. The backend serves data to the frontend at `gzv.one`.
 
 ## Base URL
 
 ```
-https://api.msc.edu.vn
+https://api.gzv.one
 ```
 
 ## Authentication
@@ -21,9 +21,9 @@ Content-Type: application/json
 ## CORS Policy
 
 The API accepts requests from:
-- `https://msc.edu.vn`
-- `https://www.msc.edu.vn`
-- `https://app.msc.edu.vn`
+- `https://gzv.one`
+- `https://www.gzv.one`
+- `https://app.gzv.one`
 - `http://localhost:3000` (development only)
 - `http://localhost:3001` (development only)
 
@@ -206,7 +206,7 @@ Common query parameters for list endpoints:
 
 ```javascript
 // 1. Login
-const loginRes = await fetch('https://api.msc.edu.vn/api/auth/login', {
+const loginRes = await fetch('https://api.gzv.one/api/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -219,7 +219,7 @@ const loginData = await loginRes.json()
 const accessToken = loginData.data.session.access_token
 
 // 2. Make authenticated request
-const articlesRes = await fetch('https://api.msc.edu.vn/api/articles', {
+const articlesRes = await fetch('https://api.gzv.one/api/articles', {
   headers: {
     'Authorization': `Bearer ${accessToken}`,
     'Content-Type': 'application/json'
@@ -233,7 +233,7 @@ const articles = await articlesRes.json()
 
 ```bash
 # Login
-curl -X POST https://api.msc.edu.vn/api/auth/login \
+curl -X POST https://api.gzv.one/api/auth/login \
   -H 'Content-Type: application/json' \
   -d '{
     "email": "user@example.com",
@@ -241,11 +241,11 @@ curl -X POST https://api.msc.edu.vn/api/auth/login \
   }'
 
 # Verify token
-curl -X GET https://api.msc.edu.vn/api/auth/verify \
+curl -X GET https://api.gzv.one/api/auth/verify \
   -H 'Authorization: Bearer <access_token>'
 
 # Get articles
-curl -X GET 'https://api.msc.edu.vn/api/articles?page=1&limit=10' \
+curl -X GET 'https://api.gzv.one/api/articles?page=1&limit=10' \
   -H 'Authorization: Bearer <access_token>'
 ```
 
@@ -259,4 +259,4 @@ See `.env.example` for all available configuration options.
 
 ## Support
 
-For API issues or questions, please contact: support@msc.edu.vn
+For API issues or questions, please contact: support@gzv.one

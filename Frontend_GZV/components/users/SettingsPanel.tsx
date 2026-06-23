@@ -640,7 +640,7 @@ const SettingsPanel = ({ user, onUpdateUser }: SettingsPanelProps) => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="public">Công khai</SelectItem>
-                        <SelectItem value="students">Chỉ học viên MSC</SelectItem>
+                        <SelectItem value="students">Chỉ học viên gzv</SelectItem>
                         <SelectItem value="private">Riêng tư</SelectItem>
                       </SelectContent>
                     </Select>

@@ -37,7 +37,7 @@ export default function TrainingAdminPage() {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
       <Loader2 className="animate-spin text-blue-600" size={40} />
-      <p className="font-black text-[10px] text-slate-400 uppercase tracking-[0.3em]">MSC System Loading...</p>
+      <p className="font-black text-[10px] text-slate-400 uppercase tracking-[0.3em]">gzv System Loading...</p>
     </div>
   )
 
@@ -47,7 +47,7 @@ export default function TrainingAdminPage() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-6xl font-black text-slate-900 tracking-tighter uppercase italic">Training</h1>
-          <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em] uppercase mt-2 ml-1">Quản trị tri thức hệ thống MSC</p>
+          <p className="text-slate-400 font-bold text-[10px] tracking-[0.4em] uppercase mt-2 ml-1">Quản trị tri thức hệ thống gzv</p>
         </div>
         <div className="flex gap-4">
           {/* NÚT MỚI: CRUD GIAO DIỆN TỔNG */}
@@ -69,7 +69,7 @@ export default function TrainingAdminPage() {
         {[
           { label: 'Tổng số khóa', val: stats.total, icon: BookOpen, color: 'text-blue-600' },
           { label: 'Đang hiển thị', val: stats.live, icon: GraduationCap, color: 'text-emerald-500' },
-          { label: 'Học viên MSC', val: stats.students, icon: Users, color: 'text-purple-600' }
+          { label: 'Học viên gzv', val: stats.students, icon: Users, color: 'text-purple-600' }
         ].map((item, i) => (
           <Card key={i} className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white group hover:translate-y-[-5px] transition-all">
             <CardContent className="p-8 flex items-center justify-between">

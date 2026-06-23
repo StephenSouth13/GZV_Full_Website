@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\app\admin\articles\page.tsx
+//D:\gzv\Backend_gzv\app\admin\articles\page.tsx
 "use client"
 
 import { useState, useEffect } from 'react'

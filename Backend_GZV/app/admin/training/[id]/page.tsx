@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\app\admin\training\[id]\page.tsx
+//D:\gzv\Backend_gzv\app\admin\training\[id]\page.tsx
 "use client"
 
 import React, { useState, useEffect, useCallback } from 'react'
@@ -103,7 +103,7 @@ export default function TrainingEditorPage() {
     <div className="h-screen flex items-center justify-center bg-slate-50">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="animate-spin text-blue-600" size={40} />
-        <p className="font-black text-slate-400 uppercase tracking-widest text-xs">MSC Center đang khởi tạo...</p>
+        <p className="font-black text-slate-400 uppercase tracking-widest text-xs">gzv Center đang khởi tạo...</p>
       </div>
     </div>
   )

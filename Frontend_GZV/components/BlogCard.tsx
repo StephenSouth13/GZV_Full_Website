@@ -98,7 +98,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
               </div>
               <div className="flex flex-col ml-1">
                 <span className="text-[11px] font-black text-slate-700 dark:text-slate-200 leading-none">
-                  {authors?.[0]?.full_name || "MSC Team"}
+                  {authors?.[0]?.full_name || "gzv Team"}
                 </span>
                 <span className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-tighter">
                   {publishDate}

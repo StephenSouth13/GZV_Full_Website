@@ -74,7 +74,7 @@ Chia thành 4 tab chính:
 ```
 ├── Bảng điều khiển
 ├── Chương trình Đào tạo
-├── Quản lý MSCers
+├── Quản lý gzvers
 ├── Quản lý Mentors
 ├── Danh mục tác giả
 ├── Tin nhắn liên hệ
@@ -249,7 +249,7 @@ const adminMenuItems = [
 ## 📚 File Structure
 
 ```
-Backend_MSC/
+Backend_gzv/
 ├── app/admin/
 │   ├── dashboard/page.tsx
 │   ├── profile/page.tsx

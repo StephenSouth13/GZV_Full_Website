@@ -125,7 +125,7 @@
 
 ```bash
 # Install dependencies
-cd Backend_MSC
+cd Backend_gzv
 pnpm install
 
 # Build project
@@ -194,7 +194,7 @@ docker run -p 3000:3000 admin-dashboard
 
 ```bash
 # Copy files to server
-scp -r Backend_MSC/* user@server:/var/www/admin/
+scp -r Backend_gzv/* user@server:/var/www/admin/
 
 # SSH into server
 ssh user@server

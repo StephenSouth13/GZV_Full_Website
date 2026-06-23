@@ -14,7 +14,7 @@ import {
   Lock, Unlock, Search, Tag, Type, Film, ListOrdered
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { MSCRichEditor } from '@/components/editor/MSCRichEditor'
+import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
 
 export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
   const [loading, setLoading] = useState(false)
@@ -146,7 +146,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
 
             <div className="space-y-4">
               <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Type size={12}/> Nội dung soạn thảo chi tiết</Label>
-              <MSCRichEditor
+              <gzvRichEditor
                 value={formData.detailproject || ''}
                 onChange={(html) => setFormData((prev: any) => ({ ...prev, detailproject: html }))}
                 uploadFolder="projects"

@@ -35,13 +35,13 @@ const FloatingButtons = () => {
 
   const actionButtons = [
     {
-      name: "Chat với MSC Assistant",
+      name: "Chat với gzv Assistant",
       icon: <Bot className="h-7 w-7 text-neutral-500 group-hover:text-blue-600 dark:text-neutral-400" />,
       action: () => setShowChatbot(true),
     },
     {
       name: "Facebook",
-      href: "https://www.facebook.com/msc.edu.vn",
+      href: "https://www.facebook.com/gzv.one",
       icon: (
         <Image
           src="/icons/facebook.png"

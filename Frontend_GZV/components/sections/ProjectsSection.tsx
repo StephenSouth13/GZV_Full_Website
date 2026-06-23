@@ -47,7 +47,7 @@ const ProjectsSection = () => {
             DỰ ÁN TIÊU BIỂU
           </h2>
           <p className="text-xl text-gray-500 dark:text-neutral-400 max-w-3xl mx-auto leading-relaxed">
-            Khám phá các dự án đào tạo thực tế tiêu biểu nhất do MSC Center triển khai.
+            Khám phá các dự án đào tạo thực tế tiêu biểu nhất do gzv Center triển khai.
           </p>
         </motion.div>
 

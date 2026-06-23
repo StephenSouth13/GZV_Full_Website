@@ -34,12 +34,12 @@ const convertToSlug = (text: string) => {
     .replace(/^-+|-+$/g, '');
 };
 
-export function MscerModal({ open, onClose, mscer, onSave }: any) {
+export function gzverModal({ open, onClose, gzver, onSave }: any) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<any>({
     full_name: '',
     slug: '',
-    company: 'MSC',
+    company: 'gzv',
     position: '',
     avatar_url: '',
     cv_url: '',
@@ -58,9 +58,9 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
   })
 
   useEffect(() => {
-    if (mscer) setFormData(mscer)
+    if (gzver) setFormData(gzver)
     else setFormData({
-        full_name: '', slug: '', company: 'MSC', position: '', avatar_url: '', cv_url: '',
+        full_name: '', slug: '', company: 'gzv', position: '', avatar_url: '', cv_url: '',
         achievement_summary: '', testimonial: '', graduation_year: '',
         promotion_path: '', social_impact: '', course_taken: '',
         skills: [], achievements_list: [], mentoring_content: '',
@@ -68,7 +68,7 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
         is_active: true,
         order: 0
     })
-  }, [mscer, open])
+  }, [gzver, open])
 
   const handleFileUpload = async (e: any, folder: string, field: string) => {
     const file = e.target.files[0]
@@ -92,12 +92,12 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
     setLoading(true)
     try {
       const { id, created_at, updated_at, ...payload } = formData;
-      const { error } = mscer?.id 
-        ? await supabase.from('mscers').update(payload).eq('id', mscer.id)
-        : await supabase.from('mscers').insert([payload])
+      const { error } = gzver?.id 
+        ? await supabase.from('gzvers').update(payload).eq('id', gzver.id)
+        : await supabase.from('gzvers').insert([payload])
       if (error) throw error
       onSave(); onClose();
-      toast({ title: "Thành công", description: "Hồ sơ MSCer đã được lưu." })
+      toast({ title: "Thành công", description: "Hồ sơ gzver đã được lưu." })
     } catch (error: any) {
       toast({ title: "Lỗi", description: error.message, variant: "destructive" })
     } finally { setLoading(false) }
@@ -106,14 +106,14 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-5xl bg-gray-950 border-white/10 text-white p-0 overflow-hidden rounded-[2.5rem] shadow-2xl">
-        <div className="hidden"><DialogDescription>Quản lý hồ sơ học viên MSCer ưu tú</DialogDescription></div>
+        <div className="hidden"><DialogDescription>Quản lý hồ sơ học viên gzver ưu tú</DialogDescription></div>
         <DialogHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
               <Sparkles className="text-white" size={24}/>
             </div>
             <div>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ MSCer</DialogTitle>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ gzver</DialogTitle>
               <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Hệ thống quản trị Profile</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Upload size={24} className="text-white" />
                       </div>
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleFileUpload(e, 'mscers/avatars', 'avatar_url')} />
+                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleFileUpload(e, 'gzvers/avatars', 'avatar_url')} />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -184,12 +184,12 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase text-gray-500">Công ty (Company)</Label>
-                      <Input className="bg-white/5 border-white/10 h-12 rounded-xl" placeholder="VD: MSC Center" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
+                      <Input className="bg-white/5 border-white/10 h-12 rounded-xl" placeholder="VD: gzv Center" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-teal-500 tracking-widest">Thành tích hiển thị Card (Achievement)</Label>
-                    <Textarea className="bg-teal-500/5 border-teal-500/10 rounded-xl resize-none h-20 text-sm font-medium" placeholder="VD: Tốt nghiệp và trưởng thành từ MSC..." value={formData.achievement_summary} onChange={(e) => setFormData({...formData, achievement_summary: e.target.value})} />
+                    <Textarea className="bg-teal-500/5 border-teal-500/10 rounded-xl resize-none h-20 text-sm font-medium" placeholder="VD: Tốt nghiệp và trưởng thành từ gzv..." value={formData.achievement_summary} onChange={(e) => setFormData({...formData, achievement_summary: e.target.value})} />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-gray-500 ml-1">Quote / Lời chứng thực (Testimonial)</Label>
@@ -247,7 +247,7 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
                 </div>
                 <h3 className="text-xl font-black uppercase tracking-tight mb-2 italic">Hồ sơ năng lực (CV)</h3>
                 <p className="text-gray-500 text-xs font-medium mb-8 text-center px-10 max-w-md">
-                  Đính kèm file PDF chuyên nghiệp. File này sẽ được hiển thị cho các đối tác chiến lược của MSC Center.
+                  Đính kèm file PDF chuyên nghiệp. File này sẽ được hiển thị cho các đối tác chiến lược của gzv Center.
                 </p>
                 {formData.cv_url ? (
                   <div className="flex flex-col items-center gap-4">
@@ -263,7 +263,7 @@ export function MscerModal({ open, onClose, mscer, onSave }: any) {
                 ) : (
                   <Button variant="outline" className="relative h-16 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-full px-16 font-black transition-all shadow-xl shadow-blue-500/10 active:scale-95">
                     {loading ? <Loader2 className="animate-spin mr-3"/> : <Upload size={20} className="mr-3"/>} TẢI LÊN FILE PDF (MAX 10MB)
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => handleFileUpload(e, 'mscers/cvs', 'cv_url')} disabled={loading} />
+                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => handleFileUpload(e, 'gzvers/cvs', 'cv_url')} disabled={loading} />
                   </Button>
                 )}
               </div>

@@ -60,8 +60,8 @@ export default function LoginPage() {
   ]
 
   const testimonials = [
-    { name: "Nguyễn Tuấn Dũng", role: "IT Fullstack", company: "UEH", content: "MSC Center đã giúp tôi môi trường phát triển một cách toàn diện.", avatar: "/MSCers/NTD.webp" },
-    { name: "Quách Thành Long", role: "CTO", company: "MSC", content: "Những khóa học tại đây rất thực tế và ứng dụng được ngay vào công việc.", avatar: "/MSCers/QTL.webp" }
+    { name: "Nguyễn Tuấn Dũng", role: "IT Fullstack", company: "UEH", content: "gzv Center đã giúp tôi môi trường phát triển một cách toàn diện.", avatar: "/gzvers/NTD.webp" },
+    { name: "Quách Thành Long", role: "CTO", company: "gzv", content: "Những khóa học tại đây rất thực tế và ứng dụng được ngay vào công việc.", avatar: "/gzvers/QTL.webp" }
   ]
 
   return (
@@ -94,7 +94,7 @@ export default function LoginPage() {
               <Link href="/" className="inline-block mb-6">
                 <div className="h-12 w-auto mx-auto flex items-center justify-center">
                   <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-                    MSC Center
+                    gzv Center
                   </span>
                 </div>
               </Link>
@@ -184,7 +184,7 @@ export default function LoginPage() {
               </form>
                   {/* THÊM NÚT ĐĂNG NHẬP HRM */}
                 <Link 
-                  href="https://mscer.msc.edu.vn/" 
+                  href="https://gzver.gzv.one/" 
                   target="_blank"
                   className="w-full inline-block"
                 >
@@ -235,7 +235,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex flex-col justify-center max-w-lg">
           <h2 className="text-4xl font-bold mb-6">Tham gia cộng đồng học tập hàng đầu Việt Nam</h2>
-          <p className="text-blue-100 text-lg mb-12">Hơn 10,000+ học viên đã tin tưởng và phát triển cùng MSC Center.</p>
+          <p className="text-blue-100 text-lg mb-12">Hơn 10,000+ học viên đã tin tưởng và phát triển cùng gzv Center.</p>
 
           {/* Benefits */}
           <div className="space-y-4 mb-12">

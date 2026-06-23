@@ -1,10 +1,10 @@
-# MSC Backend - Complete Setup and Deployment Guide
+# gzv Backend - Complete Setup and Deployment Guide
 
-This guide covers the setup, configuration, and deployment of the MSC backend system.
+This guide covers the setup, configuration, and deployment of the gzv backend system.
 
 ## Overview
 
-The MSC backend is a Next.js application that serves as the API for the msc.edu.vn frontend. It provides endpoints for:
+The gzv backend is a Next.js application that serves as the API for the gzv.one frontend. It provides endpoints for:
 - User management and authentication
 - Articles/Blog content
 - Courses and learning management
@@ -25,7 +25,7 @@ The MSC backend is a Next.js application that serves as the API for the msc.edu.
 
 ```bash
 git clone <repository-url>
-cd msc-project
+cd gzv-project
 pnpm install
 ```
 
@@ -47,7 +47,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 SUPABASE_JWT_SECRET=your-jwt-secret
 
 # CORS - Add your frontend domain
-ALLOWED_ORIGINS=https://msc.edu.vn,https://www.msc.edu.vn
+ALLOWED_ORIGINS=https://gzv.one,https://www.gzv.one
 
 # Optional: Cloudinary for media
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
@@ -88,7 +88,7 @@ Execute the SQL files in order to create database tables:
 INSERT INTO public.profiles (id, email, full_name, role, status)
 VALUES (
   'admin-user-id',
-  'admin@msc.edu.vn',
+  'admin@gzv.one',
   'Admin User',
   'admin',
   'active'
@@ -228,13 +228,13 @@ Configure environment variables in Vercel dashboard:
 
 ```bash
 # Build image
-docker build -t msc-backend .
+docker build -t gzv-backend .
 
 # Run container
 docker run -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL=... \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY=... \
-  msc-backend
+  gzv-backend
 ```
 
 #### Traditional Server
@@ -350,9 +350,9 @@ Headers are automatically set by Next.js. For additional security:
 
 ## Frontend Integration
 
-The frontend at `msc.edu.vn` should:
+The frontend at `gzv.one` should:
 
-1. Set `NEXT_PUBLIC_API_URL=https://api.msc.edu.vn`
+1. Set `NEXT_PUBLIC_API_URL=https://api.gzv.one`
 2. Use authentication endpoints to login
 3. Include `Authorization: Bearer <token>` in API requests
 4. Implement token refresh when expired
@@ -364,7 +364,7 @@ See `docs/FRONTEND_INTEGRATION.md` for detailed integration guide.
 - **Issues**: Create GitHub issue
 - **Documentation**: See `docs/` directory
 - **API Docs**: See `docs/API.md`
-- **Contact**: support@msc.edu.vn
+- **Contact**: support@gzv.one
 
 ## License
 

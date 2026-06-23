@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# MSC Center Website Setup Script
-# This script sets up the development environment for the MSC Center website
+# gzv Center Website Setup Script
+# This script sets up the development environment for the gzv Center website
 
 set -e  # Exit on any error
 
@@ -150,7 +150,7 @@ setup_database() {
     print_status "Setting up database..."
     
     # Check if database exists
-    DB_NAME="msc_center"
+    DB_NAME="gzv_center"
     if psql -lqt | cut -d \| -f 1 | grep -qw $DB_NAME; then
         print_warning "Database $DB_NAME already exists. Skipping creation..."
     else
@@ -284,11 +284,11 @@ show_next_steps() {
 main() {
     echo -e "${BLUE}"
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                    MSC Center Website                        ║"
+    echo "║                    gzv Center Website                        ║"
     echo "║                    Setup Script v1.0                        ║"
     echo "║                                                              ║"
     echo "║  This script will set up your development environment       ║"
-    echo "║  for the MSC Center website project.                        ║"
+    echo "║  for the gzv Center website project.                        ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
     echo ""

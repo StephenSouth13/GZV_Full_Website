@@ -148,7 +148,7 @@ export function EditorSidebar({ isOpen, isCollapsed, onToggleCollapse }: EditorS
               exit={{ opacity: 0 }}
               className="text-center"
             >
-              <p className="text-xs text-gray-400">MSC Editor Panel</p>
+              <p className="text-xs text-gray-400">gzv Editor Panel</p>
               <p className="text-xs text-gray-500">v1.0.0</p>
             </motion.div>
           )}

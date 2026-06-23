@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from 'next/server'
 const getAllowedOrigins = (): string[] => {
   const envOrigins = process.env.ALLOWED_ORIGINS?.split(',') || []
   const defaultOrigins = [
-    'https://msc.edu.vn',
-    'https://www.msc.edu.vn',
+    'https://gzv.one',
+    'https://www.gzv.one',
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
@@ -18,7 +18,7 @@ const getAllowedOrigins = (): string[] => {
   }
   
   // In production, only allow explicitly configured origins
-  return envOrigins.length > 0 ? envOrigins : defaultOrigins.filter(o => o.includes('msc.edu.vn') || o.includes('localhost'))
+  return envOrigins.length > 0 ? envOrigins : defaultOrigins.filter(o => o.includes('gzv.one') || o.includes('localhost'))
 }
 
 export const corsHeaders = (origin?: string): Record<string, string> => {

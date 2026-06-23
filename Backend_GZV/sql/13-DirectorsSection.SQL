@@ -1,1 +1,1 @@
-ALTER TABLE public.mscers ADD COLUMN IF NOT EXISTS is_director BOOLEAN DEFAULT false;
+ALTER TABLE public.gzvers ADD COLUMN IF NOT EXISTS is_director BOOLEAN DEFAULT false;

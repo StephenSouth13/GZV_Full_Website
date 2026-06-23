@@ -45,8 +45,8 @@ const adminMenuItems = [
     roles: ['admin', 'collab']
   },
   {
-    title: 'Quản lý MSCers',
-    href: '/admin/mscers',
+    title: 'Quản lý gzvers',
+    href: '/admin/gzvers',
     icon: UserCircle2,
     roles: ['admin', 'collab']
   },
@@ -155,7 +155,7 @@ export function AdminSidebar({ isOpen, isCollapsed, onToggleCollapse }: AdminSid
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30">
               <span className="text-white font-bold text-sm">M</span>
             </div>
-            <span className="text-white font-bold tracking-tight text-sm uppercase">MSC Center</span>
+            <span className="text-white font-bold tracking-tight text-sm uppercase">gzv Center</span>
           </motion.div>
         )}
         
@@ -248,7 +248,7 @@ export function AdminSidebar({ isOpen, isCollapsed, onToggleCollapse }: AdminSid
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span className="text-[10px] text-gray-400 font-bold uppercase">Hệ thống sẵn sàng</span>
             </div>
-            <p className="text-[9px] text-gray-600 font-medium ml-4 italic">v2.5.0 MSC Quản trị</p>
+            <p className="text-[9px] text-gray-600 font-medium ml-4 italic">v2.5.0 gzv Quản trị</p>
           </div>
         )}
       </div>

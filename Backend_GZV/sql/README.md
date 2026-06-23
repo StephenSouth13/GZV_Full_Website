@@ -1,6 +1,6 @@
 # Database Schema Documentation
 
-This directory contains SQL schema files for the MSC project database. Each file is numbered and represents a logical group of related tables.
+This directory contains SQL schema files for the gzv project database. Each file is numbered and represents a logical group of related tables.
 
 ## Files Overview
 

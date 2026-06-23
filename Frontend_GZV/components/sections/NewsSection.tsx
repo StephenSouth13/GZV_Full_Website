@@ -50,7 +50,7 @@ const NewsSection = () => {
             Tin Tức Mới Nhất
           </h2>
           <p className="section-description text-slate-500 dark:text-slate-400">
-            Cập nhật những góc nhìn chuyên sâu và giải pháp đào tạo đột phá từ đội ngũ chuyên gia MSC.
+            Cập nhật những góc nhìn chuyên sâu và giải pháp đào tạo đột phá từ đội ngũ chuyên gia gzv.
           </p>
         </motion.div>
 

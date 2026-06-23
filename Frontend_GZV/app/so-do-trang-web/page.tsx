@@ -38,13 +38,13 @@ export default function SiteMapPage() {
       title: "Trang chủ",
       href: "/",
       icon: <Home className="h-5 w-5" />,
-      description: "Trang chủ giới thiệu tổng quan về MSC Center"
+      description: "Trang chủ giới thiệu tổng quan về gzv Center"
     },
     {
       title: "Giới thiệu",
       href: "/gioi-thieu",
       icon: <Info className="h-5 w-5" />,
-      description: "Thông tin về MSC Center, tầm nhìn, sứ mệnh và giá trị cốt lõi"
+      description: "Thông tin về gzv Center, tầm nhìn, sứ mệnh và giá trị cốt lõi"
     },
     {
       title: "Đào tạo",
@@ -62,7 +62,7 @@ export default function SiteMapPage() {
       title: "Mentors",
       href: "/mentors",
       icon: <Users className="h-5 w-5" />,
-      description: "Đội ngũ mentor và chuyên gia của MSC Center",
+      description: "Đội ngũ mentor và chuyên gia của gzv Center",
       children: [
         {
           title: "Chi tiết mentor",
@@ -74,16 +74,16 @@ export default function SiteMapPage() {
       ]
     },
     {
-      title: "MSCers",
-      href: "/mscer",
+      title: "gzvers",
+      href: "/gzver",
       icon: <UserCheck className="h-5 w-5" />,
-      description: "Cộng đồng học viên và cựu học viên MSC",
+      description: "Cộng đồng học viên và cựu học viên gzv",
       children: [
         {
-          title: "Hồ sơ MSCer",
-          href: "/mscer/[id]",
+          title: "Hồ sơ gzver",
+          href: "/gzver/[id]",
           icon: <User className="h-4 w-4" />,
-          description: "Thông tin chi tiết về từng MSCer",
+          description: "Thông tin chi tiết về từng gzver",
           isDynamic: true
         }
       ]
@@ -92,13 +92,13 @@ export default function SiteMapPage() {
       title: "Đồng hành",
       href: "/dong-hanh",
       icon: <Handshake className="h-5 w-5" />,
-      description: "Đối tác và nhà tài trợ của MSC Center"
+      description: "Đối tác và nhà tài trợ của gzv Center"
     },
     {
       title: "Chia sẻ",
       href: "/tin-tuc",
       icon: <FileText className="h-5 w-5" />,
-      description: "Blog, bài viết và tin tức từ MSC Center",
+      description: "Blog, bài viết và tin tức từ gzv Center",
       children: [
         {
           title: "Danh mục bài viết",
@@ -280,7 +280,7 @@ export default function SiteMapPage() {
               Sơ đồ trang web
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Khám phá tất cả các trang và dịch vụ có sẵn trên website MSC Center
+              Khám phá tất cả các trang và dịch vụ có sẵn trên website gzv Center
             </p>
           </div>
 

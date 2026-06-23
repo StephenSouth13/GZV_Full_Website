@@ -15,7 +15,7 @@ const config: Config = {
           facebook: "#1877F2",
           linkedin: "#0A66C2",
           youtube: "#FF0000",
-          "msc-assistant": "#14b8a6",
+          "gzv-assistant": "#14b8a6",
         },
         primary: {
           DEFAULT: "#0C3C78",

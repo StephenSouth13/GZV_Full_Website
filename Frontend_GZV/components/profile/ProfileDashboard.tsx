@@ -29,16 +29,16 @@
     },
     {
       name: "Phạm Hoàng Minh Khánh",
-      title: "Giám Đốc MSC",
+      title: "Giám Đốc gzv",
       company: "Điều hành & Phát triển chương trình",
-      imageSrc: "/MSCers/PHMK.webp",
+      imageSrc: "/gzvers/PHMK.webp",
       specialties: ["Academic Affairs", "Curriculum Development", "Quality Assurance"],
     },
     {
       name: "Dương Thế Khải",
-      title: "Phó Giám Đốc MSC",
+      title: "Phó Giám Đốc gzv",
       company: "Chiến lược & Phát triển kinh doanh",
-      imageSrc: "/MSCers/DTK.webp",
+      imageSrc: "/gzvers/DTK.webp",
       specialties: ["Strategic Leadership", "Business Development", "Management"],
     },
     {
@@ -52,12 +52,12 @@
       name: "Quách Thành Long",
       title: "Trưởng phòng CNTT",
       company: "Hạ tầng & Công nghệ",
-      imageSrc: "/MSCers/QTL.webp",
+      imageSrc: "/gzvers/QTL.webp",
       specialties: ["IT Infrastructure", "Cybersecurity", "Cloud Computing"],
     },
   ];
 
-  // --- COMPONENT TRANG CHÍNH: HỒ SƠ NĂNG LỰC CÔNG TY MSC ---
+  // --- COMPONENT TRANG CHÍNH: HỒ SƠ NĂNG LỰC CÔNG TY gzv ---
   const ProfileDashboard = () => {
     return (
       <div className="bg-white dark:bg-gray-950">
@@ -73,7 +73,7 @@
             >
               <Building className="mx-auto h-16 w-16 mb-6" />
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-                Hồ Sơ Năng Lực Doanh Nghiệp MSC
+                Hồ Sơ Năng Lực Doanh Nghiệp gzv
               </h1>
               <p className="text-lg md:text-xl max-w-3xl mx-auto text-gray-200">
                 Tiên phong kiến tạo tương lai số qua các chương trình đào tạo Marketing & Communication thực chiến.
@@ -83,7 +83,7 @@
         </section>
 
         <div className="container mx-auto py-16 px-4 space-y-24">
-          {/* ===== SỨ MỆNH & TẦM NHÌN: KIM CHỈ NAM CỦA MSC ===== */}
+          {/* ===== SỨ MỆNH & TẦM NHÌN: KIM CHỈ NAM CỦA gzv ===== */}
           <section className="grid md:grid-cols-2 gap-8 items-stretch">
             <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <Card className="h-full bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 shadow-lg">
@@ -103,9 +103,9 @@
           <section>
             <div className="text-center mb-12">
               <Crown className="mx-auto h-12 w-12 text-yellow-500 mb-4" />
-              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">Những Người Đặt Nền Móng Cho MSC</h2>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white">Những Người Đặt Nền Móng Cho gzv</h2>
               <p className="mt-4 max-w-3xl mx-auto text-lg text-gray-600 dark:text-gray-400">
-                Hội tụ những bộ óc chiến lược và trái tim nhiệt huyết, đội ngũ đồng sáng lập là những người định hình tầm nhìn và cam kết cho sự phát triển bền vững của MSC.
+                Hội tụ những bộ óc chiến lược và trái tim nhiệt huyết, đội ngũ đồng sáng lập là những người định hình tầm nhìn và cam kết cho sự phát triển bền vững của gzv.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
@@ -140,11 +140,11 @@
           {/* ===== CALL TO ACTION: LỜI KÊU GỌI HÀNH ĐỘNG ===== */}
           <section className="bg-gray-800 text-white rounded-xl py-16 px-6 text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-              <h2 className="text-3xl font-bold mb-4">Đồng hành cùng MSC trên hành trình sự nghiệp</h2>
+              <h2 className="text-3xl font-bold mb-4">Đồng hành cùng gzv trên hành trình sự nghiệp</h2>
               <p className="max-w-2xl mx-auto mb-8 text-gray-300">Khám phá các khóa học được thiết kế bởi những chuyên gia hàng đầu và sẵn sàng bứt phá trong sự nghiệp của bạn.</p>
               <div className="flex justify-center items-center gap-6 mb-8">
                 <span className="flex items-center gap-2"><Phone size={18}/> (+84) 329 381 489</span>
-                <span className="flex items-center gap-2"><Mail size={18}/>  msc.edu.vn@gmail.com</span>
+                <span className="flex items-center gap-2"><Mail size={18}/>  gzv.one@gmail.com</span>
               </div>
               <Button size="lg" className="bg-white text-blue-600 font-bold hover:bg-gray-200 transition-colors text-lg px-8 py-6">
                 Xem Toàn Bộ Khóa Học

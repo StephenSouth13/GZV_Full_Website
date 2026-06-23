@@ -104,7 +104,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: any) {
           </div>
           <div>
             <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Hồ sơ Tác giả <span className="text-emerald-500">Expert</span></DialogTitle>
-            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Biên tập viên & Đội ngũ chuyên gia MSC</p>
+            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Biên tập viên & Đội ngũ chuyên gia gzv</p>
           </div>
         </DialogHeader>
 
@@ -115,7 +115,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: any) {
               <Avatar className="h-48 w-48 border-4 border-emerald-500/20 shadow-2xl overflow-hidden bg-slate-900 ring-8 ring-white/5">
                 <AvatarImage src={formData.avatar_url} className="object-cover" />
                 <AvatarFallback className="text-4xl font-black bg-emerald-900 text-emerald-400">
-                  {uploading ? <Loader2 className="animate-spin" /> : "MSC"}
+                  {uploading ? <Loader2 className="animate-spin" /> : "gzv"}
                 </AvatarFallback>
               </Avatar>
               <label className="absolute inset-0 bg-emerald-600/60 rounded-full flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-300 backdrop-blur-sm border-2 border-dashed border-white/50">

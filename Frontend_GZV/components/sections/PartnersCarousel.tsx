@@ -58,7 +58,7 @@ const PartnersCarousel = () => {
             Đơn Vị Đồng Hành
           </h2>
           <p className="text-lg text-blue-100 max-w-3xl mx-auto font-medium">
-            Những đối tác tin cậy đồng hành cùng MSC Center trong hành trình phát triển giáo dục
+            Những đối tác tin cậy đồng hành cùng gzv Center trong hành trình phát triển giáo dục
           </p>
         </motion.div>
 

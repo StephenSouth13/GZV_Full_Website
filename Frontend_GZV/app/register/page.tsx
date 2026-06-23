@@ -92,7 +92,7 @@ export default function RegisterPage() {
       
       if (response.success) {
         toast.success('Đăng ký thành công!', {
-          description: 'Chào mừng bạn đến với MSC Center. Đang chuyển đến trang đăng nhập...'
+          description: 'Chào mừng bạn đến với gzv Center. Đang chuyển đến trang đăng nhập...'
         })
         
         setTimeout(() => {
@@ -129,7 +129,7 @@ export default function RegisterPage() {
             <div className="max-w-md">
               <h2 className="text-4xl font-bold mb-6 italic font-serif">Bắt đầu hành trình thành công</h2>
               <p className="text-xl text-teal-100 mb-8 leading-relaxed">
-                Tham gia MSC Center và trở thành phiên bản tốt nhất của chính mình.
+                Tham gia gzv Center và trở thành phiên bản tốt nhất của chính mình.
               </p>
 
               <div className="space-y-6">
@@ -173,7 +173,7 @@ export default function RegisterPage() {
             <div className="text-center">
               <Link href="/" className="inline-block">
                 <span className="text-3xl font-black bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent uppercase tracking-tighter">
-                  MSC Center
+                  gzv Center
                 </span>
               </Link>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-4">Tạo tài khoản mới</h1>
@@ -279,7 +279,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-3">
-                  <Link href="https://mscer.msc.edu.vn/" target="_blank" className="w-full block">
+                  <Link href="https://gzver.gzv.one/" target="_blank" className="w-full block">
                     <Button variant="outline" className="w-full h-12 rounded-xl border-blue-100 hover:bg-blue-50">
                       <Building2 className="h-5 w-5 mr-2 text-blue-700" />
                       Hệ thống nội bộ HRM

@@ -1,7 +1,7 @@
-# 🎓 MSC Center - Life Long Learning Platform
+# 🎓 gzv Center - Life Long Learning Platform
 
 <div align="center">
-  <img src="/placeholder.svg?height=120&width=400&text=MSC+CENTER+LOGO" alt="MSC Center Logo" />
+  <img src="/placeholder.svg?height=120&width=400&text=gzv+CENTER+LOGO" alt="gzv Center Logo" />
   
   [![Next.js](https://img.shields.io/badge/Next.js-14.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
@@ -15,7 +15,7 @@
 
 ## 📖 Giới thiệu
 
-**MSC Center** là nền tảng giáo dục trực tuyến hàng đầu Việt Nam, chuyên cung cấp các khóa học chất lượng cao về công nghệ, kinh doanh và phát triển cá nhân. Với slogan **"Life Long Learning"**, chúng tôi cam kết đồng hành cùng học viên trong suốt hành trình học tập và phát triển sự nghiệp.
+**gzv Center** là nền tảng giáo dục trực tuyến hàng đầu Việt Nam, chuyên cung cấp các khóa học chất lượng cao về công nghệ, kinh doanh và phát triển cá nhân. Với slogan **"Life Long Learning"**, chúng tôi cam kết đồng hành cùng học viên trong suốt hành trình học tập và phát triển sự nghiệp.
 
 ### 🎯 Mục tiêu dự án
 - Xây dựng nền tảng giáo dục trực tuyến hiện đại và thân thiện
@@ -103,8 +103,8 @@
 
 ### 1️⃣ Clone Repository
 \`\`\`bash
-git clone https://github.com/msc-center/msc-website.git
-cd msc-website
+git clone https://github.com/gzv-center/gzv-website.git
+cd gzv-website
 \`\`\`
 
 ### 2️⃣ Cài đặt Dependencies
@@ -138,7 +138,7 @@ cp .env.example .env.local
 ### 4️⃣ Setup Database
 \`\`\`bash
 # Khởi tạo PostgreSQL database
-createdb msc_center
+createdb gzv_center
 
 # Chạy migrations
 npm run db:migrate
@@ -171,7 +171,7 @@ docker-compose up -dev
 ## 📁 Cấu trúc dự án
 
 \`\`\`
-msc-center-website/
+gzv-center-website/
 ├── 📁 app/                          # Next.js App Router
 │   ├── 📁 (auth)/                   # Auth routes group
 │   │   ├── 📁 login/
@@ -185,8 +185,8 @@ msc-center-website/
 │   │   └── 📁 category/
 │   ├── 📁 mentors/                  # Mentor pages
 │   │   └── 📁 [id]/                 # Dynamic mentor profile
-│   ├── 📁 mscer/                    # MSCer pages
-│   │   └── 📁 [id]/                 # Dynamic MSCer profile
+│   ├── 📁 gzver/                    # gzver pages
+│   │   └── 📁 [id]/                 # Dynamic gzver profile
 │   ├── 📁 profile/                  # User profile dashboard
 │   │   ├── 📁 courses/              # Course management
 │   │   ├── 📁 settings/             # User settings
@@ -630,7 +630,7 @@ sanity init
 
 # Chọn cấu hình:
 # - Create new project
-# - Project name: MSC Center CMS
+# - Project name: gzv Center CMS
 # - Dataset: production
 # - Template: Blog (schema)
 \`\`\`
@@ -1189,7 +1189,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:password@db:5432/msc_center
+      - DATABASE_URL=postgresql://postgres:password@db:5432/gzv_center
       - REDIS_URL=redis://redis:6379
       - NEXT_PUBLIC_SANITY_PROJECT_ID=${NEXT_PUBLIC_SANITY_PROJECT_ID}
       - NEXT_PUBLIC_SANITY_DATASET=${NEXT_PUBLIC_SANITY_DATASET}
@@ -1197,13 +1197,13 @@ services:
       - db
       - redis
     networks:
-      - msc-network
+      - gzv-network
 
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: msc_center
+      POSTGRES_DB: gzv_center
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
@@ -1213,7 +1213,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - msc-network
+      - gzv-network
 
   # Redis Cache
   redis:
@@ -1224,7 +1224,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - msc-network
+      - gzv-network
 
   # Golang Backend API
   backend-go:
@@ -1234,7 +1234,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/msc_center
+      - DATABASE_URL=postgresql://postgres:password@db:5432/gzv_center
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=${JWT_SECRET}
       - SMTP_HOST=${SMTP_HOST}
@@ -1245,7 +1245,7 @@ services:
       - db
       - redis
     networks:
-      - msc-network
+      - gzv-network
 
   # Rust Analytics Service
   backend-rust:
@@ -1255,13 +1255,13 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/msc_center
+      - DATABASE_URL=postgresql://postgres:password@db:5432/gzv_center
       - REDIS_URL=redis://redis:6379
     depends_on:
       - db
       - redis
     networks:
-      - msc-network
+      - gzv-network
 
   # Nginx Reverse Proxy
   nginx:
@@ -1277,14 +1277,14 @@ services:
       - backend-go
       - backend-rust
     networks:
-      - msc-network
+      - gzv-network
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  msc-network:
+  gzv-network:
     driver: bridge
 \`\`\`
 
@@ -1294,7 +1294,7 @@ networks:
 \`\`\`bash
 # .env.example
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/msc_center"
+DATABASE_URL="postgresql://username:password@localhost:5432/gzv_center"
 REDIS_URL="redis://localhost:6379"
 
 # NextAuth.js
@@ -1416,11 +1416,11 @@ npm run test:e2e -- tests/auth.spec.ts
 - **Documentation**: Check this README and docs folder
 - **Issues**: Create a GitHub issue for bugs
 - **Discussions**: Use GitHub Discussions for questions
-- **Email**: tech@msc.edu.vn
+- **Email**: tech@gzv.one
 
-### MSC Center Contact
-- **Website**: [msc.edu.vn](https://msc.edu.vn)
-- **Email**: info@msc.edu.vn
+### gzv Center Contact
+- **Website**: [gzv.one](https://gzv.one)
+- **Email**: info@gzv.one
 - **Phone**: +84 (0) 123 456 789
 - **Address**: 123 Nguyen Hue, District 1, Ho Chi Minh City, Vietnam
 
@@ -1431,15 +1431,15 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ---
 
 <div align="center">
-  <img src="/placeholder.svg?height=60&width=200&text=MSC+CENTER" alt="MSC Center" />
+  <img src="/placeholder.svg?height=60&width=200&text=gzv+CENTER" alt="gzv Center" />
   
   <p><strong>🚀 Life Long Learning 🚀</strong></p>
-  <p>Made with ❤️ by MSC Center Team</p>
+  <p>Made with ❤️ by gzv Center Team</p>
   
   <p>
-    <a href="https://msc.edu.vn">Website</a> •
-    <a href="mailto:info@msc.edu.vn">Email</a> •
-    <a href="https://facebook.com/msccenter">Facebook</a> •
-    <a href="https://linkedin.com/company/msc-center">LinkedIn</a>
+    <a href="https://gzv.one">Website</a> •
+    <a href="mailto:info@gzv.one">Email</a> •
+    <a href="https://facebook.com/gzvcenter">Facebook</a> •
+    <a href="https://linkedin.com/company/gzv-center">LinkedIn</a>
   </p>
 </div>

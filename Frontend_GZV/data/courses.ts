@@ -64,7 +64,7 @@ export const courses: Course[] = [
     duration: "4 tháng",
     level: "Intermediate",
     category: "Management",
-    instructor: "MSC Expert",
+    instructor: "gzv Expert",
     students: 250,
     rating: 4.8,
     progress: 0
@@ -78,7 +78,7 @@ export const courses: Course[] = [
     duration: "2.5 tháng",
     level: "Beginner",
     category: "Marketing",
-    instructor: "MSC Marketing Team",
+    instructor: "gzv Marketing Team",
     students: 180,
     rating: 4.7,
     progress: 0
@@ -92,7 +92,7 @@ export const courses: Course[] = [
     duration: "3 tháng", 
     level: "Advanced",
     category: "Leadership",
-    instructor: "MSC Leadership Coach",
+    instructor: "gzv Leadership Coach",
     students: 120,
     rating: 4.9,
     progress: 0
@@ -106,7 +106,7 @@ export const courses: Course[] = [
     duration: "6 tuần",
     level: "Beginner", 
     category: "Data Science",
-    instructor: "MSC Data Team",
+    instructor: "gzv Data Team",
     students: 95,
     rating: 4.6,
     progress: 0
@@ -120,7 +120,7 @@ export const courses: Course[] = [
     duration: "4 tuần",
     level: "Beginner",
     category: "Soft Skills", 
-    instructor: "MSC Communication Expert",
+    instructor: "gzv Communication Expert",
     students: 200,
     rating: 4.5,
     progress: 0

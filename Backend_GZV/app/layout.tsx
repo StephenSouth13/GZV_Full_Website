@@ -7,8 +7,8 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "MSC Backend System",
-  description: "Hệ thống quản trị nội dung MSC",
+  title: "gzv Backend System",
+  description: "Hệ thống quản trị nội dung gzv",
 };
 
 export default function RootLayout({

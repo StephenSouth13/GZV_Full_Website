@@ -430,7 +430,7 @@ export type Database = {
         }
         Relationships: []
       }
-      mscers: {
+      gzvers: {
         Row: {
           achievement_summary: string | null
           achievements_list: string[] | null

@@ -225,7 +225,7 @@ export function ImageUpload({ isOpen, onClose, onUploadComplete, currentFolder =
                 id="folder"
                 value={folder}
                 onChange={(e) => setFolder(e.target.value)}
-                placeholder="Enter folder name (e.g., msc/news)"
+                placeholder="Enter folder name (e.g., gzv/news)"
                 disabled={isUploading}
               />
             </div>

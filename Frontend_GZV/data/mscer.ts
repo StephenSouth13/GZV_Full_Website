@@ -1,4 +1,4 @@
-export interface MSCer {
+export interface gzver {
   id: string;
   full_name: string;
   slug: string;
@@ -24,16 +24,16 @@ export interface MSCer {
   is_active: boolean;
 }
 
-export const mscersData: MSCer[] = [
+export const gzversData: gzver[] = [
   {
     id: "1",
     full_name: "Phạm Hoàng Minh Khánh",
     slug: "pham-hoang-minh-khanh",
-    company: "MSC",
-    position: "GIÁM ĐỐC MSC",
-    avatar_url: "/MSCers/PHMK.webp",
+    company: "gzv",
+    position: "GIÁM ĐỐC gzv",
+    avatar_url: "/gzvers/PHMK.webp",
     achievement_summary: "Nhà sáng lập đa ngành, Giảng viên & Chuyên gia tư vấn chiến lược",
-    testimonial: "Hành trình tại MSC đã mở ra cho tôi nhiều cơ hội mới để kết nối và cống hiến.",
+    testimonial: "Hành trình tại gzv đã mở ra cho tôi nhiều cơ hội mới để kết nối và cống hiến.",
     graduation_year: "2022",
     promotion_path: "Từ Trưởng phòng Marketing → Giám đốc → Nhà sáng lập & Viện phó",
     social_impact: "Sáng lập và vận hành 3+ công ty trong lĩnh vực tư vấn, công nghệ và nông nghiệp. Giảng dạy và định hướng cho hàng ngàn sinh viên tại Đại học UEF.",
@@ -57,9 +57,9 @@ export const mscersData: MSCer[] = [
     id: "2",
     full_name: "Dương Thế Khải",
     slug: "duong-the-khai",
-    company: "MSC",
+    company: "gzv",
     position: "PHÓ GIÁM ĐỐC",
-    avatar_url: "/MSCers/DTK.webp",
+    avatar_url: "/gzvers/DTK.webp",
     achievement_summary: "Founder Vietnam Student Marathon & Quản lý dự án chuyên nghiệp",
     testimonial: "Quá trình học tập và làm việc đã cho tôi khả năng quản lý và điều hành sân chơi ý nghĩa cho sinh viên.",
     graduation_year: "2024",
@@ -84,20 +84,20 @@ export const mscersData: MSCer[] = [
     id: "3",
     full_name: "Quách Thành Long",
     slug: "quach-thanh-long",
-    company: "MSC",
+    company: "gzv",
     position: "TRƯỞNG PHÒNG CNTT",
-    avatar_url: "/MSCers/QTL.webp",
+    avatar_url: "/gzvers/QTL.webp",
     achievement_summary: "Developer đa năng, Business Analyst & Nhà đầu tư",
     testimonial: "Tôi áp dụng kiến thức để xây dựng giải pháp công nghệ tối ưu cho cộng đồng giáo dục.",
     graduation_year: "2024",
     promotion_path: "Từ Business Analyst (Thực tập) → Web Developer → Trưởng phòng CNTT",
-    social_impact: "Leader và developer chính của website msc.edu.vn; Tổ chức lớp lập trình cơ bản miễn phí.",
+    social_impact: "Leader và developer chính của website gzv.one; Tổ chức lớp lập trình cơ bản miễn phí.",
     course_taken: "Technology Leadership & Business Analysis",
     skills: ["Full-Stack Development", "Game Development", "Business Analysis", "Database", "DevOps"],
     achievements_list: [
-      "Trưởng phòng Công nghệ thông tin – Trung tâm MSC (05/2025 – nay)",
+      "Trưởng phòng Công nghệ thông tin – Trung tâm gzv (05/2025 – nay)",
       "Giải Nhất Học bổng Tài năng VTC Academy – Ngành Phát triển Game (2024)",
-      "Leader & Developer website giáo dục msc.edu.vn",
+      "Leader & Developer website giáo dục gzv.one",
       "Vô địch Marathon VSM 2024 – Cự ly 42km"
     ],
     mentoring_content: "Tổ chức các lớp lập trình miễn phí và chia sẻ kinh nghiệm phát triển sự nghiệp ngành IT.",

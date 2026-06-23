@@ -87,7 +87,7 @@ const ProfileDashboard = () => {
     id: "user-123",
     fullName: "Quách Thành Long",
     email: "stephensouth1307@gmail.com",
-    avatar: "/MSCers/QTL.webp",
+    avatar: "/gzvers/QTL.webp",
     bio: "Passionate developer với 5 năm kinh nghiệm trong lĩnh vực web development. Luôn học hỏi và cập nhật những công nghệ mới nhất.",
     location: "Hồ Chí Minh, Việt Nam",
     website: "https://nguyenvanan.dev",

@@ -55,7 +55,7 @@ const getProgramHighlights = (program: any): string[] => {
 // --- ĐỊNH NGHĨA TYPES (Data Models) ---
 // ==========================================
 
-export interface MSCer {
+export interface gzver {
   id: string;
   full_name: string;
   slug: string;
@@ -279,19 +279,19 @@ export const authAPI = {
 // ==========================================
 export const api = {
   /**
-   * Lấy danh sách MSCer
+   * Lấy danh sách gzver
    */
-  getMSCer: async (): Promise<MSCer[]> => {
+  getgzver: async (): Promise<gzver[]> => {
     try {
       const { data, error } = await supabase
-        .from('mscers')
+        .from('gzvers')
         .select('*')
         .eq('is_active', true)
         .order('order', { ascending: true });
       if (error) throw error;
       return (data || []).map(m => ({ ...m, avatar_url: getPublicUrl(m.avatar_url) }));
     } catch (error) {
-      console.error("❌ Error fetching MSCers:", error);
+      console.error("❌ Error fetching gzvers:", error);
       return [];
     }
   },
@@ -417,10 +417,10 @@ export const api = {
       return [];
     }
   },
-  getMSCerBySlug: async (slug: string): Promise<MSCer | null> => {
+  getgzverBySlug: async (slug: string): Promise<gzver | null> => {
     try {
       const { data, error } = await supabase
-        .from('mscers')
+        .from('gzvers')
         .select('*')
         .eq('slug', slug)
         .single();
@@ -431,9 +431,9 @@ export const api = {
       return { 
         ...data, 
         avatar_url: getPublicUrl(data.avatar_url) 
-      } as MSCer;
+      } as gzver;
     } catch (error) {
-      console.error("❌ Error fetching MSCer detail:", error);
+      console.error("❌ Error fetching gzver detail:", error);
       return null;
     }
   },

@@ -64,7 +64,7 @@ export default function PartnersClient({ corporate, education }: Props) {
       <PageBanner
         badge="Mạng lưới toàn cầu"
         title="Đối tác & Đồng hành"
-        subtitle="MSC Center có mạng lưới đối tác từ các doanh nghiệp và các trường Đại học có cùng chung tầm nhìn về phát triển giáo dục và nguồn nhân lực chất lượng cao."
+        subtitle="gzv Center có mạng lưới đối tác từ các doanh nghiệp và các trường Đại học có cùng chung tầm nhìn về phát triển giáo dục và nguồn nhân lực chất lượng cao."
         stats={[
           { value: '100+', label: 'Đối tác doanh nghiệp' },
           { value: '100+', label: 'Dự án hợp tác' },
@@ -112,7 +112,7 @@ export default function PartnersClient({ corporate, education }: Props) {
               <h2 className="text-3xl font-bold font-serif">Đối tác Doanh nghiệp & Tập đoàn</h2>
             </div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mt-4">
-              Những doanh nghiệp hàng đầu đã tin tưởng và lựa chọn MSC Center làm đối tác đào tạo và phát triển nguồn nhân lực.
+              Những doanh nghiệp hàng đầu đã tin tưởng và lựa chọn gzv Center làm đối tác đào tạo và phát triển nguồn nhân lực.
             </p>
           </motion.div>
 
@@ -192,7 +192,7 @@ export default function PartnersClient({ corporate, education }: Props) {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">Trở thành Đối tác của MSC</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">Trở thành Đối tác của gzv</h2>
             <p className="text-xl text-blue-100 mb-10 max-w-3xl mx-auto">
               Cùng chúng tôi kiến tạo những giá trị bền vững cho cộng đồng và doanh nghiệp thông qua các chương trình đào tạo chất lượng cao.
             </p>

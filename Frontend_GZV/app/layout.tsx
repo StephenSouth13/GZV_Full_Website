@@ -18,20 +18,20 @@ const montserrat = Montserrat({
 // Nó cũng sẽ được sử dụng để tạo các thẻ OpenGraph và Twitter Card
 export const metadata: Metadata = {
   title: {
-    default: "MSC Center - Trung tâm Mentoring & Coaching tại Việt Nam",
-    template: "%s | MSC Center",
+    default: "GZV - GenZ VietNam Company",
+    template: "%s | gzv Center",
   },
-  description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp MSC Center - Học tập và nỗ lực suốt đời",
-  keywords: "MSC Center, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân, life long learning, Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
-  authors: [{ name: "MSC Center", url: "https://msc.edu.vn" }],
-  creator: "MSC Center",
-  publisher: "MSC Center",
+  description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center - Học tập và nỗ lực suốt đời",
+  keywords: "gzv Center, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân, life long learning, Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
+  authors: [{ name: "gzv Center", url: "https://gzv.one" }],
+  creator: "gzv Center",
+  publisher: "gzv Center",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://msc.edu.vn"),
+  metadataBase: new URL("https://gzv.one"),
   alternates: {
     canonical: "/",
     languages: {
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "MSC Center - Life Long Learning",
-    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp MSC Center",
-    url: "https://msc.edu.vn",
-    siteName: "MSC Center",
+    title: "gzv Center - Life Long Learning",
+    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center",
+    url: "https://gzv.one",
+    siteName: "gzv Center",
     images: [
       {
-        url: "/msc/assets/og-image.jpg", // Đổi đường dẫn ảnh phù hợp
+        url: "/gzv/assets/og-image.jpg", // Đổi đường dẫn ảnh phù hợp
         width: 1200,
         height: 630,
         alt: "Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
@@ -57,10 +57,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "MSC Center - Life Long Learning",
-    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp MSC Center",
-    images: ["/msc/assets/twitter-card.jpg"], // Đổi đường dẫn ảnh phù hợp
-    creator: "@msccenter",
+    title: "gzv Center - Life Long Learning",
+    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center",
+    images: ["/gzv/assets/twitter-card.jpg"], // Đổi đường dẫn ảnh phù hợp
+    creator: "@gzvcenter",
   },
   robots: {
     index: true,
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/logo/site.webmanifest",
-  generator: "MSC-IT Department",
+  generator: "gzv-IT Department",
 };
 
 export default function RootLayout({

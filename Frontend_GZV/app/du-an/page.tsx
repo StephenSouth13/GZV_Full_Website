@@ -55,7 +55,7 @@ export default function ProjectsPage() {
       <PageBanner
         badge="Những dự án tiêu biểu"
         title="Dự án đã triển khai"
-        subtitle="Các dự án Mentoring & Coaching thực tế mà MSC Center đã triển khai, đem lại giá trị thực cho các đối tác và học viên."
+        subtitle="Các dự án Mentoring & Coaching thực tế mà gzv Center đã triển khai, đem lại giá trị thực cho các đối tác và học viên."
         stats={[
           { value: `${projects.length}+`, label: 'Dự án tiêu biểu' },
           { value: '50+', label: 'Doanh nghiệp' },
@@ -193,7 +193,7 @@ export default function ProjectsPage() {
 
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed">
 
-              Hãy để MSC Center trở thành đối tác đồng hành, thiết kế chương trình đào tạo riêng biệt và hiệu quả cho tổ chức của bạn.
+              Hãy để gzv Center trở thành đối tác đồng hành, thiết kế chương trình đào tạo riêng biệt và hiệu quả cho tổ chức của bạn.
 
             </p>
 

@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS public.authors (
     slug TEXT UNIQUE NOT NULL,
     title TEXT,             -- Chức danh (VD: Senior Mentor)
     avatar_url TEXT,
-    type TEXT DEFAULT 'mentor', -- Để phân biệt 'mscer' hay 'mentor' phục vụ việc trỏ Link
+    type TEXT DEFAULT 'mentor', -- Để phân biệt 'gzver' hay 'mentor' phục vụ việc trỏ Link
     bio TEXT,
     linkedin_url TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

@@ -77,7 +77,7 @@ const Header = () => {
     { href: "/dao-tao", label: t("nav.training") },
     { href: "/du-an", label: t("nav.projects") },
     { href: "/mentors", label: t("nav.mentors") },
-    { href: "/mscer", label: t("nav.mscer") },
+    { href: "/gzver", label: t("nav.gzver") },
     { href: "/dong-hanh", label: t("nav.partners") },
     { href: "/tin-tuc", label: "Tin tức" },
     { href: "/lien-he", label: t("nav.contact") },
@@ -134,10 +134,10 @@ const Header = () => {
                 {!isLoading && (
                   <>
                     {!isAuthenticated ? (
-                      <Link href="https://mscer.gzv.one/" target="_blank" className="hidden sm:block">
+                      <Link href="https://gzver.gzv.one/" target="_blank" className="hidden sm:block">
                         <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 h-7 text-xs">
                           <LogIn className="h-3 w-3 mr-1" />
-                          {t("nav.mscerlogin")}
+                          {t("nav.gzverlogin")}
                         </Button>
                       </Link>
                     ) : (

@@ -103,7 +103,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               {/* Tên hiển thị bên phải Avatar */}
               <div className="flex flex-col">
                 <span className="text-[13px] font-black text-slate-900 dark:text-white leading-none">
-                  {mentors[0]?.name || "MSC Team"}
+                  {mentors[0]?.name || "gzv Team"}
                 </span>
                 <span className="text-[10px] text-slate-400 uppercase font-black mt-1.5 tracking-tighter">
                   {mentors.length > 1 ? `& ${mentors.length - 1} chuyên gia khác` : "Chuyên gia đào tạo"}

@@ -12,7 +12,7 @@ import { Folder, Search, Upload, Loader2, Image as ImageIcon, Check } from 'luci
 const BUCKET = 'media'
 const DEFAULT_FOLDERS = [
   'articles', 'projects', 'project-thumbnails', 'project-videos',
-  'courses', 'mentors', 'authors', 'mscers', 'training', 'uploads',
+  'courses', 'mentors', 'authors', 'gzvers', 'training', 'uploads',
 ]
 
 type Item = { name: string; path: string; url: string; size: number; mimetype: string }

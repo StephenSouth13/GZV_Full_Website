@@ -126,7 +126,7 @@ export default function NewsPostPage({ params }: { params: { slug: string } }) {
                   <span className="font-medium">
                     {post.authors && post.authors.length > 0 
                       ? post.authors.map(auth => auth.full_name).join(', ') 
-                      : 'MSC Center'}
+                      : 'gzv Center'}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">

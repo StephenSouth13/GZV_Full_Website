@@ -17,10 +17,10 @@ import {
 import { Label } from '@/components/ui/label'
 
 const BUCKET = 'media'
-// Default folders for the MSC ecosystem
+// Default folders for the gzv ecosystem
 const DEFAULT_FOLDERS = [
   'articles', 'projects', 'project-thumbnails', 'project-videos',
-  'courses', 'mentors', 'authors', 'mscers', 'training', 'uploads',
+  'courses', 'mentors', 'authors', 'gzvers', 'training', 'uploads',
 ]
 
 type MediaItem = {

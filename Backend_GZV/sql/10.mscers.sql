@@ -1,9 +1,9 @@
--- 1. Tạo bảng mscers với đầy đủ các trường dữ liệu thực tế
-CREATE TABLE IF NOT EXISTS public.mscers (
+-- 1. Tạo bảng gzvers với đầy đủ các trường dữ liệu thực tế
+CREATE TABLE IF NOT EXISTS public.gzvers (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     full_name text NOT NULL, -- Họ và tên
     slug text UNIQUE NOT NULL, -- Đường dẫn URL chuẩn SEO (ví dụ: pham-hoang-minh-khanh)
-    company text DEFAULT 'MSC', -- Công ty hiện tại
+    company text DEFAULT 'gzv', -- Công ty hiện tại
     position text, -- Chức danh chuyên môn
     avatar_url text, -- Link ảnh chân dung
     cv_url text, -- Link file PDF hồ sơ năng lực (nâng cao)
@@ -44,16 +44,16 @@ CREATE TABLE IF NOT EXISTS public.mscers (
 );
 
 -- 2. Thiết lập Row Level Security (RLS) để bảo mật dữ liệu
-ALTER TABLE public.mscers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.gzvers ENABLE ROW LEVEL SECURITY;
 
 -- Cho phép mọi người xem thông tin (Public Read)
 CREATE POLICY "Allow public read access" 
-ON public.mscers FOR SELECT 
+ON public.gzvers FOR SELECT 
 USING (true);
 
 -- Chỉ cho phép người dùng đã đăng nhập (Admin) thao tác CRUD
 CREATE POLICY "Allow individual delete for admin" 
-ON public.mscers FOR ALL 
+ON public.gzvers FOR ALL 
 USING (auth.role() = 'authenticated');
 
 -- 3. Tạo function tự động cập nhật thời gian 'updated_at'
@@ -65,7 +65,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_mscer_modtime
-    BEFORE UPDATE ON public.mscers
+CREATE TRIGGER update_gzver_modtime
+    BEFORE UPDATE ON public.gzvers
     FOR EACH ROW
     EXECUTE PROCEDURE update_modified_column();

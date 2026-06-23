@@ -111,7 +111,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
             <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20"><Award className="text-white" size={24}/></div>
             <div>
               <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ Mentor Chuyên sâu</DialogTitle>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Hệ thống quản trị MSC Center</p>
+              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Hệ thống quản trị gzv Center</p>
             </div>
           </div>
           <div className="flex items-center gap-4 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/10">

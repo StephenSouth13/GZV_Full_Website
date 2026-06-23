@@ -6,37 +6,37 @@ import Image from "next/image"
 import Link from "next/link"
 import { Star, ArrowRight, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-import { api, MSCer } from "@/lib/api-supabase"
+import { api, gzver } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/PageBanner"
 
-export default function MSCerPage() {
-  const [mscers, setMscers] = useState<MSCer[]>([])
+export default function gzverPage() {
+  const [gzvers, setgzvers] = useState<gzver[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchMscers = async () => {
+    const fetchgzvers = async () => {
       try {
         setLoading(true)
-        const data = await api.getMSCer()
+        const data = await api.getgzver()
         // Sắp xếp theo order để đảm bảo thứ tự như CMS
-        setMscers(data.sort((a, b) => (a.order || 0) - (b.order || 0)))
+        setgzvers(data.sort((a, b) => (a.order || 0) - (b.order || 0)))
       } catch (error) {
-        console.error("❌ Error fetching MSCers:", error)
+        console.error("❌ Error fetching gzvers:", error)
       } finally {
         setLoading(false)
       }
     }
-    fetchMscers()
+    fetchgzvers()
   }, [])
 
   return (
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Khám phá đội ngũ"
-        title="Đội ngũ MSCers"
+        title="Đội ngũ gzvers"
         subtitle="Kết nối cùng chúng tôi thông qua các chương trình đào tạo và lộ trình phát triển năng lực chuyên sâu."
         stats={[
-          { value: `${mscers.length}+`, label: 'Chuyên gia' },
+          { value: `${gzvers.length}+`, label: 'Chuyên gia' },
           { value: '100%', label: 'Tâm huyết' },
           { value: '5000+', label: 'Học viên' },
           { value: '95%', label: 'Hài lòng' },
@@ -68,7 +68,7 @@ export default function MSCerPage() {
                 Đang tải dữ liệu chuyên gia...
               </motion.p>
             </motion.div>
-          ) : mscers.length > 0 ? (
+          ) : gzvers.length > 0 ? (
             <>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -77,9 +77,9 @@ export default function MSCerPage() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto items-stretch"
               >
                 <AnimatePresence mode="popLayout">
-                  {mscers.map((mscer, index) => (
+                  {gzvers.map((gzver, index) => (
                     <motion.div
-                      key={mscer.id}
+                      key={gzver.id}
                       initial={{ opacity: 0, scale: 0.95, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -106,8 +106,8 @@ export default function MSCerPage() {
                             >
                               <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-slate-700">
                                 <Image
-                                  src={mscer.avatar_url || '/MSCers/default.webp'}
-                                  alt={mscer.full_name}
+                                  src={gzver.avatar_url || '/gzvers/default.webp'}
+                                  alt={gzver.full_name}
                                   fill
                                   className="object-cover transition-transform duration-700 group-hover:scale-125"
                                 />
@@ -132,25 +132,25 @@ export default function MSCerPage() {
                               className="inline-flex items-center justify-center mb-4 mx-auto"
                             >
                               <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-700 dark:text-blue-300">
-                                {mscer.position}
+                                {gzver.position}
                               </span>
                             </motion.div>
 
                             {/* Name */}
                             <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
-                              {mscer.full_name}
+                              {gzver.full_name}
                             </h3>
 
                             {/* Testimonial / Achievement */}
                             <div className="flex-grow flex items-center justify-center mb-8">
                               <blockquote className="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed italic font-medium line-clamp-4">
-                                "{mscer.testimonial || mscer.achievement_summary || 'Chuyên gia tài năng trong lĩnh vực của mình'}"
+                                "{gzver.testimonial || gzver.achievement_summary || 'Chuyên gia tài năng trong lĩnh vực của mình'}"
                               </blockquote>
                             </div>
 
                             {/* View Profile Button */}
                             <div className="w-full mt-auto">
-                              <Link href={`/mscer/${mscer.slug}`} className="block group/btn">
+                              <Link href={`/gzver/${gzver.slug}`} className="block group/btn">
                                 <motion.button
                                   whileHover={{ y: -2 }}
                                   whileTap={{ y: 0 }}
@@ -181,7 +181,7 @@ export default function MSCerPage() {
                 className="text-center mt-12"
               >
                 <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                  Hiển thị <span className="font-bold text-slate-700 dark:text-slate-300">{mscers.length}</span> chuyên gia
+                  Hiển thị <span className="font-bold text-slate-700 dark:text-slate-300">{gzvers.length}</span> chuyên gia
                 </p>
               </motion.div>
             </>

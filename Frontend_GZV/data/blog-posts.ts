@@ -15,7 +15,7 @@ export const topPosts: BlogPost[] = [
     category: "Frontend",
     views: 15420,
     excerpt: "Những bước đầu tiên để trở thành một frontend developer...",
-    author: "MSC Team",
+    author: "gzv Team",
     publishedAt: "2024-01-15"
   },
   {
@@ -24,7 +24,7 @@ export const topPosts: BlogPost[] = [
     category: "Backend",
     views: 12350,
     excerpt: "Khám phá những công nghệ backend hot nhất hiện tại...",
-    author: "MSC Team",
+    author: "gzv Team",
     publishedAt: "2024-01-20"
   },
   {
@@ -33,7 +33,7 @@ export const topPosts: BlogPost[] = [
     category: "Kinh nghiệm",
     views: 9870,
     excerpt: "Chia sẻ hành trình từ thực tập sinh đến developer...",
-    author: "MSC Team", 
+    author: "gzv Team", 
     publishedAt: "2024-01-10"
   },
   {
@@ -42,7 +42,7 @@ export const topPosts: BlogPost[] = [
     category: "Database",
     views: 8520,
     excerpt: "Thiết kế cơ sở dữ liệu hiệu quả và tối ưu...",
-    author: "MSC Team",
+    author: "gzv Team",
     publishedAt: "2024-01-25"
   },
   {
@@ -51,7 +51,7 @@ export const topPosts: BlogPost[] = [
     category: "DevOps", 
     views: 7230,
     excerpt: "Tự động hóa quy trình phát triển và triển khai...",
-    author: "MSC Team",
+    author: "gzv Team",
     publishedAt: "2024-01-30"
   }
 ]

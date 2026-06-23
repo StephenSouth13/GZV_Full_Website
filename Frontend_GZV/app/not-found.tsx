@@ -23,9 +23,9 @@ export default function NotFound() {
       color: "from-green-500 to-green-600",
     },
     {
-      title: "Cộng đồng MSCer",
+      title: "Cộng đồng gzver",
       description: "Tham gia cộng đồng học viên thành công",
-      href: "/mscer",
+      href: "/gzver",
       icon: Award,
       color: "from-purple-500 to-purple-600",
     },
@@ -43,14 +43,14 @@ export default function NotFound() {
             className="mb-8"
           >
             <div className="relative">
-              {/* MSC Logo Background */}
+              {/* gzv Logo Background */}
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                 className="absolute inset-0 flex items-center justify-center opacity-5"
               >
                 <div className="w-96 h-96 border-8 border-blue-200 rounded-full flex items-center justify-center">
-                  <div className="text-8xl font-bold text-blue-300">MSC</div>
+                  <div className="text-8xl font-bold text-blue-300">gzv</div>
                 </div>
               </motion.div>
 
@@ -102,7 +102,7 @@ export default function NotFound() {
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">Oops! Trang không tồn tại</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Có vẻ như bạn đã đi lạc trong hành trình học tập. Đừng lo lắng, MSC Center sẽ giúp bạn tìm đúng đường!
+              Có vẻ như bạn đã đi lạc trong hành trình học tập. Đừng lo lắng, gzv Center sẽ giúp bạn tìm đúng đường!
             </p>
           </motion.div>
 
@@ -181,7 +181,7 @@ export default function NotFound() {
             className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-teal-50 rounded-2xl"
           >
             <h4 className="text-xl font-bold text-gray-900 mb-4">Vẫn không tìm thấy những gì bạn cần?</h4>
-            <p className="text-gray-600 mb-6">Đội ngũ hỗ trợ của MSC Center luôn sẵn sàng giúp đỡ bạn 24/7</p>
+            <p className="text-gray-600 mb-6">Đội ngũ hỗ trợ của gzv Center luôn sẵn sàng giúp đỡ bạn 24/7</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/lien-he">
                 <Button className="btn-secondary">Liên hệ hỗ trợ</Button>

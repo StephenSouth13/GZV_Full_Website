@@ -61,7 +61,7 @@ function ToolButton({
 
 const Divider = () => <span className="w-px h-6 bg-slate-200 mx-1 self-center" />
 
-export function MSCRichEditor({
+export function gzvRichEditor({
   value, onChange, placeholder = 'Bắt đầu viết câu chuyện của bạn…',
   minHeight = 720, uploadFolder = 'articles',
 }: Props) {
@@ -98,7 +98,7 @@ export function MSCRichEditor({
     editorProps: {
       attributes: {
         class:
-          'msc-doc-editor focus:outline-none prose prose-slate max-w-none ' +
+          'gzv-doc-editor focus:outline-none prose prose-slate max-w-none ' +
           'prose-headings:font-black prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl ' +
           'prose-p:text-[17px] prose-p:leading-8 prose-p:text-slate-800 ' +
           'prose-strong:text-slate-900 prose-a:text-blue-600 ' +
@@ -279,16 +279,16 @@ export function MSCRichEditor({
 
       {/* Placeholder + page styles */}
       <style jsx global>{`
-        .msc-doc-editor p.is-editor-empty:first-child::before {
+        .gzv-doc-editor p.is-editor-empty:first-child::before {
           content: "${placeholder.replace(/"/g, '\\"')}";
           float: left;
           color: #cbd5e1;
           pointer-events: none;
           height: 0;
         }
-        .msc-doc-editor:focus { outline: none; }
-        .msc-doc-editor img { max-width: 100%; }
-        .msc-doc-editor iframe { width: 100%; aspect-ratio: 16/9; border-radius: 16px; }
+        .gzv-doc-editor:focus { outline: none; }
+        .gzv-doc-editor img { max-width: 100%; }
+        .gzv-doc-editor iframe { width: 100%; aspect-ratio: 16/9; border-radius: 16px; }
       `}</style>
 
       <MediaPickerDialog
@@ -306,4 +306,4 @@ export function MSCRichEditor({
   )
 }
 
-export default MSCRichEditor
+export default gzvRichEditor

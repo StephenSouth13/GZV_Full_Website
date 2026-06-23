@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata: Metadata = {
-  title: "Hồ sơ năng lực - MSC Center",
-  description: "Tạo và quản lý hồ sơ năng lực chuyên nghiệp với MSC Center",
+  title: "Hồ sơ năng lực - gzv Center",
+  description: "Tạo và quản lý hồ sơ năng lực chuyên nghiệp với gzv Center",
 }
 
 export default function CVPage() {
@@ -83,7 +83,7 @@ export default function CVPage() {
   const cvServices = [
     {
       title: "CV Review & Feedback",
-      description: "Chuyên gia MSC Center sẽ review và đưa ra feedback chi tiết cho CV của bạn",
+      description: "Chuyên gia gzv Center sẽ review và đưa ra feedback chi tiết cho CV của bạn",
       price: "500,000 VNĐ",
       duration: "2-3 ngày",
       features: [
@@ -132,7 +132,7 @@ export default function CVPage() {
       company: "Grab Vietnam",
       avatar: "/placeholder.svg?height=60&width=60&text=Tu",
       story:
-        "Sau khi sử dụng dịch vụ CV Writing của MSC, tôi đã nhận được 5 lời mời phỏng vấn trong vòng 2 tuần và cuối cùng được nhận vào vị trí mơ ước tại Grab.",
+        "Sau khi sử dụng dịch vụ CV Writing của gzv, tôi đã nhận được 5 lời mời phỏng vấn trong vòng 2 tuần và cuối cùng được nhận vào vị trí mơ ước tại Grab.",
       salaryIncrease: "+150%",
       timeToJob: "3 tuần",
     },
@@ -173,7 +173,7 @@ export default function CVPage() {
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 font-serif">Hồ sơ Năng lực Chuyên nghiệp</h1>
             <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-              Tạo CV ấn tượng và nhận được công việc mơ ước với sự hỗ trợ từ các chuyên gia HR hàng đầu tại MSC Center
+              Tạo CV ấn tượng và nhận được công việc mơ ước với sự hỗ trợ từ các chuyên gia HR hàng đầu tại gzv Center
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4">
@@ -355,7 +355,7 @@ export default function CVPage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 font-serif">Câu chuyện thành công</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Những thành công thực tế từ các khách hàng đã sử dụng dịch vụ CV của MSC Center
+              Những thành công thực tế từ các khách hàng đã sử dụng dịch vụ CV của gzv Center
             </p>
           </div>
 
@@ -402,7 +402,7 @@ export default function CVPage() {
         <div className="container text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">Sẵn sàng tạo CV ấn tượng?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
-            Bắt đầu hành trình tìm kiếm công việc mơ ước với CV chuyên nghiệp từ MSC Center
+            Bắt đầu hành trình tìm kiếm công việc mơ ước với CV chuyên nghiệp từ gzv Center
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4">

@@ -190,7 +190,7 @@ export default function AdminLoginPage() {
 
               <div className="space-y-2">
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">
-                  Cổng Quản Trị MSC
+                  Cổng Quản Trị gzv
                 </h1>
                 <p className="text-white/60 text-sm font-medium tracking-wide">
                   Đăng nhập để truy cập hệ thống quản lý
@@ -220,7 +220,7 @@ export default function AdminLoginPage() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="admin_msc@gmail.com"
+                    placeholder="admin_gzv@gmail.com"
                     {...form.register('email')}
                     className="pl-4 pr-10 h-12 bg-white/10 border border-white/20 rounded-xl text-white placeholder:text-white/40 focus:bg-white/15 focus:border-white/40 focus:outline-none transition-all duration-300 backdrop-blur-sm hover:bg-white/15"
                   />

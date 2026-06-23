@@ -7,24 +7,24 @@ import Link from "next/link"
 import { Star, ArrowRight, Loader2, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { api, MSCer } from "@/lib/api-supabase"
+import { api, gzver } from "@/lib/api-supabase"
 
 export default function DirectorsSection() {
-  const [directors, setDirectors] = useState<MSCer[]>([])
+  const [directors, setDirectors] = useState<gzver[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchDirectors = async () => {
       try {
         setLoading(true)
-        // Lấy toàn bộ dữ liệu MSCers đã được sắp xếp order từ API
-        const data = await api.getMSCer()
+        // Lấy toàn bộ dữ liệu gzvers đã được sắp xếp order từ API
+        const data = await api.getgzver()
         
         /**
          * LOGIC LỌC TỰ ĐỘNG:
          * Chỉ lấy những người được bật switch "is_director" trong CMS.
          */
-        const filtered = data.filter(mscer => mscer.is_director && mscer.is_active);
+        const filtered = data.filter(gzver => gzver.is_director && gzver.is_active);
 
         setDirectors(filtered)
       } catch (error) {
@@ -62,7 +62,7 @@ export default function DirectorsSection() {
             </h2>
           </div>
           <p className="section-description">
-            Đội ngũ lãnh đạo nòng cốt định hướng chiến lược tại MSC Center.
+            Đội ngũ lãnh đạo nòng cốt định hướng chiến lược tại gzv Center.
           </p>
         </motion.div>
 
@@ -84,7 +84,7 @@ export default function DirectorsSection() {
                   <div className="relative mb-8 shrink-0">
                     <div className="relative w-40 h-40 rounded-full p-1 bg-white dark:bg-slate-800 shadow-xl overflow-hidden border border-slate-100">
                       <Image
-                        src={director.avatar_url || '/MSCers/default.webp'}
+                        src={director.avatar_url || '/gzvers/default.webp'}
                         alt={director.full_name}
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -112,7 +112,7 @@ export default function DirectorsSection() {
                     </div>
 
                     <div className="w-full mt-auto pt-4">
-                      <Link href={`/mscer/${director.slug}`} className="block">
+                      <Link href={`/gzver/${director.slug}`} className="block">
                         <Button className="w-full btn-primary rounded-lg h-12 text-sm font-semibold gap-2">
                           Xem Hồ Sơ <ArrowRight size={18} />
                         </Button>

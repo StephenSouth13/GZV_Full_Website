@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
               Chính sách bảo mật
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              MSC Center cam kết bảo vệ thông tin cá nhân của bạn một cách an toàn và minh bạch
+              gzv Center cam kết bảo vệ thông tin cá nhân của bạn một cách an toàn và minh bạch
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
               Cập nhật lần cuối: {new Date().toLocaleDateString('vi-VN')}
@@ -50,7 +50,7 @@ export default function PrivacyPolicyPage() {
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">1. Giới thiệu</h2>
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Trung tâm Kỹ năng Mekong (MSC Center) tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá nhân mà bạn chia sẻ với chúng tôi. Chính sách bảo mật này mô tả cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin của bạn khi bạn sử dụng dịch vụ của MSC Center.
+                  Trung tâm Kỹ năng Mekong (gzv Center) tôn trọng quyền riêng tư của bạn và cam kết bảo vệ thông tin cá nhân mà bạn chia sẻ với chúng tôi. Chính sách bảo mật này mô tả cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin của bạn khi bạn sử dụng dịch vụ của gzv Center.
                 </p>
               </motion.div>
 
@@ -120,12 +120,12 @@ export default function PrivacyPolicyPage() {
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">4. Chia sẻ thông tin</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
-                  <p className="mb-4">MSC Center cam kết không bán, cho thuê hoặc trao đổi thông tin cá nhân của bạn với bên thứ ba, trừ khi:</p>
+                  <p className="mb-4">gzv Center cam kết không bán, cho thuê hoặc trao đổi thông tin cá nhân của bạn với bên thứ ba, trừ khi:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Có sự đồng ý rõ ràng từ bạn</li>
                     <li>Cần thiết để cung cấp dịch vụ (ví dụ: đối tác thanh toán)</li>
                     <li>Theo yêu cầu của pháp luật</li>
-                    <li>Để bảo vệ quyền lợi của MSC Center và người dùng</li>
+                    <li>Để bảo vệ quyền lợi của gzv Center và người dùng</li>
                   </ul>
                 </div>
               </motion.div>
@@ -188,7 +188,7 @@ export default function PrivacyPolicyPage() {
                   Nếu bạn có bất kỳ câu hỏi nào về chính sách bảo mật này, vui lòng liên hệ:
                 </p>
                 <div className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <p><strong>Email:</strong> msc.edu.vn@gmail.com</p>
+                  <p><strong>Email:</strong> gzv.one@gmail.com</p>
                   <p><strong>Điện thoại:</strong> (+84) 329 381 489</p>
                   <p><strong>Địa chỉ:</strong> 279 Nguyễn Tri Phương, Phường Diên Hồng, TP.Hồ Chí Minh</p>
                 </div>

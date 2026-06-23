@@ -103,7 +103,7 @@ const HeroVideo = () => {
           >
             <div className="mx-auto w-96 h-32 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
               <div className="text-center">
-                <h1 className="text-4xl font-bold text-white mb-2">MSC CENTER</h1>
+                <h1 className="text-4xl font-bold text-white mb-2">gzv CENTER</h1>
                 <p className="text-lg text-gray-200">Life Long Learning</p>
               </div>
             </div>

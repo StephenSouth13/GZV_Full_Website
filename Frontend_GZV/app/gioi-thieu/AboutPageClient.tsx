@@ -33,7 +33,7 @@ const AboutPageClient = () => {
       src: "/gioi-thieu/4.webp",
       title: "Môi trường đào tạo",
       category: "Cơ sở vật chất",
-      description: "Không gian học tập hiện đại, đầy đủ tiện nghi tại MSC Center."
+      description: "Không gian học tập hiện đại, đầy đủ tiện nghi tại gzv Center."
     },
     {
       id: 2,
@@ -229,7 +229,7 @@ const AboutPageClient = () => {
               THƯ VIỆN HÌNH ẢNH
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Những khoảnh khắc đáng nhớ trong hành trình phát triển và đào tạo tại MSC Center
+              Những khoảnh khắc đáng nhớ trong hành trình phát triển và đào tạo tại gzv Center
             </p>
           </motion.div>
 

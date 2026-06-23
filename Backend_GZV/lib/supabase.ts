@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\lib\supabase.ts
+//D:\gzv\Backend_gzv\lib\supabase.ts
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -122,7 +122,7 @@ export interface Program {
   price?: string
 }
 
-export interface ProgramSchedule {
+export interface Progragzvhedule {
   id: string
   program_id: string
   start_date: string

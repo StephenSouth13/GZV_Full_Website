@@ -74,7 +74,7 @@ export default function BlogPage() {
       <PageBanner
         badge="Knowledge Hub"
         title="Chia sẻ & Tri thức"
-        subtitle="Nơi hội tụ kiến thức thực tiễn từ chuyên gia MSC Center, chia sẻ kinh nghiệm và phát triển chuyên môn."
+        subtitle="Nơi hội tụ kiến thức thực tiễn từ chuyên gia gzv Center, chia sẻ kinh nghiệm và phát triển chuyên môn."
         stats={[
           { value: `${allBlogPosts.length}+`, label: 'Bài viết chuyên môn' },
           { value: '10K+', label: 'Lượt đọc/tháng' },

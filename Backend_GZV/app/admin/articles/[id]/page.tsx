@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\app\admin\articles\[id]\page.tsx
+//D:\gzv\Backend_gzv\app\admin\articles\[id]\page.tsx
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -119,7 +119,7 @@ export default function ArticleDetailPage() {
             ))}
           </div>
 
-          {/* AUTHOR CARD (MENTOR/MSCER INFO) */}
+          {/* AUTHOR CARD (MENTOR/gzvER INFO) */}
           {author && (
             <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center border border-slate-100">
               <Avatar className="h-32 w-32 border-4 border-white shadow-xl">
@@ -132,7 +132,7 @@ export default function ArticleDetailPage() {
                   <Badge className="bg-orange-100 text-orange-600 border-none uppercase text-[10px]">{author.role}</Badge>
                 </div>
                 <p className="text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
-                  {author.bio || "Chuyên gia dẫn dắt tại MSC, đồng hành cùng thế hệ trẻ kiến tạo tương lai."}
+                  {author.bio || "Chuyên gia dẫn dắt tại gzv, đồng hành cùng thế hệ trẻ kiến tạo tương lai."}
                 </p>
                 <Link href={`/mentors/${author.slug}`}>
                   <Button variant="link" className="p-0 text-blue-600 h-fit text-lg">
@@ -148,7 +148,7 @@ export default function ArticleDetailPage() {
         <aside className="lg:col-span-3 space-y-10">
            <div className="p-6 bg-blue-600 rounded-2xl text-white space-y-4 shadow-xl shadow-blue-500/20">
               <h4 className="font-bold text-xl leading-tight">Sẵn sàng nâng tầm sự nghiệp?</h4>
-              <p className="text-sm opacity-90">Tham gia cộng đồng MSCer để nhận những chia sẻ độc quyền từ Mentors.</p>
+              <p className="text-sm opacity-90">Tham gia cộng đồng gzver để nhận những chia sẻ độc quyền từ Mentors.</p>
               <Button className="w-full bg-white text-blue-600 hover:bg-slate-100">Tham gia ngay</Button>
            </div>
            

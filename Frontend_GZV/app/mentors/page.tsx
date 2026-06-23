@@ -279,7 +279,7 @@ export default function MentorsPage() {
               </h2>
 
               <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium italic mb-12">
-                "Chương trình chiến lược nhằm phát hiện, bồi dưỡng và đồng hành cùng thế hệ lãnh đạo trẻ, định hướng trở thành những nhân sự cốt cán trong hệ sinh thái MSC Center."
+                "Chương trình chiến lược nhằm phát hiện, bồi dưỡng và đồng hành cùng thế hệ lãnh đạo trẻ, định hướng trở thành những nhân sự cốt cán trong hệ sinh thái gzv Center."
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

@@ -14,7 +14,7 @@ import {
   Lock, Unlock, Search, Edit, Tag, Type, Video, Film, Globe
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { MSCRichEditor } from '@/components/editor/MSCRichEditor'
+import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
 
 export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
   const [loading, setLoading] = useState(false)
@@ -105,7 +105,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             <div className="p-4 bg-blue-600 rounded-2xl shadow-lg text-white"><FolderPlus size={28} /></div>
             <div>
               <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Cấu hình dự án <span className="text-blue-400">Portfolio</span></DialogTitle>
-              <DialogDescription className="text-slate-400 font-medium text-[11px] uppercase tracking-[0.2em] mt-1">MSC Center CMS Professional v3.0</DialogDescription>
+              <DialogDescription className="text-slate-400 font-medium text-[11px] uppercase tracking-[0.2em] mt-1">gzv Center CMS Professional v3.0</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -145,7 +145,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             {/* RICH TEXT EDITOR - GOOGLE DOCS STYLE */}
             <div className="space-y-4">
               <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Type size={12}/> Nội dung chi tiết (Soạn thảo chuyên sâu)</Label>
-              <MSCRichEditor
+              <gzvRichEditor
                 value={formData.detailproject}
                 onChange={(html) => setFormData(prev => ({ ...prev, detailproject: html }))}
                 uploadFolder="projects"

@@ -1,4 +1,4 @@
--- Nâng cấp bảng profiles để chứa các trường chuyên sâu của MSC
+-- Nâng cấp bảng profiles để chứa các trường chuyên sâu của gzv
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS slug TEXT UNIQUE,
 ADD COLUMN IF NOT EXISTS bio TEXT,

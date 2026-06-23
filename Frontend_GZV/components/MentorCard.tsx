@@ -12,7 +12,7 @@ interface MentorCardProps {
   degree: string
   avatar: string
   specialties?: string[]
-  linkPrefix?: "mentors" | "mscer"
+  linkPrefix?: "mentors" | "gzver"
 }
 
 export default function MentorCard({

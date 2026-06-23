@@ -12,18 +12,18 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { api, MSCer } from "@/lib/api-supabase"
+import { api, gzver } from "@/lib/api-supabase"
 
-export default function MSCerDetailPage({ params }: { params: { slug: string } }) {
-  const [mscer, setMscer] = useState<MSCer | null>(null)
+export default function gzverDetailPage({ params }: { params: { slug: string } }) {
+  const [gzver, setgzver] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         setLoading(true)
-        const data = await api.getMSCerBySlug(params.slug)
-        if (data) setMscer(data)
+        const data = await api.getgzverBySlug(params.slug)
+        if (data) setgzver(data)
       } catch (error) {
         console.error("❌ Error:", error)
       } finally {
@@ -44,7 +44,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
     </div>
   )
 
-  if (!mscer) notFound()
+  if (!gzver) notFound()
 
   return (
     <div className="min-h-screen pt-24 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 pb-20">
@@ -55,9 +55,9 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Link href="/mscer" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 font-bold text-xs mb-12 transition-all group">
+          <Link href="/gzver" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 font-bold text-xs mb-12 transition-all group">
             <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" /> 
-            QUAY LẠI CỘNG ĐỒNG MSCERS
+            QUAY LẠI CỘNG ĐỒNG gzvERS
           </Link>
         </motion.div>
 
@@ -80,10 +80,10 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                       className="relative w-full h-full"
                     >
                       <Image 
-                        src={mscer.avatar_url || '/MSCers/default.webp'} 
+                        src={gzver.avatar_url || '/gzvers/default.webp'} 
                         fill 
                         className="rounded-full border-8 border-white/20 shadow-2xl object-cover" 
-                        alt={mscer.full_name} 
+                        alt={gzver.full_name} 
                       />
                     </motion.div>
                     <motion.div
@@ -93,16 +93,16 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                       <Star size={18} className="fill-white text-white" />
                     </motion.div>
                   </div>
-                  <h1 className="text-3xl font-black leading-tight mb-2 tracking-tighter">{mscer.full_name}</h1>
-                  <p className="font-bold text-blue-100 uppercase text-[10px] tracking-[0.2em] mb-8">{mscer.position}</p>
+                  <h1 className="text-3xl font-black leading-tight mb-2 tracking-tighter">{gzver.full_name}</h1>
+                  <p className="font-bold text-blue-100 uppercase text-[10px] tracking-[0.2em] mb-8">{gzver.position}</p>
                   
-                  {mscer.cv_url && (
+                  {gzver.cv_url && (
                     <motion.div
                       whileHover={{ y: -2 }}
                       whileTap={{ y: 0 }}
                     >
                       <Button asChild className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-2xl font-black h-14 shadow-xl border-none">
-                        <a href={mscer.cv_url} target="_blank" rel="noopener noreferrer">
+                        <a href={gzver.cv_url} target="_blank" rel="noopener noreferrer">
                           <FileText className="mr-2" size={18} /> TẢI HỒ SƠ NĂNG LỰC
                         </a>
                       </Button>
@@ -123,7 +123,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                   <Wrench size={14} className="text-blue-600" /> Kỹ năng chuyên môn
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {mscer.skills?.map((skill: string, idx: number) => (
+                  {gzver.skills?.map((skill: string, idx: number) => (
                     <motion.div
                       key={skill}
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -156,7 +156,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
               </h2>
               <div className="p-8 bg-blue-50/50 dark:bg-blue-900/20 rounded-[2rem] border-l-8 border-blue-600">
                 <p className="text-xl font-medium leading-relaxed italic text-slate-700 dark:text-slate-200">
-                  "{mscer.promotion_path}"
+                  "{gzver.promotion_path}"
                 </p>
               </div>
             </motion.section>
@@ -175,7 +175,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                   <Trophy /> Thành tựu nổi bật
                 </h3>
                 <div className="space-y-4">
-                  {mscer.achievements_list?.map((item: string, i: number) => (
+                  {gzver.achievements_list?.map((item: string, i: number) => (
                     <motion.div
                       key={i}
                       initial={{ opacity: 0, x: -20 }}
@@ -204,7 +204,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                 </h3>
                 <div className="p-8 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-[2.5rem] border-t-4 border-indigo-500 shadow-sm hover:shadow-md transition-all">
                   <p className="text-sm leading-loose font-medium text-slate-600 dark:text-slate-400 whitespace-pre-line">
-                    {mscer.background?.education}
+                    {gzver.background?.education}
                   </p>
                 </div>
               </motion.section>
@@ -222,7 +222,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                 <Briefcase /> Kinh nghiệm thực chiến
               </h2>
               <div className="text-slate-600 dark:text-slate-400 font-medium leading-[2] whitespace-pre-line">
-                {mscer.background?.experience}
+                {gzver.background?.experience}
               </div>
             </motion.section>
 
@@ -239,7 +239,7 @@ export default function MSCerDetailPage({ params }: { params: { slug: string } }
                 <Heart className="fill-white" /> Tác động xã hội
               </h2>
               <p className="text-lg font-medium leading-relaxed italic relative z-10 opacity-95">
-                {mscer.social_impact}
+                {gzver.social_impact}
               </p>
             </motion.section>
           </div>

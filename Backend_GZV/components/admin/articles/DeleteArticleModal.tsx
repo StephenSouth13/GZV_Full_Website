@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\components\admin\articles\DeleteArticleModal.tsx
+//D:\gzv\Backend_gzv\components\admin\articles\DeleteArticleModal.tsx
 "use client"
 
 import { useState } from 'react'
@@ -51,7 +51,7 @@ export function DeleteArticleModal({ article, isOpen, onClose, onDeleteArticle }
           <div className="mt-6 flex items-start gap-3 bg-amber-50 p-4 rounded-2xl border border-amber-100">
             <Info size={20} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-[13px] text-amber-700 leading-snug font-medium">
-              Hành động này sẽ gỡ bài viết khỏi cơ sở dữ liệu và website MSC. Bạn không thể khôi phục dữ liệu này sau khi đã xóa.
+              Hành động này sẽ gỡ bài viết khỏi cơ sở dữ liệu và website gzv. Bạn không thể khôi phục dữ liệu này sau khi đã xóa.
             </p>
           </div>
         </div>

@@ -115,12 +115,12 @@ export default function ContactForm() {
   const contactInfo = useMemo(() => ([
     { icon: MapPin, title: "Địa chỉ", lines: ["279 Nguyễn Tri Phương, Phường 5,", "Phường Diên Hồng,  TP. Hồ Chí Minh"] },
     { icon: Phone, title: "Điện thoại", lines: ["(+84) 329 381 489"], link: "tel:+84329381489" },
-    { icon: Mail, title: "Email", lines: ["msc.edu.vn@gmail.com"], link: "mailto:msc.edu.vn@gmail.com" },
+    { icon: Mail, title: "Email", lines: ["gzv.one@gmail.com"], link: "mailto:gzv.one@gmail.com" },
     { icon: Clock, title: "Giờ làm việc", lines: ["Thứ 2 - Thứ 7: 8:00 - 17:30", "Chủ nhật: Nghỉ"] },
   ]), [])
 
   const socialLinks = [
-    { icon: Facebook, name: "Facebook", href: "https://www.facebook.com/msc.edu.vn" },
+    { icon: Facebook, name: "Facebook", href: "https://www.facebook.com/gzv.one" },
     { icon: MessageSquare, name: "Zalo", href: "https://zalo.me/g/acumou501" },
   ]
 
@@ -252,7 +252,7 @@ export default function ContactForm() {
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Liên hệ ngay"
-        title="Kết nối với MSC"
+        title="Kết nối với gzv"
         subtitle="Chúng tôi luôn sẵn sàng lắng nghe và tư vấn. Hãy để lại lời nhắn hoặc liên hệ trực tiếp để bắt đầu hành trình phát triển của bạn."
         stats={[
           { value: '+84', label: 'Điện thoại' },
@@ -275,7 +275,7 @@ export default function ContactForm() {
               <Card className="shadow-2xl border-0 rounded-2xl p-4 md:p-8">
                 <CardHeader>
                   <CardTitle className="text-3xl font-bold text-gray-900">Gửi lời nhắn cho chúng tôi</CardTitle>
-                  <p className="text-gray-500 mt-2 text-sm">Điền thông tin bên dưới, đội ngũ MSC sẽ phản hồi trong vòng 24 giờ làm việc.</p>
+                  <p className="text-gray-500 mt-2 text-sm">Điền thông tin bên dưới, đội ngũ gzv sẽ phản hồi trong vòng 24 giờ làm việc.</p>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -374,14 +374,14 @@ export default function ContactForm() {
           >
             <div className="w-full h-96 bg-gray-200 rounded-2xl overflow-hidden shadow-lg">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3547.0824622742025!2d106.66582407451699!3d10.761148759476423!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752fe01ccb37b3%3A0xb9b5223950251041!2sMSC%20Center!5e1!3m2!1svi!2s!4v1754099890700!5m2!1svi!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3547.0824622742025!2d106.66582407451699!3d10.761148759476423!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752fe01ccb37b3%3A0xb9b5223950251041!2sgzv%20Center!5e1!3m2!1svi!2s!4v1754099890700!5m2!1svi!2s"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Vị trí Trung tâm MSC"
+                title="Vị trí Trung tâm gzv"
               />
             </div>
           </motion.div>

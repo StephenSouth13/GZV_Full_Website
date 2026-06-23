@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\components\admin\articles\ArticlesTable.tsx
+//D:\gzv\Backend_gzv\components\admin\articles\ArticlesTable.tsx
 "use client"
 
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,7 @@ export function ArticlesTable({ articles, onDeleteArticle, onEditArticle }: any)
                     </Avatar>
                   ))}
                   {(!article.authors_details || article.authors_details.length === 0) && (
-                    <div className="text-[10px] font-bold text-slate-300 italic">MSC Team</div>
+                    <div className="text-[10px] font-bold text-slate-300 italic">gzv Team</div>
                   )}
                 </div>
               </TableCell>

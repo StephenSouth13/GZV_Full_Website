@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Loader2, Edit3, Upload, CheckCircle2, Globe } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { MSCRichEditor } from '@/components/editor/MSCRichEditor'
+import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
 
 export function EditArticleModal({ open, onClose, article, onUpdateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -80,7 +80,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20"><Edit3 size={22} /></div>
             <div>
-              <h2 className="font-black text-lg leading-none uppercase tracking-tighter">MSC Publisher Pro</h2>
+              <h2 className="font-black text-lg leading-none uppercase tracking-tighter">gzv Publisher Pro</h2>
               <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mt-1"><Globe size={10}/> ĐANG CHỈNH SỬA CÔNG KHAI</p>
             </div>
           </div>
@@ -98,7 +98,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
             <Input className="text-5xl font-black py-16 border-none bg-transparent focus-visible:ring-0 placeholder:text-slate-100" placeholder="Tiêu đề bài viết..." value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
             
             <div className="space-y-4">
-              <MSCRichEditor
+              <gzvRichEditor
                 value={formData.content || ''}
                 onChange={(html) => setFormData({ ...formData, content: html })}
                 placeholder="Chỉnh sửa nội dung bài viết… (định dạng giống Google Docs)"

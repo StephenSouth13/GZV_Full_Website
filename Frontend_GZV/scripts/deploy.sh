@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# MSC Center Website Deployment Script
+# gzv Center Website Deployment Script
 # This script handles deployment to various environments
 
 set -e  # Exit on any error
@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_NAME="msc-center-website"
-DOCKER_IMAGE="msc-center"
+PROJECT_NAME="gzv-center-website"
+DOCKER_IMAGE="gzv-center"
 DOCKER_REGISTRY="your-registry.com"
 
 # Function to print colored output
@@ -125,11 +125,11 @@ deploy_staging() {
     
     # Deploy to staging server (customize based on your setup)
     if command_exists rsync; then
-        rsync -avz --delete .next/ staging-server:/var/www/msc-center/
-        rsync -avz --delete public/ staging-server:/var/www/msc-center/public/
+        rsync -avz --delete .next/ staging-server:/var/www/gzv-center/
+        rsync -avz --delete public/ staging-server:/var/www/gzv-center/public/
         
         # Restart staging server
-        ssh staging-server "pm2 restart msc-center"
+        ssh staging-server "pm2 restart gzv-center"
         
         print_success "Deployed to staging environment"
         print_status "Staging URL:  "
@@ -159,21 +159,21 @@ deploy_production() {
     
     # Create backup of current production
     print_status "Creating backup of current production..."
-    ssh production-server "tar -czf /backups/msc-center-$(date +%Y%m%d-%H%M%S).tar.gz /var/www/msc-center/"
+    ssh production-server "tar -czf /backups/gzv-center-$(date +%Y%m%d-%H%M%S).tar.gz /var/www/gzv-center/"
     
     # Deploy to production server
     if command_exists rsync; then
-        rsync -avz --delete .next/ production-server:/var/www/msc-center/
-        rsync -avz --delete public/ production-server:/var/www/msc-center/public/
+        rsync -avz --delete .next/ production-server:/var/www/gzv-center/
+        rsync -avz --delete public/ production-server:/var/www/gzv-center/public/
         
         # Restart production server
-        ssh production-server "pm2 restart msc-center"
+        ssh production-server "pm2 restart gzv-center"
         
         # Run health check
         sleep 10
-        if curl -f https://msc.edu.vn/api/health > /dev/null 2>&1; then
+        if curl -f https://gzv.one/api/health > /dev/null 2>&1; then
             print_success "Deployed to production environment successfully"
-            print_status "Production URL: https://msc.edu.vn"
+            print_status "Production URL: https://gzv.one"
         else
             print_error "Health check failed. Rolling back..."
             # Rollback logic here
@@ -357,7 +357,7 @@ main() {
     # Display deployment info
     echo -e "${BLUE}"
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                    MSC Center Website                        ║"
+    echo "║                    gzv Center Website                        ║"
     echo "║                   Deployment Script v1.0                    ║"
     echo "║                                                              ║"
     echo "║  Environment: $(printf "%-43s" "$ENVIRONMENT")║"

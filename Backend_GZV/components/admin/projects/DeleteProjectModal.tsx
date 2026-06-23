@@ -1,4 +1,4 @@
-//D:\MSC\Backend_MSC\components\admin\projects\DeleteProjectModal.tsx
+//D:\gzv\Backend_gzv\components\admin\projects\DeleteProjectModal.tsx
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
