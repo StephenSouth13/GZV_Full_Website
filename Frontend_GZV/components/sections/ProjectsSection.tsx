@@ -17,8 +17,9 @@ const ProjectsSection = () => {
         setLoading(true)
         const projectsData = await api.getProjects()
         // Chỉ lấy các dự án có featured === true
-        const featuredOnly = projectsData.filter((p: any) => p.featured === true)
-        setProjects(featuredOnly)
+        const featuredOnly = projectsData.filter((p: any) => p.featured === true);
+const displayProjects = featuredOnly.length > 0 ? featuredOnly : projectsData.slice(0, 6);
+setProjects(displayProjects);
       } catch (error) {
         console.error('❌ ProjectsSection Error:', error)
         setProjects([]) 

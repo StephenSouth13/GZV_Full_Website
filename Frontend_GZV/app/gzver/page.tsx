@@ -17,7 +17,7 @@ export default function gzverPage() {
     const fetchgzvers = async () => {
       try {
         setLoading(true)
-        const data = await api.getgzver()
+        const data = await api.getGzvers()
         // Sắp xếp theo order để đảm bảo thứ tự như CMS
         setgzvers(data.sort((a, b) => (a.order || 0) - (b.order || 0)))
       } catch (error) {

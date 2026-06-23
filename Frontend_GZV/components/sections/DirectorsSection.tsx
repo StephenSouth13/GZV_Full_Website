@@ -18,7 +18,7 @@ export default function DirectorsSection() {
       try {
         setLoading(true)
         // Lấy toàn bộ dữ liệu gzvers đã được sắp xếp order từ API
-        const data = await api.getgzver()
+        const data = await api.getGzvers()
         
         /**
          * LOGIC LỌC TỰ ĐỘNG:

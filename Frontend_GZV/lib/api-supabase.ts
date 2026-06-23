@@ -2,19 +2,22 @@
 
 import { createBrowserClient } from '@supabase/ssr'
 
-// --- CẤU HÌNH BIẾN MÔI TRƯỜNG ---
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-/**
- * Khởi tạo Supabase Client cho Browser (Client Component)
- */
-export function createClient() {
-  return createBrowserClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error("❌ CẢNH BÁO: Thiếu biến môi trường Supabase!");
 }
 
-export const supabase = createClient()
+/**
+ * Khởi tạo Supabase Client cho Browser
+ */
+export function createClient() {
+  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+}
 
+// Chỉ export 1 biến duy nhất này để dùng chung toàn bộ dự án
+export const supabase = createClient()
 /**
  * // // Nguồn: HÀM HELPER QUAN TRỌNG NHẤT
  * Chuyển đổi đường dẫn file trong Storage thành URL công khai.
@@ -281,7 +284,7 @@ export const api = {
   /**
    * Lấy danh sách gzver
    */
-  getgzver: async (): Promise<gzver[]> => {
+  getGzvers: async (): Promise<gzver[]> => {
     try {
       const { data, error } = await supabase
         .from('gzvers')
@@ -289,7 +292,7 @@ export const api = {
         .eq('is_active', true)
         .order('order', { ascending: true });
       if (error) throw error;
-      return (data || []).map(m => ({ ...m, avatar_url: getPublicUrl(m.avatar_url) }));
+      return (data || []).map(m => ({ ...m, avatar_url: getPublicUrl(m.avatar_url || m.image) }));
     } catch (error) {
       console.error("❌ Error fetching gzvers:", error);
       return [];
@@ -350,11 +353,14 @@ export const api = {
         .from('authors')
         .select('id, full_name, avatar_url, slug, title, position'); 
 
-      const mappedProjects = projects.map((p: any) => {
+      // ... (các dòng trên giữ nguyên)
+      const mappedProjects = (projects || []).map((p: any) => {
         const matched = authorsData?.filter(a => p.author_ids?.includes(a.id)) || [];
         return {
           ...p,
-          image: getPublicUrl(p.image),
+          // SỬA TẠI ĐÂY: Ưu tiên thumbnail_url, nếu không có mới lấy image
+          image: getPublicUrl(p.thumbnail_url || p.image),
+          
           project_authors: matched.map(a => ({
             name: a.full_name,
             avatar: getPublicUrl(a.avatar_url),
@@ -363,6 +369,7 @@ export const api = {
           }))
         };
       });
+// ... (các dòng dưới giữ nguyên)
 
       return mappedProjects as Project[];
     } catch (error) {
