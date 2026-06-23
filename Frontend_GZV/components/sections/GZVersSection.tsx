@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { supabase, gzver } from "@/lib/api-supabase"
 
-const gzversSection = () => {
+const GZVersSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [gzvers, setgzvers] = useState<gzver[]>([])
   const [loading, setLoading] = useState(true)
@@ -117,4 +117,4 @@ const gzversSection = () => {
     </section>
   )
 }
-export default gzversSection
+export default GZVersSection
