@@ -66,7 +66,7 @@ const GZVersSection = () => {
           viewport={{ once: true }}
         >
            <h2 className="section-title mb-6">
-            Đội Ngũ gzvers
+            Đội Ngũ GZVer
            </h2>
            <p className="section-subtitle text-gray-500 dark:text-gray-400 italic">
             Hành trình trưởng thành từ gzv Center

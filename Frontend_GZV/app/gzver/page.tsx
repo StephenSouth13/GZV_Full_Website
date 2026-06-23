@@ -33,7 +33,7 @@ export default function gzverPage() {
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Khám phá đội ngũ"
-        title="Đội ngũ gzvers"
+        title="Đội Ngũ GZVer"
         subtitle="Kết nối cùng chúng tôi thông qua các chương trình đào tạo và lộ trình phát triển năng lực chuyên sâu."
         stats={[
           { value: `${gzvers.length}+`, label: 'Chuyên gia' },
