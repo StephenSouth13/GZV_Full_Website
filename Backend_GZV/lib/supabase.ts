@@ -39,6 +39,35 @@ export interface Author {
   website_url?: string
   created_at?: string
 }
+// --- Interface cho GZVers (Bổ sung vào file này) ---
+export interface Gzver {
+  id: string
+  full_name: string
+  slug: string
+  company: string
+  position: string
+  avatar_url: string
+  cv_url?: string
+  achievement_summary: string
+  testimonial: string
+  graduation_year: string
+  promotion_path: string
+  social_impact: string
+  course_taken: string
+  skills: string[]
+  achievements_list: string[]
+  mentoring_content: string
+  background: {
+    education: string
+    previous_role: string
+    experience: string
+  }
+  is_active: boolean
+  is_director: boolean
+  order: number
+  created_at?: string
+  updated_at?: string
+}
 export interface BlogPost {
   id: number
   slug: string
