@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
     const folder = (formData.get('folder') as string) || 'uploads'
+    const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
 
     if (!files || files.length === 0) {
       return NextResponse.json(
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await uploadFiles(files, folder)
+    const result = await uploadFiles(files, folder, accessToken || undefined)
 
     return NextResponse.json({
       success: result.success,

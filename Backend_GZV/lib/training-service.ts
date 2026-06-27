@@ -1,4 +1,4 @@
-import { supabase, Program, Progragzvhedule } from './supabase'
+import { supabase, Program } from './supabase'
 
 export class TrainingService {
   static async getAllPrograms(): Promise<Program[]> {

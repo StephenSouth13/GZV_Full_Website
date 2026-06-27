@@ -1,4 +1,19 @@
-import { supabase } from './supabase'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+function createStorageClient(accessToken?: string) {
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: accessToken && !process.env.SUPABASE_SERVICE_ROLE_KEY
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : undefined,
+  })
+}
 
 export interface UploadedFile {
   id: string
@@ -18,7 +33,7 @@ export interface StorageResponse {
   message?: string
 }
 
-const BUCKET_NAME = 'content'
+const BUCKET_NAME = 'media'
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
@@ -27,9 +42,11 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
  */
 export async function uploadFile(
   file: File,
-  folder: string = 'uploads'
+  folder: string = 'uploads',
+  accessToken?: string
 ): Promise<StorageResponse> {
   try {
+    const supabase = createStorageClient(accessToken)
     // Validate file
     if (!file) {
       return {
@@ -84,6 +101,7 @@ export async function uploadFile(
       .from('media_files')
       .insert({
         file_name: file.name,
+        file_type: file.type,
         file_size_bytes: file.size,
         mime_type: file.type,
         file_url: publicUrlData.publicUrl,
@@ -125,7 +143,8 @@ export async function uploadFile(
  */
 export async function uploadFiles(
   files: File[],
-  folder: string = 'uploads'
+  folder: string = 'uploads',
+  accessToken?: string
 ): Promise<{
   success: boolean
   successful: UploadedFile[]
@@ -135,7 +154,7 @@ export async function uploadFiles(
   const failed: Array<{ filename: string; error: string }> = []
 
   for (const file of files) {
-    const result = await uploadFile(file, folder)
+    const result = await uploadFile(file, folder, accessToken)
     if (result.success && result.data) {
       successful.push(result.data)
     } else {
@@ -157,6 +176,7 @@ export async function uploadFiles(
  * Get public URL for a file
  */
 export function getPublicUrl(path: string): string {
+  const supabase = createStorageClient()
   const { data } = supabase.storage
     .from(BUCKET_NAME)
     .getPublicUrl(path)
@@ -168,6 +188,7 @@ export function getPublicUrl(path: string): string {
  */
 export async function deleteFile(path: string): Promise<StorageResponse> {
   try {
+    const supabase = createStorageClient()
     const { error } = await supabase.storage
       .from(BUCKET_NAME)
       .remove([path])
@@ -203,6 +224,7 @@ export async function deleteFile(path: string): Promise<StorageResponse> {
  */
 export async function listFiles(folder: string = 'uploads'): Promise<StorageResponse> {
   try {
+    const supabase = createStorageClient()
     const { data, error } = await supabase.storage
       .from(BUCKET_NAME)
       .list(folder)
@@ -246,6 +268,7 @@ export async function getMediaFiles(options?: {
   file_type?: string
 }): Promise<StorageResponse> {
   try {
+    const supabase = createStorageClient()
     let query = supabase
       .from('media_files')
       .select('*', { count: 'exact' })

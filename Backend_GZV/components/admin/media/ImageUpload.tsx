@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { supabase } from '@/lib/supabase'
 import {
   Dialog,
   DialogContent,
@@ -149,6 +150,10 @@ export function ImageUpload({ isOpen, onClose, onUploadComplete, currentFolder =
 
       // Start upload
       xhr.open('POST', '/api/images/upload')
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${session.access_token}`)
+      }
       xhr.send(formData)
 
     } catch (error) {

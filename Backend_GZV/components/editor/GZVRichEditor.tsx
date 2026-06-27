@@ -61,7 +61,7 @@ function ToolButton({
 
 const Divider = () => <span className="w-px h-6 bg-slate-200 mx-1 self-center" />
 
-export function gzvRichEditor({
+export function GZVRichEditor({
   value, onChange, placeholder = 'Bắt đầu viết câu chuyện của bạn…',
   minHeight = 720, uploadFolder = 'articles',
 }: Props) {
@@ -306,4 +306,4 @@ export function gzvRichEditor({
   )
 }
 
-export default gzvRichEditor
+export default GZVRichEditor

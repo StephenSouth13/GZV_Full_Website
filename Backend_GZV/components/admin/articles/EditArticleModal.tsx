@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Loader2, Edit3, Upload, CheckCircle2, Globe } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
+import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 
 export function EditArticleModal({ open, onClose, article, onUpdateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -24,7 +24,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
         ...article,
         author_ids: article.author_ids || (article.author_id ? [article.author_id] : [])
       })
-      supabase.from('mentors').select('id, full_name, avatar_url').then(({ data }) => data && setMembers(data))
+      supabase.from('authors').select('id, full_name, avatar_url, title').order('full_name', { ascending: true }).then(({ data }) => data && setMembers(data))
     }
   }, [article, open])
 
@@ -98,7 +98,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
             <Input className="text-5xl font-black py-16 border-none bg-transparent focus-visible:ring-0 placeholder:text-slate-100" placeholder="Tiêu đề bài viết..." value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
             
             <div className="space-y-4">
-              <gzvRichEditor
+              <GZVRichEditor
                 value={formData.content || ''}
                 onChange={(html) => setFormData({ ...formData, content: html })}
                 placeholder="Chỉnh sửa nội dung bài viết… (định dạng giống Google Docs)"

@@ -5,7 +5,7 @@ import Image from "next/image"
 import { ChevronLeft, ChevronRight, Star, Award, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { supabase, gzver } from "@/lib/api-supabase"
+import { api, gzver } from "@/lib/api-supabase"
 
 const GZVersSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -16,12 +16,7 @@ const GZVersSection = () => {
     const fetchgzvers = async () => {
       try {
         setLoading(true)
-        const { data, error } = await supabase
-          .from('gzvers')
-          .select('*')
-          .eq('is_active', true)
-          .order('order', { ascending: true })
-        if (error) throw error
+        const data = await api.getGzvers()
         setgzvers(data || [])
       } catch (err) {
         console.error(err)

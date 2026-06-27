@@ -14,7 +14,7 @@ import {
   Lock, Unlock, Search, Edit, Tag, Type, Video, Film, Globe
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
+import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 
 export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
   const [loading, setLoading] = useState(false)
@@ -145,7 +145,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             {/* RICH TEXT EDITOR - GOOGLE DOCS STYLE */}
             <div className="space-y-4">
               <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Type size={12}/> Nội dung chi tiết (Soạn thảo chuyên sâu)</Label>
-              <gzvRichEditor
+              <GZVRichEditor
                 value={formData.detailproject}
                 onChange={(html) => setFormData(prev => ({ ...prev, detailproject: html }))}
                 uploadFolder="projects"

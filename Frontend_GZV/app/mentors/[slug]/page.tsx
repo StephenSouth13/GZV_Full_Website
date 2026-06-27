@@ -48,18 +48,15 @@ export default function MentorDetailPage({ params }: { params: { slug: string } 
   useEffect(() => {
     const loadData = async () => {
       try {
-        // First try from local data
-        const localMentor = mentorDetails.find(m => m.slug === params.slug)
-        if (localMentor) {
-          setMentor(convertToMentor(localMentor))
-          setLoading(false)
-          return
-        }
-
-        // Then try Supabase
         const data = await api.getMentorBySlug(params.slug)
         if (data) {
           setMentor(data)
+          return
+        }
+
+        const localMentor = mentorDetails.find(m => m.slug === params.slug)
+        if (localMentor) {
+          setMentor(convertToMentor(localMentor))
         }
       } catch (error) {
         console.error("Error:", error)

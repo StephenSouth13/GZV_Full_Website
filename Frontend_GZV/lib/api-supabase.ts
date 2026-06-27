@@ -25,23 +25,42 @@
    */
   const getPublicUrl = (path: string | null | undefined): string => {
     // 1. Nếu không có path, trả về ảnh placeholder
-    if (!path) return '/placeholder-avatar.jpg'; 
+    if (!path) return '/placeholder-avatar.jpg';
 
     // 2. Nếu đã là link tuyệt đối (http/https), giữ nguyên
-    if (path.startsWith('http')) return path;
+    const trimmed = String(path).trim();
+    if (!trimmed) return '/placeholder-avatar.jpg';
+    if (/^(https?:|data:|blob:)/i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith('/')) return trimmed;
 
     // 3. Nếu là đường dẫn nội bộ nhưng thiếu dấu gạch chéo, thêm vào
     // Đây là cái fix lỗi cho "authors/..." -> "/authors/..."
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const normalizedPath = trimmed.replace(/^media\//, '').replace(/^\/+/, '');
 
     // 4. Nếu dùng Supabase Storage, lấy public URL
-    const { data } = supabase.storage.from('media').getPublicUrl(normalizedPath.replace(/^\//, ''));
+    const { data } = supabase.storage.from('media').getPublicUrl(normalizedPath);
     return data.publicUrl;
+  };
+
+  const tiptapNodeToText = (node: any): string => {
+    if (!node) return '';
+    if (typeof node === 'string') return node;
+    if (Array.isArray(node)) return node.map(tiptapNodeToText).filter(Boolean).join('\n\n');
+    if (node.type === 'text') return node.text || '';
+
+    const children = Array.isArray(node.content) ? node.content.map(tiptapNodeToText).filter(Boolean) : [];
+    if (node.type === 'bulletList' || node.type === 'orderedList') return children.join('\n');
+    if (node.type === 'listItem') return children.length ? `- ${children.join(' ')}` : '';
+    if (node.type === 'heading') return children.join(' ');
+    if (node.type === 'paragraph') return children.join('');
+    if (node.type === 'hardBreak') return '\n';
+    return children.join('\n\n');
   };
 
   const getProgramDetailedContent = (program: any): string => {
     if (typeof program.detailed_content === 'string') return program.detailed_content;
     if (typeof program.content === 'string') return program.content;
+    if (program.content && typeof program.content === 'object') return tiptapNodeToText(program.content);
     return '';
   };
 
@@ -406,7 +425,7 @@
             title: a.title || a.position
           })) || [];
         }
-        return { ...project, image: getPublicUrl(project.image) } as Project;
+        return { ...project, image: getPublicUrl(project.thumbnail_url || project.image) } as Project;
       } catch (error) {
         return null;
       }
@@ -425,7 +444,7 @@
           authors: post.authors_details || [],
           publish_date: post.publish_date || post.created_at,
           read_time: post.read_time || '5 phút đọc',
-          image: getPublicUrl(post.image)
+          image: getPublicUrl(post.thumbnail_url || post.image)
         }));
       } catch (error) {
         return [];
@@ -471,7 +490,7 @@
           authors: post.authors_details || [],
           publish_date: post.publish_date || post.created_at,
           read_time: post.read_time || '5 phút đọc',
-          image: getPublicUrl(post.image)
+          image: getPublicUrl(post.thumbnail_url || post.image)
         }));
       } catch (error) {
         console.error("❌ Error fetching posts by category:", error);
@@ -488,7 +507,7 @@
           authors: data.authors_details || [],
           publish_date: data.publish_date || data.created_at,
           read_time: data.read_time || '5 phút đọc',
-          image: getPublicUrl(data.image)
+          image: getPublicUrl(data.thumbnail_url || data.image)
         } as BlogPost;
       } catch (error) {
         return null;
@@ -510,7 +529,7 @@
         if (error) throw error;
         return (data || []).map((p: any) => ({
           ...p,
-          image: getPublicUrl(p.thumbnail_url),
+          image: getPublicUrl(p.thumbnail_url || p.image),
           detailed_content: getProgramDetailedContent(p),
           highlights: getProgramHighlights(p),
           duration: p.estimated_duration ?? '',

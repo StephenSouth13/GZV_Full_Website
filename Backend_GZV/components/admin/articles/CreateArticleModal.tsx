@@ -15,7 +15,7 @@ import {
   Sparkles, Layout, UserCheck, Type
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { gzvRichEditor } from '@/components/editor/gzvRichEditor'
+import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 
 export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -36,7 +36,7 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
 
   useEffect(() => {
     if (open) {
-      supabase.from('mentors').select('id, full_name, avatar_url, role')
+      supabase.from('authors').select('id, full_name, avatar_url, title').order('full_name', { ascending: true })
         .then(({ data }) => data && setMembers(data))
     }
   }, [open])
@@ -168,7 +168,7 @@ const handleSubmit = async () => {
               </div>
 
               {/* Google Docs–style Rich Editor */}
-              <gzvRichEditor
+              <GZVRichEditor
                 value={formData.content}
                 onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
                 placeholder="Bắt đầu câu chuyện của bạn… (định dạng giống Google Docs)"
@@ -238,7 +238,7 @@ const handleSubmit = async () => {
                     <div className="flex flex-col">
                       <span className="text-xs font-black leading-none">{m.full_name}</span>
                       <span className={`text-[9px] uppercase font-bold ${formData.author_ids.includes(m.id) ? 'text-blue-100' : 'text-slate-400'}`}>
-                        {m.role}
+                        {m.title || 'Tác giả'}
                       </span>
                     </div>
                   </div>

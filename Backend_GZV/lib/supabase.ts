@@ -151,7 +151,7 @@ export interface Program {
   price?: string
 }
 
-export interface Progragzvhedule {
+export interface ProgramSchedule {
   id: string
   program_id: string
   start_date: string
