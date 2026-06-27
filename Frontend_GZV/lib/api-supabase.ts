@@ -80,6 +80,47 @@
     return [];
   };
 
+  const toStringList = (value: any): string[] => {
+    if (Array.isArray(value)) return value.filter(Boolean).map(String);
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return [];
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean).map(String);
+      } catch {
+        // Plain text below.
+      }
+      return trimmed.split('\n').map(item => item.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  const toText = (value: any): string => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) return value.filter(Boolean).map(String).join(', ');
+    if (typeof value === 'object') {
+      return Object.values(value).flatMap(toStringList).filter(Boolean).join(', ');
+    }
+    return String(value);
+  };
+
+  const normalizeMentor = (mentor: any): Mentor => ({
+    ...mentor,
+    avatar_url: getPublicUrl(mentor.avatar_url),
+    organizations: toText(mentor.organizations),
+    specialties: toStringList(mentor.specialties),
+    practical_projects: toStringList(mentor.practical_projects),
+    research_projects: toStringList(mentor.research_projects),
+    awards: toStringList(mentor.awards),
+    tech_business_achievements: toStringList(mentor.tech_business_achievements),
+    background: {
+      education: toText(mentor.background?.education),
+      experience: toText(mentor.background?.experience),
+    },
+  }) as Mentor;
+
   // ==========================================
   // --- ĐỊNH NGHĨA TYPES (Data Models) ---
   // ==========================================
@@ -336,7 +377,7 @@
           .eq('is_active', true)
           .order('order', { ascending: true });
         if (error) throw error;
-        return (data || []).map(m => ({ ...m, avatar_url: getPublicUrl(m.avatar_url) }));
+        return (data || []).map(normalizeMentor);
       } catch (error) {
         console.error("❌ Error fetching Mentors:", error);
         return [];
@@ -354,7 +395,7 @@
           .eq('slug', slug)
           .single();
         if (error || !data) return null;
-        return { ...data, avatar_url: getPublicUrl(data.avatar_url) } as Mentor;
+        return normalizeMentor(data);
       } catch (error) {
         console.error("❌ Error fetching Mentor detail:", error);
         return null;

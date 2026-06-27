@@ -1,9 +1,48 @@
 -- Frontend/backend sync fixes for public pages.
 -- Safe to run multiple times in Supabase SQL editor.
 
-alter table public.programs
+alter table public.courses
+  add column if not exists short_description text,
   add column if not exists detailed_content text,
-  add column if not exists highlights jsonb default '[]'::jsonb;
+  add column if not exists highlights jsonb default '[]'::jsonb,
+  add column if not exists estimated_duration text,
+  add column if not exists total_lessons integer default 0,
+  add column if not exists price_original numeric,
+  add column if not exists price_sale numeric,
+  add column if not exists theme_color text default '#0077B6',
+  add column if not exists is_featured boolean default false,
+  add column if not exists updated_at timestamptz default now();
+
+create or replace view public.programs as
+select
+  id,
+  title,
+  slug,
+  description,
+  video_url,
+  modules,
+  level,
+  price,
+  featured,
+  status,
+  thumbnail_url,
+  created_at,
+  thumbnail_url as image,
+  modules as content,
+  short_description,
+  detailed_content,
+  highlights,
+  estimated_duration,
+  total_lessons,
+  price_original,
+  price_sale,
+  theme_color,
+  coalesce(is_featured, featured, false) as is_featured,
+  updated_at
+from public.courses
+where status = 'published';
+
+grant select on public.programs to anon, authenticated;
 
 alter table public.articles
   add column if not exists author_ids uuid[] default '{}'::uuid[];
@@ -19,18 +58,18 @@ select
   a.featured,
   a.status,
   a.thumbnail_url,
+  a.published_at,
+  a.created_at,
+  a.author_id,
+  first_author.full_name as author_name,
+  first_author.avatar_url as author_avatar,
   a.image,
   coalesce(a.thumbnail_url, a.image) as display_image,
-  a.published_at,
   a.published_at as publish_date,
-  a.created_at,
   a.updated_at,
   a.views,
   a.likes,
-  a.author_id,
   a.author_ids,
-  first_author.full_name as author_name,
-  first_author.avatar_url as author_avatar,
   coalesce(
     jsonb_agg(
       distinct jsonb_build_object(
