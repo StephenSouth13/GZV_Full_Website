@@ -44,8 +44,8 @@ const Footer = () => {
             <FacebookSDKLoader />
 
             {/* Nội dung chính */}
-            <div className="relative z-10 container mx-auto px-4 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="relative z-10 container mx-auto px-4 py-10 sm:py-14 lg:py-16">
+                <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-12">
 
                     {/* Logo + giới thiệu */}
                     
@@ -54,15 +54,15 @@ const Footer = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                     viewport={{ once: true }}
-                    className="lg:col-span-2"
+                    className="min-w-0 lg:col-span-2"
                     >
-                    <Link href="/" className="inline-block mb-6 w-full">
-                        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-lg w-full max-w-[280px] sm:max-w-[360px] md:max-w-[420px]">
+                    <Link href="/" className="mb-5 inline-block w-auto">
+                        <div className="w-full max-w-[180px] rounded-xl bg-white p-3 shadow-lg sm:max-w-[220px] sm:p-4">
                         <Image
                             src="/logo.webp"
                             alt="GZV"
-                            width={450}
-                            height={150}
+                            width={260}
+                            height={90}
                             className="w-full h-auto object-contain"
                             priority
                         />
@@ -74,7 +74,7 @@ const Footer = () => {
                     </p>
 
                     {/* Facebook */}
-                    <div className="w-full max-w-[340px] rounded-xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-sm">
+                    <div className="w-full max-w-[320px] rounded-xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-sm">
                         <div
                         className="fb-page"
                         data-href="https://www.facebook.com/gzv.one"
@@ -98,20 +98,20 @@ const Footer = () => {
                     >
                         <h3 className="text-xl font-bold mb-6 font-serif text-white">Thông tin liên hệ</h3>
                         <div className="space-y-4">
-                            <div className="flex items-start space-x-4">
-                                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                                <div className="w-10 h-10 shrink-0 bg-white/10 rounded-lg flex items-center justify-center">
                                     <MapPin className="h-5 w-5 text-white" />
                                 </div>
                                 <p className="text-white/80">279 Nguyễn Tri Phương, Phường Diên Hồng, TP.Hồ Chí Minh</p>
                             </div>
-                            <div className="flex items-center space-x-4">
-                                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 shrink-0 bg-white/10 rounded-lg flex items-center justify-center">
                                     <Phone className="h-5 w-5 text-white" />
                                 </div>
                                 <a href="tel:+84329381489" className="text-white/80 hover:text-white">Điện Thoại: (+84) 329 381 489</a>
                             </div>
-                            <div className="flex items-center space-x-4">
-                                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+                            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                                <div className="w-10 h-10 shrink-0 bg-white/10 rounded-lg flex items-center justify-center">
                                     <Mail className="h-5 w-5 text-white" />
                                 </div>
                                 <a href="mailto:gzv.one@gmail.com" className="text-white/80 hover:text-white">Email: gzv.one@gmail.com</a>
@@ -130,20 +130,20 @@ const Footer = () => {
                         <p className="text-white/80 mb-4">Đăng ký để nhận thông tin về các khóa học và sự kiện mới nhất.</p>
 
                         <form onSubmit={handleNewsletterSubmit} className="mb-8">
-                            <div className="flex">
+                            <div className="flex min-w-0">
                                 <Input
                                     type="email"
                                     placeholder="Email của bạn"
-                                    className="rounded-r-none bg-white/20 border-white/20 text-white placeholder-white/60 focus:ring-white focus:border-white"
+                                    className="min-w-0 rounded-r-none bg-white/20 border-white/20 text-white placeholder-white/60 focus:ring-white focus:border-white"
                                     required
                                 />
-                                <Button type="submit" className="rounded-l-none bg-white text-[#095095] px-4 hover:bg-gray-200">
+                                <Button type="submit" className="shrink-0 rounded-l-none bg-white text-[#095095] px-4 hover:bg-gray-200">
                                     <Send className="h-4 w-4" />
                                 </Button>
                             </div>
                         </form>
 
-                        <div className="flex space-x-4">
+                        <div className="flex gap-3 sm:gap-4">
                             <Link href="https://www.facebook.com/gzv.one" target="_blank" rel="noopener noreferrer"
                                 className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#095095] transition-all duration-300">
                                 <Facebook className="h-5 w-5" />

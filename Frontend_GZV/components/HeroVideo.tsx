@@ -40,7 +40,7 @@ const HeroVideo = () => {
   }
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative flex h-[calc(100svh-136px)] min-h-[360px] max-h-[720px] items-center justify-center overflow-hidden sm:min-h-[420px] lg:h-[calc(100vh-136px)] lg:min-h-[560px]">
       {/* Video Background */}
             <div
         className="absolute inset-0 z-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900"
@@ -59,7 +59,7 @@ const HeroVideo = () => {
           loop
           playsInline
           preload="none"
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23003d6b' width='1920' height='1080'/%3E%3C/svg%3E"
         >
           <source src="/Intro.mp4" type="video/mp4" />
@@ -81,13 +81,13 @@ const HeroVideo = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
         onClick={toggleVideo}
-        className="absolute top-6 right-6 z-30 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-all duration-300"
+        className="absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
       >
         {isPlaying ? <Pause className="h-5 w-5 text-white" /> : <Play className="h-5 w-5 text-white ml-1" />}
       </motion.button>
 
       {/* Content */}
-      <div className="relative z-20 text-center text-white px-4">
+      <div className="relative z-20 px-4 text-center text-white">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
