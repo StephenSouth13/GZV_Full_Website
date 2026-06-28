@@ -3,6 +3,7 @@ export interface Project {
   title: string
   description: string
   detailproject?: string 
+  thumbnail_url?: string
   image?: string
   technologies?: string[]
   // CẬP NHẬT ĐOẠN NÀY

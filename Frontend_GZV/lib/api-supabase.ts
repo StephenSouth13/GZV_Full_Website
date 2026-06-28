@@ -219,6 +219,7 @@
     title: string;
     description: string;
     detailproject?: string; 
+    thumbnail_url?: string;
     image?: string;
     video_url?: string;
     hashtags?: string;
