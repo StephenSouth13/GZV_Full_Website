@@ -48,50 +48,45 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
 
                     {/* Logo + giới thiệu */}
+                    
                     <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        viewport={{ once: true }}
-                        className="lg:col-span-2"
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className="lg:col-span-2"
                     >
-                        <Link href="/" className="inline-block mb-6">
-                            <div className="relative inline-block rounded-2xl p-4 transition-all duration-300 hover:shadow-xl bg-white">
-                                <Image
-                                    src="/logo.webp"
-                                    alt="gzv Center - UEH University"
-                                    width={450}
-                                    height={100}
-                                    className="relative z-10 h-auto w-auto max-w-full md:max-w-[450px]"
-                                    priority
-                                />
-                            </div>
-                        </Link>
-
-                        <p className="text-white/80 mb-6 leading-relaxed max-w-md">
-                            GZV - The Voice of Genzers
-                        </p>
-
-                        <div className="mt-6 bg-white/10 p-1 rounded-lg backdrop-blur-sm border border-white/20" style={{ maxWidth: 320 }}>
-                            <div
-                                className="fb-page"
-                                data-href="https://www.facebook.com/gzv.one"
-                                data-tabs="timeline"
-                                data-width="320"
-                                data-height="150"
-                                data-small-header="true"
-                                data-adapt-container-width="true"
-                                data-hide-cover="false"
-                                data-show-facepile="true"
-                            >
-                                <blockquote
-                                    cite="https://www.facebook.com/gzv.one"
-                                    className="fb-xfbml-parse-ignore"
-                                >
-                                    <a href="https://www.facebook.com/gzv.one">gzv - Life Long Learning</a>
-                                </blockquote>
-                            </div>
+                    <Link href="/" className="inline-block mb-6 w-full">
+                        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-lg w-full max-w-[280px] sm:max-w-[360px] md:max-w-[420px]">
+                        <Image
+                            src="/logo.webp"
+                            alt="GZV"
+                            width={450}
+                            height={150}
+                            className="w-full h-auto object-contain"
+                            priority
+                        />
                         </div>
+                    </Link>
+
+                    <p className="text-white/80 mb-6 leading-relaxed text-base sm:text-lg">
+                        GZV - The Voice of Genzers
+                    </p>
+
+                    {/* Facebook */}
+                    <div className="w-full max-w-[340px] rounded-xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-sm">
+                        <div
+                        className="fb-page"
+                        data-href="https://www.facebook.com/gzv.one"
+                        data-tabs="timeline"
+                        data-width=""
+                        data-height="130"
+                        data-small-header="true"
+                        data-adapt-container-width="true"
+                        data-hide-cover="false"
+                        data-show-facepile="false"
+                        />
+                    </div>
                     </motion.div>
 
                     {/* Liên hệ */}
