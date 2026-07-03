@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getBrandingSettings, type SiteNavItem } from "@/lib/site-content"
 
 // --- ANIMATION VARIANTS ---
 const mobileNavVariants = {
@@ -23,9 +24,14 @@ const mobileNavItemVariants = {
   closed: { y: 50, opacity: 0, transition: { y: { stiffness: 1000 } } }
 };
 
-const Header = () => {
+type HeaderProps = {
+  managedNavItems?: SiteNavItem[]
+}
+
+const Header = ({ managedNavItems = [] }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [headerLogo, setHeaderLogo] = useState("/logo.webp")
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
   const { user, isAuthenticated, logout, isLoading } = useAuth()
@@ -72,7 +78,17 @@ const Header = () => {
     }
   }, [])
 
-  const navItems = [
+  useEffect(() => {
+    let active = true
+    getBrandingSettings().then((branding) => {
+      if (active) setHeaderLogo(branding.header_logo_url || "/logo.webp")
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const fallbackNavItems = [
     { href: "/gioi-thieu", label: t("nav.about") },
     { href: "/dao-tao", label: t("nav.training") },
     { href: "/du-an", label: t("nav.projects") },
@@ -82,6 +98,16 @@ const Header = () => {
     { href: "/tin-tuc", label: "Tin tức" },
     { href: "/lien-he", label: t("nav.contact") },
   ]
+
+  const navItems = managedNavItems.length
+    ? managedNavItems
+        .filter((item) => item.is_visible)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((item) => ({
+          href: item.href,
+          label: language === "en" && item.label_en ? item.label_en : item.label_vi,
+        }))
+    : fallbackNavItems
 
   const activePath = navItems.find(item => pathname.startsWith(item.href))?.href || null;
 
@@ -174,12 +200,13 @@ const Header = () => {
             >
               <div className="h-10 sm:h-11 lg:h-12">
                 <Image
-                  src="/logo.webp"
+                  src={headerLogo}
                   alt="GZV"
                   width={240}
                   height={72}
                   className="h-full w-auto object-contain"
                   priority
+                  unoptimized
                 />
               </div>
             </motion.div>
@@ -257,7 +284,7 @@ const Header = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
             <motion.div key="mobile-menu-panel" className="fixed top-0 left-0 bottom-0 z-[100] w-4/5 max-w-sm bg-white dark:bg-gray-900 shadow-2xl lg:hidden flex flex-col" initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ duration: 0.4, ease: "anticipate" }}>
               <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
-                <Link href="/" onClick={() => setIsMobileMenuOpen(false)}><Image src="/logo.webp" alt="Logo" width={120} height={32} /></Link>
+                <Link href="/" onClick={() => setIsMobileMenuOpen(false)}><Image src={headerLogo} alt="Logo" width={120} height={32} unoptimized /></Link>
                 <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} className="rounded-full"><X className="h-5 w-5" /></Button>
               </div>
               <motion.nav className="flex-1 p-6 space-y-2 overflow-y-auto" variants={mobileNavVariants} initial="closed" animate="open">

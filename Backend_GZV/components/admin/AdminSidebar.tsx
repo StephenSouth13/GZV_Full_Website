@@ -12,6 +12,7 @@ import {
   FolderOpen, 
   Share2, 
   Settings,
+  FileText,
   ChevronLeft,
   ChevronRight,
   Image,
@@ -90,6 +91,12 @@ const adminMenuItems = [
     title: 'Quản lý hình ảnh',
     href: '/admin/images',
     icon: Image,
+    roles: ['admin', 'collab']
+  },
+  {
+    title: 'Nội dung website',
+    href: '/admin/site-content',
+    icon: FileText,
     roles: ['admin', 'collab']
   },
   {

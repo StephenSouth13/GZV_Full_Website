@@ -4,10 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
 import { AuthProvider } from "@/contexts/auth-context";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import FloatingButtons from "@/components/FloatingButtons";
 import ExtensionCleanup from "@/components/ExtensionCleanup";
+import SiteShell from "@/components/SiteShell";
 // 2. Khởi tạo font Montserrat
 const montserrat = Montserrat({
   subsets: ["vietnamese"], // Hỗ trợ tiếng Việt
@@ -106,12 +104,7 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <ExtensionCleanup />
-              <div className="min-h-screen bg-background text-foreground">
-                <Header />
-                <main>{children}</main>
-                <Footer />
-                <FloatingButtons />
-              </div>
+              <SiteShell>{children}</SiteShell>
             </AuthProvider>
           </LanguageProvider>
         </ThemeProvider>

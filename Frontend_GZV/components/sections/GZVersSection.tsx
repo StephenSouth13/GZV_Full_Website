@@ -7,25 +7,27 @@ import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { api, gzver } from "@/lib/api-supabase"
+import { getHomeSectionConfig, type HomeSectionConfig } from "@/lib/site-content"
 
 const GZVersSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [gzvers, setgzvers] = useState<gzver[]>([])
+  const [section, setSection] = useState<HomeSectionConfig | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchgzvers = async () => {
-      try {
-        setLoading(true)
-        const data = await api.getGzvers()
-        setgzvers(data || [])
-      } catch (err) {
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
+    let active = true
+    Promise.all([api.getGzvers(), getHomeSectionConfig("gzvers")])
+      .then(([data, config]) => {
+        if (!active) return
+        setSection(config)
+        setgzvers((data || []).slice(0, config?.item_limit || 6))
+      })
+      .finally(() => active && setLoading(false))
+
+    return () => {
+      active = false
     }
-    fetchgzvers()
   }, [])
 
   const nextSlide = () => {
@@ -49,7 +51,7 @@ const GZVersSection = () => {
     return cards
   }
 
-  if (loading || gzvers.length === 0) return null
+  if (loading || section?.is_visible === false || gzvers.length === 0) return null
 
   return (
     <section className="overflow-hidden bg-gradient-to-br from-teal-50 to-blue-50 py-12 dark:from-gray-900 dark:to-gray-800 sm:py-16 lg:py-20">
@@ -61,12 +63,10 @@ const GZVersSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="section-title mb-4 text-3xl sm:text-4xl md:text-5xl">
-            Đội Ngũ GZVer
-          </h2>
-          <p className="section-subtitle text-gray-500 dark:text-gray-400 italic">
-            Hành trình trưởng thành từ GZV Center
-          </p>
+          {section?.title && <h2 className="section-title mb-4 text-3xl sm:text-4xl md:text-5xl">{section.title}</h2>}
+          {(section?.subtitle || section?.description) && (
+            <p className="section-subtitle text-gray-500 dark:text-gray-400 italic">{section?.subtitle || section?.description}</p>
+          )}
         </motion.div>
 
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-center md:gap-6">
@@ -89,7 +89,7 @@ const GZVersSection = () => {
                     <CardContent className="flex h-full flex-col items-center p-5 text-center sm:p-6 lg:p-8">
                       <div className="relative mb-6">
                         <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-lg sm:h-24 sm:w-24">
-                          <Image src={gzver.avatar_url || "/gzvers/default.webp"} alt={gzver.full_name} width={96} height={96} unoptimized={true} className="h-full w-full object-cover" />
+                          <Image src={gzver.avatar_url || "/placeholder-user.jpg"} alt={gzver.full_name} width={96} height={96} unoptimized className="h-full w-full object-cover" />
                         </div>
                         <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 shadow-md">
                           <Star className="h-4 w-4 fill-current text-white" />
@@ -101,9 +101,11 @@ const GZVersSection = () => {
                         <p className="mb-1 text-sm font-medium text-teal-600">{gzver.position}</p>
                         <p className="mb-4 text-xs uppercase text-gray-400">@{gzver.company}</p>
 
-                        <div className="mt-auto flex flex-grow items-center justify-center rounded-xl bg-teal-50/50 p-4">
-                          <p className="text-sm italic text-gray-600">"{gzver.achievement_summary}"</p>
-                        </div>
+                        {gzver.achievement_summary && (
+                          <div className="mt-auto flex flex-grow items-center justify-center rounded-xl bg-teal-50/50 p-4">
+                            <p className="text-sm italic text-gray-600">"{gzver.achievement_summary}"</p>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

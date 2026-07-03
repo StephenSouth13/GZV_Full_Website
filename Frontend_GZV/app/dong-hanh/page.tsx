@@ -6,10 +6,6 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 export const fetchCache = 'force-no-store'
 
-const FALLBACK_CORPORATE: Partner[] = [
-  { id: 'f-1', name: 'ASL', logo_url: '/carousel/ASL.webp', category: 'corporate', sort_order: 10, website_url: null },
-]
-
 export default async function PartnersPage() {
   const supabase = getSupabaseServer()
   const toPartnerLogoUrl = (path?: string | null) => {
@@ -31,7 +27,7 @@ export default async function PartnersPage() {
     .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
 
-  const partners = ((data as Partner[] | null) ?? FALLBACK_CORPORATE).map(partner => ({
+  const partners = ((data as Partner[] | null) ?? []).map(partner => ({
     ...partner,
     logo_url: toPartnerLogoUrl(partner.logo_url),
   }))
