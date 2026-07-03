@@ -8,7 +8,9 @@ import { Award, BookOpen, Target, Users, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { api, type Program } from "@/lib/api-supabase"
-import { getPageBlocks, type PageBlock } from "@/lib/site-content"
+import ContactForm from "@/components/ContactForm"
+import PageBanner from "@/components/sections/PageBanner"
+import { getActivePartners, getPageBlocks, type PageBlock } from "@/lib/site-content"
 
 const iconMap: Record<string, any> = {
   award: Award,
@@ -50,6 +52,20 @@ function RenderBlock({ block }: { block: PageBlock }) {
       return <FeatureGrid {...props} />
     case "programs_grid":
       return <ProgramsGrid {...props} />
+    case "projects_grid":
+      return <DynamicGrid source="projects" {...props} />
+    case "news_grid":
+      return <DynamicGrid source="news" {...props} />
+    case "mentors_grid":
+      return <DynamicGrid source="mentors" {...props} />
+    case "gzvers_grid":
+      return <DynamicGrid source="gzvers" {...props} />
+    case "partners_grid":
+      return <DynamicGrid source="partners" {...props} />
+    case "contact_form":
+      return <ContactFormBlock {...props} />
+    case "page_banner":
+      return <PageBanner {...props} />
     case "image_gallery":
       return <ImageGallery {...props} />
     case "cta_band":
@@ -59,6 +75,104 @@ function RenderBlock({ block }: { block: PageBlock }) {
     default:
       return null
   }
+}
+
+function DynamicGrid({ source, title, subtitle, limit = 9, background = "#ffffff" }: any) {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    const load = async () => {
+      const loaders: Record<string, () => Promise<any[]>> = {
+        projects: () => api.getProjects(),
+        news: () => api.getBlogPosts(),
+        mentors: () => api.getMentors(),
+        gzvers: () => api.getGzvers(),
+        partners: () => getActivePartners(Number(limit) || 40),
+      }
+      const data = await (loaders[source] || loaders.projects)()
+      if (!active) return
+      setItems((data || []).slice(0, Number(limit) || 9))
+      setLoading(false)
+    }
+    load().catch(() => {
+      if (!active) return
+      setItems([])
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [source, limit])
+
+  return (
+    <section className="py-16 dark:bg-gray-900 sm:py-20" style={{ background }}>
+      <div className="container px-4">
+        {(title || subtitle) && (
+          <div className="mx-auto mb-12 max-w-4xl text-center">
+            {title && <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-5xl">{title}</h2>}
+            {subtitle && <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>}
+          </div>
+        )}
+        {loading ? (
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item, index) => <DynamicCard key={item.id || item.slug || index} item={item} source={source} />)}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+function DynamicCard({ item, source }: { item: any; source: string }) {
+  const title = item.title || item.full_name || item.name || "Untitled"
+  const image = item.image || item.avatar_url || item.logo_url || "/placeholder.jpg"
+  const description = item.description || item.excerpt || item.role || item.company || item.website_url || ""
+  const href = getDynamicHref(item, source)
+  const card = (
+    <Card className="h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-gray-800">
+      <div className="relative h-52 bg-slate-100">
+        <img src={image} alt={title} className="h-full w-full object-cover" />
+      </div>
+      <CardHeader>
+        <CardTitle className="line-clamp-2 text-xl font-black dark:text-white">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {description && <p className="line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{description}</p>}
+      </CardContent>
+    </Card>
+  )
+
+  if (!href) return card
+  return <Link href={href}>{card}</Link>
+}
+
+function getDynamicHref(item: any, source: string) {
+  if (source === "projects" && item.slug) return `/du-an/${item.slug}`
+  if (source === "news" && item.slug) return `/tin-tuc/${item.slug}`
+  if (source === "mentors" && item.slug) return `/mentors/${item.slug}`
+  if (source === "gzvers" && item.slug) return `/gzver/${item.slug}`
+  if (source === "partners") return item.website_url || ""
+  return ""
+}
+
+function ContactFormBlock({ title, subtitle }: any) {
+  return (
+    <section className="bg-white py-16 dark:bg-gray-900 sm:py-20">
+      <div className="container px-4">
+        {(title || subtitle) && (
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            {title && <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-5xl">{title}</h2>}
+            {subtitle && <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>}
+          </div>
+        )}
+        <ContactForm />
+      </div>
+    </section>
+  )
 }
 
 function HeroStats({ title, subtitle, stats = [], backgroundFrom = "#1e3a8a", backgroundTo = "#0f766e" }: any) {

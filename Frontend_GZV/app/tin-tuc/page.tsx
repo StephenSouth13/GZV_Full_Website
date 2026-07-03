@@ -11,6 +11,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { useEffect, useState } from "react"
 import { api, BlogPost } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/PageBanner"
+import BuilderPageGate from "@/components/BuilderPageGate"
 
 export default function BlogPage() {
   const [allBlogPosts, setAllBlogPosts] = useState<BlogPost[]>([])
@@ -70,6 +71,7 @@ export default function BlogPage() {
   if (error || !featuredPost) return <div className="p-40 text-center font-bold text-slate-300 italic">Hiện tại chưa có bài viết nào được xuất bản.</div>
 
   return (
+    <BuilderPageGate slug="tin-tuc">
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Knowledge Hub"
@@ -243,5 +245,6 @@ export default function BlogPage() {
         )}
       </section>
     </div>
+    </BuilderPageGate>
   )
 }

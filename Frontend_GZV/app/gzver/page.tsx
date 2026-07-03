@@ -8,6 +8,7 @@ import { Star, ArrowRight, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { api, gzver } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/PageBanner"
+import BuilderPageGate from "@/components/BuilderPageGate"
 
 export default function gzverPage() {
   const [gzvers, setgzvers] = useState<gzver[]>([])
@@ -30,6 +31,7 @@ export default function gzverPage() {
   }, [])
 
   return (
+    <BuilderPageGate slug="gzver">
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Khám phá đội ngũ"
@@ -198,5 +200,6 @@ export default function gzverPage() {
         </div>
       </section>
     </div>
+    </BuilderPageGate>
   )
 }

@@ -7,6 +7,7 @@ import { Users, Award, Handshake, Building2, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import PageBanner from "@/components/sections/PageBanner"
+import BuilderPageGate from "@/components/BuilderPageGate"
 
 export type Partner = {
   id: string
@@ -60,6 +61,7 @@ function LogoCard({ partner, cardClass, imgClass }: { partner: Partner; cardClas
 
 export default function PartnersClient({ corporate, education }: Props) {
   return (
+    <BuilderPageGate slug="dong-hanh">
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Mạng lưới toàn cầu"
@@ -206,5 +208,6 @@ export default function PartnersClient({ corporate, education }: Props) {
         </div>
       </section>
     </div>
+    </BuilderPageGate>
   )
 }

@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useEffect, useState } from "react"
 import { api, Project } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/PageBanner"
+import BuilderPageGate from "@/components/BuilderPageGate"
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -51,6 +52,7 @@ export default function ProjectsPage() {
   )
 
   return (
+    <BuilderPageGate slug="du-an">
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Những dự án tiêu biểu"
@@ -216,5 +218,6 @@ export default function ProjectsPage() {
 
       </section>
     </div>
+    </BuilderPageGate>
   )
 }

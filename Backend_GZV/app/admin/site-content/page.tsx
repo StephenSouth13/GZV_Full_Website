@@ -15,10 +15,10 @@ import { GZVRichEditor } from "@/components/editor/GZVRichEditor"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
-import { Eye, EyeOff, Image as ImageIcon, Loader2, MonitorCog, Plus, Save, Settings2, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, Image as ImageIcon, Layers, Loader2, MonitorCog, Plus, Save, Settings2, Trash2 } from "lucide-react"
 
 type NavItem = { id?: string; href: string; label_vi: string; label_en?: string | null; sort_order: number; is_visible: boolean; is_page_enabled: boolean }
-type PageContent = { id?: string; slug: string; title: string; menu_title?: string | null; banner_badge?: string | null; banner_title?: string | null; banner_subtitle?: string | null; banner_description?: string | null; banner_image_url?: string | null; content_html?: string | null; is_visible: boolean }
+type PageContent = { id?: string; slug: string; title: string; menu_title?: string | null; banner_badge?: string | null; banner_title?: string | null; banner_subtitle?: string | null; banner_description?: string | null; banner_image_url?: string | null; content_html?: string | null; is_visible: boolean; seo_title?: string | null; seo_description?: string | null }
 type HomeSection = { id?: string; section_key: string; title: string; subtitle?: string | null; description?: string | null; button_label?: string | null; button_url?: string | null; sort_order: number; item_limit: number; is_visible: boolean; content_html?: string | null }
 type LoadingSettings = { id: number; logo_url: string; title: string; subtitle: string; effect: "orbit" | "pulse" | "bars"; background_from: string; background_to: string; accent_color: string; enabled: boolean; minimum_duration_ms: number }
 type FooterSettings = {
@@ -87,13 +87,22 @@ function SiteContentManager() {
   const [pageBlocks, setPageBlocks] = useState<PageBlock[]>([])
   const [selectedSlug, setSelectedSlug] = useState("gioi-thieu")
   const [builderSlug, setBuilderSlug] = useState("dao-tao")
+  const [slugRenames, setSlugRenames] = useState<Record<string, string>>({})
   const [selectedSectionKey, setSelectedSectionKey] = useState("projects")
   const [loadingSettings, setLoadingSettings] = useState<LoadingSettings>(defaultLoading)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [pickerOpen, setPickerOpen] = useState<"banner" | "loadingLogo" | "footerLogo" | "headerLogo" | "brandFooterLogo" | "favicon" | "ogImage" | { floatingIndex: number } | null>(null)
+  const [pickerOpen, setPickerOpen] = useState<"banner" | "builderBanner" | "loadingLogo" | "footerLogo" | "headerLogo" | "brandFooterLogo" | "favicon" | "ogImage" | { floatingIndex: number } | null>(null)
 
   const selectedPage = useMemo(() => pages.find((page) => page.slug === selectedSlug) || null, [pages, selectedSlug])
+  const builderPage = useMemo(() => pages.find((page) => page.slug === builderSlug) || null, [pages, builderSlug])
+  const builderBlocks = useMemo(
+    () => pageBlocks
+      .map((block, index) => ({ block, index }))
+      .filter((item) => item.block.page_slug === builderSlug)
+      .sort((a, b) => (a.block.sort_order || 0) - (b.block.sort_order || 0)),
+    [pageBlocks, builderSlug],
+  )
   const selectedSection = useMemo(() => homeSections.find((section) => section.section_key === selectedSectionKey) || null, [homeSections, selectedSectionKey])
 
   useEffect(() => {
@@ -140,6 +149,17 @@ function SiteContentManager() {
     load()
   }, [])
 
+  useEffect(() => {
+    if (loading || pages.some((page) => page.slug === builderSlug)) return
+    setPages((items) => [...items, {
+      slug: builderSlug,
+      title: builderSlug,
+      menu_title: builderSlug,
+      banner_title: builderSlug,
+      is_visible: true,
+    }])
+  }, [builderSlug, loading, pages])
+
   const saveRows = async (table: string, rows: any[], conflict: string, success: string) => {
     try {
       setSaving(true)
@@ -158,12 +178,101 @@ function SiteContentManager() {
   const updateSection = (patch: Partial<HomeSection>) => setHomeSections((items) => items.map((item) => item.section_key === selectedSectionKey ? { ...item, ...patch } : item))
   const updateFloating = (index: number, patch: Partial<FloatingAction>) => setFloating((items) => items.map((item, idx) => idx === index ? { ...item, ...patch } : item))
   const updateBlock = (index: number, patch: Partial<PageBlock>) => setPageBlocks((items) => items.map((item, idx) => idx === index ? { ...item, ...patch } : item))
+  const updateBuilderPage = (patch: Partial<PageContent>) => setPages((items) => items.map((item) => item.slug === builderSlug ? { ...item, ...patch } : item))
+
+  const renameBuilderSlug = (value: string) => {
+    const nextSlug = normalizeSlug(value)
+    if (!nextSlug || nextSlug === builderSlug) return
+    const previousSlug = builderSlug
+    setSlugRenames((items) => ({ ...items, [previousSlug]: nextSlug }))
+    setPages((items) => items.map((item) => item.slug === previousSlug ? { ...item, slug: nextSlug } : item))
+    setPageBlocks((items) => items.map((item) => item.page_slug === previousSlug ? { ...item, page_slug: nextSlug } : item))
+    setNavItems((items) => items.map((item) => item.href === `/${previousSlug}` ? { ...item, href: `/${nextSlug}` } : item))
+    setSelectedSlug((slug) => slug === previousSlug ? nextSlug : slug)
+    setBuilderSlug(nextSlug)
+  }
+
+  const moveBlock = (blockIndex: number, direction: -1 | 1) => {
+    const currentPosition = builderBlocks.findIndex((item) => item.index === blockIndex)
+    const swapWith = builderBlocks[currentPosition + direction]
+    const current = builderBlocks[currentPosition]
+    if (!current || !swapWith) return
+    setPageBlocks((items) => items.map((item, index) => {
+      if (index === current.index) return { ...item, sort_order: swapWith.block.sort_order }
+      if (index === swapWith.index) return { ...item, sort_order: current.block.sort_order }
+      return item
+    }))
+  }
+
+  const duplicateBlock = (block: PageBlock) => {
+    setPageBlocks((rows) => {
+      const samePage = rows.filter((row) => row.page_slug === builderSlug)
+      return [...rows, {
+        ...block,
+        id: undefined,
+        block_key: `${block.block_key}-copy-${Date.now()}`,
+        title: `${block.title || block.block_key} copy`,
+        sort_order: samePage.length * 10 + 10,
+      }]
+    })
+  }
 
   const saveNavigation = () => saveRows("site_navigation", navItems, "href", "Đã lưu menu header")
   const savePage = () => selectedPage && saveRows("site_pages", [selectedPage], "slug", "Đã lưu nội dung trang")
   const saveHomeSections = () => saveRows("site_home_sections", homeSections, "section_key", "Đã lưu section trang chủ")
   const saveFloating = () => saveRows("site_floating_actions", floating, "action_key", "Đã lưu floating buttons")
   const saveBlocks = () => saveRows("site_page_blocks", pageBlocks, "page_slug,block_key", "Đã lưu page builder")
+
+  const saveBuilderLayout = async () => {
+    try {
+      setSaving(true)
+      const oldSlugs = Object.keys(slugRenames)
+      const slugsToClean = [...new Set([...oldSlugs, builderSlug])]
+      const page = builderPage || {
+        slug: builderSlug,
+        title: builderSlug,
+        menu_title: builderSlug,
+        banner_title: builderSlug,
+        is_visible: true,
+      }
+      const blocks = builderBlocks.map(({ block }, position) => ({
+        ...block,
+        page_slug: builderSlug,
+        sort_order: (position + 1) * 10,
+      }))
+
+      for (const slug of slugsToClean) {
+        await supabase.from("site_page_blocks").delete().eq("page_slug", slug)
+      }
+      for (const slug of oldSlugs) {
+        await supabase.from("site_pages").delete().eq("slug", slug)
+        await supabase.from("site_navigation").delete().eq("href", `/${slug}`)
+      }
+
+      const pageResult = await supabase.from("site_pages").upsert(page, { onConflict: "slug" })
+      if (pageResult.error) throw pageResult.error
+      if (blocks.length) {
+        const blockResult = await supabase.from("site_page_blocks").insert(blocks)
+        if (blockResult.error) throw blockResult.error
+      }
+      const relatedNav = navItems.find((item) => item.href === `/${builderSlug}`)
+      if (relatedNav) {
+        const navResult = await supabase.from("site_navigation").upsert(relatedNav, { onConflict: "href" })
+        if (navResult.error) throw navResult.error
+      }
+
+      setPageBlocks((items) => [
+        ...items.filter((item) => item.page_slug !== builderSlug && !oldSlugs.includes(item.page_slug)),
+        ...blocks,
+      ])
+      setSlugRenames({})
+      toast.success("Đã lưu layout, thứ tự section và slug trang")
+    } catch (error: any) {
+      toast.error(error.message || "Không lưu được layout trang")
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const saveBranding = async () => {
     try {
@@ -206,6 +315,7 @@ function SiteContentManager() {
 
   const handleMediaSelect = (result: MediaPickResult) => {
     if (pickerOpen === "banner") updatePage({ banner_image_url: result.url })
+    if (pickerOpen === "builderBanner") updateBuilderPage({ banner_image_url: result.url })
     if (pickerOpen === "loadingLogo") setLoadingSettings((value) => ({ ...value, logo_url: result.url }))
     if (pickerOpen === "footerLogo") setFooter((value) => ({ ...value, logo_url: result.url }))
     if (pickerOpen === "headerLogo") setBranding((value) => ({ ...value, header_logo_url: result.url }))
@@ -255,6 +365,29 @@ function SiteContentManager() {
                 <CardDescription>Kéo thả phiên bản nhẹ: đổi thứ tự bằng số, thêm template, sửa JSON props, HTML, slug trang và ẩn/hiện block.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-black text-slate-900 dark:text-white">Cau hinh trang dang edit</p>
+                      <p className="text-sm text-slate-500">Doi slug, title tab, SEO, banner va trang thai public cho tung trang.</p>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Slug trang">
+                      <Input value={builderSlug} onChange={(event) => renameBuilderSlug(event.target.value)} placeholder="vi-du-slug" />
+                    </Field>
+                    <SwitchLine label="Hien trang public" checked={builderPage?.is_visible !== false} onChange={(value) => updateBuilderPage({ is_visible: value })} />
+                    <Field label="Ten trang"><Input value={builderPage?.title || ""} onChange={(event) => updateBuilderPage({ title: event.target.value })} /></Field>
+                    <Field label="Title tab / SEO"><Input value={(builderPage as any)?.seo_title || ""} onChange={(event) => updateBuilderPage({ seo_title: event.target.value } as any)} /></Field>
+                    <Field label="Tieu de banner"><Input value={builderPage?.banner_title || ""} onChange={(event) => updateBuilderPage({ banner_title: event.target.value })} /></Field>
+                    <Field label="Anh banner"><PickerInput value={builderPage?.banner_image_url || ""} onChange={(value) => updateBuilderPage({ banner_image_url: value })} onPick={() => setPickerOpen("builderBanner")} /></Field>
+                  </div>
+                  <Field label="Meta description">
+                    <Textarea value={(builderPage as any)?.seo_description || ""} onChange={(event) => updateBuilderPage({ seo_description: event.target.value } as any)} />
+                  </Field>
+                </div>
+
                 <div className="flex flex-wrap gap-2">
                   {templates.map((template) => (
                     <Button
@@ -279,35 +412,31 @@ function SiteContentManager() {
                   ))}
                 </div>
 
-                {pageBlocks.map((block, index) => block.page_slug === builderSlug ? (
+                {builderBlocks.map(({ block, index }, position) => (
                   <div key={`${block.page_slug}-${block.block_key}-${index}`} className="space-y-3 rounded-2xl border bg-white p-4 dark:bg-slate-900">
                     <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_0.5fr_auto]">
                       <Field label="Page slug"><Input value={block.page_slug} onChange={(e) => updateBlock(index, { page_slug: e.target.value })} /></Field>
                       <Field label="Block key"><Input value={block.block_key} onChange={(e) => updateBlock(index, { block_key: e.target.value })} /></Field>
                       <Field label="Component"><Input value={block.component_type} onChange={(e) => updateBlock(index, { component_type: e.target.value })} /></Field>
                       <Field label="Thứ tự"><Input type="number" value={block.sort_order} onChange={(e) => updateBlock(index, { sort_order: Number(e.target.value) })} /></Field>
-                      <div className="flex items-end gap-2"><Switch checked={block.is_visible} onCheckedChange={(v) => updateBlock(index, { is_visible: v })} /><Button variant="destructive" size="icon" onClick={() => setPageBlocks((rows) => rows.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4" /></Button></div>
+                      <div className="flex items-end gap-2">
+                        <Button type="button" variant="outline" size="icon" disabled={position === 0} onClick={() => moveBlock(index, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                        <Button type="button" variant="outline" size="icon" disabled={position === builderBlocks.length - 1} onClick={() => moveBlock(index, 1)}><ArrowDown className="h-4 w-4" /></Button>
+                        <Button type="button" variant="outline" size="icon" onClick={() => duplicateBlock(block)}><Copy className="h-4 w-4" /></Button>
+                        <Switch checked={block.is_visible} onCheckedChange={(v) => updateBlock(index, { is_visible: v })} />
+                        <Button variant="destructive" size="icon" onClick={() => setPageBlocks((rows) => rows.filter((_, i) => i !== index))}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
                     </div>
                     <Field label="Tên block"><Input value={block.title || ""} onChange={(e) => updateBlock(index, { title: e.target.value })} /></Field>
-                    <Field label="Props JSON">
-                      <Textarea
-                        className="min-h-[180px] font-mono text-xs"
-                        value={JSON.stringify(block.props || {}, null, 2)}
-                        onChange={(e) => {
-                          try {
-                            updateBlock(index, { props: JSON.parse(e.target.value || "{}") })
-                          } catch {
-                            updateBlock(index, { props: block.props })
-                          }
-                        }}
-                      />
-                    </Field>
+                    <PropsEditor value={block.props || {}} onChange={(props) => updateBlock(index, { props })} />
                     <Field label="Rich HTML của block">
                       <GZVRichEditor value={block.content_html || ""} onChange={(html) => updateBlock(index, { content_html: html })} minHeight={260} uploadFolder={`blocks/${builderSlug}`} />
                     </Field>
                   </div>
-                ) : null)}
-                <Button onClick={saveBlocks} disabled={saving} className="gap-2"><Save className="h-4 w-4" /> Lưu page builder</Button>
+                ))}
+                <div className="sticky bottom-4 z-10 flex justify-end rounded-2xl border bg-white/95 p-3 shadow-xl backdrop-blur dark:bg-slate-950/95">
+                  <Button onClick={saveBuilderLayout} disabled={saving} className="gap-2"><Save className="h-4 w-4" /> Luu layout trang nay</Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -500,6 +629,107 @@ function SiteContentManager() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-2"><Label>{label}</Label>{children}</div>
+}
+
+function PropsEditor({ value, onChange }: { value: Record<string, any>; onChange: (value: Record<string, any>) => void }) {
+  const [rawJson, setRawJson] = useState(() => JSON.stringify(value || {}, null, 2))
+  const [jsonError, setJsonError] = useState("")
+
+  useEffect(() => {
+    setRawJson(JSON.stringify(value || {}, null, 2))
+    setJsonError("")
+  }, [value])
+
+  const updateKey = (key: string, nextValue: any) => {
+    onChange({ ...(value || {}), [key]: nextValue })
+  }
+
+  const entries = Object.entries(value || {})
+
+  return (
+    <div className="space-y-4 rounded-xl border bg-slate-50 p-4 dark:bg-slate-950">
+      <div>
+        <Label>Props editor</Label>
+        <p className="mt-1 text-xs text-slate-500">Edit nhanh tung field. Object/array van co JSON rieng de can thiep sau.</p>
+      </div>
+      {entries.length > 0 && (
+        <div className="grid gap-3 md:grid-cols-2">
+          {entries.map(([key, item]) => (
+            <Field key={key} label={key}>
+              {renderPropControl(item, (nextValue) => updateKey(key, nextValue))}
+            </Field>
+          ))}
+        </div>
+      )}
+      <Field label="Raw JSON">
+        <Textarea
+          className="min-h-[180px] font-mono text-xs"
+          value={rawJson}
+          onChange={(event) => {
+            const text = event.target.value
+            setRawJson(text)
+            try {
+              const parsed = JSON.parse(text || "{}")
+              setJsonError("")
+              onChange(parsed)
+            } catch (error: any) {
+              setJsonError(error.message || "JSON khong hop le")
+            }
+          }}
+        />
+      </Field>
+      {jsonError && <p className="text-xs font-bold text-red-600">{jsonError}</p>}
+    </div>
+  )
+}
+
+function renderPropControl(value: any, onChange: (value: any) => void) {
+  if (typeof value === "boolean") {
+    return <Switch checked={value} onCheckedChange={onChange} />
+  }
+  if (typeof value === "number") {
+    return <Input type="number" value={value} onChange={(event) => onChange(Number(event.target.value))} />
+  }
+  if (typeof value === "string") {
+    const looksLikeColor = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)
+    if (looksLikeColor) {
+      return (
+        <div className="flex gap-2">
+          <Input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="w-16 shrink-0" />
+          <Input value={value} onChange={(event) => onChange(event.target.value)} />
+        </div>
+      )
+    }
+    if (value.length > 90) {
+      return <Textarea value={value} onChange={(event) => onChange(event.target.value)} />
+    }
+    return <Input value={value} onChange={(event) => onChange(event.target.value)} />
+  }
+
+  return (
+    <Textarea
+      className="min-h-[120px] font-mono text-xs"
+      value={JSON.stringify(value ?? null, null, 2)}
+      onChange={(event) => {
+        try {
+          onChange(JSON.parse(event.target.value || "null"))
+        } catch {
+          onChange(value)
+        }
+      }}
+    />
+  )
+}
+
+function normalizeSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
 function PickerInput({ value, onChange, onPick }: { value: string; onChange: (value: string) => void; onPick: () => void }) {

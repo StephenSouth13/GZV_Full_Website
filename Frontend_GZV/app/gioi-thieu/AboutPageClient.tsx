@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AnimatePresence, motion } from "framer-motion"
 import PageBanner from "@/components/sections/PageBanner"
+import BuilderPageGate from "@/components/BuilderPageGate"
 
 // Định nghĩa Interface để fix lỗi TypeScript "Property does not exist"
 interface GalleryImage {
@@ -121,6 +122,7 @@ const AboutPageClient = () => {
   }
 
   return (
+    <BuilderPageGate slug="gioi-thieu">
     <div className="bg-white dark:bg-gray-900">
       <PageBanner
         badge="Về chúng tôi"
@@ -338,6 +340,7 @@ const AboutPageClient = () => {
         </motion.div>
       )}
     </div>
+    </BuilderPageGate>
   )
 }
 
