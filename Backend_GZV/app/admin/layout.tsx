@@ -2,6 +2,7 @@
 "use client"
 
 import { AdminLayout } from '@/components/admin/AdminLayout'
+import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
 import { AdminAuthProvider } from '@/components/auth/AdminAuthProvider'
 
 export default function AdminRootLayout({
@@ -11,9 +12,11 @@ export default function AdminRootLayout({
 }) {
   return (
     <AdminAuthProvider>
-      <AdminLayout>
-        {children}
-      </AdminLayout>
+      <ProtectedRoute allowedRoles={["admin", "collab"]}>
+        <AdminLayout>
+          {children}
+        </AdminLayout>
+      </ProtectedRoute>
     </AdminAuthProvider>
   )
 }

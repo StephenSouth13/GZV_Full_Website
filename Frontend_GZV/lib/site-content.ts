@@ -93,6 +93,9 @@ export type BrandingSettings = {
   default_description?: string | null
   default_keywords?: string | null
   og_image_url?: string | null
+  topbar_email_label?: string | null
+  topbar_phone_label?: string | null
+  topbar_badge_label?: string | null
 }
 
 export type PageBlock = {
@@ -180,6 +183,9 @@ export const defaultBrandingSettings: BrandingSettings = {
   default_description: 'GZV Center',
   default_keywords: 'GZV, đào tạo, mentoring, coaching',
   og_image_url: '/og-image.jpg',
+  topbar_email_label: 'gzv.one@gmail.com',
+  topbar_phone_label: '(+84) 329 381 489',
+  topbar_badge_label: 'GZV',
 }
 
 export const getPageSlugFromPath = (pathname: string) => pathname.split('/').filter(Boolean)[0] || 'home'

@@ -40,7 +40,7 @@ type FooterSettings = {
   social_links: Array<{ label: string; href: string; icon?: string; visible?: boolean }>
 }
 type FloatingAction = { id?: string; action_key: string; label: string; href?: string | null; icon_url?: string | null; action_type: "link" | "chatbot"; sort_order: number; is_visible: boolean }
-type BrandingSettings = { id: number; site_name: string; header_logo_url: string; footer_logo_url: string; favicon_url: string; default_title: string; title_template: string; default_description?: string | null; default_keywords?: string | null; og_image_url?: string | null }
+type BrandingSettings = { id: number; site_name: string; header_logo_url: string; footer_logo_url: string; favicon_url: string; default_title: string; title_template: string; default_description?: string | null; default_keywords?: string | null; og_image_url?: string | null; topbar_email_label?: string | null; topbar_phone_label?: string | null; topbar_badge_label?: string | null }
 type SectionTemplate = { id?: string; template_key: string; name: string; category: string; component_type: string; default_props: any; sort_order: number; is_active: boolean }
 type PageBlock = { id?: string; page_slug: string; block_key: string; component_type: string; title?: string | null; props: any; content_html?: string | null; sort_order: number; is_visible: boolean; responsive?: any; seo?: any }
 
@@ -56,7 +56,7 @@ const defaultNav: NavItem[] = [
 ]
 
 const defaultLoading: LoadingSettings = { id: 1, logo_url: "/logo.webp", title: "GZV", subtitle: "Đang tải dữ liệu...", effect: "orbit", background_from: "#031b3f", background_to: "#0f766e", accent_color: "#38bdf8", enabled: true, minimum_duration_ms: 900 }
-const defaultBranding: BrandingSettings = { id: 1, site_name: "GZV", header_logo_url: "/logo.webp", footer_logo_url: "/logo.webp", favicon_url: "/logo/favicon.ico", default_title: "GZV - The Voice of Genzers", title_template: "%s | GZV", default_description: "GZV Center", default_keywords: "GZV, đào tạo, mentoring, coaching", og_image_url: "/og-image.jpg" }
+const defaultBranding: BrandingSettings = { id: 1, site_name: "GZV", header_logo_url: "/logo.webp", footer_logo_url: "/logo.webp", favicon_url: "/logo/favicon.ico", default_title: "GZV - The Voice of Genzers", title_template: "%s | GZV", default_description: "GZV Center", default_keywords: "GZV, đào tạo, mentoring, coaching", og_image_url: "/og-image.jpg", topbar_email_label: "gzv.one@gmail.com", topbar_phone_label: "(+84) 329 381 489", topbar_badge_label: "GZV" }
 const defaultFooter: FooterSettings = {
   id: 1,
   logo_url: "/logo.webp",
@@ -454,6 +454,9 @@ function SiteContentManager() {
                 <Field label="Footer logo"><PickerInput value={branding.footer_logo_url} onChange={(v) => setBranding({ ...branding, footer_logo_url: v })} onPick={() => setPickerOpen("brandFooterLogo")} /></Field>
                 <Field label="Favicon"><PickerInput value={branding.favicon_url} onChange={(v) => setBranding({ ...branding, favicon_url: v })} onPick={() => setPickerOpen("favicon")} /></Field>
                 <Field label="OG image"><PickerInput value={branding.og_image_url || ""} onChange={(v) => setBranding({ ...branding, og_image_url: v })} onPick={() => setPickerOpen("ogImage")} /></Field>
+                <Field label="Topbar email"><Input value={branding.topbar_email_label || ""} onChange={(e) => setBranding({ ...branding, topbar_email_label: e.target.value })} /></Field>
+                <Field label="Topbar phone"><Input value={branding.topbar_phone_label || ""} onChange={(e) => setBranding({ ...branding, topbar_phone_label: e.target.value })} /></Field>
+                <Field label="Topbar badge"><Input value={branding.topbar_badge_label || ""} onChange={(e) => setBranding({ ...branding, topbar_badge_label: e.target.value })} /></Field>
               </div>
               <Field label="Meta description"><Textarea value={branding.default_description || ""} onChange={(e) => setBranding({ ...branding, default_description: e.target.value })} /></Field>
               <Field label="Meta keywords"><Textarea value={branding.default_keywords || ""} onChange={(e) => setBranding({ ...branding, default_keywords: e.target.value })} /></Field>

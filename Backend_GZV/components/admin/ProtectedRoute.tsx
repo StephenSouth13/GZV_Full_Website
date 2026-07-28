@@ -33,19 +33,16 @@ export function ProtectedRoute({
 
         setUser(session.user)
 
-        // Get user role from localStorage or fetch from database
-        let role = localStorage.getItem('user_role') || 'collab'
-        
-        if (!localStorage.getItem('user_role')) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
-          
-          role = profile?.role || 'collab'
-          localStorage.setItem('user_role', role)
-        }
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .maybeSingle()
+
+        if (profileError) throw profileError
+
+        const role = profile?.role || 'collab'
+        localStorage.setItem('user_role', role)
 
         setUserRole(role)
 

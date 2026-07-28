@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, ChevronDown, ChevronRight, Sun, Moon, User, LogIn, UserPlus, LogOut } from 'lucide-react'
+import { Menu, X, ChevronDown, ChevronRight, Sun, Moon, User, LogIn, UserPlus, LogOut, Mail, Phone, Sparkles } from 'lucide-react'
 import { useTheme } from "next-themes"
 import { useLanguage } from "./language-provider"
 import { useAuth } from "@/contexts/auth-context"
@@ -32,6 +32,11 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [headerLogo, setHeaderLogo] = useState("/logo.webp")
+  const [topbar, setTopbar] = useState({
+    email: "gzv.one@gmail.com",
+    phone: "(+84) 329 381 489",
+    badge: "GZV",
+  })
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t } = useLanguage()
   const { user, isAuthenticated, logout, isLoading } = useAuth()
@@ -81,7 +86,13 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
   useEffect(() => {
     let active = true
     getBrandingSettings().then((branding) => {
-      if (active) setHeaderLogo(branding.header_logo_url || "/logo.webp")
+      if (!active) return
+      setHeaderLogo(branding.header_logo_url || "/logo.webp")
+      setTopbar({
+        email: branding.topbar_email_label || "gzv.one@gmail.com",
+        phone: branding.topbar_phone_label || "(+84) 329 381 489",
+        badge: branding.topbar_badge_label || branding.site_name || "GZV",
+      })
     })
     return () => {
       active = false
@@ -138,9 +149,9 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
             </div>
             <div className="container mx-auto flex justify-between items-center h-full px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="flex items-center space-x-4 text-xs">
-                <span className="hidden sm:block">📧 gzv.one@gmail.com</span>
-                <span className="hidden md:block">📞 (+84) 329 381 489</span>
-                <span className="block font-bold">🌟 GZV</span>
+                <span className="hidden items-center gap-1.5 sm:inline-flex"><Mail className="h-3.5 w-3.5" /> {topbar.email}</span>
+                <span className="hidden items-center gap-1.5 md:inline-flex"><Phone className="h-3.5 w-3.5" /> {topbar.phone}</span>
+                <span className="inline-flex items-center gap-1.5 font-bold"><Sparkles className="h-3.5 w-3.5" /> {topbar.badge}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <DropdownMenu>
