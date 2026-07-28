@@ -4,70 +4,66 @@ import { useEffect, useState } from 'react'
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { Star, ArrowRight, Loader2, ShieldCheck } from "lucide-react"
+import { ArrowRight, Loader2, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { api, gzver } from "@/lib/api-supabase"
+import { getHomeSectionConfig, type HomeSectionConfig } from "@/lib/site-content"
 
 export default function DirectorsSection() {
   const [directors, setDirectors] = useState<gzver[]>([])
+  const [section, setSection] = useState<HomeSectionConfig | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchDirectors = async () => {
-      try {
-        setLoading(true)
-        // Lấy toàn bộ dữ liệu gzvers đã được sắp xếp order từ API
-        const data = await api.getGzvers()
-        
-        /**
-         * LOGIC LỌC TỰ ĐỘNG:
-         * Chỉ lấy những người được bật switch "is_director" trong CMS.
-         */
-        const filtered = data.filter(gzver => gzver.is_director && gzver.is_active);
+    let active = true
 
-        setDirectors(filtered)
-      } catch (error) {
-        console.error("❌ Error fetching Directors:", error)
-      } finally {
-        setLoading(false)
-      }
+    Promise.all([api.getGzvers(), getHomeSectionConfig("directors")])
+      .then(([data, config]) => {
+        if (!active) return
+        setSection(config)
+        const filtered = data.filter((item) => item.is_director && item.is_active)
+        setDirectors(filtered.slice(0, config?.item_limit || 6))
+      })
+      .catch((error) => console.error("Error fetching directors:", error))
+      .finally(() => active && setLoading(false))
+
+    return () => {
+      active = false
     }
-    fetchDirectors()
   }, [])
 
-  if (loading) return (
-    <div className="flex justify-center py-20">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
-    </div>
-  )
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="animate-spin text-[#082f57]" size={40} />
+      </div>
+    )
+  }
 
-  if (directors.length === 0) return null
+  if (section?.is_visible === false || directors.length === 0) return null
 
   return (
-    <section className="py-24 bg-white dark:bg-slate-950">
+    <section className="border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-950">
       <div className="container mx-auto px-6 text-center">
-        {/* --- Header Section --- */}
         <motion.div
-          className="mb-20"
+          className="mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-        
-            <h2 className="section-title mb-6">
-              BAN CHỦ NHIỆM 
-            </h2>
-          </div>
-          <p className="section-description">
-            Đội ngũ lãnh đạo nòng cốt định hướng chiến lược tại gzv Center.
-          </p>
+          <h2 className="section-title mb-6">
+            {section?.title || "Ban Chủ Nhiệm"}
+          </h2>
+          {(section?.subtitle || section?.description) && (
+            <p className="section-description">
+              {section?.subtitle || section?.description}
+            </p>
+          )}
         </motion.div>
 
-        {/* --- Grid Layout: Luôn cân xứng tuyệt đối --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 max-w-7xl mx-auto items-stretch text-center">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-8 text-center md:grid-cols-2 lg:grid-cols-3">
           {directors.map((director, index) => (
             <motion.div
               key={director.id}
@@ -77,50 +73,45 @@ export default function DirectorsSection() {
               viewport={{ once: true }}
               className="flex"
             >
-              <Card className="flex flex-col w-full border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_15px_50px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(37,99,235,0.15)] transition-all duration-500 overflow-hidden relative group">
-                <CardContent className="p-10 flex flex-col items-center h-full">
-                  
-                  {/* Avatar & Badge chuẩn mẫu */}
+              <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] dark:border-slate-800 dark:bg-slate-900">
+                <CardContent className="flex h-full flex-col items-center p-8">
                   <div className="relative mb-8 shrink-0">
-                    <div className="relative w-40 h-40 rounded-full p-1 bg-white dark:bg-slate-800 shadow-xl overflow-hidden border border-slate-100">
+                    <div className="relative h-40 w-40 overflow-hidden rounded-full border border-slate-100 bg-white p-1 shadow-xl dark:bg-slate-800">
                       <Image
                         src={director.avatar_url || '/gzvers/default.webp'}
                         alt={director.full_name}
                         fill
-                        unoptimized={true}
+                        unoptimized
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
-                    {/* Badge xanh dương chuẩn vị trí ảnh mẫu */}
-                    <div className="absolute bottom-1 right-1 bg-[#3b82f6] p-2.5 rounded-full border-[4px] border-white dark:border-slate-900 shadow-lg text-white transform transition-transform group-hover:rotate-12">
+                    <div className="absolute bottom-1 right-1 rounded-full border-[4px] border-white bg-[#082f57] p-2.5 text-white shadow-lg transition-transform group-hover:rotate-12 dark:border-slate-900">
                       <Star size={18} className="fill-white" />
                     </div>
                   </div>
 
-                  <div className="w-full flex flex-col flex-grow">
-                    <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-2 uppercase group-hover:text-blue-600 transition-colors">
+                  <div className="flex w-full flex-grow flex-col">
+                    <h3 className="mb-2 text-2xl font-black uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#082f57] dark:text-white">
                       {director.full_name}
                     </h3>
-                    
-                    <p className="text-[#3b82f6] font-extrabold text-lg uppercase tracking-wide mb-6">
+                    <p className="mb-6 text-base font-extrabold uppercase text-[#082f57]">
                       {director.position}
                     </p>
 
-                    <div className="flex-grow flex items-center justify-center mb-8">
-                      <blockquote className="text-slate-500 dark:text-slate-400 text-base italic leading-relaxed px-4">
-                        "{director.achievement_summary || director.testimonial}"
+                    <div className="mb-8 flex flex-grow items-center justify-center">
+                      <blockquote className="px-4 text-base italic leading-relaxed text-slate-500 dark:text-slate-400">
+                        "{director.achievement_summary || director.testimonial || ""}"
                       </blockquote>
                     </div>
 
-                    <div className="w-full mt-auto pt-4">
+                    <div className="mt-auto w-full pt-4">
                       <Link href={`/gzver/${director.slug}`} className="block">
-                        <Button className="w-full btn-primary rounded-lg h-12 text-sm font-semibold gap-2">
+                        <Button className="btn-primary h-12 w-full rounded-md text-sm font-semibold">
                           Xem Hồ Sơ <ArrowRight size={18} />
                         </Button>
                       </Link>
                     </div>
                   </div>
-
                 </CardContent>
               </Card>
             </motion.div>
@@ -128,5 +119,5 @@ export default function DirectorsSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

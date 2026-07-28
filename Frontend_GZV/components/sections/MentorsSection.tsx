@@ -51,7 +51,7 @@ const MentorsSection = () => {
   if (loading || section?.is_visible === false || mentors.length === 0) return null
 
   return (
-    <section className="py-20 bg-white dark:bg-gray-800">
+    <section className="border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-gray-900">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

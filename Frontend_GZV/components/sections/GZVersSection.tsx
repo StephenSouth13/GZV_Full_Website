@@ -54,7 +54,7 @@ const GZVersSection = () => {
   if (loading || section?.is_visible === false || gzvers.length === 0) return null
 
   return (
-    <section className="overflow-hidden bg-gradient-to-br from-teal-50 to-blue-50 py-12 dark:from-gray-900 dark:to-gray-800 sm:py-16 lg:py-20">
+    <section className="overflow-hidden border-y border-slate-200 bg-slate-50 py-12 dark:border-slate-800 dark:bg-gray-900 sm:py-16 lg:py-20">
       <div className="container px-4">
         <motion.div
           className="mb-10 text-center sm:mb-14 lg:mb-16"
@@ -85,7 +85,7 @@ const GZVersSection = () => {
                   transition={{ duration: 0.4 }}
                   className="h-full w-[82vw] max-w-[340px] flex-none snap-center sm:w-[46vw] md:w-auto md:max-w-none"
                 >
-                  <Card className="group flex h-full flex-col rounded-xl border-none bg-white/80 shadow-xl backdrop-blur-sm">
+                  <Card className="group flex h-full flex-col rounded-lg border border-slate-200 bg-white/90 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950">
                     <CardContent className="flex h-full flex-col items-center p-5 text-center sm:p-6 lg:p-8">
                       <div className="relative mb-6">
                         <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-lg sm:h-24 sm:w-24">
@@ -102,7 +102,7 @@ const GZVersSection = () => {
                         <p className="mb-4 text-xs uppercase text-gray-400">@{gzver.company}</p>
 
                         {gzver.achievement_summary && (
-                          <div className="mt-auto flex flex-grow items-center justify-center rounded-xl bg-teal-50/50 p-4">
+                          <div className="mt-auto flex flex-grow items-center justify-center rounded-md bg-slate-50 p-4 dark:bg-slate-900">
                             <p className="text-sm italic text-gray-600">"{gzver.achievement_summary}"</p>
                           </div>
                         )}

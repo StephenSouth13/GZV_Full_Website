@@ -33,7 +33,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
       transition={{ duration: 0.3 }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-0 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden group rounded-[2rem]">
+      <Card className="h-full flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-[0_14px_34px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] transition-all duration-300 overflow-hidden group rounded-lg">
         
         {/* Header Image */}
         <div className="relative overflow-hidden aspect-[16/10]">
@@ -43,7 +43,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <Badge className="absolute top-4 left-4 bg-blue-600/90 backdrop-blur-md text-white border-none px-3 py-1 font-black text-[9px] uppercase tracking-widest">
+          <Badge className="absolute top-4 left-4 bg-[#082f57]/95 backdrop-blur-md text-white border-none px-3 py-1 font-black text-[9px] uppercase">
             {category}
           </Badge>
         </div>
@@ -77,7 +77,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
                         +{remaining}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-64 p-4 rounded-2xl shadow-2xl border-none bg-white/95 backdrop-blur-md z-[100]">
+                    <PopoverContent className="w-64 p-4 rounded-lg shadow-2xl border border-slate-200 bg-white/95 backdrop-blur-md z-[100]">
                       <div className="flex items-center gap-2 mb-3 pb-2 border-b">
                         <Users size={14} className="text-blue-600" />
                         <span className="text-[10px] font-black uppercase text-slate-400">Chuyên gia thực hiện</span>

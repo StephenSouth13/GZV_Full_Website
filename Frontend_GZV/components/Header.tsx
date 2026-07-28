@@ -38,9 +38,9 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
   const pathname = usePathname()
 
   // Constants cho kích thước
-  const TOPBAR_HEIGHT = 36
-  const HEADER_BASE_HEIGHT = 100
-  const HEADER_SCROLLED_HEIGHT = 72
+  const TOPBAR_HEIGHT = 34
+  const HEADER_BASE_HEIGHT = 88
+  const HEADER_SCROLLED_HEIGHT = 68
 
   // 1. FIX LỖI TS 2345: Hàm getInitials an toàn với dữ liệu undefined/null
   const getInitials = (name: string | null | undefined) => {
@@ -90,7 +90,6 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
 
   const fallbackNavItems = [
     { href: "/gioi-thieu", label: t("nav.about") },
-    { href: "/dao-tao", label: t("nav.training") },
     { href: "/du-an", label: t("nav.projects") },
     { href: "/mentors", label: t("nav.mentors") },
     { href: "/gzver", label: t("nav.gzver") },
@@ -127,7 +126,7 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -TOPBAR_HEIGHT, opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="fixed top-0 left-0 right-0 z-[60] bg-[#095095] text-white text-sm shadow-md"
+            className="fixed top-0 left-0 right-0 z-[60] border-b border-white/10 bg-[#082f57] text-white text-sm shadow-md"
             style={{ height: TOPBAR_HEIGHT }}
           >
             <div className="absolute inset-0 opacity-30">
@@ -188,7 +187,7 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
 
       {/* --- MAIN HEADER --- */}
       <motion.header 
-        className={`fixed left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-lg" : "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"}`} 
+        className={`fixed left-0 right-0 z-50 w-full border-b transition-all duration-300 ${isScrolled ? "border-slate-200/80 bg-white/95 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-gray-950/95" : "border-slate-200/70 bg-white/[0.92] shadow-[0_8px_24px_rgba(15,23,42,0.05)] backdrop-blur-xl dark:border-slate-800 dark:bg-gray-950/90"}`} 
         style={{ top: isScrolled ? 0 : `${TOPBAR_HEIGHT}px`, height: isScrolled ? `${HEADER_SCROLLED_HEIGHT}px` : `${HEADER_BASE_HEIGHT}px` }}
       >
         <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -213,15 +212,15 @@ const Header = ({ managedNavItems = [] }: HeaderProps) => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden items-center font-bold lg:flex lg:space-x-1 xl:space-x-3">
+          <nav className="hidden items-center font-bold lg:flex lg:space-x-1 xl:space-x-2">
             {navItems.map((item) => (
               <Link 
                 key={item.href} 
                 href={item.href} 
-                className={`relative group rounded-md py-2 text-gray-700 transition-colors duration-300 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 lg:px-2 xl:px-3 lg:text-[11px] xl:text-[12px] 2xl:text-sm uppercase tracking-wider ${item.href === activePath ? "text-blue-600 dark:text-blue-400" : ""}`}
+                className={`relative group rounded-md py-2 text-gray-700 transition-colors duration-300 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-300 lg:px-2 xl:px-3 lg:text-[11px] xl:text-[12px] 2xl:text-sm uppercase ${item.href === activePath ? "text-blue-700 dark:text-blue-300" : ""}`}
               >
                 {item.label}
-                <span className={`absolute -bottom-1 left-1/2 h-0.5 -translate-x-1/2 rounded-full bg-blue-600 transition-all duration-300 ${item.href === activePath ? 'w-1/2' : 'w-0 group-hover:w-full'}`} />
+                <span className={`absolute -bottom-1 left-1/2 h-0.5 -translate-x-1/2 bg-[#f7931e] transition-all duration-300 ${item.href === activePath ? 'w-1/2' : 'w-0 group-hover:w-full'}`} />
               </Link>
             ))}
           </nav>

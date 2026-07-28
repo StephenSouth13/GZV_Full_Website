@@ -32,7 +32,7 @@ const NewsSection = () => {
   if (!loading && (section?.is_visible === false || posts.length === 0)) return null
 
   return (
-    <section className="py-24 bg-gray-50 dark:bg-gray-950 overflow-hidden">
+    <section className="overflow-hidden border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-gray-950">
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -41,10 +41,10 @@ const NewsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6 shadow-sm border border-blue-100 dark:border-blue-800">
+          <div className="section-kicker">
             <Sparkles size={12} className="animate-pulse" /> Tri thức & Chia sẻ
           </div>
-          <h2 className="section-title mb-6 text-5xl md:text-6xl">{section?.title || "Tin Tức Mới Nhất"}</h2>
+          <h2 className="section-title mb-6">{section?.title || "Tin Tức Mới Nhất"}</h2>
           {(section?.subtitle || section?.description) && (
             <p className="section-description text-slate-500 dark:text-slate-400">{section?.subtitle || section?.description}</p>
           )}

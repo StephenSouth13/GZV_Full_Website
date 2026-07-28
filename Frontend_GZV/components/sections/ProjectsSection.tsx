@@ -35,7 +35,7 @@ const ProjectsSection = () => {
   if (!loading && section?.is_visible === false) return null
 
   return (
-    <section className="py-24 bg-gray-50 dark:bg-neutral-900">
+    <section className="border-y border-slate-200 bg-slate-50 py-20 dark:border-slate-800 dark:bg-neutral-900">
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -44,7 +44,7 @@ const ProjectsSection = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight uppercase">
+          <h2 className="section-title mb-6">
             {section?.title || "Dự án tiêu biểu"}
           </h2>
           {(section?.subtitle || section?.description) && (
@@ -85,7 +85,7 @@ const ProjectsSection = () => {
             viewport={{ once: true }}
           >
             <Link href={section.button_url}>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-7 h-auto text-lg font-bold rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 uppercase tracking-widest">
+              <Button size="lg" className="btn-primary h-auto px-10 py-4 text-sm uppercase">
                 {section.button_label} <ArrowRight className="ml-2 h-6 w-6" />
               </Button>
             </Link>

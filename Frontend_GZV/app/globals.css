@@ -5,9 +5,11 @@
 @tailwind utilities;
 
 :root {
-  --primary-blue: #0c3c78;
+  --primary-blue: #082f57;
   --primary-white: #ffffff;
   --accent-orange: #f7931e;
+  --ink: #0f172a;
+  --muted-ink: #475569;
 }
 
 @layer base {
@@ -19,6 +21,8 @@
     @apply bg-background text-foreground;
     font-family: 'Montserrat', 'Roboto', sans-serif;
     scroll-behavior: smooth;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.92) 0%, #ffffff 28%, #ffffff 100%);
+    color: var(--ink);
   }
 }
 
@@ -27,13 +31,12 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Primary Button - Dark Blue Standard */
   .btn-primary {
-    @apply bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg;
+    @apply bg-[#082f57] hover:bg-[#0c3c78] text-white px-6 py-3 rounded-md font-bold transition-all duration-300 shadow-[0_10px_24px_rgba(8,47,87,0.18)] hover:shadow-[0_16px_34px_rgba(8,47,87,0.26)];
   }
 
   .btn-secondary {
-    @apply bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg;
+    @apply bg-[#f7931e] hover:bg-[#df7d08] text-white px-6 py-3 rounded-md font-bold transition-all duration-300 shadow-[0_10px_24px_rgba(247,147,30,0.18)];
   }
 
   .card-hover {
@@ -42,15 +45,25 @@
 
   /* Typography Helpers - Professional Standardization */
   .section-title {
-    @apply text-4xl md:text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tight font-sans;
+    @apply text-3xl md:text-5xl font-black text-slate-950 dark:text-white uppercase font-sans;
+    letter-spacing: 0;
   }
 
   .section-subtitle {
-    @apply text-lg text-gray-600 dark:text-gray-300 font-medium leading-relaxed;
+    @apply text-base md:text-lg text-slate-600 dark:text-gray-300 font-medium leading-relaxed;
   }
 
   .section-description {
-    @apply text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto font-medium;
+    @apply text-base md:text-lg text-slate-600 dark:text-gray-300 max-w-3xl mx-auto font-medium leading-8;
+  }
+
+  .section-kicker {
+    @apply mb-4 inline-flex items-center border-l-4 border-[#f7931e] bg-slate-50 px-4 py-2 text-[11px] font-black uppercase text-[#082f57] dark:bg-slate-900 dark:text-blue-200;
+    letter-spacing: 0;
+  }
+
+  .sharp-card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-950;
   }
 
   /* Enhanced responsive utilities */
@@ -118,27 +131,3 @@ html {
   background: #f7931e;
 }
 
-/* Blob animations for decorative elements */
-@keyframes blob {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}

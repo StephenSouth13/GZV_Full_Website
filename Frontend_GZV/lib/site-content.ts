@@ -123,7 +123,7 @@ export type SectionTemplate = {
 
 export const defaultNavigation: SiteNavItem[] = [
   { href: '/gioi-thieu', label_vi: 'Giới thiệu', label_en: 'About', sort_order: 10, is_visible: true, is_page_enabled: true },
-  { href: '/dao-tao', label_vi: 'Đào tạo', label_en: 'Training', sort_order: 20, is_visible: true, is_page_enabled: true },
+  { href: '/dao-tao', label_vi: 'Đào tạo', label_en: 'Training', sort_order: 20, is_visible: false, is_page_enabled: true },
   { href: '/du-an', label_vi: 'Dự án', label_en: 'Projects', sort_order: 30, is_visible: true, is_page_enabled: true },
   { href: '/mentors', label_vi: 'Mentors', label_en: 'Mentors', sort_order: 40, is_visible: true, is_page_enabled: true },
   { href: '/gzver', label_vi: 'GZVers', label_en: 'GZVers', sort_order: 50, is_visible: true, is_page_enabled: true },
