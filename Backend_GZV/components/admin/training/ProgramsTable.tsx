@@ -156,7 +156,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                       
                       <DropdownMenuItem 
                         className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-slate-600 focus:bg-slate-900 focus:text-white transition-all"
-                        onClick={() => window.open(`/dao-tao/${program.slug}`, '_blank')}
+                        onClick={() => window.open('/#dich-vu', '_blank')}
                       >
                         <Eye className="h-5 w-5" /> XEM TRƯỚC GIAO DIỆN
                       </DropdownMenuItem>

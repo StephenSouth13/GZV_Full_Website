@@ -48,7 +48,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
       <ScrollToTop />
       <SeoBrandingManager />
       <SiteLoadingOverlay settings={loadingSettings} show={booting || routeLoading} />
-      <Header managedNavItems={navigation} />
+      <Header />
       <main>
         {disabledPage ? (
           <section className="flex min-h-[55vh] items-center justify-center bg-slate-50 px-4 py-20 text-center dark:bg-gray-900">

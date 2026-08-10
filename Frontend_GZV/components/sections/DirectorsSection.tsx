@@ -36,7 +36,7 @@ export default function DirectorsSection() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="animate-spin text-[#082f57]" size={40} />
+        <Loader2 className="animate-spin text-[#00539b]" size={40} />
       </div>
     )
   }
@@ -44,7 +44,7 @@ export default function DirectorsSection() {
   if (section?.is_visible === false || directors.length === 0) return null
 
   return (
-    <section className="border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-slate-950">
+    <section className="border-y border-slate-200 bg-slate-50 py-20 dark:border-slate-800 dark:bg-slate-950">
       <div className="container mx-auto px-6 text-center">
         <motion.div
           className="mb-16"
@@ -54,7 +54,7 @@ export default function DirectorsSection() {
           viewport={{ once: true }}
         >
           <h2 className="section-title mb-6">
-            {section?.title || "Ban Chủ Nhiệm"}
+            {section?.title || "Ban điều hành"}
           </h2>
           {(section?.subtitle || section?.description) && (
             <p className="section-description">
@@ -73,10 +73,10 @@ export default function DirectorsSection() {
               viewport={{ once: true }}
               className="flex"
             >
-              <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] dark:border-slate-800 dark:bg-slate-900">
+              <Card className="group relative flex w-full flex-col overflow-hidden rounded-none border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-[#00539b] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] dark:border-slate-800 dark:bg-slate-900">
                 <CardContent className="flex h-full flex-col items-center p-8">
                   <div className="relative mb-8 shrink-0">
-                    <div className="relative h-40 w-40 overflow-hidden rounded-full border border-slate-100 bg-white p-1 shadow-xl dark:bg-slate-800">
+                    <div className="relative h-40 w-40 overflow-hidden rounded-none border border-slate-100 bg-white p-1 shadow-xl dark:bg-slate-800">
                       <Image
                         src={director.avatar_url || '/gzvers/default.webp'}
                         alt={director.full_name}
@@ -85,16 +85,16 @@ export default function DirectorsSection() {
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     </div>
-                    <div className="absolute bottom-1 right-1 rounded-full border-[4px] border-white bg-[#082f57] p-2.5 text-white shadow-lg transition-transform group-hover:rotate-12 dark:border-slate-900">
+                    <div className="absolute bottom-1 right-1 rounded-none border-[4px] border-white bg-[#ed1c24] p-2.5 text-white shadow-lg dark:border-slate-900">
                       <Star size={18} className="fill-white" />
                     </div>
                   </div>
 
                   <div className="flex w-full flex-grow flex-col">
-                    <h3 className="mb-2 text-2xl font-black uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#082f57] dark:text-white">
+                    <h3 className="mb-2 text-2xl font-black uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#00539b] dark:text-white">
                       {director.full_name}
                     </h3>
-                    <p className="mb-6 text-base font-extrabold uppercase text-[#082f57]">
+                    <p className="mb-6 text-base font-extrabold uppercase text-[#00539b]">
                       {director.position}
                     </p>
 
@@ -106,8 +106,8 @@ export default function DirectorsSection() {
 
                     <div className="mt-auto w-full pt-4">
                       <Link href={`/gzver/${director.slug}`} className="block">
-                        <Button className="btn-primary h-12 w-full rounded-md text-sm font-semibold">
-                          Xem Hồ Sơ <ArrowRight size={18} />
+                        <Button className="btn-primary h-12 w-full rounded-none text-sm font-semibold">
+                          Xem hồ sơ <ArrowRight size={18} />
                         </Button>
                       </Link>
                     </div>

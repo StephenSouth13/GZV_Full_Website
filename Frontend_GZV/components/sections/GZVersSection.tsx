@@ -70,8 +70,8 @@ const GZVersSection = () => {
         </motion.div>
 
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-center md:gap-6">
-          <Button onClick={prevSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-full border-teal-200 md:inline-flex">
-            <ChevronLeft className="text-teal-600" />
+          <Button onClick={prevSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-none border-slate-300 md:inline-flex">
+            <ChevronLeft className="text-[#00539b]" />
           </Button>
 
           <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:flex-grow md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
@@ -85,24 +85,24 @@ const GZVersSection = () => {
                   transition={{ duration: 0.4 }}
                   className="h-full w-[82vw] max-w-[340px] flex-none snap-center sm:w-[46vw] md:w-auto md:max-w-none"
                 >
-                  <Card className="group flex h-full flex-col rounded-lg border border-slate-200 bg-white/90 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950">
+                  <Card className="group flex h-full flex-col rounded-none border border-slate-200 bg-white/90 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:border-[#00539b] dark:border-slate-800 dark:bg-slate-950">
                     <CardContent className="flex h-full flex-col items-center p-5 text-center sm:p-6 lg:p-8">
                       <div className="relative mb-6">
-                        <div className="h-20 w-20 overflow-hidden rounded-full border-4 border-white shadow-lg sm:h-24 sm:w-24">
+                        <div className="h-20 w-20 overflow-hidden rounded-md border-4 border-white shadow-lg sm:h-24 sm:w-24">
                           <Image src={gzver.avatar_url || "/placeholder-user.jpg"} alt={gzver.full_name} width={96} height={96} unoptimized className="h-full w-full object-cover" />
                         </div>
-                        <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 shadow-md">
+                        <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-none bg-[#ed1c24] shadow-md">
                           <Star className="h-4 w-4 fill-current text-white" />
                         </div>
                       </div>
 
                       <div className="flex w-full flex-grow flex-col">
                         <h3 className="mb-1 text-lg font-bold text-gray-900 sm:text-xl">{gzver.full_name}</h3>
-                        <p className="mb-1 text-sm font-medium text-teal-600">{gzver.position}</p>
+                        <p className="mb-1 text-sm font-medium text-[#00539b]">{gzver.position}</p>
                         <p className="mb-4 text-xs uppercase text-gray-400">@{gzver.company}</p>
 
                         {gzver.achievement_summary && (
-                          <div className="mt-auto flex flex-grow items-center justify-center rounded-md bg-slate-50 p-4 dark:bg-slate-900">
+                          <div className="mt-auto flex flex-grow items-center justify-center rounded-none bg-slate-50 p-4 dark:bg-slate-900">
                             <p className="text-sm italic text-gray-600">"{gzver.achievement_summary}"</p>
                           </div>
                         )}
@@ -115,16 +115,16 @@ const GZVersSection = () => {
           </div>
 
           <div className="flex justify-center gap-3 md:hidden">
-            <Button onClick={prevSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-full border-teal-200">
-              <ChevronLeft className="text-teal-600" />
+            <Button onClick={prevSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-none border-slate-300">
+              <ChevronLeft className="text-[#00539b]" />
             </Button>
-            <Button onClick={nextSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-full border-teal-200">
-              <ChevronRight className="text-teal-600" />
+            <Button onClick={nextSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-none border-slate-300">
+              <ChevronRight className="text-[#00539b]" />
             </Button>
           </div>
 
-          <Button onClick={nextSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-full border-teal-200 md:inline-flex">
-            <ChevronRight className="text-teal-600" />
+          <Button onClick={nextSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-none border-slate-300 md:inline-flex">
+            <ChevronRight className="text-[#00539b]" />
           </Button>
         </div>
       </div>

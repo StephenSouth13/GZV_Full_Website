@@ -11,7 +11,7 @@ export default function NotFound() {
     {
       title: "Khám phá các khóa học",
       description: "Tìm hiểu các chương trình đào tạo chuyên nghiệp",
-      href: "/dao-tao",
+      href: "/#dich-vu",
       icon: BookOpen,
       color: "from-blue-500 to-blue-600",
     },

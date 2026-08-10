@@ -290,8 +290,8 @@ function ProgramsGrid({ title, subtitle, limit = 12 }: any) {
                 </CardHeader>
                 <CardContent>
                   <p className="mb-6 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{program.description}</p>
-                  <Link href={`/dao-tao/${program.slug}`}>
-                    <Button className="w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700">Chi tiết khóa học</Button>
+                  <Link href="/#dich-vu">
+                    <Button className="w-full rounded-none bg-[#00539b] text-white hover:bg-[#ed1c24]">Chi tiết dịch vụ</Button>
                   </Link>
                 </CardContent>
               </Card>

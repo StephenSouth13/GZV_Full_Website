@@ -178,7 +178,7 @@ export default function StudentDashboard() {
         <CardContent>
           {items.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Giỏ hàng trống. <Link className="text-blue-600 hover:underline" href="/dao-tao">Xem khóa học</Link>
+              Giỏ hàng trống. <Link className="text-blue-600 hover:underline" href="/#dich-vu">Xem dịch vụ</Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
@@ -252,7 +252,7 @@ export default function StudentDashboard() {
                 <div className="text-sm font-semibold text-blue-600">
                   {formatCurrency(course.price)}
                 </div>
-                <Link href={`/dao-tao/${course.id}`}>
+                <Link href="/#dich-vu">
                   <Button variant="outline" size="sm">Chi tiết</Button>
                 </Link>
               </CardContent>

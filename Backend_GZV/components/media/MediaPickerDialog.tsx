@@ -7,12 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Folder, Search, Upload, Loader2, Image as ImageIcon, Check } from 'lucide-react'
+import { Folder, Search, Upload, Loader2, Image as ImageIcon, Check, Video } from 'lucide-react'
 
 const BUCKET = 'media'
 const DEFAULT_FOLDERS = [
   'articles', 'projects', 'project-thumbnails', 'project-videos',
-  'courses', 'mentors', 'authors', 'gzvers', 'training', 'uploads',
+  'courses', 'mentors', 'authors', 'gzvers', 'training', 'uploads', 'site', 'hero-videos',
 ]
 
 type Item = { name: string; path: string; url: string; size: number; mimetype: string }
@@ -57,7 +57,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
         limit: 500, sortBy: { column: 'created_at', order: 'desc' },
       })
       if (error) throw error
-      const files = (data || []).filter(o => o.metadata && /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(o.name))
+      const files = (data || []).filter(o => o.metadata && /\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov)$/i.test(o.name))
       setItems(files.map(file => {
         const path = `${f}/${file.name}`
         const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
@@ -101,12 +101,12 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[1100px] w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-3xl border-none">
-        <DialogHeader className="px-7 py-5 border-b bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-3xl">
+      <DialogContent className="max-w-[1100px] w-[95vw] max-h-[90vh] overflow-hidden p-0 rounded-none border-none">
+        <DialogHeader className="px-7 py-5 border-b bg-[#050505] text-white">
           <DialogTitle className="text-lg font-black uppercase tracking-tight flex items-center gap-2">
             <ImageIcon size={18} /> Chèn ảnh từ thư viện
           </DialogTitle>
-          <DialogDescription className="text-blue-100 text-[11px] font-bold uppercase tracking-widest">
+          <DialogDescription className="text-white/70 text-[11px] font-bold uppercase tracking-widest">
             Chọn ảnh → chọn kích thước → bấm Chèn
           </DialogDescription>
         </DialogHeader>
@@ -119,8 +119,8 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
               {folders.map(f => (
                 <button key={f} onClick={() => setFolder(f)}
                   className={[
-                    'flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[12px] font-bold transition',
-                    folder === f ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:bg-slate-100',
+                    'flex items-center gap-2 px-3 py-2 rounded-none text-left text-[12px] font-bold transition',
+                    folder === f ? 'bg-[#ed1c24] text-white shadow' : 'text-slate-600 hover:bg-slate-100',
                   ].join(' ')}>
                   <Folder size={13} /> <span className="truncate">{f}</span>
                 </button>
@@ -136,10 +136,10 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
                 <Input value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Tìm ảnh trong thư mục…" className="h-9 pl-9 text-sm rounded-lg" />
               </div>
-              <Button variant="outline" size="sm" className="h-9 rounded-lg" onClick={() => fileRef.current?.click()} disabled={uploading}>
+              <Button variant="outline" size="sm" className="h-9 rounded-none" onClick={() => fileRef.current?.click()} disabled={uploading}>
                 {uploading ? <Loader2 className="animate-spin mr-1" size={14} /> : <Upload size={14} className="mr-1" />} Tải mới
               </Button>
-              <input ref={fileRef} type="file" multiple accept="image/*" className="hidden"
+              <input ref={fileRef} type="file" multiple accept="image/*,video/*" className="hidden"
                 onChange={e => { handleUpload(e.target.files); e.target.value = '' }} />
             </div>
 
@@ -159,14 +159,21 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
                     return (
                       <button key={item.path} onClick={() => setSelected(item)}
                         className={[
-                          'relative group rounded-xl overflow-hidden border-2 transition-all bg-white',
-                          isSel ? 'border-blue-600 ring-4 ring-blue-100 shadow-lg scale-[1.02]' : 'border-transparent hover:border-blue-200',
+                          'relative group rounded-none overflow-hidden border-2 transition-all bg-white',
+                          isSel ? 'border-[#ed1c24] ring-4 ring-red-100 shadow-lg scale-[1.02]' : 'border-transparent hover:border-red-200',
                         ].join(' ')}>
                         <div className="aspect-square bg-slate-100">
-                          <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
+                          {/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(item.name) ? (
+                            <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-[#050505] text-white">
+                              <Video className="h-8 w-8 text-[#ed1c24]" />
+                              <span className="px-3 text-[10px] font-black uppercase">Video</span>
+                            </div>
+                          ) : (
+                            <img src={item.url} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
+                          )}
                         </div>
                         {isSel && (
-                          <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg">
+                          <div className="absolute top-2 right-2 h-6 w-6 bg-[#ed1c24] text-white flex items-center justify-center shadow-lg">
                             <Check size={14} />
                           </div>
                         )}
@@ -185,8 +192,8 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
                 {SIZES.map(s => (
                   <button key={s.value} onClick={() => setWidth(s.value)}
                     className={[
-                      'px-3 h-8 rounded-lg text-[11px] font-black uppercase tracking-wider transition border',
-                      width === s.value ? 'bg-blue-600 text-white border-blue-600 shadow' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
+                      'px-3 h-8 rounded-none text-[11px] font-black uppercase tracking-wider transition border',
+                      width === s.value ? 'bg-[#ed1c24] text-white border-[#ed1c24] shadow' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50',
                     ].join(' ')}>
                     {s.label}
                   </button>
@@ -195,7 +202,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'ar
               <div className="ml-auto flex items-center gap-2">
                 <Button variant="ghost" onClick={onClose} className="h-10 font-bold text-slate-500">Hủy</Button>
                 <Button disabled={!selected} onClick={confirm}
-                  className="h-10 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-xs tracking-wider shadow-lg">
+                  className="h-10 px-6 rounded-none bg-[#ed1c24] hover:bg-[#c91218] text-white font-black uppercase text-xs tracking-wider shadow-lg">
                   <Check size={14} className="mr-1.5" /> Chèn ảnh
                 </Button>
               </div>

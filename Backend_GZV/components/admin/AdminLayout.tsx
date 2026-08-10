@@ -15,9 +15,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900/20 overflow-hidden">
-      {/* Glassmorphism background overlay */}
-      <div className="fixed inset-0 bg-gradient-to-br from-white/40 via-blue-50/30 to-indigo-100/40 dark:from-gray-900/40 dark:via-slate-800/30 dark:to-indigo-900/40 backdrop-blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full overflow-hidden bg-[#f4f6f8] text-slate-950 dark:bg-[#050505] dark:text-white">
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-1 bg-[#ed1c24]" />
       
       <div className="relative flex h-screen overflow-hidden w-full">
         {/* Sidebar - hidden on mobile, shown on lg */}
@@ -61,7 +60,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="backdrop-blur-xl bg-white/10 dark:bg-gray-900/10 min-h-full w-full">
+            <div className="min-h-full w-full">
               {children}
             </div>
           </motion.main>

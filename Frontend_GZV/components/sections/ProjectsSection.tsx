@@ -35,7 +35,7 @@ const ProjectsSection = () => {
   if (!loading && section?.is_visible === false) return null
 
   return (
-    <section className="border-y border-slate-200 bg-slate-50 py-20 dark:border-slate-800 dark:bg-neutral-900">
+    <section className="border-y border-slate-200 bg-white py-20 dark:border-slate-800 dark:bg-neutral-900">
       <div className="container mx-auto px-4">
         <motion.div
           className="text-center mb-16"
@@ -45,7 +45,7 @@ const ProjectsSection = () => {
           viewport={{ once: true }}
         >
           <h2 className="section-title mb-6">
-            {section?.title || "Dự án tiêu biểu"}
+            {section?.title || "Dự án đã triển khai"}
           </h2>
           {(section?.subtitle || section?.description) && (
             <p className="text-xl text-gray-500 dark:text-neutral-400 max-w-3xl mx-auto leading-relaxed">
@@ -57,7 +57,7 @@ const ProjectsSection = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-12">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-[450px] bg-white dark:bg-neutral-800 animate-pulse rounded-[2.5rem] shadow-sm" />
+              <div key={i} className="h-[450px] animate-pulse rounded-none border border-slate-200 bg-slate-50 shadow-sm dark:bg-neutral-800" />
             ))}
           </div>
         ) : projects.length > 0 ? (

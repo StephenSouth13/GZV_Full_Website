@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { useTheme } from "next-themes"
+import { Bell, ExternalLink, LogOut, Menu, Moon, Search, Settings, Sun, User } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,193 +15,143 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Badge } from '@/components/ui/badge'
-import { 
-  Bell, 
-  LogOut, 
-  User, 
-  Settings,
-  Menu,
-  Sun,
-  Moon
-} from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { supabase } from '@/lib/supabase'
+} from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase"
 
 interface AdminHeaderProps {
   onToggleSidebar: () => void
   sidebarCollapsed: boolean
 }
 
-export function AdminHeader({ onToggleSidebar, sidebarCollapsed }: AdminHeaderProps) {
+function titleFromPath(pathname: string) {
+  const segment = pathname.split("/").filter(Boolean).pop() || "dashboard"
+  const labels: Record<string, string> = {
+    dashboard: "Dashboard",
+    "site-content": "Website Control",
+    projects: "Dự án",
+    articles: "Tin tức",
+    gzvers: "GZVers",
+    mentors: "Mentors",
+    partners: "Đối tác",
+    contacts: "Tin liên hệ",
+    images: "Media",
+    users: "Người dùng",
+    settings: "Cài đặt",
+  }
+  return labels[segment] || segment.replace(/-/g, " ")
+}
+
+export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
   const { theme, setTheme } = useTheme()
   const router = useRouter()
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
-  const [userRole, setUserRole] = useState<string>('collab')
+  const [userRole, setUserRole] = useState("collab")
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
         setUser(session.user)
-        const role = localStorage.getItem('user_role') || 'collab'
-        setUserRole(role)
+        setUserRole(localStorage.getItem("user_role") || "collab")
       }
     }
     getUser()
   }, [])
 
-  // TODO: Load real notifications from database
-  const notifications: Array<{ id: number; title: string; time: string; unread: boolean }> = []
-
-  const unreadCount = notifications.filter(n => n.unread).length
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    localStorage.removeItem('user_role')
-    router.push('/admin-login')
+    localStorage.removeItem("user_role")
+    router.push("/admin-login")
   }
 
-  const handleNavigate = (path: string) => {
-    router.push(path)
-  }
-
-  const getUserInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase()
-  }
-
-  const getRoleColor = (role: string) => {
-    return role === 'admin' ? 'bg-blue-500' : 'bg-emerald-500'
-  }
-
-  const getRoleBadgeColor = (role: string) => {
-    return role === 'admin' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 
-           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200'
+  const getUserInitials = (value?: string | null) => {
+    if (!value) return "G"
+    return value.split(/[\s@.]+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase()
   }
 
   return (
-    <header className="h-14 md:h-16 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10 border-b border-white/20 dark:border-gray-700/20 relative z-30 w-full">
-      <div className="flex items-center justify-between h-full px-4 md:px-6 w-full">
-        {/* Left Section */}
-        <div className="flex items-center space-x-4">
+    <header className="relative z-30 h-16 w-full border-b border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-[#0b0b0b]">
+      <div className="flex h-full items-center justify-between gap-4 px-4 md:px-6">
+        <div className="flex min-w-0 items-center gap-4">
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={onToggleSidebar}
-            className="lg:hidden text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            className="rounded-none text-slate-700 hover:bg-slate-100 lg:hidden dark:text-white dark:hover:bg-white/10"
           >
             <Menu className="h-5 w-5" />
           </Button>
 
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="hidden sm:block"
-          >
-            <h1 className="text-sm md:text-lg font-semibold text-gray-900 dark:text-white capitalize">
-              {userRole} Dashboard
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-              Welcome back, {user?.name}
-            </p>
+          <motion.div initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} className="min-w-0">
+            <div className="flex items-center gap-3">
+              <span className="hidden h-8 w-1 bg-[#ed1c24] sm:block" />
+              <div>
+                <h1 className="truncate text-lg font-black uppercase text-slate-950 dark:text-white">{titleFromPath(pathname)}</h1>
+                <p className="hidden text-xs font-semibold text-slate-500 sm:block">Chỉnh, thêm, xóa và xuất bản nội dung website GZV.</p>
+              </div>
+            </div>
           </motion.div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center space-x-4">
-          {/* Theme Toggle */}
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" className="hidden rounded-none border-slate-300 md:inline-flex" aria-label="Search">
+            <Search className="h-4 w-4" />
+          </Button>
           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            variant="outline"
+            size="icon"
+            onClick={() => window.open("http://localhost:3000", "_blank")}
+            className="hidden rounded-none border-slate-300 md:inline-flex"
+            aria-label="Open website"
           >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-none border-slate-300"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button variant="outline" size="icon" className="hidden rounded-none border-slate-300 sm:inline-flex" aria-label="Notifications">
+            <Bell className="h-4 w-4" />
           </Button>
 
-          {/* Notifications - hidden on mobile */}
-          <DropdownMenu open={notificationsOpen} onOpenChange={setNotificationsOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="relative hidden sm:flex">
-                <Bell className="h-4 md:h-5 w-4 md:w-5 text-gray-600 dark:text-gray-300" />
-                {unreadCount > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1"
-                  >
-                    <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
-                      {unreadCount}
-                    </Badge>
-                  </motion.div>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72 md:w-80 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90">
-              <DropdownMenuLabel>Thông báo</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-64 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <div className="flex items-start space-x-3 w-full">
-                      <div className={cn(
-                        'w-2 h-2 rounded-full mt-2 flex-shrink-0',
-                        notification.unread ? 'bg-blue-500' : 'bg-gray-300'
-                      )} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {notification.title}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {notification.time}
-                        </p>
-                      </div>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 md:h-10 md:w-10 rounded-full">
-                <Avatar className="h-8 w-8 md:h-10 md:w-10">
-                  <AvatarImage src={user?.email} alt={user?.name} />
-                  <AvatarFallback className={cn('text-white text-xs md:text-sm', getRoleColor(userRole))}>
-                    {getUserInitials(user?.email || user?.user_metadata?.full_name || 'User')}
+              <Button variant="ghost" className="h-10 w-10 rounded-none p-0">
+                <Avatar className="h-10 w-10 rounded-none">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Admin"} />
+                  <AvatarFallback className="rounded-none bg-[#00539b] text-xs font-black text-white">
+                    {getUserInitials(user?.email || user?.user_metadata?.full_name)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 md:w-56 backdrop-blur-xl bg-white/90 dark:bg-gray-900/90">
+            <DropdownMenuContent align="end" className="w-64 rounded-none border-slate-200 bg-white/95 backdrop-blur dark:border-white/10 dark:bg-[#111]">
               <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.name}</p>
-                  <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
-                  <Badge className={cn('w-fit mt-1 text-xs', getRoleBadgeColor(userRole))}>
+                <div className="flex flex-col gap-2">
+                  <p className="truncate text-sm font-black">{user?.user_metadata?.full_name || "GZV Admin"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
+                  <Badge className={cn("w-fit rounded-none text-xs", userRole === "admin" ? "bg-[#ed1c24]" : "bg-[#00539b]")}>
                     {userRole}
                   </Badge>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleNavigate('/admin/profile')}>
+              <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
                 <User className="mr-2 h-4 w-4" />
                 Hồ sơ
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigate('/admin/settings')}>
+              <DropdownMenuItem onClick={() => router.push("/admin/settings")}>
                 <Settings className="mr-2 h-4 w-4" />
                 Cài đặt
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+              <DropdownMenuItem onClick={handleLogout} className="text-[#ed1c24]">
                 <LogOut className="mr-2 h-4 w-4" />
                 Đăng xuất
               </DropdownMenuItem>

@@ -1,8 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { getPageSlugFromPath, getSitePageContent, type SitePageContent } from '@/lib/site-content'
 
@@ -34,7 +33,9 @@ export default function PageBanner({
     getSitePageContent(getPageSlugFromPath(pathname)).then((data) => {
       if (active) setManagedPage(data)
     })
-    return () => { active = false }
+    return () => {
+      active = false
+    }
   }, [pathname])
 
   const displayTitle = managedPage?.banner_title || title
@@ -44,36 +45,33 @@ export default function PageBanner({
   const bannerImage = managedPage?.banner_image_url
 
   return (
-    <section className={`py-20 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-900 text-white relative overflow-hidden ${className}`}>
+    <section className={`relative overflow-hidden bg-[#050505] py-20 text-white ${className}`}>
       {bannerImage && (
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-35"
+          className="absolute inset-0 bg-cover bg-center opacity-20 grayscale"
           style={{ backgroundImage: `url(${bannerImage})` }}
           aria-hidden="true"
         />
       )}
-      {bannerImage && <div className="absolute inset-0 bg-blue-950/65" aria-hidden="true" />}
-      {/* Decorative background blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-      </div>
+      <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(5,5,5,0.96)_0%,rgba(5,5,5,0.88)_54%,rgba(237,28,36,0.30)_100%)]" aria-hidden="true" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" aria-hidden="true" />
+      <div className="absolute bottom-0 left-0 h-20 w-full border-t border-white/10 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.08)_0,rgba(255,255,255,0.08)_1px,transparent_1px,transparent_14px)]" aria-hidden="true" />
 
       <div className="container relative z-10">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="mx-auto max-w-4xl text-center">
           {displayBadge && (
             <motion.div
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/20"
+              className="mb-6 inline-flex items-center gap-2 border-l-4 border-[#ed1c24] bg-white/10 px-4 py-2 backdrop-blur-sm"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="text-sm font-semibold text-teal-300 uppercase tracking-wider">{displayBadge}</span>
+              <span className="text-sm font-black uppercase tracking-wider text-white">{displayBadge}</span>
             </motion.div>
           )}
 
           <motion.h1
-            className="text-5xl md:text-6xl font-bold mb-6 font-serif"
+            className="mb-6 text-5xl font-black uppercase leading-tight md:text-6xl"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
@@ -83,7 +81,7 @@ export default function PageBanner({
 
           {displaySubtitle && (
             <motion.p
-              className="text-xl text-blue-100 mb-8 leading-relaxed"
+              className="mb-8 text-xl font-semibold leading-relaxed text-white/78"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
@@ -94,7 +92,7 @@ export default function PageBanner({
 
           {displayDescription && (
             <motion.p
-              className="text-lg text-blue-100 mb-8 leading-relaxed"
+              className="mb-8 text-lg leading-relaxed text-white/70"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
@@ -105,15 +103,15 @@ export default function PageBanner({
 
           {stats && stats.length > 0 && (
             <motion.div
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12"
+              className="mt-12 grid grid-cols-2 gap-4 md:grid-cols-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.4 }}
             >
               {stats.map((stat, idx) => (
-                <div key={idx} className="text-center">
-                  <div className="text-3xl font-bold text-teal-300 mb-2">{stat.value}</div>
-                  <div className="text-sm text-blue-200">{stat.label}</div>
+                <div key={idx} className="border border-white/12 bg-white/6 px-4 py-5 text-center">
+                  <div className="mb-2 text-3xl font-black text-[#ed1c24]">{stat.value}</div>
+                  <div className="text-sm font-bold uppercase tracking-wide text-white/65">{stat.label}</div>
                 </div>
               ))}
             </motion.div>

@@ -33,7 +33,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
       transition={{ duration: 0.3 }}
       className="h-full"
     >
-      <Card className="h-full flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-[0_14px_34px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] transition-all duration-300 overflow-hidden group rounded-lg">
+      <Card className="h-full flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-[0_14px_34px_rgba(15,23,42,0.08)] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] transition-all duration-300 overflow-hidden group rounded-none">
         
         {/* Header Image */}
         <div className="relative overflow-hidden aspect-[16/10]">
@@ -43,13 +43,13 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <Badge className="absolute top-4 left-4 bg-[#082f57]/95 backdrop-blur-md text-white border-none px-3 py-1 font-black text-[9px] uppercase">
+          <Badge className="absolute top-4 left-4 rounded-none bg-[#00539b]/95 backdrop-blur-md text-white border-none px-3 py-1 font-black text-[9px] uppercase">
             {category}
           </Badge>
         </div>
 
         <CardHeader className="pb-3 px-6 pt-6">
-          <h3 className="text-xl font-black text-slate-900 dark:text-white line-clamp-2 min-h-[3.5rem] leading-tight group-hover:text-blue-600 transition-colors">
+          <h3 className="text-xl font-black text-slate-900 dark:text-white line-clamp-2 min-h-[3.5rem] leading-tight group-hover:text-[#00539b] transition-colors">
             {title}
           </h3>
         </CardHeader>
@@ -64,7 +64,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
             <div className="flex items-center gap-2">
               <div className="flex -space-x-3">
                 {displayAuthors.map((auth, i) => (
-                  <Avatar key={i} className="h-8 w-8 border-2 border-white dark:border-slate-900 shadow-sm transition-transform hover:-translate-y-1">
+                  <Avatar key={i} className="h-8 w-8 rounded-md border-2 border-white dark:border-slate-900 shadow-sm transition-transform hover:-translate-y-1">
                     <AvatarImage src={auth.avatar_url} className="object-cover" />
                     <AvatarFallback className="text-[10px] font-bold">{auth.full_name?.[0]}</AvatarFallback>
                   </Avatar>
@@ -73,13 +73,13 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
                 {remaining > 0 && (
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button className="h-8 w-8 rounded-full bg-slate-900 text-white border-2 border-white flex items-center justify-center text-[9px] font-black hover:bg-blue-600 transition-colors z-10 shadow-md">
+                      <button className="h-8 w-8 rounded-md bg-slate-900 text-white border-2 border-white flex items-center justify-center text-[9px] font-black hover:bg-[#00539b] transition-colors z-10 shadow-md">
                         +{remaining}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-64 p-4 rounded-lg shadow-2xl border border-slate-200 bg-white/95 backdrop-blur-md z-[100]">
+                    <PopoverContent className="w-64 p-4 rounded-none shadow-2xl border border-slate-200 bg-white/95 backdrop-blur-md z-[100]">
                       <div className="flex items-center gap-2 mb-3 pb-2 border-b">
-                        <Users size={14} className="text-blue-600" />
+                        <Users size={14} className="text-[#00539b]" />
                         <span className="text-[10px] font-black uppercase text-slate-400">Chuyên gia thực hiện</span>
                       </div>
                       <div className="space-y-3">
@@ -113,7 +113,7 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
 
         <CardFooter className="px-6 pb-6 pt-0">
           <Link href={`/tin-tuc/${slug}`} className="w-full">
-            <Button className="w-full btn-primary rounded-lg h-11 text-sm font-semibold">
+            <Button className="w-full btn-primary rounded-none h-11 text-sm font-semibold">
               Đọc bài viết
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

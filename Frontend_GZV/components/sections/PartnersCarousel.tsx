@@ -30,7 +30,7 @@ const PartnersCarousel = () => {
   if (loading || section?.is_visible === false || partners.length === 0) return null
 
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-900 via-teal-800 to-blue-900 overflow-hidden">
+    <section className="overflow-hidden bg-[#050505] py-20">
       <div className="container">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -40,12 +40,12 @@ const PartnersCarousel = () => {
           className="text-center mb-16"
         >
           {section?.title && (
-            <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight font-sans mb-6">
+                <h2 className="mb-6 text-4xl font-black uppercase text-white md:text-5xl">
               {section.title}
             </h2>
           )}
           {(section?.subtitle || section?.description) && (
-            <p className="text-lg text-blue-100 max-w-3xl mx-auto font-medium">
+            <p className="mx-auto max-w-3xl text-lg font-medium text-white/70">
               {section?.subtitle || section?.description}
             </p>
           )}
@@ -54,7 +54,7 @@ const PartnersCarousel = () => {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {partners.map((partner) => {
             const logo = (
-              <div className="relative h-24 rounded-xl border border-white/20 bg-white/10 p-4 backdrop-blur-sm transition hover:bg-white/20">
+              <div className="relative h-24 rounded-none border border-white/20 bg-white p-4 transition hover:border-[#ed1c24]">
                 <Image
                   src={partner.logo_url || "/placeholder.svg"}
                   alt={partner.name}

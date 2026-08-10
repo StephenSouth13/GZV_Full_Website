@@ -145,7 +145,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                       
                       <DropdownMenuItem 
                         className="rounded-xl py-3 cursor-pointer gap-3 font-bold text-slate-600"
-                        onClick={() => window.open(`/dao-tao/${program.slug}`, '_blank')}
+                        onClick={() => window.open('/#dich-vu', '_blank')}
                       >
                         <ExternalLink className="h-4 w-4 text-slate-400" /> Xem bản Preview
                       </DropdownMenuItem>

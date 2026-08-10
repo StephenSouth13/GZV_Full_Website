@@ -5,9 +5,11 @@
 @tailwind utilities;
 
 :root {
-  --primary-blue: #082f57;
+  --primary-blue: #00539b;
   --primary-white: #ffffff;
-  --accent-orange: #f7931e;
+  --accent-red: #ed1c24;
+  --accent-orange: #ed1c24;
+  --brand-black: #050505;
   --ink: #0f172a;
   --muted-ink: #475569;
 }
@@ -21,8 +23,13 @@
     @apply bg-background text-foreground;
     font-family: 'Montserrat', 'Roboto', sans-serif;
     scroll-behavior: smooth;
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.92) 0%, #ffffff 28%, #ffffff 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 42%, #ffffff 100%);
     color: var(--ink);
+  }
+
+  ::selection {
+    background: var(--accent-red);
+    color: white;
   }
 }
 
@@ -32,11 +39,11 @@
   }
 
   .btn-primary {
-    @apply bg-[#082f57] hover:bg-[#0c3c78] text-white px-6 py-3 rounded-md font-bold transition-all duration-300 shadow-[0_10px_24px_rgba(8,47,87,0.18)] hover:shadow-[0_16px_34px_rgba(8,47,87,0.26)];
+    @apply bg-[#00539b] hover:bg-[#ed1c24] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 shadow-[0_12px_28px_rgba(0,83,155,0.18)];
   }
 
   .btn-secondary {
-    @apply bg-[#f7931e] hover:bg-[#df7d08] text-white px-6 py-3 rounded-md font-bold transition-all duration-300 shadow-[0_10px_24px_rgba(247,147,30,0.18)];
+    @apply bg-[#ed1c24] hover:bg-[#c91218] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 shadow-[0_12px_28px_rgba(237,28,36,0.18)];
   }
 
   .card-hover {
@@ -47,6 +54,7 @@
   .section-title {
     @apply text-3xl md:text-5xl font-black text-slate-950 dark:text-white uppercase font-sans;
     letter-spacing: 0;
+    line-height: 1.02;
   }
 
   .section-subtitle {
@@ -58,12 +66,16 @@
   }
 
   .section-kicker {
-    @apply mb-4 inline-flex items-center border-l-4 border-[#f7931e] bg-slate-50 px-4 py-2 text-[11px] font-black uppercase text-[#082f57] dark:bg-slate-900 dark:text-blue-200;
+    @apply mb-4 inline-flex items-center border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-2 text-[11px] font-black uppercase text-[#00539b] dark:bg-slate-900 dark:text-blue-200;
     letter-spacing: 0;
   }
 
   .sharp-card {
-    @apply rounded-lg border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-950;
+    @apply rounded-none border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 dark:border-slate-800 dark:bg-slate-950;
+  }
+
+  .brand-red-rule {
+    @apply h-[3px] w-24 bg-[#ed1c24];
   }
 
   /* Enhanced responsive utilities */
@@ -123,11 +135,11 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0c3c78;
-  border-radius: 4px;
+  background: #00539b;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #f7931e;
+  background: #ed1c24;
 }
 

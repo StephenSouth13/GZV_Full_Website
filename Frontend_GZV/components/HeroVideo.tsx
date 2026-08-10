@@ -1,136 +1,145 @@
 "use client"
-import Link from 'next/link';
+
+import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
-import { ChevronDown, Play, Pause } from "lucide-react"
-import { useState, useRef } from "react"
-import { useLanguage } from '@/components/language-provider'
+import { ArrowRight, Pause, Play } from "lucide-react"
+import { getHomeSectionConfig, type HomeSectionConfig } from "@/lib/site-content"
+
+const DEFAULT_HERO = {
+  title: "GZV Ltd",
+  subtitle: "The Next-Gen Company",
+  description:
+    "Đồng hành cùng doanh nghiệp và thế hệ trẻ qua Marketing, Sales và Digital Transformation với tư duy triển khai thực chiến.",
+  button_label: "Khám phá dịch vụ",
+  button_url: "/#dich-vu",
+  settings: {
+    video_url: "/Intro.mp4",
+    poster_url: "/og-image.jpg",
+  },
+}
+
+const getEmbedUrl = (url: string) => {
+  if (!url) return ""
+  if (/youtube\.com\/watch\?v=/.test(url)) return url.replace("watch?v=", "embed/")
+  if (/youtu\.be\//.test(url)) return url.replace("youtu.be/", "www.youtube.com/embed/")
+  if (/vimeo\.com\/\d+/.test(url)) return url.replace("vimeo.com/", "player.vimeo.com/video/")
+  return url
+}
+
+const isDirectVideo = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
 
 const HeroVideo = () => {
-  // Add error boundary or conditional check
-  let language = 'vi'; // default fallback
-  let t = (key: string) => key; // fallback translation function
-  
-  try {
-    const context = useLanguage();
-    language = context.language;
-    t = context.t;
-  } catch (error) {
-    console.warn('LanguageProvider not available, using fallback');
-  }
-
   const [isPlaying, setIsPlaying] = useState(true)
+  const [hero, setHero] = useState<HomeSectionConfig | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  const toggleVideo = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
+  useEffect(() => {
+    let active = true
+    getHomeSectionConfig("hero").then((section) => {
+      if (active) setHero(section)
+    })
+    return () => {
+      active = false
     }
+  }, [])
+
+  const toggleVideo = () => {
+    if (!videoRef.current) return
+    if (isPlaying) videoRef.current.pause()
+    else videoRef.current.play()
+    setIsPlaying(!isPlaying)
   }
 
-  const scrollToContact = () => {
-    const contactSection = document.getElementById("contact-section")
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" })
-    }
-  }
+  const visible = hero?.is_visible ?? true
+  if (!visible) return null
+
+  const title = hero?.title || DEFAULT_HERO.title
+  const subtitle = hero?.subtitle || DEFAULT_HERO.subtitle
+  const description = hero?.description || DEFAULT_HERO.description
+  const buttonLabel = hero?.button_label || DEFAULT_HERO.button_label
+  const buttonUrl = hero?.button_url || DEFAULT_HERO.button_url
+  const settings = { ...DEFAULT_HERO.settings, ...(hero?.settings || {}) }
+  const videoUrl = settings.video_url || DEFAULT_HERO.settings.video_url
+  const posterUrl = settings.poster_url || DEFAULT_HERO.settings.poster_url
+  const directVideo = isDirectVideo(videoUrl)
 
   return (
-    <section className="relative flex h-[calc(100svh-136px)] min-h-[360px] max-h-[720px] items-center justify-center overflow-hidden sm:min-h-[420px] lg:h-[calc(100vh-136px)] lg:min-h-[560px]">
-      {/* Video Background */}
-            <div
-        className="absolute inset-0 z-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%)
-          `,
-        }}
-      >
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          className="h-full w-full object-cover"
-          poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1920 1080'%3E%3Crect fill='%23003d6b' width='1920' height='1080'/%3E%3C/svg%3E"
-        >
-          <source src="/Intro.mp4" type="video/mp4" />
-        </video>
+    <section className="relative isolate overflow-hidden bg-[#050505] text-white">
+      <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(237,28,36,0.14),transparent_35%,rgba(255,255,255,0.04))]" aria-hidden="true" />
 
-        {/* Video Overlay */}
-        <div className="absolute inset-0 bg-black/40" />
-
-        {/* Animated waves overlay */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-y-12 animate-pulse" />
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-300/20 to-transparent transform skew-y-12 animate-pulse delay-1000" />
-        </div>
-      </div>
-
-      {/* Video Controls */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
-        onClick={toggleVideo}
-        className="absolute right-4 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all duration-300 hover:bg-white/30 sm:right-6 sm:top-6 sm:h-12 sm:w-12"
-      >
-        {isPlaying ? <Pause className="h-5 w-5 text-white" /> : <Play className="h-5 w-5 text-white ml-1" />}
-      </motion.button>
-
-      {/* Content */}
-      <div className="relative z-20 px-4 text-center text-white">
+      <div className="container relative z-10 grid gap-8 py-12 lg:grid-cols-[1.18fr_0.82fr] lg:items-center lg:py-16">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-4xl mx-auto"
+          transition={{ duration: 0.65, ease: "easeOut" }}
+          className="relative overflow-hidden border border-white/14 bg-black shadow-[0_28px_80px_rgba(0,0,0,0.42)]"
         >
-          {/* Logo 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mb-8"
-          >
-            <div className="mx-auto w-96 h-32 flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-white mb-2">gzv CENTER</h1>
-                <p className="text-lg text-gray-200">Life Long Learning</p>
-              </div>
-            </div>
-          </motion.div> */}
-
-          {/* Title 
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 font-serif"
-          >
-            {t("hero.title")}
-          </motion.h2>*/}
-
-          {/* Subtitle 
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl mx-auto leading-relaxed"
-          >
-            {t("hero.subtitle")}
-          </motion.p>*/}
-
-           
+          <div className="aspect-video bg-black">
+            {directVideo ? (
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                className="h-full w-full object-cover"
+                poster={posterUrl}
+              >
+                <source src={videoUrl} />
+              </video>
+            ) : (
+              <iframe
+                src={getEmbedUrl(videoUrl)}
+                className="h-full w-full"
+                title="GZV hero video"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            )}
+          </div>
+          {directVideo && (
+            <button
+              onClick={toggleVideo}
+              className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center border border-white/25 bg-black/65 text-white backdrop-blur transition hover:border-[#ed1c24] hover:bg-[#ed1c24]"
+              aria-label={isPlaying ? "Pause hero video" : "Play hero video"}
+            >
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="ml-0.5 h-5 w-5" />}
+            </button>
+          )}
         </motion.div>
+
+        <div className="border-l-4 border-[#ed1c24] bg-white px-6 py-7 text-[#050505] shadow-[0_24px_70px_rgba(0,0,0,0.18)] lg:px-8 lg:py-10">
+          <motion.div
+            initial={{ opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.75, ease: "easeOut" }}
+          >
+            <div className="mb-5 inline-flex border-l-4 border-[#ed1c24] bg-slate-100 px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-900">
+              {subtitle}
+            </div>
+            <h1 className="text-5xl font-black uppercase leading-none text-[#050505] sm:text-6xl lg:text-7xl">
+              {title}
+            </h1>
+            <p className="mt-6 text-lg font-semibold leading-8 text-slate-600 sm:text-xl">
+              {description}
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href={buttonUrl}>
+                <span className="inline-flex h-[52px] items-center justify-center bg-[#ed1c24] px-7 py-4 text-sm font-black uppercase text-white transition hover:bg-[#c91218]">
+                  {buttonLabel} <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
+              </Link>
+              <Link href="/lien-he">
+                <span className="inline-flex h-[52px] items-center justify-center border border-slate-300 bg-white px-7 py-4 text-sm font-black uppercase text-[#050505] transition hover:border-[#050505] hover:bg-[#050505] hover:text-white">
+                  Liên hệ GZV
+                </span>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   )

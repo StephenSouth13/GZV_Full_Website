@@ -65,8 +65,8 @@ export default function MyCoursesPage() {
               <div className="text-gray-600 dark:text-gray-400 mb-4">
                 Bạn chưa có khóa học nào đang học.
               </div>
-              <Link href="/dao-tao">
-                <Button>Khám phá khóa học</Button>
+              <Link href="/#dich-vu">
+                <Button>Khám phá dịch vụ</Button>
               </Link>
             </CardContent>
           </Card>

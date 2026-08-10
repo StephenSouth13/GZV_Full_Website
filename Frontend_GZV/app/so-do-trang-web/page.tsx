@@ -48,7 +48,7 @@ export default function SiteMapPage() {
     },
     {
       title: "Đào tạo",
-      href: "/dao-tao",
+      href: "/#dich-vu",
       icon: <GraduationCap className="h-5 w-5" />,
       description: "Các khóa học và chương trình đào tạo chuyên nghiệp"
     },

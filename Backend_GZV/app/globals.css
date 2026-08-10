@@ -3,9 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --primary-blue: #0c3c78;
+  --primary-blue: #00539b;
   --primary-white: #ffffff;
-  --accent-orange: #f7931e;
+  --accent-orange: #ed1c24;
+  --accent-red: #ed1c24;
+  --brand-black: #050505;
 }
 
 @layer base {
@@ -16,6 +18,7 @@
   body {
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
+    background: #f4f6f8;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -29,11 +32,11 @@
   }
 
   .btn-primary {
-    @apply bg-blue-700 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg;
+    @apply bg-[#00539b] hover:bg-[#ed1c24] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 hover:shadow-lg;
   }
 
   .btn-secondary {
-    @apply bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg;
+    @apply bg-[#ed1c24] hover:bg-[#c91218] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 hover:shadow-lg;
   }
 
   .card-hover {
@@ -119,10 +122,10 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0c3c78;
-  border-radius: 4px;
+  background: #00539b;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #f7931e;
+  background: #ed1c24;
 }
