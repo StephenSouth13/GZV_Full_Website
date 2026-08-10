@@ -127,11 +127,11 @@ const handleSubmit = async () => {
         {/* TOP NAVIGATION BAR */}
         <div className="h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-50">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-blue-600 rounded-lg">
+            <div className="p-2 bg-[#ed1c24] rounded-lg">
               <Wand2 className="text-white h-5 w-5 animate-pulse" />
             </div>
             <span className="font-bold text-slate-800 tracking-tight uppercase text-sm">gzv Content Studio</span>
-            <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-600 border-blue-200">v3.0 PRO</Badge>
+            <Badge variant="outline" className="ml-2 bg-red-50 text-[#ed1c24] border-red-200">v3.0 PRO</Badge>
           </div>
 
           <div className="flex items-center gap-3">
@@ -163,7 +163,7 @@ const handleSubmit = async () => {
                 <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
                   <Globe className="h-3 w-3" />
                   <span>gzventer.edu.vn/chia-se/</span>
-                  <span className="text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{formData.slug || 'your-slug-here'}</span>
+                  <span className="text-[#ed1c24] bg-red-50 px-2 py-0.5 rounded">{formData.slug || 'your-slug-here'}</span>
                 </div>
               </div>
 
@@ -191,7 +191,7 @@ const handleSubmit = async () => {
               <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
                 <Layout className="h-3 w-3" /> Ảnh bìa (16:9)
               </Label>
-              <div className="relative aspect-video rounded-[2rem] bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-blue-400 transition-all cursor-pointer shadow-sm">
+              <div className="relative aspect-video rounded-[2rem] bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-[#ed1c24] transition-all cursor-pointer shadow-sm">
                 {formData.image ? (
                   <>
                     <img src={formData.image} className="w-full h-full object-cover" />
@@ -203,7 +203,7 @@ const handleSubmit = async () => {
                   </>
                 ) : (
                   <label className="flex flex-col items-center gap-2 cursor-pointer">
-                    {uploading === 'thumb' ? <Loader2 className="animate-spin text-blue-500" /> : <Plus className="text-slate-400" />}
+                    {uploading === 'thumb' ? <Loader2 className="animate-spin text-[#ed1c24]" /> : <Plus className="text-slate-400" />}
                     <span className="text-[10px] font-bold text-slate-400 uppercase">Tải ảnh bìa</span>
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumb')} />
                   </label>
@@ -227,8 +227,8 @@ const handleSubmit = async () => {
                     }}
                     className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${
                       formData.author_ids.includes(m.id) 
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-md' 
-                      : 'bg-white border-slate-100 hover:border-blue-200'
+                      ? 'bg-[#ed1c24] border-[#ed1c24] text-white shadow-md' 
+                      : 'bg-white border-slate-100 hover:border-red-200'
                     }`}
                   >
                     <Avatar className="h-8 w-8 border-2 border-white/20">
@@ -237,7 +237,7 @@ const handleSubmit = async () => {
                     </Avatar>
                     <div className="flex flex-col">
                       <span className="text-xs font-black leading-none">{m.full_name}</span>
-                      <span className={`text-[9px] uppercase font-bold ${formData.author_ids.includes(m.id) ? 'text-blue-100' : 'text-slate-400'}`}>
+                      <span className={`text-[9px] uppercase font-bold ${formData.author_ids.includes(m.id) ? 'text-red-50' : 'text-slate-400'}`}>
                         {m.title || 'Tác giả'}
                       </span>
                     </div>
@@ -271,16 +271,16 @@ const handleSubmit = async () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl">
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-blue-600" />
-                  <span className="text-xs font-black text-blue-900 uppercase">Bài viết nổi bật</span>
+                  <Sparkles className="h-4 w-4 text-[#ed1c24]" />
+                  <span className="text-xs font-black text-red-950 uppercase">Bài viết nổi bật</span>
                 </div>
                 <input 
                   type="checkbox" 
                   checked={formData.featured}
                   onChange={(e) => setFormData(prev => ({...prev, featured: e.target.checked}))}
-                  className="h-5 w-5 rounded-full border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-5 w-5 rounded-full border-slate-300 text-[#ed1c24] focus:ring-[#ed1c24]"
                 />
               </div>
             </div>

@@ -78,7 +78,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
         {/* TOP BAR NHƯ MỘT EDITOR CHUYÊN NGHIỆP */}
         <div className="bg-slate-900 p-5 text-white flex justify-between items-center sticky top-0 z-50">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20"><Edit3 size={22} /></div>
+            <div className="p-2.5 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/20"><Edit3 size={22} /></div>
             <div>
               <h2 className="font-black text-lg leading-none uppercase tracking-tighter">gzv Publisher Pro</h2>
               <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mt-1"><Globe size={10}/> ĐANG CHỈNH SỬA CÔNG KHAI</p>
@@ -86,7 +86,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           </div>
           <div className="flex gap-3">
             <Button variant="ghost" className="text-slate-400 hover:text-white font-bold" onClick={onClose}>Hủy bỏ</Button>
-            <Button disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-black px-10 rounded-full h-12 shadow-xl shadow-blue-500/30" onClick={handleSave}>
+            <Button disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-10 rounded-full h-12 shadow-xl shadow-red-500/30" onClick={handleSave}>
               {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />} XÁC NHẬN XUẤT BẢN
             </Button>
           </div>
@@ -117,10 +117,10 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
                   {formData.image ? (
                     <>
                       <img src={formData.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="Thumb" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><label className="bg-white text-blue-600 px-6 py-2 rounded-full text-[10px] font-black cursor-pointer shadow-2xl hover:scale-110 transition-all">ĐỔI ẢNH<input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label></div>
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><label className="bg-white text-[#ed1c24] px-6 py-2 rounded-full text-[10px] font-black cursor-pointer shadow-2xl hover:scale-110 transition-all">ĐỔI ẢNH<input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label></div>
                     </>
                   ) : (
-                    <label className="cursor-pointer flex flex-col items-center gap-3">{uploading === 'thumbnails' ? <Loader2 className="animate-spin text-blue-600" /> : <Upload size={32} className="text-slate-300" />}<span className="text-[10px] font-black text-slate-400 tracking-tighter">TẢI LÊN THUMBNAIL</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label>
+                    <label className="cursor-pointer flex flex-col items-center gap-3">{uploading === 'thumbnails' ? <Loader2 className="animate-spin text-[#ed1c24]" /> : <Upload size={32} className="text-slate-300" />}<span className="text-[10px] font-black text-slate-400 tracking-tighter">TẢI LÊN THUMBNAIL</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label>
                   )}
                 </div>
               </div>
@@ -129,7 +129,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Nhóm tác giả (Đa người viết)</Label>
                 <div className="grid gap-2 max-h-60 overflow-y-auto pr-2">
                   {members.map(m => (
-                    <div key={m.id} onClick={() => { const current = formData.author_ids || []; const next = current.includes(m.id) ? current.filter((id:any) => id !== m.id) : [...current, m.id]; setFormData({...formData, author_ids: next})}} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${formData.author_ids?.includes(m.id) ? 'border-blue-600 bg-blue-50/50 shadow-md scale-[1.02]' : 'border-transparent bg-white hover:bg-slate-100'}`}>
+                    <div key={m.id} onClick={() => { const current = formData.author_ids || []; const next = current.includes(m.id) ? current.filter((id:any) => id !== m.id) : [...current, m.id]; setFormData({...formData, author_ids: next})}} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${formData.author_ids?.includes(m.id) ? 'border-[#ed1c24] bg-red-50/50 shadow-md scale-[1.02]' : 'border-transparent bg-white hover:bg-slate-100'}`}>
                       <Avatar className="h-8 w-8 shadow-sm"><AvatarImage src={m.avatar_url} className="object-cover" /><AvatarFallback>{m.full_name?.charAt(0)}</AvatarFallback></Avatar>
                       <span className="text-xs font-black text-slate-700 leading-none">{m.full_name}</span>
                     </div>

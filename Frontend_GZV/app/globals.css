@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  --primary-blue: #00539b;
+  --primary-red: #ed1c24;
   --primary-white: #ffffff;
   --accent-red: #ed1c24;
   --accent-orange: #ed1c24;
@@ -39,7 +39,7 @@
   }
 
   .btn-primary {
-    @apply bg-[#00539b] hover:bg-[#ed1c24] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 shadow-[0_12px_28px_rgba(0,83,155,0.18)];
+    @apply bg-[#ed1c24] hover:bg-[#ed1c24] text-white px-6 py-3 rounded-none font-black uppercase transition-all duration-300 shadow-[0_12px_28px_rgba(0,83,155,0.18)];
   }
 
   .btn-secondary {
@@ -66,7 +66,7 @@
   }
 
   .section-kicker {
-    @apply mb-4 inline-flex items-center border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-2 text-[11px] font-black uppercase text-[#00539b] dark:bg-slate-900 dark:text-blue-200;
+    @apply mb-4 inline-flex items-center border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-2 text-[11px] font-black uppercase text-[#ed1c24] dark:bg-slate-900 dark:text-red-100;
     letter-spacing: 0;
   }
 
@@ -135,7 +135,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00539b;
+  background: #ed1c24;
   border-radius: 0;
 }
 

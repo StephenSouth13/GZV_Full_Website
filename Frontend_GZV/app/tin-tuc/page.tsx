@@ -64,7 +64,7 @@ export default function BlogPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-white pt-20 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-24 w-24 border-b-2 border-[#ed1c24]"></div>
     </div>
   )
 
@@ -90,7 +90,7 @@ export default function BlogPage() {
         <section className="py-20 container px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <Link href={`/tin-tuc/${featuredPost.slug}`}>
-              <div className="relative group overflow-hidden rounded-[3.5rem] bg-slate-900 aspect-[21/9] shadow-2xl shadow-blue-900/20">
+              <div className="relative group overflow-hidden rounded-[3.5rem] bg-slate-900 aspect-[21/9] shadow-2xl shadow-red-950/20">
                 <img src={featuredPost.image || '/placeholder.jpg'} className="h-full w-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000" alt="Cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent p-10 md:p-20 flex flex-col justify-end">
                   <Badge className="w-fit mb-4 bg-red-600 text-white font-black px-4 py-1 uppercase text-[10px]">Tiêu biểu</Badge>
@@ -104,7 +104,7 @@ export default function BlogPage() {
                           ))}
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-[9px] font-black uppercase text-blue-400 leading-none mb-1">Expert Authors</span>
+                          <span className="text-[9px] font-black uppercase text-[#ed1c24] leading-none mb-1">Expert Authors</span>
                           <span className="text-sm font-bold text-white">{featuredPost.authors?.map(a => a.full_name).join(', ')}</span>
                         </div>
                      </div>
@@ -139,7 +139,7 @@ export default function BlogPage() {
             {selectedCategory && (
               <button
                 onClick={() => setSelectedCategory(null)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-50 text-[#ed1c24] rounded-lg font-semibold transition-colors"
               >
                 <X size={18} /> Xóa bộ lọc
               </button>
@@ -155,7 +155,7 @@ export default function BlogPage() {
               onClick={() => setSelectedCategory(null)}
               className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
                 !selectedCategory
-                  ? 'bg-blue-700 text-white'
+                  ? 'bg-[#ed1c24] text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -167,7 +167,7 @@ export default function BlogPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
                   selectedCategory === category
-                    ? 'bg-blue-700 text-white'
+                    ? 'bg-[#ed1c24] text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -185,7 +185,7 @@ export default function BlogPage() {
               onClick={() => setSortBy('newest')}
               className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
                 sortBy === 'newest'
-                  ? 'bg-blue-700 text-white'
+                  ? 'bg-[#ed1c24] text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -195,7 +195,7 @@ export default function BlogPage() {
               onClick={() => setSortBy('oldest')}
               className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${
                 sortBy === 'oldest'
-                  ? 'bg-blue-700 text-white'
+                  ? 'bg-[#ed1c24] text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -222,7 +222,7 @@ export default function BlogPage() {
                       <Badge className="bg-white/90 backdrop-blur-md text-slate-900 absolute top-6 left-6 font-black uppercase text-[9px] tracking-widest px-3 py-1 rounded-full shadow-xl border-none">{post.category}</Badge>
                     </div>
                     <CardContent className="p-10 flex flex-col flex-grow">
-                      <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">{post.title}</h3>
+                      <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-[#ed1c24] transition-colors line-clamp-2 leading-tight">{post.title}</h3>
                       <p className="text-slate-500 text-sm font-medium line-clamp-3 mb-10 italic leading-relaxed">{post.excerpt}</p>
                       <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
                          <div className="flex -space-x-2">

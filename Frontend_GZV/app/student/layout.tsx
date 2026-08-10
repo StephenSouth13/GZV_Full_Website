@@ -21,7 +21,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   if (isLoading) {
     return (
       <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ed1c24]"></div>
       </div>
     )
   }
@@ -47,7 +47,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
         {/* User Info Section */}
         <div className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="h-12 w-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+            <div className="h-12 w-12 bg-red-50 dark:bg-red-900 rounded-full flex items-center justify-center">
               {user.avatar ? (
                 <img 
                   src={user.avatar} 
@@ -55,7 +55,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                   className="h-12 w-12 rounded-full object-cover"
                 />
               ) : (
-                <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <User className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24]" />
               )}
             </div>
             <div>

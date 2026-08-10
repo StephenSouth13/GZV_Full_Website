@@ -30,7 +30,7 @@ export default function MentorCard({
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ duration: 0.3 }}
-        className="group cursor-pointer border border-slate-200 bg-white p-6 text-center shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition hover:border-[#00539b] dark:border-slate-800 dark:bg-slate-900"
+        className="group cursor-pointer border border-slate-200 bg-white p-6 text-center shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition hover:border-[#ed1c24] dark:border-slate-800 dark:bg-slate-900"
       >
         <div className="mx-auto mb-5 h-40 w-40 overflow-hidden border-4 border-slate-100 transition group-hover:border-[#ed1c24] dark:border-slate-800">
           <Image
@@ -46,7 +46,7 @@ export default function MentorCard({
         <h3 className="mb-1 text-lg font-black uppercase text-gray-900 dark:text-white">
           {name}
         </h3>
-        <p className="mb-1 font-bold text-[#00539b] dark:text-blue-300">
+        <p className="mb-1 font-bold text-[#ed1c24] dark:text-red-200">
           {title}
         </p>
         <p className="text-gray-500 dark:text-gray-400 text-sm">

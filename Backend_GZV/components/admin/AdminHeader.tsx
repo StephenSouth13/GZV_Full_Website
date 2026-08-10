@@ -125,7 +125,7 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
               <Button variant="ghost" className="h-10 w-10 rounded-none p-0">
                 <Avatar className="h-10 w-10 rounded-none">
                   <AvatarImage src={user?.user_metadata?.avatar_url} alt={user?.email || "Admin"} />
-                  <AvatarFallback className="rounded-none bg-[#00539b] text-xs font-black text-white">
+                  <AvatarFallback className="rounded-none bg-[#ed1c24] text-xs font-black text-white">
                     {getUserInitials(user?.email || user?.user_metadata?.full_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -136,7 +136,7 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
                 <div className="flex flex-col gap-2">
                   <p className="truncate text-sm font-black">{user?.user_metadata?.full_name || "GZV Admin"}</p>
                   <p className="truncate text-xs text-muted-foreground">{user?.email}</p>
-                  <Badge className={cn("w-fit rounded-none text-xs", userRole === "admin" ? "bg-[#ed1c24]" : "bg-[#00539b]")}>
+                  <Badge className={cn("w-fit rounded-none text-xs", userRole === "admin" ? "bg-[#ed1c24]" : "bg-[#ed1c24]")}>
                     {userRole}
                   </Badge>
                 </div>

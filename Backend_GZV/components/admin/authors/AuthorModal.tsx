@@ -127,7 +127,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: any) {
             
             <div className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-gray-500 tracking-widest flex items-center gap-2 px-1"><Linkedin size={14} className="text-blue-400"/> LinkedIn Profile</Label>
+                <Label className="text-[10px] font-black uppercase text-gray-500 tracking-widest flex items-center gap-2 px-1"><Linkedin size={14} className="text-[#ed1c24]"/> LinkedIn Profile</Label>
                 <Input className="bg-white/5 border-white/10 h-12 rounded-xl focus:ring-emerald-500/20 text-sm" placeholder="https://linkedin.com/in/..." value={formData.linkedin_url || ''} onChange={(e) => setFormData({...formData, linkedin_url: e.target.value})} />
               </div>
               <div className="space-y-2">

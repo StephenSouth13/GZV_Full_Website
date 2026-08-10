@@ -49,7 +49,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
 
   const getLevelBadge = (level: string) => {
     const config: any = {
-      'Cơ bản': 'bg-blue-50 text-blue-600 border-blue-100',
+      'Cơ bản': 'bg-red-50 text-[#ed1c24] border-red-100',
       'Trung cấp': 'bg-amber-50 text-amber-600 border-amber-100',
       'Nâng cao': 'bg-purple-50 text-purple-600 border-purple-100',
       'Chuyên gia': 'bg-rose-50 text-rose-600 border-rose-100'
@@ -87,7 +87,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
             </TableRow>
           ) : (
             programs.map((program: any) => (
-              <TableRow key={program.id} className="hover:bg-blue-50/20 border-slate-50 transition-all duration-500 group">
+              <TableRow key={program.id} className="hover:bg-red-50/20 border-slate-50 transition-all duration-500 group">
                 <TableCell className="py-10 pl-12">
                   <div className="flex items-center gap-6">
                     {/* Thumbnail xịn xò */}
@@ -101,12 +101,12 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     </div>
                     
                     <div className="flex flex-col justify-center space-y-2">
-                      <h3 className="font-black text-slate-800 text-xl leading-tight line-clamp-1 group-hover:text-blue-600 transition-colors uppercase italic tracking-tighter">
+                      <h3 className="font-black text-slate-800 text-xl leading-tight line-clamp-1 group-hover:text-[#ed1c24] transition-colors uppercase italic tracking-tighter">
                         {program.title}
                       </h3>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                          <Clock size={12} className="text-blue-500" /> {program.duration || 'Flexible'}
+                          <Clock size={12} className="text-[#ed1c24]" /> {program.duration || 'Flexible'}
                         </div>
                         <Badge className={`w-fit text-[8px] h-5 px-3 font-black shadow-none border-none rounded-full ${program.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
                           {program.status === 'published' ? '• LIVE' : '• DRAFT'}
@@ -118,7 +118,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
 
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
+                    <div className="p-3 bg-red-50 rounded-2xl text-[#ed1c24]">
                       <Users size={20} />
                     </div>
                     <div>
@@ -134,9 +134,9 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                   <div className="flex items-center gap-3">
                     <div 
                       className="w-10 h-10 rounded-2xl shadow-inner border-4 border-white"
-                      style={{ backgroundColor: program.theme_color || '#0077B6' }}
+                      style={{ backgroundColor: program.theme_color || '#ed1c24' }}
                     />
-                    <code className="text-[10px] font-black text-slate-400 uppercase">{program.theme_color || '#0077B6'}</code>
+                    <code className="text-[10px] font-black text-slate-400 uppercase">{program.theme_color || '#ed1c24'}</code>
                   </div>
                 </TableCell>
 
@@ -149,7 +149,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-72 p-3 rounded-[2rem] shadow-2xl border-none bg-white/90 backdrop-blur-xl">
                       <Link href={`/admin/training/${program.id}`}>
-                        <DropdownMenuItem className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-slate-600 focus:bg-blue-600 focus:text-white transition-all">
+                        <DropdownMenuItem className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-slate-600 focus:bg-[#ed1c24] focus:text-white transition-all">
                           <Edit3 className="h-5 w-5" /> CHỈNH SỬA CHUYÊN SÂU
                         </DropdownMenuItem>
                       </Link>

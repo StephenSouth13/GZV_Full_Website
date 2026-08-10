@@ -184,12 +184,12 @@ function ProfileContent() {
           <div className="flex flex-col md:flex-row md:items-end gap-5 -mt-12 mb-6">
             <Avatar className="h-28 w-28 border-4 border-white dark:border-gray-800 shadow-lg">
               <AvatarImage src={formData.avatarUrl} alt={formData.fullName || formData.email} />
-              <AvatarFallback className="bg-blue-600 text-white text-3xl font-bold">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-[#ed1c24] text-white text-3xl font-bold">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">{formData.fullName || formData.email}</h2>
               <div className="flex flex-wrap gap-2 mt-2">
-                <Badge className={profile.role === "admin" ? "bg-blue-600" : "bg-emerald-600"}><Shield className="h-3 w-3 mr-1" />{profile.role || "collab"}</Badge>
+                <Badge className={profile.role === "admin" ? "bg-[#ed1c24]" : "bg-emerald-600"}><Shield className="h-3 w-3 mr-1" />{profile.role || "collab"}</Badge>
                 <Badge variant="outline" className="bg-white/70 dark:bg-gray-800/70">{profile.status === "active" ? "Đang hoạt động" : profile.status || "Chưa rõ"}</Badge>
               </div>
             </div>
@@ -256,7 +256,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function InfoCard({ icon, label, value, action }: { icon: ReactNode; label: string; value: string; action?: ReactNode }) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30">
-      <div className="h-10 w-10 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 flex items-center justify-center shrink-0">{icon}</div>
+      <div className="h-10 w-10 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#ed1c24] dark:text-red-200 flex items-center justify-center shrink-0">{icon}</div>
       <div className="flex-1 min-w-0"><p className="text-sm text-gray-500">{label}</p><p className="font-medium text-gray-900 dark:text-white truncate">{value}</p></div>
       {action}
     </div>

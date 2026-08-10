@@ -53,7 +53,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
         {disabledPage ? (
           <section className="flex min-h-[55vh] items-center justify-center bg-slate-50 px-4 py-20 text-center dark:bg-gray-900">
             <div className="max-w-xl">
-              <p className="text-sm font-black uppercase tracking-[0.3em] text-blue-600">GZV</p>
+              <p className="text-sm font-black uppercase tracking-[0.3em] text-[#ed1c24]">GZV</p>
               <h1 className="mt-4 text-3xl font-black text-slate-900 dark:text-white">Trang đang được bảo trì</h1>
               <p className="mt-4 text-slate-600 dark:text-slate-300">Nội dung này đang được admin tạm ẩn và sẽ quay lại khi hoàn tất cập nhật.</p>
             </div>

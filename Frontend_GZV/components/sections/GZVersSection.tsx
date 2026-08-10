@@ -71,7 +71,7 @@ const GZVersSection = () => {
 
         <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-center md:gap-6">
           <Button onClick={prevSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-none border-slate-300 md:inline-flex">
-            <ChevronLeft className="text-[#00539b]" />
+            <ChevronLeft className="text-[#ed1c24]" />
           </Button>
 
           <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6 md:mx-0 md:grid md:flex-grow md:grid-cols-2 md:gap-6 md:overflow-visible md:px-0 md:pb-0 lg:grid-cols-3">
@@ -85,7 +85,7 @@ const GZVersSection = () => {
                   transition={{ duration: 0.4 }}
                   className="h-full w-[82vw] max-w-[340px] flex-none snap-center sm:w-[46vw] md:w-auto md:max-w-none"
                 >
-                  <Card className="group flex h-full flex-col rounded-none border border-slate-200 bg-white/90 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:border-[#00539b] dark:border-slate-800 dark:bg-slate-950">
+                  <Card className="group flex h-full flex-col rounded-none border border-slate-200 bg-white/90 shadow-[0_14px_34px_rgba(15,23,42,0.08)] backdrop-blur-sm transition hover:border-[#ed1c24] dark:border-slate-800 dark:bg-slate-950">
                     <CardContent className="flex h-full flex-col items-center p-5 text-center sm:p-6 lg:p-8">
                       <div className="relative mb-6">
                         <div className="h-20 w-20 overflow-hidden rounded-md border-4 border-white shadow-lg sm:h-24 sm:w-24">
@@ -98,7 +98,7 @@ const GZVersSection = () => {
 
                       <div className="flex w-full flex-grow flex-col">
                         <h3 className="mb-1 text-lg font-bold text-gray-900 sm:text-xl">{gzver.full_name}</h3>
-                        <p className="mb-1 text-sm font-medium text-[#00539b]">{gzver.position}</p>
+                        <p className="mb-1 text-sm font-medium text-[#ed1c24]">{gzver.position}</p>
                         <p className="mb-4 text-xs uppercase text-gray-400">@{gzver.company}</p>
 
                         {gzver.achievement_summary && (
@@ -116,15 +116,15 @@ const GZVersSection = () => {
 
           <div className="flex justify-center gap-3 md:hidden">
             <Button onClick={prevSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-none border-slate-300">
-              <ChevronLeft className="text-[#00539b]" />
+              <ChevronLeft className="text-[#ed1c24]" />
             </Button>
             <Button onClick={nextSlide} variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-none border-slate-300">
-              <ChevronRight className="text-[#00539b]" />
+              <ChevronRight className="text-[#ed1c24]" />
             </Button>
           </div>
 
           <Button onClick={nextSlide} variant="outline" size="icon" className="hidden shrink-0 rounded-none border-slate-300 md:inline-flex">
-            <ChevronRight className="text-[#00539b]" />
+            <ChevronRight className="text-[#ed1c24]" />
           </Button>
         </div>
       </div>

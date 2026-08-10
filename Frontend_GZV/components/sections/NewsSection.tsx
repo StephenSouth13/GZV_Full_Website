@@ -52,7 +52,7 @@ const NewsSection = () => {
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-80 gap-4">
-            <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+            <Loader2 className="h-12 w-12 text-[#ed1c24] animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">

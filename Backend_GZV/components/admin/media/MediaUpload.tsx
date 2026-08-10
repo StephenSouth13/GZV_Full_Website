@@ -131,7 +131,7 @@ export function MediaUpload({ isOpen, onClose }: MediaUploadProps) {
       case 'error':
         return <AlertCircle className="h-5 w-5 text-red-600" />
       case 'uploading':
-        return <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+        return <Loader2 className="h-5 w-5 text-[#ed1c24] animate-spin" />
       default:
         return null
     }

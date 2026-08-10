@@ -190,7 +190,7 @@ export default function SiteMapPage() {
             className="bg-white dark:bg-gray-700 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-600"
           >
             <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <div className="flex-shrink-0 w-10 h-10 bg-red-50 dark:bg-red-950/30 rounded-lg flex items-center justify-center">
                 {item.icon}
               </div>
               <div className="flex-1">
@@ -206,7 +206,7 @@ export default function SiteMapPage() {
                 ) : (
                   <Link
                     href={item.href}
-                    className="group flex items-center space-x-2 mb-2 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="group flex items-center space-x-2 mb-2 hover:text-[#ed1c24] dark:hover:text-[#ed1c24] transition-colors"
                   >
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                       {item.title}
@@ -240,7 +240,7 @@ export default function SiteMapPage() {
                         ) : (
                           <Link
                             href={child.href}
-                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#ed1c24] dark:hover:text-[#ed1c24] transition-colors"
                           >
                             {child.title}
                           </Link>
@@ -258,7 +258,7 @@ export default function SiteMapPage() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-950">
       <div className="container py-8 sm:py-12 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -272,9 +272,9 @@ export default function SiteMapPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-6"
+              className="inline-flex items-center justify-center w-20 h-20 bg-red-50 dark:bg-red-950/30 rounded-2xl mb-6"
             >
-              <MapPin className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+              <MapPin className="h-10 w-10 text-[#ed1c24] dark:text-[#ed1c24]" />
             </motion.div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white font-serif mb-4">
               Sơ đồ trang web
@@ -298,24 +298,24 @@ export default function SiteMapPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.7 }}
-            className="bg-gradient-to-r from-blue-600 to-teal-600 rounded-2xl p-8 text-white text-center"
+            className="bg-gradient-to-r from-[#ed1c24] to-teal-600 rounded-2xl p-8 text-white text-center"
           >
             <h3 className="text-2xl font-bold mb-4">Cần hỗ trợ thêm?</h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+            <p className="text-red-50 mb-6 max-w-2xl mx-auto">
               Nếu bạn không tìm thấy thông tin cần thiết hoặc gặp khó khăn trong việc điều hướng, 
               đừng ngần ngại liên hệ với chúng tôi.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 href="/lien-he"
-                className="inline-flex items-center justify-center px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#ed1c24] rounded-lg font-medium hover:bg-red-50 transition-colors"
               >
                 <Phone className="h-5 w-5 mr-2" />
                 Liên hệ hỗ trợ
               </Link>
               <Link 
                 href="/"
-                className="inline-flex items-center justify-center px-6 py-3 bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors border border-blue-500"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#c91218] text-white rounded-lg font-medium hover:bg-red-900 transition-colors border border-[#ed1c24]"
               >
                 <Home className="h-5 w-5 mr-2" />
                 Về trang chủ

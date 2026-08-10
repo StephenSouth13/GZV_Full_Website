@@ -32,13 +32,13 @@ export function MentorTable({ mentors, onEdit, onDelete, onView }: any) {
               <TableCell className="font-mono text-xs text-gray-500 pl-8">{mentor.order || 0}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12 border-2 border-white/10 group-hover:border-blue-500 transition-all">
+                  <Avatar className="h-12 w-12 border-2 border-white/10 group-hover:border-[#ed1c24] transition-all">
                     <AvatarImage src={mentor.avatar_url} className="object-cover" />
                     <AvatarFallback>{mentor.full_name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-bold text-sm text-white">{mentor.full_name}</div>
-                    <div className="text-[10px] text-blue-400 font-mono">/{mentor.slug}</div>
+                    <div className="text-[10px] text-[#ed1c24] font-mono">/{mentor.slug}</div>
                   </div>
                 </div>
               </TableCell>
@@ -56,10 +56,10 @@ export function MentorTable({ mentors, onEdit, onDelete, onView }: any) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-gray-900 border-white/10 text-white rounded-xl">
-                    <DropdownMenuItem onClick={() => onView(mentor)} className="focus:bg-blue-600 gap-2 cursor-pointer">
+                    <DropdownMenuItem onClick={() => onView(mentor)} className="focus:bg-[#ed1c24] gap-2 cursor-pointer">
                       <Eye size={14}/> Xem chi tiết
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(mentor)} className="focus:bg-blue-600 gap-2 cursor-pointer">
+                    <DropdownMenuItem onClick={() => onEdit(mentor)} className="focus:bg-[#ed1c24] gap-2 cursor-pointer">
                       <Edit size={14}/> Chỉnh sửa
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onDelete(mentor)} className="focus:bg-rose-600 gap-2 cursor-pointer text-rose-400 focus:text-white">

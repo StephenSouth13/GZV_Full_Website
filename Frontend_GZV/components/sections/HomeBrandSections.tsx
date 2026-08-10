@@ -109,9 +109,9 @@ const HomeBrandSections = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: index * 0.08 }}
                   viewport={{ once: true }}
-                  className="group border border-slate-200 bg-white p-7 shadow-[0_16px_38px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:border-[#00539b] dark:border-slate-800 dark:bg-slate-900"
+                  className="group border border-slate-200 bg-white p-7 shadow-[0_16px_38px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:border-[#ed1c24] dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#00539b] text-white transition group-hover:bg-[#ed1c24]">
+                  <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#ed1c24] text-white transition group-hover:bg-[#ed1c24]">
                     <Icon className="h-6 w-6" />
                   </div>
                   <h2 className="mb-3 text-2xl font-black uppercase text-slate-950 dark:text-white">{item.title}</h2>
@@ -124,7 +124,7 @@ const HomeBrandSections = () => {
       </section>}
 
       {servicesConfig?.is_visible !== false && <section id="dich-vu" className="relative overflow-hidden bg-[#050505] py-16 text-white lg:py-24">
-        <div className="absolute inset-y-0 right-0 w-1/2 bg-[#00539b]/20" />
+        <div className="absolute inset-y-0 right-0 w-1/2 bg-[#ed1c24]/20" />
         <div className="container relative z-10">
           <div className="mb-10 flex flex-col justify-between gap-5 border-b border-white/15 pb-8 lg:flex-row lg:items-end">
             <div>
@@ -210,7 +210,7 @@ const HomeBrandSections = () => {
                   ["GZVer", "Community"],
                 ].map(([label, sub]) => (
                   <div key={label} className="border-r border-slate-200 p-4 last:border-r-0 dark:border-slate-800">
-                    <Users2 className="mx-auto mb-2 h-5 w-5 text-[#00539b]" />
+                    <Users2 className="mx-auto mb-2 h-5 w-5 text-[#ed1c24]" />
                     <p className="text-xs font-black uppercase text-slate-950 dark:text-white">{label}</p>
                     <p className="mt-1 text-[10px] font-bold uppercase text-slate-400">{sub}</p>
                   </div>
@@ -228,7 +228,7 @@ const HomeBrandSections = () => {
               <p className="text-xs font-black uppercase text-[#ed1c24]">Lá»™ trÃ¬nh phÃ¡t triá»ƒn cá»§a GZV</p>
               <h2 className="mt-2 text-2xl font-black uppercase text-slate-950 dark:text-white">{aboutCta?.title || "Mentoring model, project network, next-gen growth."}</h2>
             </div>
-            <Link href={aboutCta?.button_url || "/gioi-thieu"} className="inline-flex items-center justify-center bg-[#00539b] px-6 py-4 text-xs font-black uppercase text-white transition hover:bg-[#ed1c24]">
+            <Link href={aboutCta?.button_url || "/gioi-thieu"} className="inline-flex items-center justify-center bg-[#ed1c24] px-6 py-4 text-xs font-black uppercase text-white transition hover:bg-[#ed1c24]">
               {aboutCta?.button_label || "TÃ¬m hiá»ƒu thÃªm"} <Rocket className="ml-2 h-4 w-4" />
             </Link>
           </div>

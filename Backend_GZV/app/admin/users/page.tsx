@@ -153,7 +153,7 @@ function UsersManagementContent() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ed1c24] mx-auto"></div>
           <p className="text-gray-500">Đang tải danh sách người dùng...</p>
         </div>
       </div>
@@ -187,7 +187,7 @@ function UsersManagementContent() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Tổng người dùng</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{roleStats.total}</p>
               </div>
-              <Users className="h-8 w-8 text-blue-600" />
+              <Users className="h-8 w-8 text-[#ed1c24]" />
             </div>
           </CardContent>
         </Card>
@@ -223,7 +223,7 @@ function UsersManagementContent() {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">Người dùng</p>
-              <p className="text-xl font-bold text-blue-600">{roleStats.user}</p>
+              <p className="text-xl font-bold text-[#ed1c24]">{roleStats.user}</p>
             </div>
           </CardContent>
         </Card>
@@ -296,7 +296,7 @@ function UsersManagementContent() {
                         user.role === 'admin' ? 'bg-red-100 text-red-800' :
                         user.role === 'editor' ? 'bg-green-100 text-green-800' :
                         user.role === 'collab' ? 'bg-purple-100 text-purple-800' : 
-                        'bg-blue-100 text-blue-800'
+                        'bg-red-50 text-[#c91218]'
                       }>
                         {user.role === 'admin' ? 'Quản trị' :
                          user.role === 'editor' ? 'Biên tập' :

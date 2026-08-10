@@ -158,7 +158,7 @@ export default function PartnersAdminPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatTile label="Tổng đối tác" value={stats.total} icon={Handshake} accent="from-slate-700 to-slate-900" />
         <StatTile label="Doanh nghiệp" value={stats.corporate} icon={Building2} accent="from-emerald-600 to-teal-700" />
-        <StatTile label="Giáo dục" value={stats.education} icon={GraduationCap} accent="from-indigo-600 to-blue-700" />
+        <StatTile label="Giáo dục" value={stats.education} icon={GraduationCap} accent="from-[#050505] to-[#050505]" />
         <StatTile label="Đang hiển thị" value={stats.active} icon={Eye} accent="from-amber-500 to-orange-600" />
       </div>
 
@@ -313,7 +313,7 @@ function PartnerCard({ partner, onEdit, onDelete, onToggle, onUp, onDown }: {
           </Button>
           <div className="flex-1" />
           <Button size="icon" variant="ghost" onClick={onEdit}
-            className="h-8 w-8 text-blue-400 hover:text-blue-300 hover:bg-blue-950">
+            className="h-8 w-8 text-[#ed1c24] hover:text-red-200 hover:bg-red-950">
             <Pencil size={14} />
           </Button>
           <Button size="icon" variant="ghost" onClick={onDelete}

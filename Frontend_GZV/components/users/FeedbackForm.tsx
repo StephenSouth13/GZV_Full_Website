@@ -154,7 +154,7 @@ const FeedbackForm = () => {
   const feedbackTypes = [
     { value: "bug", label: "Báo lỗi", icon: Bug, color: "text-red-600", bgColor: "bg-red-100" },
     { value: "feature", label: "Tính năng mới", icon: Lightbulb, color: "text-yellow-600", bgColor: "bg-yellow-100" },
-    { value: "improvement", label: "Cải thiện", icon: Settings, color: "text-blue-600", bgColor: "bg-blue-100" },
+    { value: "improvement", label: "Cải thiện", icon: Settings, color: "text-[#ed1c24]", bgColor: "bg-red-50" },
     { value: "general", label: "Góp ý chung", icon: MessageSquare, color: "text-gray-600", bgColor: "bg-gray-100" },
   ]
 
@@ -228,7 +228,7 @@ const FeedbackForm = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-blue-100 text-blue-800 border-blue-300"
+        return "bg-red-50 text-[#c91218] border-red-200"
       case "in-progress":
         return "bg-yellow-100 text-yellow-800 border-yellow-300"
       case "resolved":
@@ -260,7 +260,7 @@ const FeedbackForm = () => {
       case "low":
         return "bg-gray-100 text-gray-800"
       case "medium":
-        return "bg-blue-100 text-blue-800"
+        return "bg-red-50 text-[#c91218]"
       case "high":
         return "bg-orange-100 text-orange-800"
       case "urgent":
@@ -309,7 +309,7 @@ const FeedbackForm = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
+                <MessageSquare className="h-5 w-5 text-[#ed1c24]" />
                 Gửi góp ý cho bộ phận IT
               </CardTitle>
               <p className="text-sm text-gray-600">Chúng tôi luôn lắng nghe và cải thiện dựa trên phản hồi của bạn</p>
@@ -329,7 +329,7 @@ const FeedbackForm = () => {
                             onClick={() => setFormData({ ...formData, type: type.value as any })}
                             className={`w-full p-4 rounded-lg border-2 transition-all ${
                               formData.type === type.value
-                                ? `border-blue-500 ${type.bgColor}`
+                                ? `border-[#ed1c24] ${type.bgColor}`
                                 : "border-gray-200 hover:border-gray-300"
                             }`}
                           >
@@ -496,7 +496,7 @@ const FeedbackForm = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-600" />
+                <Clock className="h-5 w-5 text-[#ed1c24]" />
                 Lịch sử góp ý của bạn
               </CardTitle>
             </CardHeader>
@@ -590,7 +590,7 @@ const FeedbackForm = () => {
 
                                 {/* Latest Response */}
                                 {item.responses.length > 0 && (
-                                  <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-blue-500">
+                                  <div className="bg-gray-50 rounded-lg p-3 border-l-4 border-[#ed1c24]">
                                     <div className="flex items-center gap-2 mb-1">
                                       <span className="font-medium text-sm">
                                         {item.responses[item.responses.length - 1].author}

@@ -71,7 +71,7 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
       <div className="flex items-center justify-between border-b border-white/10 p-4">
         {!isCollapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center border border-white/15 bg-[#00539b]">
+            <div className="flex h-10 w-10 items-center justify-center border border-white/15 bg-[#ed1c24]">
               <span className="text-sm font-black text-white">G</span>
             </div>
             <div>
@@ -131,7 +131,7 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
                     className={cn(
                       "flex items-center gap-3 border-l-2 px-3 py-3 text-sm transition-all duration-200",
                       isActive
-                        ? "border-[#ed1c24] bg-[#00539b] text-white"
+                        ? "border-[#ed1c24] bg-[#ed1c24] text-white"
                         : "border-transparent text-gray-400 hover:border-white/20 hover:bg-white/5 hover:text-gray-100",
                     )}
                   >

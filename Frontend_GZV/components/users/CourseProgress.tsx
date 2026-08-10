@@ -149,7 +149,7 @@ const CourseProgress = () => {
       case "completed":
         return "bg-green-100 text-green-800 border-green-300"
       case "in_progress":
-        return "bg-blue-100 text-blue-800 border-blue-300"
+        return "bg-red-50 text-[#c91218] border-red-200"
       case "not_started":
         return "bg-gray-100 text-gray-800 border-gray-300"
       default:
@@ -197,9 +197,9 @@ const CourseProgress = () => {
 
         <Card className="text-center p-4">
           <div className="flex items-center justify-center mb-2">
-            <Play className="h-6 w-6 text-blue-600" />
+            <Play className="h-6 w-6 text-[#ed1c24]" />
           </div>
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-[#ed1c24]">
             {courses.filter((c) => c.status === "in_progress").length}
           </div>
           <div className="text-sm text-gray-600">Đang học</div>
@@ -228,7 +228,7 @@ const CourseProgress = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-blue-600" />
+            <BookOpen className="h-5 w-5 text-[#ed1c24]" />
             Khóa học của tôi
           </CardTitle>
         </CardHeader>

@@ -142,7 +142,7 @@ const AchievementsGrid = ({ achievements }: AchievementsGridProps) => {
       case "common":
         return "bg-gray-100 text-gray-800 border-gray-300"
       case "rare":
-        return "bg-blue-100 text-blue-800 border-blue-300"
+        return "bg-red-50 text-[#c91218] border-red-200"
       case "epic":
         return "bg-purple-100 text-purple-800 border-purple-300"
       case "legendary":
@@ -218,7 +218,7 @@ const AchievementsGrid = ({ achievements }: AchievementsGridProps) => {
       {/* Achievement Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card className="text-center p-4">
-          <div className="text-2xl font-bold text-blue-600">{achievementStats.unlocked}</div>
+          <div className="text-2xl font-bold text-[#ed1c24]">{achievementStats.unlocked}</div>
           <div className="text-sm text-gray-600">Đã mở khóa</div>
         </Card>
         <Card className="text-center p-4">
@@ -226,7 +226,7 @@ const AchievementsGrid = ({ achievements }: AchievementsGridProps) => {
           <div className="text-sm text-gray-600">Thường</div>
         </Card>
         <Card className="text-center p-4">
-          <div className="text-2xl font-bold text-blue-600">{achievementStats.rare}</div>
+          <div className="text-2xl font-bold text-[#ed1c24]">{achievementStats.rare}</div>
           <div className="text-sm text-gray-600">Hiếm</div>
         </Card>
         <Card className="text-center p-4">

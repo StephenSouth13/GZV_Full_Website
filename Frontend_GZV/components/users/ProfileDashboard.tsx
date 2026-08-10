@@ -186,7 +186,7 @@ const ProfileDashboard = () => {
       case "common":
         return "bg-gray-100 text-gray-800 border-gray-300"
       case "rare":
-        return "bg-blue-100 text-blue-800 border-blue-300"
+        return "bg-red-50 text-[#c91218] border-red-200"
       case "epic":
         return "bg-purple-100 text-purple-800 border-purple-300"
       case "legendary":
@@ -201,7 +201,7 @@ const ProfileDashboard = () => {
       case "course_completed":
         return <Award className="h-4 w-4 text-green-600" />
       case "lesson_finished":
-        return <BookOpen className="h-4 w-4 text-blue-600" />
+        return <BookOpen className="h-4 w-4 text-[#ed1c24]" />
       case "achievement_earned":
         return <Trophy className="h-4 w-4 text-yellow-600" />
       case "quiz_passed":
@@ -223,11 +223,11 @@ const ProfileDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 bg-gradient-to-br from-blue-50 via-white to-teal-50">
+    <div className="min-h-screen pt-20 bg-gradient-to-br from-red-50 via-white to-teal-50">
       <div className="container py-8">
         {/* Profile Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <Card className="mb-8 overflow-hidden bg-gradient-to-r from-blue-600 to-teal-600 text-white">
+          <Card className="mb-8 overflow-hidden bg-gradient-to-r from-[#ed1c24] to-teal-600 text-white">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <div className="relative">
@@ -242,7 +242,7 @@ const ProfileDashboard = () => {
                   </Avatar>
                   <Button
                     size="sm"
-                    className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 p-0 bg-white text-blue-600 hover:bg-gray-100"
+                    className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 p-0 bg-white text-[#ed1c24] hover:bg-gray-100"
                     onClick={() => setIsEditingProfile(true)}
                   >
                     <Camera className="h-4 w-4" />
@@ -314,9 +314,9 @@ const ProfileDashboard = () => {
         >
           <Card className="text-center p-4 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-center mb-2">
-              <BookOpen className="h-6 w-6 text-blue-600" />
+              <BookOpen className="h-6 w-6 text-[#ed1c24]" />
             </div>
-            <div className="text-2xl font-bold text-blue-600">{user.stats.coursesCompleted}</div>
+            <div className="text-2xl font-bold text-[#ed1c24]">{user.stats.coursesCompleted}</div>
             <div className="text-sm text-gray-600">Khóa học hoàn thành</div>
           </Card>
 
@@ -413,7 +413,7 @@ const ProfileDashboard = () => {
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Clock className="h-5 w-5 text-blue-600" />
+                          <Clock className="h-5 w-5 text-[#ed1c24]" />
                           Hoạt động gần đây
                         </CardTitle>
                       </CardHeader>

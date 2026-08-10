@@ -5,7 +5,7 @@ import { Scale, Book, Users, CreditCard, AlertTriangle, CheckCircle } from "luci
 
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-teal-900">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-teal-900">
       <div className="container py-8 sm:py-12 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 50 }}

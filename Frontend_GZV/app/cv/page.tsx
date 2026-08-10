@@ -168,15 +168,15 @@ export default function CVPage() {
   return (
     <div className="min-h-screen pt-20">
       {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-900 text-white">
+      <section className="py-20 bg-gradient-to-br from-red-950 via-[#c91218] to-teal-900 text-white">
         <div className="container">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 font-serif">Hồ sơ Năng lực Chuyên nghiệp</h1>
-            <p className="text-xl text-blue-100 mb-8 leading-relaxed">
+            <p className="text-xl text-red-50 mb-8 leading-relaxed">
               Tạo CV ấn tượng và nhận được công việc mơ ước với sự hỗ trợ từ các chuyên gia HR hàng đầu tại gzv Center
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4">
+              <Button size="lg" className="bg-white text-[#ed1c24] hover:bg-gray-100 px-8 py-4">
                 Tạo CV miễn phí
               </Button>
               <Button
@@ -197,8 +197,8 @@ export default function CVPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="h-8 w-8 text-blue-600" />
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <stat.icon className="h-8 w-8 text-[#ed1c24]" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
                 <div className="text-gray-600">{stat.label}</div>
@@ -230,7 +230,7 @@ export default function CVPage() {
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-[#ed1c24] text-white px-3 py-1 rounded-full text-sm font-medium">
                       {template.category}
                     </span>
                   </div>
@@ -244,7 +244,7 @@ export default function CVPage() {
                 </div>
 
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors duration-300">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#c91218] transition-colors duration-300">
                     {template.name}
                   </h3>
                   <p className="text-gray-600 mb-4 text-sm">{template.description}</p>
@@ -264,7 +264,7 @@ export default function CVPage() {
                     <h4 className="font-medium text-gray-900 mb-2 text-sm">Phù hợp với:</h4>
                     <div className="flex flex-wrap gap-1">
                       {template.suitable.slice(0, 2).map((role, index) => (
-                        <span key={index} className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                        <span key={index} className="bg-red-50 text-[#c91218] px-2 py-1 rounded-full text-xs">
                           {role}
                         </span>
                       ))}
@@ -306,13 +306,13 @@ export default function CVPage() {
               <Card key={index} className="hover:shadow-xl transition-all duration-300">
                 <CardHeader>
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <service.icon className="h-6 w-6 text-blue-600" />
+                    <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
+                      <service.icon className="h-6 w-6 text-[#ed1c24]" />
                     </div>
                     <div>
                       <CardTitle className="text-xl font-bold text-gray-900">{service.title}</CardTitle>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <span className="font-medium text-blue-600">{service.price}</span>
+                        <span className="font-medium text-[#ed1c24]">{service.price}</span>
                         <span>{service.duration}</span>
                       </div>
                     </div>
@@ -327,7 +327,7 @@ export default function CVPage() {
                     <ul className="space-y-2">
                       {service.features.map((feature, featureIndex) => (
                         <li key={featureIndex} className="flex items-center space-x-2 text-sm text-gray-600">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                          <div className="w-2 h-2 bg-[#ed1c24] rounded-full flex-shrink-0" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -373,7 +373,7 @@ export default function CVPage() {
                     />
                     <div>
                       <h3 className="font-bold text-gray-900">{story.name}</h3>
-                      <p className="text-blue-600 font-medium text-sm">{story.position}</p>
+                      <p className="text-[#ed1c24] font-medium text-sm">{story.position}</p>
                       <p className="text-gray-600 text-sm">{story.company}</p>
                     </div>
                   </div>
@@ -385,9 +385,9 @@ export default function CVPage() {
                       <div className="text-lg font-bold text-green-700">{story.salaryIncrease}</div>
                       <div className="text-xs text-green-600">Tăng lương</div>
                     </div>
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-lg font-bold text-blue-700">{story.timeToJob}</div>
-                      <div className="text-xs text-blue-600">Thời gian</div>
+                    <div className="text-center p-3 bg-red-50 rounded-lg">
+                      <div className="text-lg font-bold text-[#c91218]">{story.timeToJob}</div>
+                      <div className="text-xs text-[#ed1c24]">Thời gian</div>
                     </div>
                   </div>
                 </CardContent>
@@ -398,14 +398,14 @@ export default function CVPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
+      <section className="py-20 bg-gradient-to-r from-[#ed1c24] to-teal-600 text-white">
         <div className="container text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">Sẵn sàng tạo CV ấn tượng?</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-red-50 mb-8 max-w-3xl mx-auto">
             Bắt đầu hành trình tìm kiếm công việc mơ ước với CV chuyên nghiệp từ gzv Center
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4">
+            <Button size="lg" className="bg-white text-[#ed1c24] hover:bg-gray-100 px-8 py-4">
               Tạo CV ngay
             </Button>
             <Link href="/lien-he">

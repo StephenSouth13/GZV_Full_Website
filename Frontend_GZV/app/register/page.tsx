@@ -118,12 +118,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
 
       <div className="relative min-h-screen flex">
         {/* Left Side - Benefits */}
-        <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-teal-600 via-teal-700 to-blue-600 relative overflow-hidden">
+        <div className="hidden lg:flex lg:flex-1 bg-gradient-to-br from-teal-600 via-teal-700 to-[#050505] relative overflow-hidden">
           <div className="absolute inset-0 bg-pattern opacity-10" />
           <div className="relative flex flex-col justify-center p-12 text-white">
             <div className="max-w-md">
@@ -155,7 +155,7 @@ export default function RegisterPage() {
 
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <Shield className="h-6 w-6 text-blue-300" />
+                    <Shield className="h-6 w-6 text-red-200" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg">Cam kết chất lượng</h3>
@@ -172,7 +172,7 @@ export default function RegisterPage() {
           <div className="w-full max-w-md space-y-8">
             <div className="text-center">
               <Link href="/" className="inline-block">
-                <span className="text-3xl font-black bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent uppercase tracking-tighter">
+                <span className="text-3xl font-black bg-gradient-to-r from-teal-600 to-[#050505] bg-clip-text text-transparent uppercase tracking-tighter">
                   gzv Center
                 </span>
               </Link>
@@ -267,7 +267,7 @@ export default function RegisterPage() {
                     {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
                   </div>
 
-                  <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-xl shadow-lg font-bold">
+                  <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gradient-to-r from-teal-600 to-[#050505] text-white rounded-xl shadow-lg font-bold">
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     {isLoading ? 'Đang xử lý...' : 'Tạo tài khoản'}
                   </Button>
@@ -280,15 +280,15 @@ export default function RegisterPage() {
 
                 <div className="space-y-3">
                   <Link href="https://gzver.gzv.one/" target="_blank" className="w-full block">
-                    <Button variant="outline" className="w-full h-12 rounded-xl border-blue-100 hover:bg-blue-50">
-                      <Building2 className="h-5 w-5 mr-2 text-blue-700" />
+                    <Button variant="outline" className="w-full h-12 rounded-xl border-red-100 hover:bg-red-50">
+                      <Building2 className="h-5 w-5 mr-2 text-[#c91218]" />
                       Hệ thống nội bộ HRM
                     </Button>
                   </Link>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <Button variant="outline" className="h-11 rounded-xl">
-                      <Facebook className="h-5 w-5 mr-2 text-blue-600" /> Facebook
+                      <Facebook className="h-5 w-5 mr-2 text-[#ed1c24]" /> Facebook
                     </Button>
                     <Button variant="outline" className="h-11 rounded-xl">
                       <Chrome className="h-5 w-5 mr-2 text-red-500" /> Google

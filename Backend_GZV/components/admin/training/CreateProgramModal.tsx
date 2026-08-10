@@ -45,7 +45,7 @@ export function CreateProgramModal({ open, onClose, onRefresh }: any) {
           <Button 
             onClick={handleCreate} 
             disabled={loading || !title} 
-            className="w-full h-14 bg-blue-600 hover:bg-blue-700 rounded-2xl font-black text-white shadow-xl shadow-blue-500/20"
+            className="w-full h-14 bg-[#ed1c24] hover:bg-[#c91218] rounded-2xl font-black text-white shadow-xl shadow-red-500/20"
           >
             {loading ? <Loader2 className="animate-spin" /> : "TIẾP TỤC VÀO EDITOR"}
           </Button>

@@ -104,15 +104,15 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
         <DialogHeader className="p-8 bg-slate-900 text-white rounded-t-[3rem]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-5">
-              <div className="p-4 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/30">
+              <div className="p-4 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/30">
                 <Edit size={28} className="text-white" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Hiệu chỉnh dự án <span className="text-blue-400">Executive</span></DialogTitle>
+                <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Hiệu chỉnh dự án <span className="text-[#ed1c24]">Executive</span></DialogTitle>
                 <DialogDescription className="text-slate-400 font-medium text-[11px] uppercase tracking-[0.2em] mt-1">ID Dự án: {project.id.substring(0,8)}...</DialogDescription>
               </div>
             </div>
-            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">Priority Index: {formData.order_index}</Badge>
+            <Badge className="bg-[#ed1c24]/10 text-[#ed1c24] border-[#ed1c24]/20 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">Priority Index: {formData.order_index}</Badge>
           </div>
         </DialogHeader>
 
@@ -121,14 +121,14 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           <div className="lg:col-span-8 p-10 space-y-10 border-r border-slate-100">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-2"><Edit size={12}/> Tiêu đề H1</Label>
+                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Edit size={12}/> Tiêu đề H1</Label>
                 <Input className="h-14 text-lg font-bold rounded-2xl border-slate-200" value={formData.title} onChange={(e) => {
                    const val = e.target.value;
                    setFormData({...formData, title: val, slug: isSlugLocked ? generateSlug(val) : formData.slug})
                 }} />
               </div>
               <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Category)</Label>
+                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Category)</Label>
                 <Input className="h-14 font-bold rounded-2xl border-slate-200" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
               </div>
             </div>
@@ -193,7 +193,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] font-black uppercase text-slate-500">Mentoring & Coaching</Label>
-                <Badge className="bg-blue-600 font-black text-[9px] uppercase shadow-md">{formData.author_ids?.length || 0} Đã chọn</Badge>
+                <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-md">{formData.author_ids?.length || 0} Đã chọn</Badge>
               </div>
               <div className="grid gap-2 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar bg-white p-3 rounded-[1.5rem] border border-slate-200 shadow-inner">
                 {authors.map(a => {
@@ -205,14 +205,14 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
                         const nextIds = isSelected ? formData.author_ids.filter((id:any)=>id!==a.id) : [...formData.author_ids, a.id]
                         setFormData({...formData, author_ids: nextIds})
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-blue-600 bg-blue-50/50' : 'border-transparent bg-slate-50/30'}`}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-[#ed1c24] bg-red-50/50' : 'border-transparent bg-slate-50/30'}`}
                     >
                       <Avatar className="h-9 w-9 shadow-sm shrink-0">
                         <AvatarImage src={a.avatar_url} className="object-cover" />
                         <AvatarFallback className="font-black text-[10px] bg-slate-200 uppercase">{a.full_name?.substring(0,2)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-blue-700' : 'text-slate-600'}`}>{a.full_name}</span>
+                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-[#c91218]' : 'text-slate-600'}`}>{a.full_name}</span>
                         <span className="text-[9px] text-slate-400 font-bold italic truncate">{a.title}</span>
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
 
         <DialogFooter className="p-10 bg-slate-50 border-t flex justify-between items-center rounded-b-[3rem]">
           <Button variant="ghost" onClick={onClose} className="font-black uppercase text-[11px] text-slate-400 px-8 h-14">Hủy bỏ</Button>
-          <Button disabled={loading || uploading} className="h-16 px-20 bg-blue-700 hover:bg-blue-800 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all" onClick={handleUpdate}>
+          <Button disabled={loading || uploading} className="h-16 px-20 bg-[#c91218] hover:bg-red-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all" onClick={handleUpdate}>
             {loading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} Cập nhật bài viết
           </Button>
         </DialogFooter>

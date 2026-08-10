@@ -71,7 +71,7 @@ export default function HomePage() {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8">
-                  <Badge className="w-fit mb-4 bg-blue-600">{current.category}</Badge>
+                  <Badge className="w-fit mb-4 bg-[#ed1c24]">{current.category}</Badge>
                   <h2 className="text-3xl font-bold text-white mb-2">{current.title}</h2>
                   <p className="text-white/80 line-clamp-2">{current.description || current.excerpt}</p>
                 </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
                 <span className="text-sm text-slate-600">{current.views || 0} lượt xem</span>
               </div>
               <Link href={`/admin/${type}/${current.id}`}>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">Quản lý chi tiết</Button>
+                <Button className="w-full bg-[#ed1c24] hover:bg-[#c91218] text-white">Quản lý chi tiết</Button>
               </Link>
             </CardContent>
           </Card>
@@ -103,7 +103,7 @@ export default function HomePage() {
                 key={item.id}
                 onClick={() => setCurrentIndex(index)}
                 className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                  index === currentIndex ? 'border-blue-600 scale-110' : 'border-transparent opacity-50'
+                  index === currentIndex ? 'border-[#ed1c24] scale-110' : 'border-transparent opacity-50'
                 }`}
               >
                 <img src={item.featured_image?.file_url || '/placeholder.jpg'} className="w-full h-full object-cover" />
@@ -119,7 +119,7 @@ export default function HomePage() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4">
-      <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+      <Loader2 className="h-10 w-10 animate-spin text-[#ed1c24]" />
       <p className="text-slate-500 font-medium">Đang khởi tạo Dashboard...</p>
     </div>
   )
@@ -133,12 +133,12 @@ export default function HomePage() {
 
       {/* Các section Carousel cho Courses, Projects, Articles... */}
       <section className="space-y-6">
-        <h2 className="text-xl font-bold flex items-center gap-2"><BookOpen className="text-blue-600"/> Khóa học tiêu biểu</h2>
+        <h2 className="text-xl font-bold flex items-center gap-2"><BookOpen className="text-[#ed1c24]"/> Khóa học tiêu biểu</h2>
         <Carousel items={featuredCourses} currentIndex={currentCourseIndex} setCurrentIndex={setCurrentCourseIndex} type="courses" />
       </section>
 
       <section className="space-y-6">
-        <h2 className="text-xl font-bold flex items-center gap-2"><FolderOpen className="text-blue-600"/> Dự án mới</h2>
+        <h2 className="text-xl font-bold flex items-center gap-2"><FolderOpen className="text-[#ed1c24]"/> Dự án mới</h2>
         <Carousel items={featuredProjects} currentIndex={currentProjectIndex} setCurrentIndex={setCurrentProjectIndex} type="projects" />
       </section>
     </div>

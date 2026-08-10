@@ -88,8 +88,8 @@ export default function PartnersClient({ corporate, education }: Props) {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="h-8 w-8 text-blue-600" />
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <stat.icon className="h-8 w-8 text-[#ed1c24]" />
                 </div>
                 <div className="text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
                 <p className="text-gray-600 text-lg">{stat.label}</p>
@@ -152,7 +152,7 @@ export default function PartnersClient({ corporate, education }: Props) {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-full mb-4">
+            <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-red-500 to-red-500 text-white px-6 py-3 rounded-full mb-4">
               <Building2 className="h-6 w-6" />
               <h2 className="text-3xl font-bold font-serif">Đối tác Giáo dục & Hiệp hội</h2>
             </div>
@@ -186,7 +186,7 @@ export default function PartnersClient({ corporate, education }: Props) {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
+      <section className="py-24 bg-gradient-to-r from-[#ed1c24] to-teal-600 text-white">
         <div className="container text-center">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -195,11 +195,11 @@ export default function PartnersClient({ corporate, education }: Props) {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6 font-serif">Trở thành Đối tác của gzv</h2>
-            <p className="text-xl text-blue-100 mb-10 max-w-3xl mx-auto">
+            <p className="text-xl text-red-50 mb-10 max-w-3xl mx-auto">
               Cùng chúng tôi kiến tạo những giá trị bền vững cho cộng đồng và doanh nghiệp thông qua các chương trình đào tạo chất lượng cao.
             </p>
             <Link href="/lien-he">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-10 py-6">
+              <Button size="lg" className="bg-white text-[#ed1c24] hover:bg-gray-100 text-lg px-10 py-6">
                 Liên hệ Hợp tác
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

@@ -11,7 +11,7 @@ export default function TopPostsWidget() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <TrendingUp className="h-5 w-5 text-blue-600" />
+          <TrendingUp className="h-5 w-5 text-[#ed1c24]" />
           <span>Bài viết được xem nhiều nhất</span>
         </CardTitle>
       </CardHeader>
@@ -19,12 +19,12 @@ export default function TopPostsWidget() {
         <div className="space-y-4">
           {topPosts.map((post, index) => (
             <div key={post.id} className="flex items-start space-x-3 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-sm font-bold text-white">{index + 1}</span>
               </div>
               <div className="flex-1">
                 <Link href={`/tin-tuc/${post.id}`}>
-                  <h4 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2 mb-2">
+                  <h4 className="font-medium text-gray-900 group-hover:text-[#ed1c24] transition-colors duration-200 line-clamp-2 mb-2">
                     {post.title}
                   </h4>
                 </Link>

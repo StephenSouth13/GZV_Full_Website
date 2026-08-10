@@ -102,7 +102,7 @@ const ProfileEditor = ({ user, onClose, onSave }: ProfileEditorProps) => {
         <Card className="border-0 shadow-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-600" />
+              <User className="h-5 w-5 text-[#ed1c24]" />
               Chỉnh sửa hồ sơ
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>

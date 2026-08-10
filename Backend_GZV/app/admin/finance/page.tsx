@@ -164,12 +164,12 @@ function FinanceReportingContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Revenue Growth</p>
-                <p className="text-2xl font-bold text-blue-600">+{financeStats.revenueGrowth}%</p>
+                <p className="text-2xl font-bold text-[#ed1c24]">+{financeStats.revenueGrowth}%</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <TrendingUp className="h-8 w-8 text-[#ed1c24]" />
             </div>
             <div className="mt-2">
-              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+              <Badge className="bg-red-50 text-[#c91218] dark:bg-red-950/30 dark:text-[#ed1c24]">
                 Month over Month
               </Badge>
             </div>

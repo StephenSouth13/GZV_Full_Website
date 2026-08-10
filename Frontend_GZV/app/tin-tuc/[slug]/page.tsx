@@ -23,7 +23,7 @@ const customMarkdownComponents = {
   ul: (props: any) => <ul className="list-disc list-inside mb-6 pl-4 text-lg text-gray-700 dark:text-gray-300" {...props} />,
   ol: (props: any) => <ol className="list-decimal list-inside mb-6 pl-4 text-lg text-gray-700 dark:text-gray-300" {...props} />,
   li: (props: any) => <li className="mb-3" {...props} />,
-  blockquote: (props: any) => <blockquote className="border-l-4 border-blue-500 pl-6 py-2 my-6 text-xl italic text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 rounded-r-lg" {...props} />,
+  blockquote: (props: any) => <blockquote className="border-l-4 border-[#ed1c24] pl-6 py-2 my-6 text-xl italic text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-950/20 rounded-r-lg" {...props} />,
   img: (props: any) => (
     <div className="my-8">
       <Image 
@@ -35,7 +35,7 @@ const customMarkdownComponents = {
       />
     </div>
   ),
-  a: (props: any) => <a className="text-blue-600 dark:text-blue-400 hover:underline font-semibold" target="_blank" rel="noopener noreferrer" {...props} />,
+  a: (props: any) => <a className="text-[#ed1c24] dark:text-[#ed1c24] hover:underline font-semibold" target="_blank" rel="noopener noreferrer" {...props} />,
 };
 
 
@@ -83,7 +83,7 @@ export default function NewsPostPage({ params }: { params: { slug: string } }) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-24 w-24 border-b-4 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-24 w-24 border-b-4 border-[#ed1c24] mx-auto"></div>
           <p className="mt-6 text-lg font-semibold text-gray-700 dark:text-gray-200">Đang tải bài viết...</p>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function NewsPostPage({ params }: { params: { slug: string } }) {
             {/* Post Header */}
             <header className="mb-10">
               {post.category &&
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-2">{post.category}</p>
+                <p className="text-lg font-bold text-[#ed1c24] dark:text-[#ed1c24] mb-2">{post.category}</p>
               }
               <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">{post.title}</h1>
               <div className="flex flex-wrap items-center space-x-6 text-gray-500 dark:text-gray-400">
@@ -204,7 +204,7 @@ export default function NewsPostPage({ params }: { params: { slug: string } }) {
                             />
                         </div>
                         <CardContent className="p-5 flex flex-col flex-grow">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-700 dark:group-hover:text-blue-400">{relatedPost.title}</h3>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-[#c91218] dark:group-hover:text-[#ed1c24]">{relatedPost.title}</h3>
                             <div className="mt-auto pt-3 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
                                 {formatDate(relatedPost.publish_date)}
                             </div>

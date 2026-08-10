@@ -232,13 +232,13 @@ export default function AdminImagesPage() {
       <div className="bg-white border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-[1600px] mx-auto px-8 py-6 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/30">
+            <div className="p-3 bg-gradient-to-br from-[#ed1c24] to-[#050505] rounded-2xl shadow-lg shadow-red-500/30">
               <HardDrive className="text-white" size={22} />
             </div>
             <div>
               <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900">Thư viện ảnh & Media</h1>
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mt-0.5">
-                Bucket: <span className="text-blue-600">{BUCKET}</span> · {stats.count} tệp · {formatBytes(stats.size)}
+                Bucket: <span className="text-[#ed1c24]">{BUCKET}</span> · {stats.count} tệp · {formatBytes(stats.size)}
               </p>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function AdminImagesPage() {
             <Button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="h-11 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-blue-500/30"
+              className="h-11 px-5 rounded-xl bg-[#ed1c24] hover:bg-[#c91218] text-white font-black uppercase tracking-wider text-xs shadow-lg shadow-red-500/30"
             >
               {uploading ? <Loader2 className="animate-spin mr-2" size={16} /> : <Upload size={16} className="mr-2" />}
               Tải lên
@@ -285,7 +285,7 @@ export default function AdminImagesPage() {
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3 px-2">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Thư mục</span>
-              <Button size="sm" variant="ghost" className="h-7 px-2 text-blue-600" onClick={() => setCreatingFolder(v => !v)}>
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-[#ed1c24]" onClick={() => setCreatingFolder(v => !v)}>
                 <FolderPlus size={14} />
               </Button>
             </div>
@@ -311,11 +311,11 @@ export default function AdminImagesPage() {
                   className={[
                     'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all text-sm font-bold',
                     currentFolder === f
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+                      ? 'bg-[#ed1c24] text-white shadow-md shadow-red-500/30'
                       : 'text-slate-600 hover:bg-slate-100',
                   ].join(' ')}
                 >
-                  <Folder size={15} className={currentFolder === f ? 'text-white' : 'text-slate-400 group-hover:text-blue-500'} />
+                  <Folder size={15} className={currentFolder === f ? 'text-white' : 'text-slate-400 group-hover:text-[#ed1c24]'} />
                   <span className="flex-1 truncate">{f}</span>
                 </button>
               ))}
@@ -324,8 +324,8 @@ export default function AdminImagesPage() {
 
           <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg">
             <div className="flex items-center gap-2 mb-2">
-              <Code2 size={14} className="text-blue-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">Mẹo sử dụng</span>
+              <Code2 size={14} className="text-[#ed1c24]" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Mẹo sử dụng</span>
             </div>
             <p className="text-[12px] leading-6 text-slate-300">
               Bấm <span className="font-black text-white">Sao chép URL</span> trên mỗi tệp để nhúng vào bài viết,
@@ -341,7 +341,7 @@ export default function AdminImagesPage() {
             <Button
               size="sm" variant={selectMode ? 'default' : 'outline'}
               onClick={() => { setSelectMode(v => !v); clearSelection() }}
-              className={`h-9 rounded-lg font-black uppercase text-[11px] tracking-wider ${selectMode ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+              className={`h-9 rounded-lg font-black uppercase text-[11px] tracking-wider ${selectMode ? 'bg-[#ed1c24] hover:bg-[#c91218]' : ''}`}
             >
               {selectMode ? <CheckSquare size={14} className="mr-1.5" /> : <Square size={14} className="mr-1.5" />}
               {selectMode ? 'Đang chọn' : 'Chọn nhiều'}
@@ -357,7 +357,7 @@ export default function AdminImagesPage() {
                   Bỏ chọn
                 </Button>
                 <div className="h-6 w-px bg-slate-200 mx-1" />
-                <Badge className="bg-blue-100 text-blue-700 border-none font-black text-[10px] uppercase">
+                <Badge className="bg-red-50 text-[#c91218] border-none font-black text-[10px] uppercase">
                   {selected.size} đã chọn
                 </Badge>
                 <Button size="sm" disabled={!selected.size || busy}
@@ -402,7 +402,7 @@ export default function AdminImagesPage() {
                     onClick={() => { if (selectMode) toggleSelected(item.path) }}
                     className={[
                       'group bg-white rounded-2xl border overflow-hidden transition-all',
-                      isSel ? 'border-blue-600 ring-4 ring-blue-100 shadow-lg' : 'border-slate-200 hover:shadow-xl hover:border-blue-300',
+                      isSel ? 'border-[#ed1c24] ring-4 ring-red-100 shadow-lg' : 'border-slate-200 hover:shadow-xl hover:border-red-200',
                       selectMode ? 'cursor-pointer' : '',
                     ].join(' ')}
                   >
@@ -415,7 +415,7 @@ export default function AdminImagesPage() {
                         <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={32} /></div>
                       )}
                       {selectMode && (
-                        <div className={`absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center shadow-lg ${isSel ? 'bg-blue-600 text-white' : 'bg-white/95 text-slate-400'}`}>
+                        <div className={`absolute top-2 right-2 h-7 w-7 rounded-full flex items-center justify-center shadow-lg ${isSel ? 'bg-[#ed1c24] text-white' : 'bg-white/95 text-slate-400'}`}>
                           {isSel ? <Check size={14} /> : <Square size={12} />}
                         </div>
                       )}
@@ -424,7 +424,7 @@ export default function AdminImagesPage() {
                           <div className="flex gap-1.5">
                             <button
                               onClick={(e) => { e.stopPropagation(); copy(item.url, item.path) }}
-                              className="flex-1 h-9 rounded-lg bg-white/95 text-slate-900 font-black uppercase text-[10px] tracking-wider flex items-center justify-center gap-1.5 hover:bg-blue-600 hover:text-white transition"
+                              className="flex-1 h-9 rounded-lg bg-white/95 text-slate-900 font-black uppercase text-[10px] tracking-wider flex items-center justify-center gap-1.5 hover:bg-[#ed1c24] hover:text-white transition"
                               title="Sao chép URL"
                             >
                               {copiedPath === item.path ? <><Check size={12} /> Đã chép</> : <><Copy size={12} /> URL</>}
@@ -437,13 +437,13 @@ export default function AdminImagesPage() {
                             <a
                               href={item.url} target="_blank" rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="h-9 w-9 rounded-lg bg-white/95 text-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition"
+                              className="h-9 w-9 rounded-lg bg-white/95 text-slate-900 flex items-center justify-center hover:bg-[#ed1c24] hover:text-white transition"
                               title="Mở tab mới"
                             ><ExternalLink size={13} /></a>
                             <a
                               href={item.url} download={item.name}
                               onClick={(e) => e.stopPropagation()}
-                              className="h-9 w-9 rounded-lg bg-white/95 text-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition"
+                              className="h-9 w-9 rounded-lg bg-white/95 text-slate-900 flex items-center justify-center hover:bg-[#ed1c24] hover:text-white transition"
                               title="Tải xuống"
                             ><Download size={13} /></a>
                             <button
@@ -464,7 +464,7 @@ export default function AdminImagesPage() {
                         <span>{formatBytes(item.size)}</span>
                         <button
                           onClick={(e) => { e.stopPropagation(); copy(item.url, item.path + ':sm') }}
-                          className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          className="text-[#ed1c24] hover:text-[#c91218] flex items-center gap-1"
                         >
                           <Copy size={10} /> {copiedPath === item.path + ':sm' ? 'Đã chép' : 'Chia sẻ'}
                         </button>
@@ -485,7 +485,7 @@ export default function AdminImagesPage() {
             <DialogTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2">
               <Pencil size={16} className="text-amber-500" /> Đổi tên tệp
             </DialogTitle>
-            <DialogDescription className="text-xs">Đường dẫn cũ: <code className="text-blue-600">{renameTarget?.path}</code></DialogDescription>
+            <DialogDescription className="text-xs">Đường dẫn cũ: <code className="text-[#ed1c24]">{renameTarget?.path}</code></DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên mới</Label>
@@ -510,7 +510,7 @@ export default function AdminImagesPage() {
             <DialogTitle className="text-base font-black uppercase tracking-tight flex items-center gap-2">
               <FolderInput size={16} className="text-indigo-500" /> Di chuyển {selected.size} tệp
             </DialogTitle>
-            <DialogDescription className="text-xs">Từ <code className="text-blue-600">{currentFolder}</code> → chọn thư mục đích.</DialogDescription>
+            <DialogDescription className="text-xs">Từ <code className="text-[#ed1c24]">{currentFolder}</code> → chọn thư mục đích.</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Thư mục đích</Label>

@@ -231,7 +231,7 @@ const SettingsPanel = ({ user, onUpdateUser }: SettingsPanelProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
+                <User className="h-5 w-5 text-[#ed1c24]" />
                 Thông tin cá nhân
               </CardTitle>
             </CardHeader>
@@ -469,7 +469,7 @@ const SettingsPanel = ({ user, onUpdateUser }: SettingsPanelProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-600" />
+                <Bell className="h-5 w-5 text-[#ed1c24]" />
                 Cài đặt thông báo
               </CardTitle>
             </CardHeader>

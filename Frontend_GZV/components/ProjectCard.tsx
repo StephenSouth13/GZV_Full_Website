@@ -21,7 +21,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const imageUrl = project.image || project.thumbnail_url || "/placeholder.jpg"
 
   return (
-    <Card className="group h-full overflow-hidden rounded-none border border-slate-200/90 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#00539b]/40 hover:shadow-[0_24px_48px_rgba(8,47,87,0.16)] dark:border-neutral-700 dark:bg-neutral-900">
+    <Card className="group h-full overflow-hidden rounded-none border border-slate-200/90 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-1 hover:border-[#ed1c24]/40 hover:shadow-[0_24px_48px_rgba(8,47,87,0.16)] dark:border-neutral-700 dark:bg-neutral-900">
       <CardHeader className="p-2">
         <div className="relative overflow-hidden rounded-none border border-slate-100 bg-slate-100 aspect-[16/10] dark:border-neutral-700 dark:bg-neutral-800">
           <img
@@ -32,14 +32,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
 
-          <Badge className="absolute left-4 top-4 rounded-none border border-white/30 bg-white/95 px-3 py-1 text-[10px] font-black uppercase text-[#00539b] shadow-lg backdrop-blur">
+          <Badge className="absolute left-4 top-4 rounded-none border border-white/30 bg-white/95 px-3 py-1 text-[10px] font-black uppercase text-[#ed1c24] shadow-lg backdrop-blur">
             {project.category || "Dự án"}
           </Badge>
         </div>
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col px-6 pb-6 pt-3 sm:px-7 sm:pb-7">
-        <CardTitle className="mb-3 line-clamp-2 text-[19px] font-black uppercase leading-tight text-slate-950 transition-colors group-hover:text-[#00539b] dark:text-white">
+        <CardTitle className="mb-3 line-clamp-2 text-[19px] font-black uppercase leading-tight text-slate-950 transition-colors group-hover:text-[#ed1c24] dark:text-white">
           {project.title}
         </CardTitle>
 
@@ -49,7 +49,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
         <div className="rounded-none border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/70">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#00539b]">
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ed1c24]">
               Mentoring & Coaching
             </span>
 
@@ -63,7 +63,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               {displayMentors.map((mentor, i) => (
                 <Avatar key={i} className="h-10 w-10 rounded-md border-[3px] border-white shadow-md dark:border-neutral-900">
                   <AvatarImage src={mentor.avatar} className="object-cover" />
-                  <AvatarFallback className="rounded-md bg-blue-50 text-xs font-black text-[#00539b]">
+                  <AvatarFallback className="rounded-md bg-red-50 text-xs font-black text-[#ed1c24]">
                     {mentor.name?.charAt(0) || "G"}
                   </AvatarFallback>
                 </Avatar>
@@ -72,14 +72,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               {remainingCount > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="z-10 flex h-10 w-10 items-center justify-center rounded-md border-[3px] border-white bg-slate-950 text-[10px] font-black text-white shadow-md transition hover:bg-[#00539b] dark:border-neutral-900">
+                    <button className="z-10 flex h-10 w-10 items-center justify-center rounded-md border-[3px] border-white bg-slate-950 text-[10px] font-black text-white shadow-md transition hover:bg-[#ed1c24] dark:border-neutral-900">
                       +{remainingCount}
                     </button>
                   </PopoverTrigger>
 
                   <PopoverContent className="z-[100] w-72 rounded-none border border-slate-200 bg-white/95 p-5 shadow-2xl backdrop-blur-xl">
                     <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-                      <Users size={16} className="text-[#00539b]" />
+                      <Users size={16} className="text-[#ed1c24]" />
                       <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">
                         Đội ngũ chuyên gia
                       </span>
@@ -94,7 +94,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                           </Avatar>
 
                           <div className="flex flex-col">
-                            <span className="text-sm font-black leading-none text-slate-700 transition-colors group-hover/item:text-[#00539b]">
+                            <span className="text-sm font-black leading-none text-slate-700 transition-colors group-hover/item:text-[#ed1c24]">
                               {m.name}
                             </span>
                             <span className="mt-1.5 text-[10px] font-bold uppercase text-slate-400">
@@ -121,7 +121,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </div>
 
         <Link href={`/du-an/${project.slug || project.id}`} className="mt-5">
-          <Button className="h-12 w-full rounded-none bg-[#00539b] text-xs font-black uppercase text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-[#ed1c24]">
+          <Button className="h-12 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white shadow-lg shadow-red-950/20 transition-all hover:bg-[#ed1c24]">
             Xem chi tiết dự án
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>

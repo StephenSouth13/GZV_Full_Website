@@ -13,7 +13,7 @@ export default function NotFound() {
       description: "Tìm hiểu các chương trình đào tạo chuyên nghiệp",
       href: "/#dich-vu",
       icon: BookOpen,
-      color: "from-blue-500 to-blue-600",
+      color: "from-red-500 to-[#050505]",
     },
     {
       title: "Gặp gỡ Mentors",
@@ -27,12 +27,12 @@ export default function NotFound() {
       description: "Tham gia cộng đồng học viên thành công",
       href: "/gzver",
       icon: Award,
-      color: "from-purple-500 to-purple-600",
+      color: "from-red-500 to-purple-600",
     },
   ]
 
   return (
-    <div className="min-h-screen pt-20 bg-gradient-to-br from-blue-50 via-white to-teal-50">
+    <div className="min-h-screen pt-20 bg-gradient-to-br from-red-50 via-white to-teal-50">
       <div className="container py-20">
         <div className="max-w-4xl mx-auto text-center">
           {/* Animated 404 */}
@@ -49,8 +49,8 @@ export default function NotFound() {
                 transition={{ duration: 20, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                 className="absolute inset-0 flex items-center justify-center opacity-5"
               >
-                <div className="w-96 h-96 border-8 border-blue-200 rounded-full flex items-center justify-center">
-                  <div className="text-8xl font-bold text-blue-300">gzv</div>
+                <div className="w-96 h-96 border-8 border-red-200 rounded-full flex items-center justify-center">
+                  <div className="text-8xl font-bold text-red-200">gzv</div>
                 </div>
               </motion.div>
 
@@ -61,7 +61,7 @@ export default function NotFound() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="relative z-10"
               >
-                <h1 className="text-9xl md:text-[12rem] font-bold text-transparent bg-gradient-to-r from-blue-600 via-teal-500 to-blue-800 bg-clip-text leading-none">
+                <h1 className="text-9xl md:text-[12rem] font-bold text-transparent bg-gradient-to-r from-[#ed1c24] via-teal-500 to-[#050505] bg-clip-text leading-none">
                   404
                 </h1>
               </motion.div>
@@ -71,7 +71,7 @@ export default function NotFound() {
                 {[...Array(8)].map((_, i) => (
                   <motion.div
                     key={i}
-                    className="absolute w-4 h-4 bg-gradient-to-r from-blue-400 to-teal-400 rounded-full opacity-60"
+                    className="absolute w-4 h-4 bg-gradient-to-r from-[#ed1c24] to-teal-400 rounded-full opacity-60"
                     animate={{
                       y: [0, -100, 0],
                       x: [0, Math.random() * 100 - 50, 0],
@@ -161,7 +161,7 @@ export default function NotFound() {
                         >
                           <suggestion.icon className="h-8 w-8 text-white" />
                         </div>
-                        <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                        <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-[#ed1c24] transition-colors duration-300">
                           {suggestion.title}
                         </h4>
                         <p className="text-gray-600 text-sm">{suggestion.description}</p>
@@ -178,7 +178,7 @@ export default function NotFound() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1.2 }}
-            className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-teal-50 rounded-2xl"
+            className="mt-16 p-8 bg-gradient-to-r from-red-50 to-teal-50 rounded-2xl"
           >
             <h4 className="text-xl font-bold text-gray-900 mb-4">Vẫn không tìm thấy những gì bạn cần?</h4>
             <p className="text-gray-600 mb-6">Đội ngũ hỗ trợ của gzv Center luôn sẵn sàng giúp đỡ bạn 24/7</p>

@@ -36,7 +36,7 @@ export default function TrainingAdminPage() {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 bg-slate-50">
-      <Loader2 className="animate-spin text-blue-600" size={40} />
+      <Loader2 className="animate-spin text-[#ed1c24]" size={40} />
       <p className="font-black text-[10px] text-slate-400 uppercase tracking-[0.3em]">gzv System Loading...</p>
     </div>
   )
@@ -57,7 +57,7 @@ export default function TrainingAdminPage() {
             </Button>
           </Link>
           <Link href="/admin/training/new">
-            <Button className="bg-blue-600 hover:bg-blue-700 h-16 px-10 rounded-[2rem] font-black shadow-2xl shadow-blue-500/30 gap-3 text-white transition-all hover:scale-105">
+            <Button className="bg-[#ed1c24] hover:bg-[#c91218] h-16 px-10 rounded-[2rem] font-black shadow-2xl shadow-red-500/30 gap-3 text-white transition-all hover:scale-105">
               <Plus size={24} strokeWidth={3} /> TẠO KHÓA HỌC MỚI
             </Button>
           </Link>
@@ -67,7 +67,7 @@ export default function TrainingAdminPage() {
       {/* Stats Quick View (Sếp giữ nguyên vì nó đẹp rồi) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Tổng số khóa', val: stats.total, icon: BookOpen, color: 'text-blue-600' },
+          { label: 'Tổng số khóa', val: stats.total, icon: BookOpen, color: 'text-[#ed1c24]' },
           { label: 'Đang hiển thị', val: stats.live, icon: GraduationCap, color: 'text-emerald-500' },
           { label: 'Học viên gzv', val: stats.students, icon: Users, color: 'text-purple-600' }
         ].map((item, i) => (

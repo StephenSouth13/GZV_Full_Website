@@ -218,7 +218,7 @@ const AboutPageClient = () => {
       </AnimatePresence>
 
       {/* Image Gallery Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-red-50 dark:from-gray-900 dark:to-gray-800">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 50 }}
@@ -247,13 +247,13 @@ const AboutPageClient = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
               
               <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                <Badge className="mb-4 bg-blue-600">
+                <Badge className="mb-4 bg-[#ed1c24]">
                   {galleryImages[currentImageIndex].category}
                 </Badge>
                 <h3 className="text-2xl md:text-3xl font-bold mb-2">
                   {galleryImages[currentImageIndex].title}
                 </h3>
-                <p className="text-blue-100 text-lg">
+                <p className="text-red-50 text-lg">
                   {galleryImages[currentImageIndex].description}
                 </p>
               </div>
@@ -274,7 +274,7 @@ const AboutPageClient = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex ? "bg-blue-600 scale-125" : "bg-gray-300"}`}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex ? "bg-[#ed1c24] scale-125" : "bg-gray-300"}`}
                 />
               ))}
             </div>
@@ -327,7 +327,7 @@ const AboutPageClient = () => {
                 />
              </div>
              <div className="mt-6 text-center text-white">
-                <Badge className="bg-blue-600 mb-2">{galleryImages[lightboxIndex].category}</Badge>
+                <Badge className="bg-[#ed1c24] mb-2">{galleryImages[lightboxIndex].category}</Badge>
                 <h3 className="text-2xl font-bold">{galleryImages[lightboxIndex].title}</h3>
                 <p className="text-gray-400 mt-2">{galleryImages[lightboxIndex].description}</p>
                 <div className="mt-4 flex justify-center gap-4">

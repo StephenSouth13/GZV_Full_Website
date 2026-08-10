@@ -52,7 +52,7 @@ export default function ProjectDetailPage({ params }: Props) {
   if (loading) {
     return (
       <div className="min-h-screen pt-20 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <Loader2 className="h-12 w-12 text-blue-600 animate-spin" />
+        <Loader2 className="h-12 w-12 text-[#ed1c24] animate-spin" />
       </div>
     )
   }
@@ -62,7 +62,7 @@ export default function ProjectDetailPage({ params }: Props) {
   const getStatusColor = (status?: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800'
-      case 'ongoing': return 'bg-blue-100 text-blue-800'
+      case 'ongoing': return 'bg-red-50 text-[#c91218]'
       case 'planning': return 'bg-yellow-100 text-yellow-800'
       default: return 'bg-gray-100 text-gray-800'
     }
@@ -114,7 +114,7 @@ export default function ProjectDetailPage({ params }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-t to-transparent" />
                 <div className="absolute bottom-6 left-6">
                   <div className="flex gap-2 mb-4">
-                    {project.category && <Badge className="bg-blue-600">{project.category}</Badge>}
+                    {project.category && <Badge className="bg-[#ed1c24]">{project.category}</Badge>}
                     <Badge className={getStatusColor(project.status)}>{getStatusText(project.status)}</Badge>
                   </div>
                   <h1 className="text-4xl md:text-5xl font-black text-white uppercase">{project.title}</h1>
@@ -126,7 +126,7 @@ export default function ProjectDetailPage({ params }: Props) {
                 {project.video_url && (
                   <section className="mb-12">
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                      <PlayCircle className="text-blue-600" /> Video giới thiệu dự án
+                      <PlayCircle className="text-[#ed1c24]" /> Video giới thiệu dự án
                     </h2>
                     <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-xl bg-black">
                       <iframe 
@@ -149,7 +149,7 @@ export default function ProjectDetailPage({ params }: Props) {
                   {project.hashtags && (
                     <div className="flex flex-wrap gap-2 mt-6">
                       {project.hashtags.split(',').map((tag, i) => (
-                        <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-600 dark:bg-blue-900/20 font-bold">
+                        <Badge key={i} variant="secondary" className="bg-red-50 text-[#ed1c24] dark:bg-red-950/20 font-bold">
                           <Hash size={10} className="mr-1" /> {tag.trim()}
                         </Badge>
                       ))}
@@ -161,12 +161,12 @@ export default function ProjectDetailPage({ params }: Props) {
                 {project.project_authors && project.project_authors.length > 0 && (
                   <section className="mb-12 pt-8 border-t border-gray-100 dark:border-gray-700">
                     <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                      <Users className="text-blue-600" /> Mentoring & Coaching
+                      <Users className="text-[#ed1c24]" /> Mentoring & Coaching
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {project.project_authors.map((author, idx) => (
                         <Link key={idx} href={author.profile_link}>
-                          <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group">
+                          <div className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all group">
                             <div className="relative h-14 w-14 rounded-full overflow-hidden border-2 border-white shadow-md">
                               <Image 
                                 src={author.avatar || '/placeholder-avatar.jpg'} 
@@ -177,7 +177,7 @@ export default function ProjectDetailPage({ params }: Props) {
                               />
                             </div>
                             <div>
-                              <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{author.name}</h4>
+                              <h4 className="font-bold text-gray-900 dark:text-white group-hover:text-[#ed1c24] transition-colors">{author.name}</h4>
                               <p className="text-xs text-gray-500 uppercase font-black tracking-widest">{author.title || 'Mentor'}</p>
                             </div>
                           </div>
@@ -202,7 +202,7 @@ export default function ProjectDetailPage({ params }: Props) {
                 {project.detailproject && (
                   <section className="pt-10 border-t border-gray-100 dark:border-gray-700">
                     <h2 className="text-2xl font-black mb-8 uppercase tracking-tight">Chi tiết triển khai</h2>
-                    <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-blue-600">
+                    <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-[#ed1c24]">
                       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]}>
                         {project.detailproject}
                       </ReactMarkdown>
@@ -223,9 +223,9 @@ export default function ProjectDetailPage({ params }: Props) {
                         <Image src={rp.image || "/placeholder.svg"} alt={rp.title} fill className="object-cover transition group-hover:scale-105" unoptimized={true} />
                       </div>
                       <CardContent className="p-4">
-                        <h3 className="font-bold mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors uppercase text-sm">{rp.title}</h3>
+                        <h3 className="font-bold mb-2 line-clamp-1 group-hover:text-[#ed1c24] transition-colors uppercase text-sm">{rp.title}</h3>
                         <Link href={`/du-an/${rp.slug}`}>
-                          <Button variant="link" className="p-0 text-blue-600 h-auto font-bold text-xs">XEM CHI TIẾT</Button>
+                          <Button variant="link" className="p-0 text-[#ed1c24] h-auto font-bold text-xs">XEM CHI TIẾT</Button>
                         </Link>
                       </CardContent>
                     </Card>
@@ -238,7 +238,7 @@ export default function ProjectDetailPage({ params }: Props) {
           {/* Sidebar */}
           <aside className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 sticky top-28 border border-gray-100 dark:border-gray-700">
-              <h3 className="text-xl font-bold mb-6 italic border-l-4 border-blue-600 pl-3">Thông tin dự án</h3>
+              <h3 className="text-xl font-bold mb-6 italic border-l-4 border-[#ed1c24] pl-3">Thông tin dự án</h3>
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Trạng thái:</span>
@@ -251,13 +251,13 @@ export default function ProjectDetailPage({ params }: Props) {
                 {project.order_index && (
                   <div className="flex justify-between">
                     <span className="text-gray-500">Độ ưu tiên:</span>
-                    <span className="font-bold text-blue-600">#{project.order_index}</span>
+                    <span className="font-bold text-[#ed1c24]">#{project.order_index}</span>
                   </div>
                 )}
               </div>
               
               <Link href="/lien-he">
-                <Button className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 font-bold shadow-lg shadow-blue-100">
+                <Button className="w-full mt-8 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-xl py-6 font-bold shadow-lg shadow-red-100">
                   Liên hệ tư vấn
                 </Button>
               </Link>

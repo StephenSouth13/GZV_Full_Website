@@ -45,7 +45,7 @@ export default function ArticleDetailPage() {
     fetchFullData()
   }, [articleId])
 
-  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-blue-600" /></div>
+  if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin h-10 w-10 text-[#ed1c24]" /></div>
   if (!article) return <div className="text-center p-20">Bài viết không tồn tại.</div>
 
   const author = article.author_profile
@@ -53,7 +53,7 @@ export default function ArticleDetailPage() {
   return (
     <div className="bg-white dark:bg-gray-950 min-h-screen pb-20">
       {/* ProgressBar (Tùy chọn) */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-blue-600 z-50 origin-left" />
+      <div className="fixed top-0 left-0 w-full h-1 bg-[#ed1c24] z-50 origin-left" />
 
       {/* Hero Header: Ảnh bìa lớn và Tiêu đề */}
       <div className="relative h-[60vh] w-full overflow-hidden">
@@ -64,7 +64,7 @@ export default function ArticleDetailPage() {
         />
         <div className="absolute inset-0 flex flex-col justify-end container mx-auto px-6 pb-12">
           <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}}>
-            <Badge className="mb-4 bg-blue-500 hover:bg-blue-600 text-white border-none px-4 py-1">
+            <Badge className="mb-4 bg-[#ed1c24] hover:bg-[#ed1c24] text-white border-none px-4 py-1">
               {article.category || 'Chia sẻ'}
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight max-w-4xl font-serif">
@@ -92,28 +92,28 @@ export default function ArticleDetailPage() {
         {/* Sidebar TRÁI: Social Share & Interaction */}
         <div className="lg:col-span-1 hidden lg:flex flex-col gap-4 sticky top-32 h-fit">
           <Button variant="outline" size="icon" className="rounded-full hover:text-red-500"><Heart className="h-5 w-5"/></Button>
-          <Button variant="outline" size="icon" className="rounded-full hover:text-blue-500"><Facebook className="h-5 w-5"/></Button>
-          <Button variant="outline" size="icon" className="rounded-full hover:text-blue-700"><Linkedin className="h-5 w-5"/></Button>
+          <Button variant="outline" size="icon" className="rounded-full hover:text-[#ed1c24]"><Facebook className="h-5 w-5"/></Button>
+          <Button variant="outline" size="icon" className="rounded-full hover:text-[#c91218]"><Linkedin className="h-5 w-5"/></Button>
           <Button variant="outline" size="icon" className="rounded-full"><Bookmark className="h-5 w-5"/></Button>
         </div>
 
         {/* NỘI DUNG CHÍNH */}
         <main className="lg:col-span-8 space-y-12">
           {/* Sapo/Excerpt */}
-          <p className="text-2xl font-medium text-slate-600 dark:text-slate-300 italic border-l-4 border-blue-500 pl-6 py-2">
+          <p className="text-2xl font-medium text-slate-600 dark:text-slate-300 italic border-l-4 border-[#ed1c24] pl-6 py-2">
             {article.excerpt}
           </p>
 
           {/* Body Content: Render Markdown/HTML */}
           <article className="prose prose-slate lg:prose-xl dark:prose-invert max-w-none 
-            prose-headings:font-serif prose-a:text-blue-600 prose-img:rounded-2xl prose-img:shadow-xl">
+            prose-headings:font-serif prose-a:text-[#ed1c24] prose-img:rounded-2xl prose-img:shadow-xl">
             <ReactMarkdown>{article.content}</ReactMarkdown>
           </article>
 
           {/* Tag Cloud */}
           <div className="flex flex-wrap gap-2 pt-10 border-t">
             {article.tags?.map((tag: string) => (
-              <Badge key={tag} variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-blue-100 transition-colors">
+              <Badge key={tag} variant="secondary" className="bg-slate-100 text-slate-600 hover:bg-red-50 transition-colors">
                 #{tag}
               </Badge>
             ))}
@@ -124,7 +124,7 @@ export default function ArticleDetailPage() {
             <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center border border-slate-100">
               <Avatar className="h-32 w-32 border-4 border-white shadow-xl">
                 <AvatarImage src={author.avatar} />
-                <AvatarFallback className="bg-blue-600 text-white text-2xl">{author.name?.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="bg-[#ed1c24] text-white text-2xl">{author.name?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1 text-center md:text-left space-y-3">
                 <div className="flex items-center justify-center md:justify-start gap-3">
@@ -135,7 +135,7 @@ export default function ArticleDetailPage() {
                   {author.bio || "Chuyên gia dẫn dắt tại gzv, đồng hành cùng thế hệ trẻ kiến tạo tương lai."}
                 </p>
                 <Link href={`/mentors/${author.slug}`}>
-                  <Button variant="link" className="p-0 text-blue-600 h-fit text-lg">
+                  <Button variant="link" className="p-0 text-[#ed1c24] h-fit text-lg">
                     Xem thêm về Mentor <ArrowLeft className="rotate-180 ml-2 h-4 w-4"/>
                   </Button>
                 </Link>
@@ -146,10 +146,10 @@ export default function ArticleDetailPage() {
 
         {/* Sidebar PHẢI: Related / Newsletter */}
         <aside className="lg:col-span-3 space-y-10">
-           <div className="p-6 bg-blue-600 rounded-2xl text-white space-y-4 shadow-xl shadow-blue-500/20">
+           <div className="p-6 bg-[#ed1c24] rounded-2xl text-white space-y-4 shadow-xl shadow-red-500/20">
               <h4 className="font-bold text-xl leading-tight">Sẵn sàng nâng tầm sự nghiệp?</h4>
               <p className="text-sm opacity-90">Tham gia cộng đồng gzver để nhận những chia sẻ độc quyền từ Mentors.</p>
-              <Button className="w-full bg-white text-blue-600 hover:bg-slate-100">Tham gia ngay</Button>
+              <Button className="w-full bg-white text-[#ed1c24] hover:bg-slate-100">Tham gia ngay</Button>
            </div>
            
            <div className="space-y-4">

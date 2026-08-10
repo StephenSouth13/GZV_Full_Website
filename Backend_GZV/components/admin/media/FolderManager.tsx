@@ -170,7 +170,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
       <div key={folder.path} className="select-none">
         <div 
           className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 ${
-            isSelected ? 'bg-blue-50 border border-blue-200' : ''
+            isSelected ? 'bg-red-50 border border-red-200' : ''
           }`}
           style={{ paddingLeft: `${12 + level * 20}px` }}
         >
@@ -197,7 +197,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
             onClick={() => onFolderSelect(folder.path)}
           >
             {isExpanded ? (
-              <FolderOpen className="h-4 w-4 text-blue-500 flex-shrink-0" />
+              <FolderOpen className="h-4 w-4 text-[#ed1c24] flex-shrink-0" />
             ) : (
               <Folder className="h-4 w-4 text-gray-500 flex-shrink-0" />
             )}
@@ -324,7 +324,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
 
         {loading ? (
           <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#ed1c24] mx-auto"></div>
             <p className="text-sm text-gray-500 mt-2">Loading folders...</p>
           </div>
         ) : (
@@ -332,7 +332,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
             {/* All Images option */}
             <div 
               className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                selectedFolder === '' ? 'bg-blue-50 border border-blue-200' : ''
+                selectedFolder === '' ? 'bg-red-50 border border-red-200' : ''
               }`}
               onClick={() => onFolderSelect('')}
             >
@@ -347,7 +347,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
 
             {loading ? (
               <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#ed1c24] mx-auto"></div>
                 <p className="text-sm text-gray-500 mt-2">Loading folders...</p>
               </div>
             ) : folders.length === 0 ? (

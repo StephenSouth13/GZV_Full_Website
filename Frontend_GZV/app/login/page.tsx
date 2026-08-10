@@ -54,7 +54,7 @@ export default function LoginPage() {
 
   const benefits = [
     { icon: <CheckCircle className="h-5 w-5 text-green-500" />, text: "Truy cập hơn 100+ khóa học chất lượng cao" },
-    { icon: <Users className="h-5 w-5 text-blue-500" />, text: "Kết nối với 50+ mentors chuyên nghiệp" },
+    { icon: <Users className="h-5 w-5 text-[#ed1c24]" />, text: "Kết nối với 50+ mentors chuyên nghiệp" },
     { icon: <Award className="h-5 w-5 text-purple-500" />, text: "Nhận chứng chỉ được công nhận" },
     { icon: <Shield className="h-5 w-5 text-orange-500" />, text: "Hỗ trợ học tập 24/7" }
   ]
@@ -67,7 +67,7 @@ export default function LoginPage() {
   return (
     <>
       <SearchParamsHandler />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex">
         {/* Left Side - Login Form */}
         <div className="flex-1 flex items-center justify-center p-8 relative">
           {/* Background Animation */}
@@ -75,7 +75,7 @@ export default function LoginPage() {
             {[...Array(5)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-32 h-32 bg-blue-200/20 dark:bg-blue-800/20 rounded-full"
+                className="absolute w-32 h-32 bg-red-200/20 dark:bg-red-900/20 rounded-full"
                 animate={{ x: [0, 100, 0], y: [0, -100, 0], scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
                 transition={{ duration: 8 + i * 2, repeat: Infinity, ease: "easeInOut" }}
                 style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
@@ -93,7 +93,7 @@ export default function LoginPage() {
             <CardHeader className="text-center pb-8">
               <Link href="/" className="inline-block mb-6">
                 <div className="h-12 w-auto mx-auto flex items-center justify-center">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-[#ed1c24] to-teal-600 bg-clip-text text-transparent">
                     gzv Center
                   </span>
                 </div>
@@ -161,14 +161,14 @@ export default function LoginPage() {
                 {/* Remember & Forgot */}
                 <div className="flex items-center justify-between">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded" disabled={isLoading} />
+                    <input type="checkbox" className="w-4 h-4 text-[#ed1c24] border-gray-300 rounded" disabled={isLoading} />
                     <span className="text-sm text-gray-600 dark:text-gray-300">Ghi nhớ đăng nhập</span>
                   </label>
-                  <Link href="/forgot-password" className="text-sm text-blue-600 dark:text-blue-400">Quên mật khẩu?</Link>
+                  <Link href="/forgot-password" className="text-sm text-[#ed1c24] dark:text-[#ed1c24]">Quên mật khẩu?</Link>
                 </div>
 
                 {/* Submit */}
-                <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gradient-to-r from-blue-600 to-teal-600 text-white">
+                <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gradient-to-r from-[#ed1c24] to-teal-600 text-white">
                   {isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -189,7 +189,7 @@ export default function LoginPage() {
                   className="w-full inline-block"
                 >
                   <Button variant="outline" className="w-full h-12" disabled={isLoading}>
-                    <Building2 className="h-5 w-5 mr-2 text-blue-700 dark:text-gray-900" />
+                    <Building2 className="h-5 w-5 mr-2 text-[#c91218] dark:text-gray-900" />
                     Đăng nhập vào hệ thống HRM
                   </Button>
                 </Link>
@@ -203,7 +203,7 @@ export default function LoginPage() {
                   Đăng nhập với Google
                 </Button>
                 <Button variant="outline" className="w-full h-12" disabled={isLoading}>
-                  <Facebook className="h-5 w-5 mr-2 text-blue-600" />
+                  <Facebook className="h-5 w-5 mr-2 text-[#ed1c24]" />
                   Đăng nhập với Facebook
                 </Button>
                 
@@ -214,7 +214,7 @@ export default function LoginPage() {
               <div className="text-center pt-4">
                 <p className="text-gray-600 dark:text-gray-300">
                   Chưa có tài khoản?{" "}
-                  <Link href="/register" className="text-blue-600 dark:text-blue-400 font-medium">Đăng ký ngay</Link>
+                  <Link href="/register" className="text-[#ed1c24] dark:text-[#ed1c24] font-medium">Đăng ký ngay</Link>
                 </p>
               </div>
             </CardContent>
@@ -227,7 +227,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-teal-600 p-12 text-white relative"
+        className="hidden lg:flex flex-1 bg-gradient-to-br from-[#ed1c24] via-[#c91218] to-teal-600 p-12 text-white relative"
       >
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fillOpacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
@@ -235,7 +235,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 flex flex-col justify-center max-w-lg">
           <h2 className="text-4xl font-bold mb-6">Tham gia cộng đồng học tập hàng đầu Việt Nam</h2>
-          <p className="text-blue-100 text-lg mb-12">Hơn 10,000+ học viên đã tin tưởng và phát triển cùng gzv Center.</p>
+          <p className="text-red-50 text-lg mb-12">Hơn 10,000+ học viên đã tin tưởng và phát triển cùng gzv Center.</p>
 
           {/* Benefits */}
           <div className="space-y-4 mb-12">

@@ -69,7 +69,7 @@ export default function ProjectDetailPage() {
             <h1 className="text-xl font-bold text-gray-900 truncate max-w-[300px]">{project.title}</h1>
           </div>
           <div className="flex gap-2">
-            <Badge className="bg-blue-600 px-3 py-1">{project.status}</Badge>
+            <Badge className="bg-[#ed1c24] px-3 py-1">{project.status}</Badge>
             <Button size="sm" variant="outline" className="gap-2" onClick={() => window.open(`/du-an/${project.slug}`, '_blank')}>
                 <Globe size={14}/> Xem thực tế
             </Button>
@@ -82,14 +82,14 @@ export default function ProjectDetailPage() {
         <Card className="overflow-hidden border-none shadow-xl rounded-3xl bg-white">
           <div className="relative h-[450px] w-full bg-slate-200">
             <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
-            <Badge className="absolute top-6 left-6 bg-blue-600 text-white border-none px-4 py-1 text-md uppercase font-bold">
+            <Badge className="absolute top-6 left-6 bg-[#ed1c24] text-white border-none px-4 py-1 text-md uppercase font-bold">
               {project.category}
             </Badge>
           </div>
 
           <CardContent className="p-10">
             <h2 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">{project.title}</h2>
-            <p className="text-xl text-gray-600 leading-relaxed italic mb-8 border-l-4 border-blue-500 pl-4">
+            <p className="text-xl text-gray-600 leading-relaxed italic mb-8 border-l-4 border-[#ed1c24] pl-4">
               {project.description}
             </p>
 

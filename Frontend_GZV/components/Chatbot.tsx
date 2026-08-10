@@ -175,7 +175,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
     >
       <Card className="h-full flex flex-col shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl overflow-hidden rounded-2xl">
         <CardHeader
-          className="bg-gradient-to-r from-blue-600 to-teal-600 text-white p-4 flex-shrink-0 cursor-grab active:cursor-grabbing"
+          className="bg-gradient-to-r from-[#ed1c24] to-teal-600 text-white p-4 flex-shrink-0 cursor-grab active:cursor-grabbing"
           onPointerDown={(e) => dragControls.start(e)}
         >
           <div className="flex items-center justify-between">
@@ -183,7 +183,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
               <Bot className="h-6 w-6" />
               <div>
                 <div className="font-semibold">gzv Assistant</div>
-                <div className="text-xs text-blue-100">Trực tuyến</div>
+                <div className="text-xs text-red-50">Trực tuyến</div>
               </div>
             </CardTitle>
             <div className="flex items-center gap-1">
@@ -220,7 +220,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
                       <div
                         className={`max-w-[80%] px-4 py-2 rounded-xl text-sm whitespace-pre-line ${
                           msg.sender === "user"
-                            ? "bg-blue-600 text-white"
+                            ? "bg-[#ed1c24] text-white"
                             : "bg-gray-100 dark:bg-gray-800 dark:text-white"
                         }`}
                       >
@@ -258,7 +258,7 @@ const Chatbot = ({ onClose }: ChatbotProps) => {
                       placeholder="Nhập tin nhắn..."
                       className="flex-1"
                     />
-                    <Button type="submit" size="icon" className="bg-blue-600 text-white hover:bg-blue-700">
+                    <Button type="submit" size="icon" className="bg-[#ed1c24] text-white hover:bg-[#c91218]">
                       <Send className="h-5 w-5" />
                     </Button>
                   </form>

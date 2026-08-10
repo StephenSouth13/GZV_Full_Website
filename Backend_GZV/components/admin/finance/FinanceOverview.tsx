@@ -83,7 +83,7 @@ export function FinanceOverview({ stats }: FinanceOverviewProps) {
               </div>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-[#050505] rounded-xl flex items-center justify-center">
                 <DollarSign className="h-6 w-6 text-white" />
               </div>
             </div>
@@ -185,7 +185,7 @@ export function FinanceOverview({ stats }: FinanceOverviewProps) {
               </div>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <PieChart className="h-6 w-6 text-white" />
               </div>
             </div>

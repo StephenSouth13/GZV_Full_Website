@@ -114,7 +114,7 @@ function ProjectsManagementContent() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-800">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">
-            Hệ thống <span className="text-blue-500">Dự án</span>
+            Hệ thống <span className="text-[#ed1c24]">Dự án</span>
           </h1>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">
             Quản trị & Sắp xếp mức độ ưu tiên hiển thị Portfolio
@@ -124,7 +124,7 @@ function ProjectsManagementContent() {
           <Button variant="outline" size="icon" className="rounded-xl border-slate-700 text-white hover:bg-slate-800" onClick={() => fetchProjects(currentPage, true)} disabled={isRefreshing}>
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
-          <Button onClick={() => setIsCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl shadow-lg shadow-blue-500/20">
+          <Button onClick={() => setIsCreateModalOpen(true)} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl shadow-lg shadow-red-500/20">
             <Plus className="h-4 w-4 mr-2" /> Thêm dự án mới
           </Button>
         </div>
@@ -138,13 +138,13 @@ function ProjectsManagementContent() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
                 placeholder="TÌM KIẾM DỰ ÁN..." 
-                className="pl-12 bg-slate-50 border-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20"
+                className="pl-12 bg-slate-50 border-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-[#ed1c24]/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="flex items-center gap-2">
-              <Badge className="bg-blue-50 text-blue-600 border-blue-100 px-5 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">
+              <Badge className="bg-red-50 text-[#ed1c24] border-red-100 px-5 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">
                 DATABASE: {totalCount} DỰ ÁN
               </Badge>
             </div>
@@ -155,7 +155,7 @@ function ProjectsManagementContent() {
           <AnimatePresence mode="wait">
             {loading ? (
               <div className="py-40 flex flex-col items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+                <Loader2 className="h-12 w-12 animate-spin text-[#ed1c24]" />
                 <p className="text-slate-400 mt-6 font-black uppercase text-[10px] tracking-[0.3em]">Đang đồng bộ dữ liệu...</p>
               </div>
             ) : filteredProjects.length === 0 ? (
@@ -180,7 +180,7 @@ function ProjectsManagementContent() {
         {totalPages > 1 && (
           <div className="px-10 py-8 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
             <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-              Trang <span className="text-blue-600">{currentPage}</span> / {totalPages}
+              Trang <span className="text-[#ed1c24]">{currentPage}</span> / {totalPages}
             </p>
             <div className="flex items-center gap-3">
               <Button 
@@ -198,7 +198,7 @@ function ProjectsManagementContent() {
                     key={i}
                     variant={currentPage === i + 1 ? "default" : "ghost"}
                     size="sm"
-                    className={`w-10 h-10 p-0 rounded-xl font-black text-[10px] ${currentPage === i + 1 ? 'bg-blue-600 shadow-lg shadow-blue-500/30 text-white' : ''}`}
+                    className={`w-10 h-10 p-0 rounded-xl font-black text-[10px] ${currentPage === i + 1 ? 'bg-[#ed1c24] shadow-lg shadow-red-500/30 text-white' : ''}`}
                     onClick={() => handlePageChange(i + 1)}
                   >
                     {i + 1}

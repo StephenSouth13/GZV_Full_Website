@@ -167,7 +167,7 @@ function AdminDashboardContent() {
   }, [])
 
   const kpiData = useMemo(() => [
-    { title: "Người dùng", value: counts.profiles, change: `${counts.gzvers} gzvers`, changeType: "neutral" as const, icon: Users, iconColor: "text-blue-600 dark:text-blue-400" },
+    { title: "Người dùng", value: counts.profiles, change: `${counts.gzvers} gzvers`, changeType: "neutral" as const, icon: Users, iconColor: "text-[#ed1c24] dark:text-[#ed1c24]" },
     { title: "Tin liên hệ", value: counts.contactMessages, change: `${counts.unreadMessages} chưa đọc`, changeType: counts.unreadMessages > 0 ? "positive" as const : "neutral" as const, icon: Mail, iconColor: "text-amber-600 dark:text-amber-400" },
     { title: "Nội dung", value: counts.articles, change: `${counts.authors} tác giả`, changeType: "neutral" as const, icon: Newspaper, iconColor: "text-emerald-600 dark:text-emerald-400" },
     { title: "Dự án", value: counts.projects, change: `${counts.mentors} mentors`, changeType: "neutral" as const, icon: FolderOpen, iconColor: "text-purple-600 dark:text-purple-400" },
@@ -242,7 +242,7 @@ function ActivityRow({ activity }: { activity: Activity }) {
     message: <Mail className="h-4 w-4 text-amber-600" />,
     article: <Newspaper className="h-4 w-4 text-emerald-600" />,
     project: <FolderOpen className="h-4 w-4 text-purple-600" />,
-    profile: <Users className="h-4 w-4 text-blue-600" />,
+    profile: <Users className="h-4 w-4 text-[#ed1c24]" />,
   }
 
   return (

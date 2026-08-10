@@ -47,7 +47,7 @@ export default function ProjectsPage() {
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#ed1c24]"></div>
     </div>
   )
 
@@ -85,7 +85,7 @@ export default function ProjectsPage() {
 
                 return (
                   <motion.div key={project.id} variants={itemVariants}>
-                    <Card className="h-full flex flex-col group overflow-hidden border-2 border-transparent hover:border-blue-500 hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white dark:bg-gray-800 dark:hover:border-blue-400">
+                    <Card className="h-full flex flex-col group overflow-hidden border-2 border-transparent hover:border-[#ed1c24] hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white dark:bg-gray-800 dark:hover:border-[#ed1c24]">
                       <CardHeader className="p-0">
                         <div className="relative aspect-[16/10] overflow-hidden">
                           <Image
@@ -103,7 +103,7 @@ export default function ProjectsPage() {
                       </CardHeader>
                       
                       <CardContent className="p-8 flex flex-col flex-grow">
-                        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-[#ed1c24] transition-colors">
                           {project.title}
                         </CardTitle>
                         <p className="text-gray-600 dark:text-gray-300 mb-6 flex-grow line-clamp-3">
@@ -112,19 +112,19 @@ export default function ProjectsPage() {
                         
                         {/* --- PHẦN MENTORING & COACHING (AVATAR STACK) --- */}
                         <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3">Mentoring & Coaching</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24] dark:text-[#ed1c24] mb-3">Mentoring & Coaching</p>
                           <div className="flex -space-x-3 items-center mb-8">
                             {displayAuthors.map((author: any, idx: number) => (
                               <Avatar key={idx} className="h-10 w-10 border-2 border-white dark:border-gray-800 shadow-md">
                                 <AvatarImage src={author.avatar} className="object-cover" />
-                                <AvatarFallback className="bg-blue-100 text-blue-600 text-xs font-bold">{author.name[0]}</AvatarFallback>
+                                <AvatarFallback className="bg-red-50 text-[#ed1c24] text-xs font-bold">{author.name[0]}</AvatarFallback>
                               </Avatar>
                             ))}
                             
                             {remaining > 0 && (
                               <Popover>
                                 <PopoverTrigger asChild>
-                                  <button className="h-10 w-10 rounded-full bg-slate-900 text-white border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-black hover:bg-blue-600 transition-all z-10">
+                                  <button className="h-10 w-10 rounded-full bg-slate-900 text-white border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-black hover:bg-[#ed1c24] transition-all z-10">
                                     +{remaining}
                                   </button>
                                 </PopoverTrigger>
@@ -149,7 +149,7 @@ export default function ProjectsPage() {
 
                         {/* NÚT XEM CHI TIẾT (VẪN GIỮ NGUYÊN BẢN GỐC) */}
                         <Link href={`/du-an/${project.slug}`}>
-                          <Button className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/20 group">
+                          <Button className="w-full h-14 bg-[#ed1c24] hover:bg-[#ed1c24] text-white rounded-2xl font-bold shadow-lg shadow-red-500/20 group">
                             Xem chi tiết dự án 
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </Button>
@@ -202,7 +202,7 @@ export default function ProjectsPage() {
 
             <Link href="/lien-he">
 
-              <Button size="lg" className="h-16 px-10 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-lg font-bold shadow-2xl shadow-blue-500/40">
+              <Button size="lg" className="h-16 px-10 bg-[#ed1c24] hover:bg-[#ed1c24] text-white rounded-2xl text-lg font-bold shadow-2xl shadow-red-500/30">
 
                 Liên hệ ngay
 

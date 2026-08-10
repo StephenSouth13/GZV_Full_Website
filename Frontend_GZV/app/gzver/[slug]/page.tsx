@@ -34,12 +34,12 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
   }, [params.slug])
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-red-50 dark:from-slate-950 dark:to-red-950">
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       >
-        <Loader2 className="h-12 w-12 text-blue-600" />
+        <Loader2 className="h-12 w-12 text-[#ed1c24]" />
       </motion.div>
     </div>
   )
@@ -47,7 +47,7 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
   if (!gzver) notFound()
 
   return (
-    <div className="min-h-screen pt-24 bg-gradient-to-b from-slate-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 pb-20">
+    <div className="min-h-screen pt-24 bg-gradient-to-b from-slate-50 via-white to-red-50 dark:from-slate-950 dark:via-slate-900 dark:to-red-950 pb-20">
       <div className="container max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <motion.div
@@ -55,7 +55,7 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <Link href="/gzver" className="inline-flex items-center gap-2 text-slate-400 hover:text-blue-600 font-bold text-xs mb-12 transition-all group">
+          <Link href="/gzver" className="inline-flex items-center gap-2 text-slate-400 hover:text-[#ed1c24] font-bold text-xs mb-12 transition-all group">
             <ArrowLeft size={16} className="group-hover:-translate-x-2 transition-transform" /> 
             QUAY LẠI CỘNG ĐỒNG gzvERS
           </Link>
@@ -71,7 +71,7 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <Card className="rounded-[3rem] border-none bg-gradient-to-br from-blue-600 to-blue-700 text-white p-10 relative overflow-hidden shadow-2xl shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-500">
+              <Card className="rounded-[3rem] border-none bg-gradient-to-br from-[#ed1c24] to-[#050505] text-white p-10 relative overflow-hidden shadow-2xl shadow-red-500/30 hover:shadow-red-500/40 transition-all duration-500">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
                 <div className="relative z-10 text-center">
                   <div className="relative w-44 h-44 mx-auto mb-8">
@@ -89,20 +89,20 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
                     </motion.div>
                     <motion.div
                       whileHover={{ scale: 1.2, rotate: 360 }}
-                      className="absolute bottom-2 right-2 bg-amber-400 p-3 rounded-full border-4 border-blue-600 shadow-xl"
+                      className="absolute bottom-2 right-2 bg-amber-400 p-3 rounded-full border-4 border-[#ed1c24] shadow-xl"
                     >
                       <Star size={18} className="fill-white text-white" />
                     </motion.div>
                   </div>
                   <h1 className="text-3xl font-black leading-tight mb-2 tracking-tighter">{gzver.full_name}</h1>
-                  <p className="font-bold text-blue-100 uppercase text-[10px] tracking-[0.2em] mb-8">{gzver.position}</p>
+                  <p className="font-bold text-red-50 uppercase text-[10px] tracking-[0.2em] mb-8">{gzver.position}</p>
                   
                   {gzver.cv_url && (
                     <motion.div
                       whileHover={{ y: -2 }}
                       whileTap={{ y: 0 }}
                     >
-                      <Button asChild className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-2xl font-black h-14 shadow-xl border-none">
+                      <Button asChild className="w-full bg-white text-[#ed1c24] hover:bg-red-50 rounded-2xl font-black h-14 shadow-xl border-none">
                         <a href={gzver.cv_url} target="_blank" rel="noopener noreferrer">
                           <FileText className="mr-2" size={18} /> TẢI HỒ SƠ NĂNG LỰC
                         </a>
@@ -121,7 +121,7 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
             >
               <Card className="rounded-[2.5rem] border-none shadow-md hover:shadow-xl transition-all duration-300 p-8 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                 <h3 className="font-black uppercase text-[10px] text-slate-400 tracking-[0.2em] mb-6 flex items-center gap-2">
-                  <Wrench size={14} className="text-blue-600" /> Kỹ năng chuyên môn
+                  <Wrench size={14} className="text-[#ed1c24]" /> Kỹ năng chuyên môn
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {gzver.skills?.map((skill: string, idx: number) => (
@@ -131,7 +131,7 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: idx * 0.05 }}
                     >
-                      <Badge className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/50 px-4 py-2 rounded-full font-bold text-[11px] hover:shadow-md transition-all">
+                      <Badge className="bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/30 dark:to-red-950/30 text-[#c91218] dark:text-red-200 border border-red-200 dark:border-red-900/50 px-4 py-2 rounded-full font-bold text-[11px] hover:shadow-md transition-all">
                         {skill}
                       </Badge>
                     </motion.div>
@@ -152,10 +152,10 @@ export default function gzverDetailPage({ params }: { params: { slug: string } }
               viewport={{ once: true }}
               className="bg-white dark:bg-slate-900 p-10 rounded-[3rem] shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-800"
             >
-              <h2 className="text-2xl font-black mb-8 flex items-center gap-3 italic text-blue-600 uppercase tracking-tighter">
+              <h2 className="text-2xl font-black mb-8 flex items-center gap-3 italic text-[#ed1c24] uppercase tracking-tighter">
                 <TrendingUp /> Lộ trình thăng tiến
               </h2>
-              <div className="p-8 bg-blue-50/50 dark:bg-blue-900/20 rounded-[2rem] border-l-8 border-blue-600">
+              <div className="p-8 bg-red-50/50 dark:bg-red-950/20 rounded-[2rem] border-l-8 border-[#ed1c24]">
                 <p className="text-xl font-medium leading-relaxed italic text-slate-700 dark:text-slate-200">
                   "{gzver.promotion_path}"
                 </p>

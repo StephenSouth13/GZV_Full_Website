@@ -29,13 +29,13 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
     <TableRow 
       ref={setNodeRef} 
       style={style} 
-      className={`group transition-all border-slate-50 ${isDragging ? 'bg-blue-50/50 shadow-2xl ring-1 ring-blue-200' : 'hover:bg-slate-50/80'}`}
+      className={`group transition-all border-slate-50 ${isDragging ? 'bg-red-50/50 shadow-2xl ring-1 ring-red-200' : 'hover:bg-slate-50/80'}`}
     >
       <TableCell className="w-[50px]">
         <button 
           {...attributes} 
           {...listeners} 
-          className="cursor-grab active:cursor-grabbing p-2 text-slate-300 hover:text-blue-600 transition-colors"
+          className="cursor-grab active:cursor-grabbing p-2 text-slate-300 hover:text-[#ed1c24] transition-colors"
         >
           <GripVertical size={20} />
         </button>
@@ -70,7 +70,7 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
               )}
             </div>
             {/* TAG NAME / CATEGORY hiển thị cực đẹp */}
-            <span className="text-[10px] text-blue-600 font-bold uppercase tracking-[0.15em] mt-1">
+            <span className="text-[10px] text-[#ed1c24] font-bold uppercase tracking-[0.15em] mt-1">
               {p.category || "CHƯA PHÂN LOẠI"}
             </span>
           </div>
@@ -89,7 +89,7 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
             variant="ghost" 
             size="icon" 
             onClick={() => onEdit(p)} 
-            className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-all shadow-none"
+            className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-[#ed1c24] transition-all shadow-none"
           >
             <Edit3 size={16}/>
           </Button>

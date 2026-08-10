@@ -338,10 +338,10 @@ function SiteContentManager() {
       ...items,
       {
         slug,
-        title: "Trang m?i",
-        menu_title: "Trang m?i",
+        title: "Trang mới",
+        menu_title: "Trang mới",
         banner_badge: "GZV",
-        banner_title: "Trang m?i",
+        banner_title: "Trang mới",
         banner_subtitle: "",
         banner_description: "",
         banner_image_url: "",
@@ -373,7 +373,7 @@ function SiteContentManager() {
       ...items,
       {
         section_key: key,
-        title: "Section m?i",
+        title: "Section mới",
         subtitle: "",
         description: "",
         button_label: "",
@@ -555,7 +555,7 @@ function SiteContentManager() {
 
       <Tabs defaultValue="home" className="space-y-6">
         <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-none border bg-white p-1 md:grid-cols-8 dark:bg-[#0b0b0b]">
-          <TabsTrigger value="home">Trang ch?</TabsTrigger>
+          <TabsTrigger value="home">Trang chủ</TabsTrigger>
           <TabsTrigger value="builder">Builder</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="navigation">Header</TabsTrigger>
@@ -571,7 +571,7 @@ function SiteContentManager() {
               <CardHeader><CardTitle>Trang</CardTitle><CardDescription>Chọn trang để nạp block layout.</CardDescription></CardHeader>
               <CardContent className="space-y-2">
                 <Button type="button" variant="outline" onClick={addPage} className="mb-2 w-full rounded-none">
-                  <Plus className="mr-2 h-4 w-4" /> Trang m?i
+                  <Plus className="mr-2 h-4 w-4" /> Trang mới
                 </Button>
                 {[...new Set([...pages.map((p) => p.slug), ...pageBlocks.map((b) => b.page_slug)])].map((slug) => (
                   <button key={slug} onClick={() => setBuilderSlug(slug)} className={`w-full rounded-none px-3 py-2 text-left text-sm font-bold ${builderSlug === slug ? "bg-[#ed1c24] text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>{slug}</button>
@@ -588,19 +588,19 @@ function SiteContentManager() {
                   <div className="mb-4 flex items-center gap-2">
                     <Layers className="h-5 w-5 text-[#ed1c24]" />
                     <div>
-                      <p className="font-black text-slate-900 dark:text-white">C?u h?nh trang ?ang edit</p>
-                      <p className="text-sm text-slate-500">??i slug, title tab, SEO, banner v? tr?ng th?i public cho t?ng trang.</p>
+                      <p className="font-black text-slate-900 dark:text-white">Cấu hình trang đang edit</p>
+                      <p className="text-sm text-slate-500">Đổi slug, title tab, SEO, banner và trạng thái public cho từng trang.</p>
                     </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <Field label="Slug trang">
                       <Input value={builderSlug} onChange={(event) => renameBuilderSlug(event.target.value)} placeholder="vi-du-slug" />
                     </Field>
-                    <SwitchLine label="Hien trang public" checked={builderPage?.is_visible !== false} onChange={(value) => updateBuilderPage({ is_visible: value })} />
-                    <Field label="Ten trang"><Input value={builderPage?.title || ""} onChange={(event) => updateBuilderPage({ title: event.target.value })} /></Field>
+                    <SwitchLine label="Hiện trang public" checked={builderPage?.is_visible !== false} onChange={(value) => updateBuilderPage({ is_visible: value })} />
+                    <Field label="Tên trang"><Input value={builderPage?.title || ""} onChange={(event) => updateBuilderPage({ title: event.target.value })} /></Field>
                     <Field label="Title tab / SEO"><Input value={(builderPage as any)?.seo_title || ""} onChange={(event) => updateBuilderPage({ seo_title: event.target.value } as any)} /></Field>
-                    <Field label="Tieu de banner"><Input value={builderPage?.banner_title || ""} onChange={(event) => updateBuilderPage({ banner_title: event.target.value })} /></Field>
-                    <Field label="Anh banner"><PickerInput value={builderPage?.banner_image_url || ""} onChange={(value) => updateBuilderPage({ banner_image_url: value })} onPick={() => setPickerOpen("builderBanner")} /></Field>
+                    <Field label="Tiêu đề banner"><Input value={builderPage?.banner_title || ""} onChange={(event) => updateBuilderPage({ banner_title: event.target.value })} /></Field>
+                    <Field label="Ảnh banner"><PickerInput value={builderPage?.banner_image_url || ""} onChange={(value) => updateBuilderPage({ banner_image_url: value })} onPick={() => setPickerOpen("builderBanner")} /></Field>
                   </div>
                   <Field label="Meta description">
                     <Textarea value={(builderPage as any)?.seo_description || ""} onChange={(event) => updateBuilderPage({ seo_description: event.target.value } as any)} />
@@ -660,7 +660,7 @@ function SiteContentManager() {
                   </div>
                 ))}
                 <div className="sticky bottom-4 z-10 flex justify-end border bg-white/95 p-3 shadow-xl backdrop-blur dark:bg-slate-950/95">
-                  <Button onClick={saveBuilderLayout} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> L?u layout trang n?y</Button>
+                  <Button onClick={saveBuilderLayout} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> Lưu layout trang này</Button>
                 </div>
               </CardContent>
             </Card>

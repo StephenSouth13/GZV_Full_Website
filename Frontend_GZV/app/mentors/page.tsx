@@ -75,7 +75,7 @@ export default function MentorsPage() {
       icon: GraduationCap, 
       title: "10% - Học tập chính quy", 
       text: "Nắm vững kiến thức nền tảng và các mô hình quản trị tiên tiến thông qua bài giảng chuyên sâu từ các chuyên gia.",
-      color: "from-blue-600 to-indigo-600"
+      color: "from-[#ed1c24] to-[#050505]"
     },
     { 
       icon: Users, 
@@ -131,8 +131,8 @@ export default function MentorsPage() {
                   variant={activeTab === tab.id ? 'default' : 'ghost'}
                   className={`rounded-xl px-6 h-12 font-bold uppercase text-[11px] tracking-widest transition-all duration-300 flex-shrink-0 ${
                     activeTab === tab.id 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105' 
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-400 dark:hover:bg-blue-900/20'
+                      ? 'bg-[#ed1c24] text-white shadow-lg shadow-red-500/30 scale-105' 
+                      : 'text-gray-600 hover:text-[#ed1c24] hover:bg-red-50 dark:text-gray-400 dark:hover:bg-red-950/20'
                   }`}
                 >
                   <tab.icon className="mr-2 h-4 w-4" /> {tab.label}
@@ -155,7 +155,7 @@ export default function MentorsPage() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   >
-                    <Loader2 className="text-blue-600 h-12 w-12" />
+                    <Loader2 className="text-[#ed1c24] h-12 w-12" />
                   </motion.div>
                   <span className="text-xs font-black text-gray-400 uppercase tracking-widest mt-4">Đang tải danh sách chuyên gia...</span>
                 </div>
@@ -178,7 +178,7 @@ export default function MentorsPage() {
                         <Link href={`/mentors/${mentor.slug}`}>
                           <Card className="h-full flex flex-col group bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-md hover:shadow-2xl transition-all duration-500 rounded-3xl overflow-hidden text-center cursor-pointer relative">
                             {/* Hover Background Effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 to-indigo-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-[#ed1c24]/5 to-[#050505]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                             <CardContent className="p-10 flex flex-col items-center h-full relative z-10">
                               {/* Avatar with Ring */}
@@ -199,12 +199,12 @@ export default function MentorsPage() {
                               </div>
 
                               {/* Name */}
-                              <CardTitle className="text-2xl font-black text-gray-900 dark:text-white mb-3 tracking-tight group-hover:text-blue-600 transition-colors uppercase">
+                              <CardTitle className="text-2xl font-black text-gray-900 dark:text-white mb-3 tracking-tight group-hover:text-[#ed1c24] transition-colors uppercase">
                                 {mentor.full_name}
                               </CardTitle>
 
                               {/* Title Badge */}
-                              <Badge className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 dark:from-blue-900/40 dark:to-indigo-900/40 dark:text-blue-300 border-none px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
+                              <Badge className="bg-gradient-to-r from-red-50 to-red-50 text-[#c91218] dark:from-red-950/40 dark:to-red-950/40 dark:text-red-200 border-none px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6">
                                 {mentor.title}
                               </Badge>
 
@@ -215,7 +215,7 @@ export default function MentorsPage() {
 
                               {/* CTA Button */}
                               <div className="w-full mt-auto">
-                                <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black h-14 rounded-2xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 gap-2 group/btn uppercase text-xs tracking-widest">
+                                <Button className="w-full bg-gradient-to-r from-[#ed1c24] to-[#050505] hover:from-[#c91218] hover:to-[#050505] text-white font-black h-14 rounded-2xl shadow-lg shadow-red-500/20 transition-all active:scale-95 gap-2 group/btn uppercase text-xs tracking-widest">
                                   XEM HỒ SƠ 
                                   <motion.div
                                     initial={{ x: 0 }}
@@ -241,7 +241,7 @@ export default function MentorsPage() {
             <motion.div key="methods" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-6">
-                  Mô Hình Đào Tạo <span className="text-blue-600">70-20-10</span>
+                  Mô Hình Đào Tạo <span className="text-[#ed1c24]">70-20-10</span>
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
                   Chúng tôi áp dụng mô hình chuẩn quốc tế, kết hợp lý thuyết, tương tác xã hội và trải nghiệm thực chiến để phát triển năng lực toàn diện.
@@ -273,12 +273,12 @@ export default function MentorsPage() {
           {/* TAB 3: NHÂN SỰ KẾ THỪA (TALENT DEVELOPMENT) */}
           {activeTab === 'successors' && (
             <motion.div key="successors" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-4xl mx-auto py-12">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-blue-500/40">
+              <div className="bg-gradient-to-br from-[#ed1c24] to-[#050505] w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-red-500/30">
                 <Sparkles className="text-white w-12 h-12 animate-pulse" />
               </div>
 
               <h2 className="text-5xl font-black mb-8 uppercase tracking-tighter text-gray-900 dark:text-white">
-                Phát Triển Tài Năng <span className="text-blue-600">Kế Thừa</span>
+                Phát Triển Tài Năng <span className="text-[#ed1c24]">Kế Thừa</span>
               </h2>
 
               <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium italic mb-12">
@@ -298,7 +298,7 @@ export default function MentorsPage() {
                     transition={{ delay: idx * 0.1 }}
                   >
                     <Card className="border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 text-center">
-                      <item.icon className="w-10 h-10 text-blue-600 mx-auto mb-4" />
+                      <item.icon className="w-10 h-10 text-[#ed1c24] mx-auto mb-4" />
                       <h3 className="font-black text-gray-900 dark:text-white mb-2 uppercase text-sm">{item.title}</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
                     </Card>
@@ -307,7 +307,7 @@ export default function MentorsPage() {
               </div>
 
               <Link href="/lien-he">
-                <Button size="lg" className="rounded-full px-14 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-blue-500/30">
+                <Button size="lg" className="rounded-full px-14 h-16 bg-gradient-to-r from-[#ed1c24] to-[#050505] hover:from-[#c91218] hover:to-[#050505] text-white font-black uppercase text-xs tracking-[0.2em] shadow-2xl shadow-red-500/30">
                   <ArrowUpRight className="mr-2" size={20} /> Nhận Tư Vấn Lộ Trình
                 </Button>
               </Link>

@@ -102,7 +102,7 @@ export default function TrainingEditorPage() {
   if (fetching || !editor) return (
     <div className="h-screen flex items-center justify-center bg-slate-50">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
+        <Loader2 className="animate-spin text-[#ed1c24]" size={40} />
         <p className="font-black text-slate-400 uppercase tracking-widest text-xs">gzv Center đang khởi tạo...</p>
       </div>
     </div>
@@ -115,7 +115,7 @@ export default function TrainingEditorPage() {
         <Button variant="ghost" onClick={() => router.back()} className="font-black text-slate-400 hover:text-slate-900 uppercase text-[10px] tracking-widest">
           <ChevronLeft className="mr-2" size={20}/> Quay lại
         </Button>
-        <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 rounded-2xl px-12 h-14 font-black text-white shadow-xl shadow-blue-500/30 transition-all active:scale-95">
+        <Button onClick={handleSave} disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] rounded-2xl px-12 h-14 font-black text-white shadow-xl shadow-red-500/30 transition-all active:scale-95">
           {loading ? <Loader2 className="animate-spin mr-2" /> : "XÁC NHẬN LƯU"}
         </Button>
       </div>
@@ -136,12 +136,12 @@ export default function TrainingEditorPage() {
 
             {/* Toolbar Docs Style */}
             <div className="flex items-center gap-1 p-2 bg-slate-900 rounded-[1.5rem] w-fit shadow-2xl sticky top-32 z-40 border border-white/10">
-              <Button size="icon" variant="ghost" onClick={() => exec('bold')} className={editor.isActive('bold') ? 'text-blue-400' : 'text-slate-400'}><Bold size={18}/></Button>
-              <Button size="icon" variant="ghost" onClick={() => exec('italic')} className={editor.isActive('italic') ? 'text-blue-400' : 'text-slate-400'}><Italic size={18}/></Button>
+              <Button size="icon" variant="ghost" onClick={() => exec('bold')} className={editor.isActive('bold') ? 'text-[#ed1c24]' : 'text-slate-400'}><Bold size={18}/></Button>
+              <Button size="icon" variant="ghost" onClick={() => exec('italic')} className={editor.isActive('italic') ? 'text-[#ed1c24]' : 'text-slate-400'}><Italic size={18}/></Button>
               <div className="w-px h-6 bg-white/10 mx-2" />
-              <Button size="icon" variant="ghost" onClick={() => exec('h1')} className={editor.isActive('heading', { level: 1 }) ? 'text-blue-400' : 'text-slate-400'}><Heading1 size={18}/></Button>
-              <Button size="icon" variant="ghost" onClick={() => exec('h2')} className={editor.isActive('heading', { level: 2 }) ? 'text-blue-400' : 'text-slate-400'}><Heading2 size={18}/></Button>
-              <Button size="icon" variant="ghost" onClick={() => exec('list')} className={editor.isActive('bulletList') ? 'text-blue-400' : 'text-slate-400'}><List size={18}/></Button>
+              <Button size="icon" variant="ghost" onClick={() => exec('h1')} className={editor.isActive('heading', { level: 1 }) ? 'text-[#ed1c24]' : 'text-slate-400'}><Heading1 size={18}/></Button>
+              <Button size="icon" variant="ghost" onClick={() => exec('h2')} className={editor.isActive('heading', { level: 2 }) ? 'text-[#ed1c24]' : 'text-slate-400'}><Heading2 size={18}/></Button>
+              <Button size="icon" variant="ghost" onClick={() => exec('list')} className={editor.isActive('bulletList') ? 'text-[#ed1c24]' : 'text-slate-400'}><List size={18}/></Button>
               <div className="w-px h-6 bg-white/10 mx-2" />
               <Button size="icon" variant="ghost" onClick={() => {
                 const url = prompt('Dán link ảnh tại đây:'); if(url) (editor as any).chain().focus().setImage({ src: url }).run()
@@ -162,7 +162,7 @@ export default function TrainingEditorPage() {
             
             <div>
               <Label className="font-black text-[10px] text-slate-500 uppercase tracking-widest">Đường dẫn (Slug)</Label>
-              <Input value={data.slug} readOnly className="mt-4 h-12 rounded-xl bg-slate-50 border-none font-bold text-blue-600" />
+              <Input value={data.slug} readOnly className="mt-4 h-12 rounded-xl bg-slate-50 border-none font-bold text-[#ed1c24]" />
             </div>
 
             <div>

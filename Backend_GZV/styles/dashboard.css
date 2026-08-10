@@ -158,16 +158,16 @@
 
 /* Sidebar Active State */
 .sidebar-active {
-  @apply bg-blue-600 text-white shadow-lg shadow-blue-600/20;
+  @apply bg-[#ed1c24] text-white shadow-lg shadow-red-600/20;
 }
 
 .dark .sidebar-active {
-  @apply bg-blue-600 text-white shadow-lg shadow-blue-600/30;
+  @apply bg-[#ed1c24] text-white shadow-lg shadow-red-600/30;
 }
 
 /* Form Input Focus */
 .form-input-focus {
-  @apply focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply focus:ring-2 focus:ring-[#ed1c24] focus:border-transparent;
 }
 
 /* Status Indicator */
@@ -315,7 +315,7 @@
 }
 
 .state-info {
-  @apply border-blue-500 bg-blue-50 dark:bg-blue-900/20;
+  @apply border-[#ed1c24] bg-red-50 dark:bg-red-950/20;
 }
 
 /* Accessibility */

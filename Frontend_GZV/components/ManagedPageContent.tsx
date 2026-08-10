@@ -22,7 +22,7 @@ export default function ManagedPageContent() {
     <section className="bg-white py-16 dark:bg-gray-900">
       <div className="container mx-auto px-4">
         <div
-          className="prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-a:text-blue-600"
+          className="prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-a:text-[#ed1c24]"
           dangerouslySetInnerHTML={{ __html: page.content_html }}
         />
       </div>

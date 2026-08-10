@@ -5,7 +5,7 @@ import { Shield, Lock, Eye, Users, Database, FileText } from "lucide-react"
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-950">
       <div className="container py-8 sm:py-12 lg:py-20">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -19,9 +19,9 @@ export default function PrivacyPolicyPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-6"
+              className="inline-flex items-center justify-center w-20 h-20 bg-red-50 dark:bg-red-950/30 rounded-2xl mb-6"
             >
-              <Shield className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+              <Shield className="h-10 w-10 text-[#ed1c24] dark:text-[#ed1c24]" />
             </motion.div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white font-serif mb-4">
               Chính sách bảo mật
@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <FileText className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">1. Giới thiệu</h2>
                 </div>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <Database className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <Database className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">2. Thông tin chúng tôi thu thập</h2>
                 </div>
                 <div className="space-y-4 text-gray-700 dark:text-gray-300">
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <Eye className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">3. Cách chúng tôi sử dụng thông tin</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
@@ -116,7 +116,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <Users className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <Users className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">4. Chia sẻ thông tin</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
@@ -138,7 +138,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <Lock className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">5. Bảo mật thông tin</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
@@ -161,7 +161,7 @@ export default function PrivacyPolicyPage() {
                 className="mb-10"
               >
                 <div className="flex items-center mb-4">
-                  <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" />
+                  <Shield className="h-6 w-6 text-[#ed1c24] dark:text-[#ed1c24] mr-3" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">6. Quyền của bạn</h2>
                 </div>
                 <div className="text-gray-700 dark:text-gray-300">
@@ -181,7 +181,7 @@ export default function PrivacyPolicyPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.7 }}
-                className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 mt-8"
+                className="bg-red-50 dark:bg-red-950/20 rounded-xl p-6 mt-8"
               >
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Liên hệ với chúng tôi</h3>
                 <p className="text-gray-700 dark:text-gray-300 mb-4">

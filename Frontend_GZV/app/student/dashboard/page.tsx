@@ -24,7 +24,7 @@ export default function StudentDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ed1c24]"></div>
       </div>
     )
   }
@@ -32,9 +32,9 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8">
       {/* Welcome Section với thông tin user thực */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6">
+      <div className="bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 rounded-lg p-6">
         <div className="flex items-center space-x-4">
-          <div className="h-16 w-16 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+          <div className="h-16 w-16 bg-red-50 dark:bg-red-900 rounded-full flex items-center justify-center">
             {user?.avatar ? (
               <Image 
                 src={user.avatar} 
@@ -44,7 +44,7 @@ export default function StudentDashboard() {
                 className="rounded-full"
               />
             ) : (
-              <User className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <User className="h-8 w-8 text-[#ed1c24] dark:text-[#ed1c24]" />
             )}
           </div>
           <div>
@@ -79,7 +79,7 @@ export default function StudentDashboard() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-[#ed1c24]" />
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Khóa học</span>
             </div>
             <div className="mt-2">
@@ -178,7 +178,7 @@ export default function StudentDashboard() {
         <CardContent>
           {items.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Giỏ hàng trống. <Link className="text-blue-600 hover:underline" href="/#dich-vu">Xem dịch vụ</Link>
+              Giỏ hàng trống. <Link className="text-[#ed1c24] hover:underline" href="/#dich-vu">Xem dịch vụ</Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
@@ -249,7 +249,7 @@ export default function StudentDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-blue-600">
+                <div className="text-sm font-semibold text-[#ed1c24]">
                   {formatCurrency(course.price)}
                 </div>
                 <Link href="/#dich-vu">

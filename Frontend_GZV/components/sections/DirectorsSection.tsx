@@ -36,7 +36,7 @@ export default function DirectorsSection() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="animate-spin text-[#00539b]" size={40} />
+        <Loader2 className="animate-spin text-[#ed1c24]" size={40} />
       </div>
     )
   }
@@ -73,7 +73,7 @@ export default function DirectorsSection() {
               viewport={{ once: true }}
               className="flex"
             >
-              <Card className="group relative flex w-full flex-col overflow-hidden rounded-none border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-[#00539b] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] dark:border-slate-800 dark:bg-slate-900">
+              <Card className="group relative flex w-full flex-col overflow-hidden rounded-none border border-slate-200 bg-white shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition-all duration-300 hover:border-[#ed1c24] hover:shadow-[0_24px_48px_rgba(8,47,87,0.14)] dark:border-slate-800 dark:bg-slate-900">
                 <CardContent className="flex h-full flex-col items-center p-8">
                   <div className="relative mb-8 shrink-0">
                     <div className="relative h-40 w-40 overflow-hidden rounded-none border border-slate-100 bg-white p-1 shadow-xl dark:bg-slate-800">
@@ -91,10 +91,10 @@ export default function DirectorsSection() {
                   </div>
 
                   <div className="flex w-full flex-grow flex-col">
-                    <h3 className="mb-2 text-2xl font-black uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#00539b] dark:text-white">
+                    <h3 className="mb-2 text-2xl font-black uppercase leading-tight text-slate-900 transition-colors group-hover:text-[#ed1c24] dark:text-white">
                       {director.full_name}
                     </h3>
-                    <p className="mb-6 text-base font-extrabold uppercase text-[#00539b]">
+                    <p className="mb-6 text-base font-extrabold uppercase text-[#ed1c24]">
                       {director.position}
                     </p>
 

@@ -30,7 +30,7 @@ export default function MyCoursesPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+              <BookOpen className="h-5 w-5 text-[#ed1c24]" />
               <span className="font-medium">Đang học</span>
             </div>
             <div className="text-2xl font-bold mt-1">{enrolledCourses.length}</div>
@@ -83,7 +83,7 @@ export default function MyCoursesPage() {
                     className="w-full h-40 object-cover"
                   />
                   <div className="absolute top-4 right-4">
-                    <span className="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">
+                    <span className="bg-[#ed1c24] text-white px-2 py-1 rounded text-sm font-medium">
                       {course.progress}%
                     </span>
                   </div>

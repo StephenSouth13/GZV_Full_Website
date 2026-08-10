@@ -63,7 +63,7 @@
       <div className="bg-white dark:bg-gray-950">
         {/* ===== HERO SECTION: LỜI GIỚI THIỆU ẤN TƯỢNG ===== */}
         <section className="relative bg-gray-900 text-white py-24 px-6 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/70 to-purple-600/70"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#ed1c24]/70 to-purple-600/70"></div>
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url('/grid-pattern.svg')" }}></div>
           <div className="relative container mx-auto">
             <motion.div
@@ -120,9 +120,9 @@
                 >
                   <Card className="flex flex-col h-full text-center hover:shadow-2xl hover:scale-105 transition-all duration-300 dark:bg-gray-900">
                     <CardHeader>
-                      <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-offset-4 dark:ring-offset-gray-900 ring-blue-500"><AvatarImage src={person.imageSrc} alt={person.name} /><AvatarFallback>{person.name.split(" ").slice(-2).map(n => n[0]).join("")}</AvatarFallback></Avatar>
+                      <Avatar className="w-32 h-32 mx-auto mb-4 ring-4 ring-offset-4 dark:ring-offset-gray-900 ring-[#ed1c24]"><AvatarImage src={person.imageSrc} alt={person.name} /><AvatarFallback>{person.name.split(" ").slice(-2).map(n => n[0]).join("")}</AvatarFallback></Avatar>
                       <h3 className="text-xl font-bold">{person.name}</h3>
-                      <p className="text-blue-500 font-semibold">{person.title}</p>
+                      <p className="text-[#ed1c24] font-semibold">{person.title}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400 h-5">{person.company}</p>
                     </CardHeader>
                     <CardContent className="flex-grow">
@@ -146,7 +146,7 @@
                 <span className="flex items-center gap-2"><Phone size={18}/> (+84) 329 381 489</span>
                 <span className="flex items-center gap-2"><Mail size={18}/>  gzv.one@gmail.com</span>
               </div>
-              <Button size="lg" className="bg-white text-blue-600 font-bold hover:bg-gray-200 transition-colors text-lg px-8 py-6">
+              <Button size="lg" className="bg-white text-[#ed1c24] font-bold hover:bg-gray-200 transition-colors text-lg px-8 py-6">
                 Xem Toàn Bộ Khóa Học
               </Button>
             </motion.div>

@@ -290,7 +290,7 @@ function MessagesPanel() {
           activeCls="bg-gray-900 text-white border-gray-900" />
         <StatusPill active={statusFilter === "new"} onClick={() => setStatusFilter("new")}
           icon={<Sparkles className="h-4 w-4" />} label="Mới" value={counts.new}
-          activeCls="bg-blue-600 text-white border-blue-600" />
+          activeCls="bg-[#ed1c24] text-white border-[#ed1c24]" />
         <StatusPill active={statusFilter === "in_progress"} onClick={() => setStatusFilter("in_progress")}
           icon={<Clock className="h-4 w-4" />} label="Đang xử lý" value={counts.in_progress}
           activeCls="bg-amber-500 text-white border-amber-500" />
@@ -347,10 +347,10 @@ function MessagesPanel() {
                 const st = STATUS_LABELS[m.status] || STATUS_LABELS.new
                 return (
                   <li key={m.id}
-                    className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!m.is_read ? "bg-blue-50/40" : ""}`}
+                    className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!m.is_read ? "bg-red-50/40" : ""}`}
                     onClick={() => { setSelected(m); if (!m.is_read) markRead(m, true) }}>
                     <div className="flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#ed1c24] to-[#050505] flex items-center justify-center text-white font-semibold shrink-0">
                         {(m.name || m.email || "?").slice(0, 1).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -360,7 +360,7 @@ function MessagesPanel() {
                           </span>
                           {m.email && <span className="text-xs text-gray-500">· {m.email}</span>}
                           <Badge variant="outline" className={st.cls}>{st.label}</Badge>
-                          {!m.is_read && <span className="h-2 w-2 rounded-full bg-blue-500" />}
+                          {!m.is_read && <span className="h-2 w-2 rounded-full bg-[#ed1c24]" />}
                         </div>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{m.message || "(Không có nội dung)"}</p>
                         <p className="text-xs text-gray-400 mt-1">{new Date(m.created_at).toLocaleString("vi-VN")}</p>
@@ -368,7 +368,7 @@ function MessagesPanel() {
                       <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" title={m.is_read ? "Đánh dấu chưa đọc" : "Đánh dấu đã đọc"}
                           onClick={() => markRead(m, !m.is_read)}>
-                          {m.is_read ? <Circle className="h-4 w-4 text-gray-500" /> : <MailOpen className="h-4 w-4 text-blue-600" />}
+                          {m.is_read ? <Circle className="h-4 w-4 text-gray-500" /> : <MailOpen className="h-4 w-4 text-[#ed1c24]" />}
                         </Button>
                         <Button variant="ghost" size="icon" title="Đánh dấu đã xử lý"
                           onClick={() => updateStatus(m, "resolved")}
@@ -475,13 +475,13 @@ function MessageDetailDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-blue-600" /> Chi tiết tin nhắn
+            <Mail className="h-5 w-5 text-[#ed1c24]" /> Chi tiết tin nhắn
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#ed1c24] to-[#050505] flex items-center justify-center text-white font-bold">
               {(message.name || message.email || "?").slice(0, 1).toUpperCase()}
             </div>
             <div className="flex-1">
@@ -560,11 +560,11 @@ function MessageDetailDialog({
 function InfoRow({ icon, label, value, link }: { icon: React.ReactNode; label: string; value: string; link?: string }) {
   return (
     <div className="rounded-lg border bg-white p-3 flex items-center gap-3">
-      <div className="h-9 w-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">{icon}</div>
+      <div className="h-9 w-9 rounded-lg bg-red-50 text-[#ed1c24] flex items-center justify-center">{icon}</div>
       <div className="min-w-0">
         <p className="text-xs text-gray-500">{label}</p>
         {link ? (
-          <a href={link} className="font-medium text-gray-800 hover:text-blue-600 truncate block">{value}</a>
+          <a href={link} className="font-medium text-gray-800 hover:text-[#ed1c24] truncate block">{value}</a>
         ) : (
           <p className="font-medium text-gray-800 truncate">{value}</p>
         )}
@@ -724,6 +724,145 @@ function FieldsPanel() {
       />
     </div>
   )
+}
+
+function ContactPageSettingsPanel() {
+  const [settings, setSettings] = useState<ContactSettings>(DEFAULT_CONTACT_SETTINGS)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  const load = async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from("site_contact_settings").select("*").eq("id", 1).maybeSingle()
+    if (error) toast({ title: "Lỗi tải cấu hình trang liên hệ", description: error.message, variant: "destructive" })
+    else setSettings({ ...DEFAULT_CONTACT_SETTINGS, ...(data || {}) } as ContactSettings)
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  const save = async () => {
+    setSaving(true)
+    const payload = { ...settings, id: 1 }
+    const { error } = await supabase.from("site_contact_settings").upsert(payload, { onConflict: "id" })
+    setSaving(false)
+    if (error) toast({ title: "Không lưu được trang liên hệ", description: error.message, variant: "destructive" })
+    else toast({ title: "Đã lưu trang liên hệ" })
+  }
+
+  const updateItem = (index: number, patch: Partial<ContactSettings["contact_items"][number]>) => {
+    setSettings((value) => ({
+      ...value,
+      contact_items: value.contact_items.map((item, idx) => idx === index ? { ...item, ...patch } : item),
+    }))
+  }
+  const updateSocial = (index: number, patch: Partial<ContactSettings["social_links"][number]>) => {
+    setSettings((value) => ({
+      ...value,
+      social_links: value.social_links.map((item, idx) => idx === index ? { ...item, ...patch } : item),
+    }))
+  }
+  const updateStat = (index: number, patch: Partial<ContactSettings["stats"][number]>) => {
+    setSettings((value) => ({
+      ...value,
+      stats: value.stats.map((item, idx) => idx === index ? { ...item, ...patch } : item),
+    }))
+  }
+
+  if (loading) return <div className="border bg-white p-10 text-center text-gray-500">Đang tải cấu hình trang liên hệ...</div>
+
+  return (
+    <div className="space-y-5">
+      <Card className="rounded-none">
+        <CardHeader>
+          <CardTitle>Hero và form</CardTitle>
+          <p className="text-sm text-gray-500">Chỉnh tiêu đề banner, mô tả form, nút gửi và thông báo sau khi gửi.</p>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <AdminField label="Badge banner"><Input value={settings.hero_badge} onChange={(e) => setSettings({ ...settings, hero_badge: e.target.value })} /></AdminField>
+          <AdminField label="Tiêu đề banner"><Input value={settings.hero_title} onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })} /></AdminField>
+          <div className="md:col-span-2"><AdminField label="Mô tả banner"><Textarea value={settings.hero_subtitle} onChange={(e) => setSettings({ ...settings, hero_subtitle: e.target.value })} /></AdminField></div>
+          <AdminField label="Tiêu đề form"><Input value={settings.form_title} onChange={(e) => setSettings({ ...settings, form_title: e.target.value })} /></AdminField>
+          <AdminField label="Nút gửi"><Input value={settings.submit_label} onChange={(e) => setSettings({ ...settings, submit_label: e.target.value })} /></AdminField>
+          <div className="md:col-span-2"><AdminField label="Mô tả form"><Textarea value={settings.form_description} onChange={(e) => setSettings({ ...settings, form_description: e.target.value })} /></AdminField></div>
+          <AdminField label="Thông báo thành công"><Input value={settings.success_message} onChange={(e) => setSettings({ ...settings, success_message: e.target.value })} /></AdminField>
+          <AdminField label="Thông báo lỗi"><Input value={settings.error_message} onChange={(e) => setSettings({ ...settings, error_message: e.target.value })} /></AdminField>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-none">
+        <CardHeader>
+          <CardTitle>Thông tin liên hệ</CardTitle>
+          <p className="text-sm text-gray-500">Mỗi dòng hỗ trợ icon: map, phone, mail, clock.</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <AdminField label="Tiêu đề khối"><Input value={settings.info_title} onChange={(e) => setSettings({ ...settings, info_title: e.target.value })} /></AdminField>
+          {settings.contact_items.map((item, index) => (
+            <div key={index} className="grid gap-3 border p-3 md:grid-cols-[0.6fr_1fr_1.4fr_1fr_auto]">
+              <Input value={item.icon || ""} onChange={(e) => updateItem(index, { icon: e.target.value })} placeholder="icon" />
+              <Input value={item.title || ""} onChange={(e) => updateItem(index, { title: e.target.value })} placeholder="Tiêu đề" />
+              <Textarea value={(item.lines || []).join("\n")} onChange={(e) => updateItem(index, { lines: e.target.value.split("\n").filter(Boolean) })} placeholder="Mỗi dòng một ý" />
+              <Input value={item.href || ""} onChange={(e) => updateItem(index, { href: e.target.value })} placeholder="tel:, mailto:, https://" />
+              <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, contact_items: settings.contact_items.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          ))}
+          <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, contact_items: [...settings.contact_items, { icon: "map", title: "Thông tin mới", lines: ["Nội dung"], href: "" }] })}><Plus className="mr-2 h-4 w-4" /> Thêm thông tin</Button>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Card className="rounded-none">
+          <CardHeader><CardTitle>Social</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <AdminField label="Tiêu đề social"><Input value={settings.social_title} onChange={(e) => setSettings({ ...settings, social_title: e.target.value })} /></AdminField>
+            {settings.social_links.map((item, index) => (
+              <div key={index} className="grid gap-2 border p-3 md:grid-cols-[0.8fr_1fr_1.5fr_auto_auto]">
+                <Input value={item.icon || ""} onChange={(e) => updateSocial(index, { icon: e.target.value })} placeholder="icon" />
+                <Input value={item.label || ""} onChange={(e) => updateSocial(index, { label: e.target.value })} placeholder="Label" />
+                <Input value={item.href || ""} onChange={(e) => updateSocial(index, { href: e.target.value })} placeholder="URL" />
+                <Switch checked={item.visible !== false} onCheckedChange={(visible) => updateSocial(index, { visible })} />
+                <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, social_links: settings.social_links.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            ))}
+            <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, social_links: [...settings.social_links, { icon: "message", label: "Social mới", href: "", visible: true }] })}><Plus className="mr-2 h-4 w-4" /> Thêm social</Button>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-none">
+          <CardHeader><CardTitle>Stats banner</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {settings.stats.map((item, index) => (
+              <div key={index} className="grid gap-2 border p-3 md:grid-cols-[1fr_1fr_auto]">
+                <Input value={item.value} onChange={(e) => updateStat(index, { value: e.target.value })} placeholder="10+" />
+                <Input value={item.label} onChange={(e) => updateStat(index, { label: e.target.value })} placeholder="Nhãn" />
+                <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, stats: settings.stats.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
+              </div>
+            ))}
+            <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, stats: [...settings.stats, { value: "10+", label: "Chỉ số" }] })}><Plus className="mr-2 h-4 w-4" /> Thêm stat</Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="rounded-none">
+        <CardHeader><CardTitle>Google Map</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <AdminField label="Tiêu đề map"><Input value={settings.map_title} onChange={(e) => setSettings({ ...settings, map_title: e.target.value })} /></AdminField>
+            <div className="flex items-end justify-between border px-4 py-3"><Label>Bật bản đồ</Label><Switch checked={settings.map_enabled} onCheckedChange={(map_enabled) => setSettings({ ...settings, map_enabled })} /></div>
+          </div>
+          <AdminField label="Google Map embed URL"><Textarea rows={4} value={settings.map_embed_url || ""} onChange={(e) => setSettings({ ...settings, map_embed_url: e.target.value })} placeholder="Dán URL trong src của iframe Google Maps" /></AdminField>
+        </CardContent>
+      </Card>
+
+      <div className="sticky bottom-4 flex justify-end border bg-white/95 p-3 shadow-xl backdrop-blur">
+        <Button onClick={save} disabled={saving} className="rounded-none bg-[#ed1c24] px-8 font-black uppercase hover:bg-[#c91218]">{saving ? "Đang lưu..." : "Lưu trang liên hệ"}</Button>
+      </div>
+    </div>
+  )
+}
+
+function AdminField({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div className="space-y-2"><Label className="text-xs font-black uppercase tracking-wide text-slate-600">{label}</Label>{children}</div>
 }
 
 function FieldEditorDialog({

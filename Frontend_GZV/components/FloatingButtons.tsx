@@ -105,7 +105,7 @@ const FloatingButtons = () => {
 
 const FloatingIcon = ({ action }: { action: FloatingAction }) => {
   if (action.action_type === "chatbot") {
-    return <Bot className="h-7 w-7 text-neutral-500 group-hover:text-blue-600 dark:text-neutral-400" />
+    return <Bot className="h-7 w-7 text-neutral-500 group-hover:text-[#ed1c24] dark:text-neutral-400" />
   }
 
   if (action.icon_url) {

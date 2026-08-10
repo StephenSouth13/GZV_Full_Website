@@ -47,7 +47,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
 
   const getLevelBadge = (level: string) => {
     const config: any = {
-      'Cơ bản': 'bg-blue-100 text-blue-700 border-blue-200',
+      'Cơ bản': 'bg-red-50 text-[#c91218] border-red-200',
       'Trung cấp': 'bg-amber-100 text-amber-700 border-amber-200',
       'Nâng cao': 'bg-purple-100 text-purple-700 border-purple-200',
       'Chuyên gia': 'bg-rose-100 text-rose-700 border-rose-200'
@@ -80,7 +80,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
             </TableRow>
           ) : (
             programs.map((program: any) => (
-              <TableRow key={program.id} className="hover:bg-blue-50/30 border-slate-50 transition-all duration-500 group">
+              <TableRow key={program.id} className="hover:bg-red-50/30 border-slate-50 transition-all duration-500 group">
                 <TableCell className="py-8 pl-10">
                   <div className="flex items-start gap-5">
                     <div className="relative h-20 w-32 shrink-0 rounded-2xl overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500 bg-slate-100">
@@ -91,7 +91,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                       />
                     </div>
                     <div className="flex flex-col justify-center">
-                      <h3 className="font-black text-slate-800 text-lg leading-tight line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
+                      <h3 className="font-black text-slate-800 text-lg leading-tight line-clamp-1 mb-1 group-hover:text-[#ed1c24] transition-colors">
                         {program.title}
                       </h3>
                       <div className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
@@ -113,7 +113,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     </div>
                     <div className="text-center border-l border-slate-100 pl-6">
                       <div className="flex items-center gap-1 text-slate-700 justify-center">
-                        <Users size={14} className="text-blue-500" />
+                        <Users size={14} className="text-[#ed1c24]" />
                       </div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Lớp học</p>
                     </div>
@@ -139,7 +139,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     <DropdownMenuContent align="end" className="w-64 p-2 rounded-[1.5rem] shadow-2xl border-none">
                       <Link href={`/admin/training/${program.id}`}>
                         <DropdownMenuItem className="rounded-xl py-3 cursor-pointer gap-3 font-bold text-slate-600">
-                          <Edit3 className="h-4 w-4 text-blue-500" /> Chỉnh sửa chuyên sâu
+                          <Edit3 className="h-4 w-4 text-[#ed1c24]" /> Chỉnh sửa chuyên sâu
                         </DropdownMenuItem>
                       </Link>
                       

@@ -85,7 +85,7 @@ function CoursesManagementContent() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Courses</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{courseStats.total}</p>
               </div>
-              <BookOpen className="h-8 w-8 text-blue-600" />
+              <BookOpen className="h-8 w-8 text-[#ed1c24]" />
             </div>
           </CardContent>
         </Card>
@@ -121,7 +121,7 @@ function CoursesManagementContent() {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">Students</p>
-              <p className="text-xl font-bold text-blue-600">{courseStats.totalStudents.toLocaleString()}</p>
+              <p className="text-xl font-bold text-[#ed1c24]">{courseStats.totalStudents.toLocaleString()}</p>
             </div>
           </CardContent>
         </Card>

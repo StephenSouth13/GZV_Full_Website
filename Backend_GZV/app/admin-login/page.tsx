@@ -138,7 +138,7 @@ export default function AdminLoginPage() {
           y: [50, 0, 50],
         }}
         transition={{ duration: 20, repeat: Infinity, ease: "linear", delay: 1 }}
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-primary-400/20 to-blue-500/20 rounded-full blur-3xl"
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-primary-400/20 to-red-500/20 rounded-full blur-3xl"
       />
       
       {/* Grid pattern overlay */}
@@ -338,7 +338,7 @@ export default function AdminLoginPage() {
         <motion.div
           animate={{ y: [0, -15, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -top-8 -left-8 w-32 h-32 bg-gradient-to-br from-primary-500/20 to-blue-500/20 rounded-full blur-2xl opacity-50"
+          className="absolute -top-8 -left-8 w-32 h-32 bg-gradient-to-br from-primary-500/20 to-red-500/20 rounded-full blur-2xl opacity-50"
         />
       </motion.div>
     </div>

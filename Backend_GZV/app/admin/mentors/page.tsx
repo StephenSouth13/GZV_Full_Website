@@ -78,7 +78,7 @@ export default function MentorsAdminPage() {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
+          <div className="p-3 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/20">
             <Award className="text-white" size={28} />
           </div>
           <div>
@@ -91,7 +91,7 @@ export default function MentorsAdminPage() {
         
         <Button 
           onClick={() => { setCurrentMentor(null); setModalState(prev => ({ ...prev, addEdit: true })) }} 
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 h-12 font-black shadow-2xl shadow-blue-600/30 transition-all active:scale-95"
+          className="bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-full px-8 h-12 font-black shadow-2xl shadow-red-600/30 transition-all active:scale-95"
         >
           <Plus className="mr-2" /> THÊM CHUYÊN GIA MỚI
         </Button>

@@ -4,12 +4,12 @@ import { Users, ArrowLeft, Home } from "lucide-react"
 
 export default function MentorNotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-red-950">
       <div className="container py-20">
         <div className="max-w-2xl mx-auto text-center">
           {/* Icon */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl mb-8">
-            <Users className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-red-50 dark:bg-red-950/30 rounded-2xl mb-8">
+            <Users className="h-10 w-10 text-[#ed1c24] dark:text-[#ed1c24]" />
           </div>
           
           {/* Title */}
@@ -26,7 +26,7 @@ export default function MentorNotFound() {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/mentors">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button size="lg" className="bg-[#ed1c24] hover:bg-[#c91218] text-white">
                 <ArrowLeft className="mr-2 h-5 w-5" />
                 Quay lại danh sách Mentor
               </Button>
@@ -40,10 +40,10 @@ export default function MentorNotFound() {
           </div>
           
           {/* Help Text */}
-          <div className="mt-12 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+          <div className="mt-12 p-6 bg-red-50 dark:bg-red-950/20 rounded-xl">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Nếu bạn tin rằng đây là một lỗi, vui lòng{" "}
-              <Link href="/lien-he" className="text-blue-600 dark:text-blue-400 hover:underline">
+              <Link href="/lien-he" className="text-[#ed1c24] dark:text-[#ed1c24] hover:underline">
                 liên hệ với chúng tôi
               </Link>{" "}
               để được hỗ trợ.

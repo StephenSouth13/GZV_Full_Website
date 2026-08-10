@@ -58,7 +58,7 @@ const FONTS = [
 ]
 
 const FONT_SIZES = ["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px", "40px", "56px", "72px"]
-const COLORS = ["#050505", "#334155", "#64748b", "#ed1c24", "#c91218", "#f59e0b", "#16a34a", "#00539b", "#7c3aed", "#db2777", "#ffffff"]
+const COLORS = ["#050505", "#334155", "#64748b", "#ed1c24", "#c91218", "#f59e0b", "#16a34a", "#ed1c24", "#7c3aed", "#db2777", "#ffffff"]
 
 const TextFormat = Extension.create({
   name: "textFormat",

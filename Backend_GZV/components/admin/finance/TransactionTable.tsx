@@ -212,7 +212,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
               </DropdownMenuItem>
             )}
             {info.row.original.status === 'failed' && (
-              <DropdownMenuItem className="cursor-pointer text-blue-600 dark:text-blue-400">
+              <DropdownMenuItem className="cursor-pointer text-[#ed1c24] dark:text-[#ed1c24]">
                 Retry Transaction
               </DropdownMenuItem>
             )}

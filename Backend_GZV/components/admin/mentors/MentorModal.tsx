@@ -108,7 +108,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
         <div className="hidden"><DialogDescription>Quản lý thông tin chi tiết Ban Giảng Huấn</DialogDescription></div>
         <DialogHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20"><Award className="text-white" size={24}/></div>
+            <div className="p-3 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/20"><Award className="text-white" size={24}/></div>
             <div>
               <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ Mentor Chuyên sâu</DialogTitle>
               <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Hệ thống quản trị gzv Center</p>
@@ -143,10 +143,10 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
                   </div>
                   
                   {/* HIỂN THỊ NGOÀI BÌA CARD */}
-                  <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-[2rem] space-y-4">
+                  <div className="p-6 bg-[#ed1c24]/5 border border-[#ed1c24]/10 rounded-[2rem] space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                       <Layout size={16} className="text-blue-400"/>
-                       <Label className="text-[10px] font-black uppercase text-blue-400">Hiển thị ngoài bìa (Card)</Label>
+                       <Layout size={16} className="text-[#ed1c24]"/>
+                       <Label className="text-[10px] font-black uppercase text-[#ed1c24]">Hiển thị ngoài bìa (Card)</Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[9px] uppercase text-gray-500">Học vị (Badge)</Label>
@@ -170,15 +170,15 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
                       <Input value={formData.full_name} onChange={(e)=>{setFormData({...formData, full_name: e.target.value, slug: convertToSlug(e.target.value)})}} className="bg-white/5 border-white/10 h-12 rounded-xl font-bold text-lg" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-blue-500">Slug URL (Tự động)</Label>
-                      <Input value={formData.slug} readOnly className="bg-blue-500/5 border-blue-500/20 h-12 rounded-xl text-blue-400 font-mono" />
+                      <Label className="text-[10px] font-black uppercase text-[#ed1c24]">Slug URL (Tự động)</Label>
+                      <Input value={formData.slug} readOnly className="bg-[#ed1c24]/5 border-[#ed1c24]/20 h-12 rounded-xl text-[#ed1c24] font-mono" />
                     </div>
                   </div>
 {/* Thêm ô nhập thứ tự vào ngay sau phần Slug */}
 <div className="grid grid-cols-2 gap-4">
   <div className="space-y-2">
-    <Label className="text-[10px] font-black uppercase text-blue-500">Slug URL (Tự động)</Label>
-    <Input value={formData.slug} readOnly className="bg-blue-500/5 border-blue-500/20 h-12 rounded-xl text-blue-400 font-mono" />
+    <Label className="text-[10px] font-black uppercase text-[#ed1c24]">Slug URL (Tự động)</Label>
+    <Input value={formData.slug} readOnly className="bg-[#ed1c24]/5 border-[#ed1c24]/20 h-12 rounded-xl text-[#ed1c24] font-mono" />
   </div>
   <div className="space-y-2">
     <Label className="text-[10px] font-black uppercase text-amber-500">Thứ tự hiển thị (Số nhỏ hiện trước)</Label>
@@ -193,7 +193,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
                   {/* TRIẾT LÝ GIẢNG HUẤN (SHOW/HIDE) */}
                   <div className={`space-y-4 p-6 rounded-[2rem] border transition-all ${formData.visible_sections.description ? 'bg-white/5 border-white/10' : 'bg-red-500/5 border-red-500/10 opacity-50'}`}>
                     <div className="flex justify-between items-center">
-                      <Label className="flex items-center gap-2 text-blue-400 font-black uppercase text-[10px]"><Quote size={16}/> Triết lý giảng huấn</Label>
+                      <Label className="flex items-center gap-2 text-[#ed1c24] font-black uppercase text-[10px]"><Quote size={16}/> Triết lý giảng huấn</Label>
                       <div className="flex items-center gap-2">
                          <span className="text-[9px] text-gray-500 uppercase">{formData.visible_sections.description ? 'Đang hiện' : 'Đang ẩn'}</span>
                          <Switch checked={formData.visible_sections.description} onCheckedChange={() => toggleSection('description')} />
@@ -241,7 +241,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
               <div className="grid grid-cols-2 gap-8">
                 <div className={`space-y-4 p-6 rounded-[2.5rem] border transition-all ${formData.visible_sections.teaching ? 'bg-white/5 border-white/10' : 'bg-red-500/5 border-red-500/10 opacity-50'}`}>
                   <div className="flex justify-between items-center">
-                    <Label className="flex items-center gap-2 text-blue-400 font-black uppercase text-[10px]"><BookOpen size={16}/> Bộ môn giảng dạy</Label>
+                    <Label className="flex items-center gap-2 text-[#ed1c24] font-black uppercase text-[10px]"><BookOpen size={16}/> Bộ môn giảng dạy</Label>
                     <Switch checked={formData.visible_sections.teaching} onCheckedChange={() => toggleSection('teaching')} />
                   </div>
                   <Textarea disabled={!formData.visible_sections.teaching} className="bg-transparent border-white/5 h-64 text-sm" value={formData.teaching_subjects?.join('\n')} onChange={(e)=>setFormData({...formData, teaching_subjects: e.target.value.split('\n')})} />
@@ -300,7 +300,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
 
         <div className="p-8 bg-[#0f0f0f] border-t border-white/5 flex justify-end gap-4 shadow-2xl">
           <Button variant="ghost" onClick={onClose} className="font-black text-gray-500 rounded-full px-10 uppercase text-[10px] tracking-widest">Hủy bỏ</Button>
-          <Button onClick={handleSave} disabled={loading || uploading} className="bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full px-14 h-14 shadow-2xl shadow-blue-600/20 transition-all hover:scale-105">
+          <Button onClick={handleSave} disabled={loading || uploading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black rounded-full px-14 h-14 shadow-2xl shadow-red-600/20 transition-all hover:scale-105">
             {loading ? <Loader2 className="animate-spin mr-2"/> : <Save className="mr-2"/>} LƯU HỒ SƠ CHUYÊN GIA
           </Button>
         </div>

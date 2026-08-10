@@ -106,9 +106,9 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
       <DialogContent className="max-w-[1200px] w-[95vw] max-h-[95vh] overflow-y-auto bg-white rounded-[2.5rem] p-0 font-montserrat shadow-2xl border-none">
         <DialogHeader className="p-8 bg-slate-900 text-white rounded-t-[2.5rem]">
           <div className="flex items-center gap-5">
-            <div className="p-4 bg-blue-600 rounded-2xl shadow-lg text-white"><FolderPlus size={28} /></div>
+            <div className="p-4 bg-[#ed1c24] rounded-2xl shadow-lg text-white"><FolderPlus size={28} /></div>
             <div>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Cấu hình dự án <span className="text-blue-400">Portfolio</span></DialogTitle>
+              <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Cấu hình dự án <span className="text-[#ed1c24]">Portfolio</span></DialogTitle>
               <DialogDescription className="text-slate-400 font-medium text-[11px] uppercase tracking-[0.2em] mt-1">gzv Center CMS Professional v3.0</DialogDescription>
             </div>
           </div>
@@ -120,11 +120,11 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             {/* THÔNG TIN CHÍNH */}
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-2"><Edit size={12}/> Tiêu đề dự án (H1)</Label>
+                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Edit size={12}/> Tiêu đề dự án (H1)</Label>
                 <Input className="h-14 text-lg font-bold rounded-2xl border-slate-200" value={formData.title} onChange={handleTitleChange} />
               </div>
               <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-blue-600 tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Lĩnh vực dự án)</Label>
+                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Lĩnh vực dự án)</Label>
                 <Input className="h-14 font-bold rounded-2xl border-slate-200" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} placeholder="VD: ĐÀO TẠO DOANH NGHIỆP" />
               </div>
             </div>
@@ -163,7 +163,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
           <div className="md:col-span-4 bg-slate-50/50 p-10 space-y-10">
             <div className="space-y-4">
               <Label className="text-[11px] font-black uppercase tracking-widest text-slate-500">Thumbnail Dự án</Label>
-              <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-[2rem] bg-white flex flex-col items-center justify-center overflow-hidden hover:border-blue-500 transition-all shadow-sm">
+              <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-[2rem] bg-white flex flex-col items-center justify-center overflow-hidden hover:border-[#ed1c24] transition-all shadow-sm">
                 {formData.image ? (
                   <div className="relative w-full h-full group">
                     <img src={formData.image} className="w-full h-full object-cover" alt="Preview" />
@@ -173,7 +173,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                   </div>
                 ) : (
                   <label className="cursor-pointer flex flex-col items-center p-8 text-center gap-3">
-                    <div className="p-4 bg-blue-50 text-blue-600 rounded-full shadow-sm">{uploading ? <Loader2 className="animate-spin" /> : <Upload size={24} />}</div>
+                    <div className="p-4 bg-red-50 text-[#ed1c24] rounded-full shadow-sm">{uploading ? <Loader2 className="animate-spin" /> : <Upload size={24} />}</div>
                     <span className="text-[10px] font-black uppercase text-slate-400">Tải ảnh bìa</span>
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleMediaUpload(e, 'image')} />
                   </label>
@@ -196,7 +196,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] font-black uppercase text-slate-500">Mentoring & Coaching</Label>
-                <Badge className="bg-blue-600 font-black text-[9px] uppercase shadow-md">{formData.author_ids.length} Chọn</Badge>
+                <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-md">{formData.author_ids.length} Chọn</Badge>
               </div>
               <div className="grid gap-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar bg-white p-3 rounded-[1.5rem] border border-slate-200">
                 {authors.map(a => {
@@ -205,14 +205,14 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                     <div 
                       key={a.id} 
                       onClick={() => setFormData({...formData, author_ids: isSelected ? formData.author_ids.filter(id => id !== a.id) : [...formData.author_ids, a.id]})}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-blue-600 bg-blue-50/50 shadow-sm' : 'border-transparent bg-slate-50/30'}`}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'border-[#ed1c24] bg-red-50/50 shadow-sm' : 'border-transparent bg-slate-50/30'}`}
                     >
                       <Avatar className="h-9 w-9 border-2 border-white shadow-sm shrink-0">
                         <AvatarImage src={a.avatar_url} className="object-cover" />
                         <AvatarFallback className="font-black text-[10px] bg-slate-200 uppercase">{a.full_name?.substring(0,2)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-blue-700' : 'text-slate-600'}`}>{a.full_name}</span>
+                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-[#c91218]' : 'text-slate-600'}`}>{a.full_name}</span>
                         <span className="text-[9px] text-slate-400 font-bold italic truncate">{a.title || 'Mentor'}</span>
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
 
         <DialogFooter className="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center rounded-b-[2.5rem]">
           <Button variant="ghost" onClick={onClose} disabled={loading} className="font-black uppercase text-[10px] text-slate-400">Huỷ bỏ</Button>
-          <Button disabled={loading || uploading} className="h-14 px-12 bg-blue-700 hover:bg-blue-800 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all" onClick={handleSave}>
+          <Button disabled={loading || uploading} className="h-14 px-12 bg-[#c91218] hover:bg-red-900 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all" onClick={handleSave}>
             {loading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} Xuất bản ngay
           </Button>
         </DialogFooter>

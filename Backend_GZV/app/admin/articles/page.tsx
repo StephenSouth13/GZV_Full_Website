@@ -153,7 +153,7 @@ export default function ArticlesPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ed1c24] mx-auto"></div>
           <p className="text-gray-500">Đang tải bài viết...</p>
         </div>
       </div>
@@ -168,7 +168,7 @@ export default function ArticlesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Quản lý bài viết</h1>
           <p className="text-gray-500">Tạo và quản lý nội dung blog của bạn</p>
         </div>
-        <Button onClick={() => setCreateModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => setCreateModalOpen(true)} className="bg-[#ed1c24] hover:bg-[#c91218]">
           <Plus className="h-4 w-4 mr-2" />
           Tạo bài viết mới
         </Button>

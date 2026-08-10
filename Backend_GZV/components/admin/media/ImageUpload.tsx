@@ -253,7 +253,7 @@ export function ImageUpload({ isOpen, onClose, onUploadComplete, currentFolder =
               className={`
                 border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
                 ${isDragActive 
-                  ? 'border-blue-500 bg-blue-50' 
+                  ? 'border-[#ed1c24] bg-red-50' 
                   : 'border-gray-300 hover:border-gray-400'
                 }
                 ${isUploading ? 'pointer-events-none opacity-50' : ''}
@@ -324,7 +324,7 @@ export function ImageUpload({ isOpen, onClose, onUploadComplete, currentFolder =
                         <AlertCircle className="h-5 w-5 text-red-500" />
                       )}
                       {file.status === 'uploading' && (
-                        <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                        <Loader2 className="h-5 w-5 animate-spin text-[#ed1c24]" />
                       )}
                       
                       {!isUploading && file.status === 'pending' && (

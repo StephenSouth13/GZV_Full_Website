@@ -53,7 +53,7 @@ export function DeleteCourseModal({ course, isOpen, onClose, onDeleteCourse }: D
 
   const getCategoryBadge = (category: string) => {
     const categoryColors = {
-      frontend: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+      frontend: 'bg-red-50 text-[#c91218] dark:bg-red-950/30 dark:text-[#ed1c24]',
       backend: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       fullstack: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
       data: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
@@ -141,8 +141,8 @@ export function DeleteCourseModal({ course, isOpen, onClose, onDeleteCourse }: D
             </div>
           )}
 
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/30 rounded-lg p-3">
-            <div className="text-sm text-blue-800 dark:text-blue-300">
+          <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg p-3">
+            <div className="text-sm text-[#c91218] dark:text-red-200">
               <p className="font-medium mb-1">Course Details:</p>
               <div className="grid grid-cols-2 gap-2">
                 <span>Duration: {course.duration}</span>
