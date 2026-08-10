@@ -90,7 +90,7 @@ function SiteContentManager() {
   const [loadingSettings, setLoadingSettings] = useState<LoadingSettings>(defaultLoading)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [pickerOpen, setPickerOpen] = useState<"banner" | "builderBanner" | "loadingLogo" | "footerLogo" | "headerLogo" | "brandFooterLogo" | "favicon" | "ogImage" | "heroVideo" | "heroPoster" | { floatingIndex: number } | null>(null)
+  const [pickerOpen, setPickerOpen] = useState<"banner" | "builderBanner" | "loadingLogo" | "footerLogo" | "headerLogo" | "brandFooterLogo" | "favicon" | "ogImage" | "heroVideo" | "heroPoster" | { floatingIndex: number } | { blockImageIndex: number; imageIndex: number } | null>(null)
 
   const selectedPage = useMemo(() => pages.find((page) => page.slug === selectedSlug) || null, [pages, selectedSlug])
   const builderPage = useMemo(() => pages.find((page) => page.slug === builderSlug) || null, [pages, builderSlug])
@@ -427,6 +427,12 @@ function SiteContentManager() {
     if (pickerOpen === "heroVideo") updateSectionSettings({ video_url: result.url })
     if (pickerOpen === "heroPoster") updateSectionSettings({ poster_url: result.url })
     if (typeof pickerOpen === "object" && pickerOpen?.floatingIndex >= 0) updateFloating(pickerOpen.floatingIndex, { icon_url: result.url })
+    if (typeof pickerOpen === "object" && "blockImageIndex" in pickerOpen) {
+      const block = pageBlocks[pickerOpen.blockImageIndex]
+      const images = Array.isArray(block?.props?.images) ? [...block.props.images] : []
+      images[pickerOpen.imageIndex] = { ...(images[pickerOpen.imageIndex] || {}), src: result.url, alt: result.alt }
+      updateBlock(pickerOpen.blockImageIndex, { props: { ...(block.props || {}), images } })
+    }
   }
 
   if (loading) {
@@ -555,7 +561,12 @@ function SiteContentManager() {
                       </div>
                     </div>
                     <Field label="TÃªn block"><Input value={block.title || ""} onChange={(e) => updateBlock(index, { title: e.target.value })} /></Field>
-                    <PropsEditor value={block.props || {}} onChange={(props) => updateBlock(index, { props })} />
+                    <BlockPropsEditor
+                      block={block}
+                      blockIndex={index}
+                      onChange={(props) => updateBlock(index, { props })}
+                      onPickImage={(imageIndex) => setPickerOpen({ blockImageIndex: index, imageIndex })}
+                    />
                     <Field label="Rich HTML cá»§a block">
                       <GZVRichEditor value={block.content_html || ""} onChange={(html) => updateBlock(index, { content_html: html })} minHeight={260} uploadFolder={`blocks/${builderSlug}`} />
                     </Field>
@@ -671,6 +682,9 @@ function SiteContentManager() {
                       )}
                     </div>
                   )}
+                  <Field label="Settings JSON nâng cao">
+                    <PropsEditor value={selectedSection.settings || {}} onChange={(settings) => updateSection({ settings })} />
+                  </Field>
                   <Button onClick={saveHomeSections} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> LÆ°u section trang chá»§</Button>
                 </CardContent>
               </Card>
@@ -844,6 +858,97 @@ function ControlStat({ label, value }: { label: string; value: number }) {
     <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
       <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</p>
       <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{value}</p>
+    </div>
+  )
+}
+
+function BlockPropsEditor({
+  block,
+  blockIndex,
+  onChange,
+  onPickImage,
+}: {
+  block: PageBlock
+  blockIndex: number
+  onChange: (value: Record<string, any>) => void
+  onPickImage: (imageIndex: number) => void
+}) {
+  if (block.component_type !== "image_gallery") {
+    return <PropsEditor value={block.props || {}} onChange={onChange} />
+  }
+
+  const props = block.props || {}
+  const images = Array.isArray(props.images) ? props.images : []
+  const updateImage = (imageIndex: number, patch: Record<string, any>) => {
+    const nextImages = images.map((image: any, idx: number) => idx === imageIndex ? { ...image, ...patch } : image)
+    onChange({ ...props, images: nextImages })
+  }
+  const addImage = () => {
+    onChange({
+      ...props,
+      images: [
+        ...images,
+        { src: "", title: "Ảnh mới", category: "GZV", description: "", alt: "" },
+      ],
+    })
+  }
+  const deleteImage = (imageIndex: number) => {
+    onChange({ ...props, images: images.filter((_: any, idx: number) => idx !== imageIndex) })
+  }
+
+  return (
+    <div className="space-y-4 rounded-xl border bg-slate-50 p-4 dark:bg-slate-950">
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="Tiêu đề gallery">
+          <Input value={props.title || ""} onChange={(event) => onChange({ ...props, title: event.target.value })} />
+        </Field>
+        <Field label="Phụ đề gallery">
+          <Input value={props.subtitle || ""} onChange={(event) => onChange({ ...props, subtitle: event.target.value })} />
+        </Field>
+      </div>
+      <div className="flex items-center justify-between">
+        <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Bộ ảnh và mô tả</Label>
+        <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={addImage}>
+          <Plus className="mr-2 h-4 w-4" /> Thêm ảnh
+        </Button>
+      </div>
+      <div className="space-y-3">
+        {images.map((image: any, imageIndex: number) => (
+          <div key={`${blockIndex}-${imageIndex}`} className="grid gap-3 border bg-white p-3 dark:border-white/10 dark:bg-slate-900 md:grid-cols-[160px_1fr_auto]">
+            <div className="space-y-2">
+              <div className="aspect-video overflow-hidden bg-slate-200 dark:bg-slate-800">
+                {image.src ? <img src={image.src} alt={image.alt || image.title || ""} className="h-full w-full object-cover" /> : null}
+              </div>
+              <Button type="button" variant="outline" size="sm" className="w-full rounded-none" onClick={() => onPickImage(imageIndex)}>
+                <ImageIcon className="mr-2 h-4 w-4" /> Chọn ảnh
+              </Button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <Field label="URL ảnh">
+                <Input value={image.src || ""} onChange={(event) => updateImage(imageIndex, { src: event.target.value })} />
+              </Field>
+              <Field label="Alt">
+                <Input value={image.alt || ""} onChange={(event) => updateImage(imageIndex, { alt: event.target.value })} />
+              </Field>
+              <Field label="Tiêu đề">
+                <Input value={image.title || ""} onChange={(event) => updateImage(imageIndex, { title: event.target.value })} />
+              </Field>
+              <Field label="Category">
+                <Input value={image.category || ""} onChange={(event) => updateImage(imageIndex, { category: event.target.value })} />
+              </Field>
+              <div className="md:col-span-2">
+                <Field label="Mô tả">
+                  <Textarea value={image.description || ""} onChange={(event) => updateImage(imageIndex, { description: event.target.value })} />
+                </Field>
+              </div>
+            </div>
+            <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteImage(imageIndex)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+      <PropsEditor value={props} onChange={onChange} />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
@@ -9,19 +9,19 @@ import { getHomeSectionConfig, type HomeSectionConfig } from "@/lib/site-content
 
 const pillars = [
   {
-    title: "Sứ mệnh",
+    title: "Sá»© má»‡nh",
     icon: Target,
-    text: "Kết nối tri thức, chuyên gia và doanh nghiệp để tạo ra năng lực tăng trưởng có thể đo lường.",
+    text: "Káº¿t ná»‘i tri thá»©c, chuyÃªn gia vÃ  doanh nghiá»‡p Ä‘á»ƒ táº¡o ra nÄƒng lá»±c tÄƒng trÆ°á»Ÿng cÃ³ thá»ƒ Ä‘o lÆ°á»ng.",
   },
   {
-    title: "Tầm nhìn",
+    title: "Táº§m nhÃ¬n",
     icon: Compass,
-    text: "Trở thành hệ sinh thái mentoring, coaching và triển khai dự án thế hệ mới tại Việt Nam.",
+    text: "Trá»Ÿ thÃ nh há»‡ sinh thÃ¡i mentoring, coaching vÃ  triá»ƒn khai dá»± Ã¡n tháº¿ há»‡ má»›i táº¡i Viá»‡t Nam.",
   },
   {
-    title: "Giá trị cốt lõi",
+    title: "GiÃ¡ trá»‹ cá»‘t lÃµi",
     icon: ShieldCheck,
-    text: "Thực chiến, minh bạch, học hỏi liên tục và cam kết tạo tác động thật cho đối tác.",
+    text: "Thá»±c chiáº¿n, minh báº¡ch, há»c há»i liÃªn tá»¥c vÃ  cam káº¿t táº¡o tÃ¡c Ä‘á»™ng tháº­t cho Ä‘á»‘i tÃ¡c.",
   },
 ]
 
@@ -29,26 +29,37 @@ const services = [
   {
     title: "Marketing",
     icon: Megaphone,
-    text: "Chiến lược thương hiệu, nội dung, chiến dịch tăng trưởng và hệ thống truyền thông đa kênh.",
+    text: "Chiáº¿n lÆ°á»£c thÆ°Æ¡ng hiá»‡u, ná»™i dung, chiáº¿n dá»‹ch tÄƒng trÆ°á»Ÿng vÃ  há»‡ thá»‘ng truyá»n thÃ´ng Ä‘a kÃªnh.",
   },
   {
     title: "Sales",
     icon: BarChart3,
-    text: "Thiết kế pipeline, kịch bản bán hàng, đào tạo đội ngũ và tối ưu chuyển đổi doanh thu.",
+    text: "Thiáº¿t káº¿ pipeline, ká»‹ch báº£n bÃ¡n hÃ ng, Ä‘Ã o táº¡o Ä‘á»™i ngÅ© vÃ  tá»‘i Æ°u chuyá»ƒn Ä‘á»•i doanh thu.",
   },
   {
     title: "Digital Transformation",
     icon: Cpu,
-    text: "Chuẩn hóa quy trình, dữ liệu, tự động hóa và công cụ vận hành cho doanh nghiệp.",
+    text: "Chuáº©n hÃ³a quy trÃ¬nh, dá»¯ liá»‡u, tá»± Ä‘á»™ng hÃ³a vÃ  cÃ´ng cá»¥ váº­n hÃ nh cho doanh nghiá»‡p.",
   },
 ]
 
 const reasons = [
-  "Đội ngũ mentor và chuyên gia có kinh nghiệm triển khai thực tế.",
-  "Cách làm sắc cạnh, rõ mục tiêu, ưu tiên hiệu quả kinh doanh.",
-  "Mạng lưới đối tác, GZVers và dự án giúp tăng tốc kết nối thị trường.",
+  "Äá»™i ngÅ© mentor vÃ  chuyÃªn gia cÃ³ kinh nghiá»‡m triá»ƒn khai thá»±c táº¿.",
+  "CÃ¡ch lÃ m sáº¯c cáº¡nh, rÃµ má»¥c tiÃªu, Æ°u tiÃªn hiá»‡u quáº£ kinh doanh.",
+  "Máº¡ng lÆ°á»›i Ä‘á»‘i tÃ¡c, GZVers vÃ  dá»± Ã¡n giÃºp tÄƒng tá»‘c káº¿t ná»‘i thá»‹ trÆ°á»ng.",
 ]
 
+
+const iconMap: Record<string, any> = {
+  target: Target,
+  compass: Compass,
+  shield: ShieldCheck,
+  megaphone: Megaphone,
+  chart: BarChart3,
+  cpu: Cpu,
+  rocket: Rocket,
+  users: Users2,
+}
 const HomeBrandSections = () => {
   const [sections, setSections] = useState<Record<string, HomeSectionConfig | null>>({})
 
@@ -72,6 +83,10 @@ const HomeBrandSections = () => {
   const servicesConfig = sections.services
   const whyChoose = sections.why_choose
   const aboutCta = sections.about_cta
+  const missionPillars = Array.isArray(mission?.settings?.pillars) && mission.settings.pillars.length ? mission.settings.pillars : pillars
+  const serviceItems = Array.isArray(servicesConfig?.settings?.services) && servicesConfig.settings.services.length ? servicesConfig.settings.services : services
+  const reasonItems = Array.isArray(whyChoose?.settings?.reasons) && whyChoose.settings.reasons.length ? whyChoose.settings.reasons : reasons
+  const whyImage = typeof whyChoose?.settings?.image_url === "string" && whyChoose.settings.image_url ? whyChoose.settings.image_url : "/gioi-thieu/19.webp"
 
   return (
     <>
@@ -85,8 +100,8 @@ const HomeBrandSections = () => {
             </div>
           )}
           <div className="grid gap-5 md:grid-cols-3">
-            {pillars.map((item, index) => {
-              const Icon = item.icon
+            {missionPillars.map((item: any, index: number) => {
+              const Icon = typeof item.icon === "string" ? iconMap[item.icon] || Target : item.icon || pillars[index]?.icon || Target
               return (
                 <motion.div
                   key={item.title}
@@ -100,7 +115,7 @@ const HomeBrandSections = () => {
                     <Icon className="h-6 w-6" />
                   </div>
                   <h2 className="mb-3 text-2xl font-black uppercase text-slate-950 dark:text-white">{item.title}</h2>
-                  <p className="text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{item.text}</p>
+                  <p className="text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{item.text || item.description}</p>
                 </motion.div>
               )
             })}
@@ -114,16 +129,16 @@ const HomeBrandSections = () => {
           <div className="mb-10 flex flex-col justify-between gap-5 border-b border-white/15 pb-8 lg:flex-row lg:items-end">
             <div>
               <p className="section-kicker bg-white/10 text-white">Services</p>
-              <h2 className="section-title text-white">{servicesConfig?.title || "Dịch vụ GZV"}</h2>
+              <h2 className="section-title text-white">{servicesConfig?.title || "Dá»‹ch vá»¥ GZV"}</h2>
             </div>
             <p className="max-w-xl text-sm font-semibold leading-7 text-white/70">
-              {servicesConfig?.description || "Ba mũi triển khai chính giúp doanh nghiệp xây dựng thương hiệu, tăng doanh thu và vận hành bằng công nghệ."}
+              {servicesConfig?.description || "Ba mÅ©i triá»ƒn khai chÃ­nh giÃºp doanh nghiá»‡p xÃ¢y dá»±ng thÆ°Æ¡ng hiá»‡u, tÄƒng doanh thu vÃ  váº­n hÃ nh báº±ng cÃ´ng nghá»‡."}
             </p>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-3">
-            {services.map((item, index) => {
-              const Icon = item.icon
+            {serviceItems.map((item: any, index: number) => {
+              const Icon = typeof item.icon === "string" ? iconMap[item.icon] || Rocket : item.icon || services[index]?.icon || Rocket
               return (
                 <motion.article
                   key={item.title}
@@ -140,9 +155,9 @@ const HomeBrandSections = () => {
                     <span className="text-5xl font-black text-white/10">0{index + 1}</span>
                   </div>
                   <h3 className="mb-4 text-2xl font-black uppercase text-white">{item.title}</h3>
-                  <p className="mb-7 text-sm font-semibold leading-7 text-white/70">{item.text}</p>
+                  <p className="mb-7 text-sm font-semibold leading-7 text-white/70">{item.text || item.description}</p>
                   <Link href="/lien-he" className="inline-flex items-center text-xs font-black uppercase text-[#ed1c24] transition group-hover:text-white">
-                    Trao đổi nhu cầu <ArrowRight className="ml-2 h-4 w-4" />
+                    Trao Ä‘á»•i nhu cáº§u <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </motion.article>
               )
@@ -161,11 +176,11 @@ const HomeBrandSections = () => {
               viewport={{ once: true }}
               className="relative min-h-[440px] overflow-hidden border border-slate-200 bg-slate-200 dark:border-slate-800"
             >
-              <Image src="/gioi-thieu/19.webp" alt="GZV mentoring" fill unoptimized className="object-cover" />
+              <Image src={whyImage} alt="GZV mentoring" fill unoptimized className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/12 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-7 text-white">
-                <p className="text-xs font-black uppercase text-[#ed1c24]">Về chúng tôi</p>
-                <h2 className="mt-2 text-3xl font-black uppercase">GZV xây đội ngũ qua dự án thật</h2>
+                <p className="text-xs font-black uppercase text-[#ed1c24]">Vá» chÃºng tÃ´i</p>
+                <h2 className="mt-2 text-3xl font-black uppercase">GZV xÃ¢y Ä‘á»™i ngÅ© qua dá»± Ã¡n tháº­t</h2>
               </div>
             </motion.div>
 
@@ -175,23 +190,23 @@ const HomeBrandSections = () => {
               transition={{ duration: 0.55 }}
               viewport={{ once: true }}
             >
-              <p className="section-kicker">Tại sao nên chọn chúng tôi</p>
-              <h2 className="section-title mb-6">{whyChoose?.title || "Sắc cạnh trong tư duy, chắc tay trong triển khai"}</h2>
+              <p className="section-kicker">Táº¡i sao nÃªn chá»n chÃºng tÃ´i</p>
+              <h2 className="section-title mb-6">{whyChoose?.title || "Sáº¯c cáº¡nh trong tÆ° duy, cháº¯c tay trong triá»ƒn khai"}</h2>
               <p className="mb-8 text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">
-                {whyChoose?.description || "GZV kết hợp mô hình mentoring với năng lực triển khai dịch vụ để tạo ra môi trường học, làm và tăng trưởng cùng nhau."}
+                {whyChoose?.description || "GZV káº¿t há»£p mÃ´ hÃ¬nh mentoring vá»›i nÄƒng lá»±c triá»ƒn khai dá»‹ch vá»¥ Ä‘á»ƒ táº¡o ra mÃ´i trÆ°á»ng há»c, lÃ m vÃ  tÄƒng trÆ°á»Ÿng cÃ¹ng nhau."}
               </p>
               <div className="grid gap-4">
-                {reasons.map((reason) => (
-                  <div key={reason} className="flex gap-4 border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
+                {reasonItems.map((reason: any) => (
+                  <div key={typeof reason === "string" ? reason : reason.title || reason.text} className="flex gap-4 border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#ed1c24]" />
-                    <p className="text-sm font-bold leading-7 text-slate-700 dark:text-slate-200">{reason}</p>
+                    <p className="text-sm font-bold leading-7 text-slate-700 dark:text-slate-200">{typeof reason === "string" ? reason : reason.text || reason.description || reason.title}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-8 grid grid-cols-3 border border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-950">
                 {[
-                  ["Ban điều hành", "Directors"],
-                  ["Ban cố vấn", "Mentors"],
+                  ["Ban Ä‘iá»u hÃ nh", "Directors"],
+                  ["Ban cá»‘ váº¥n", "Mentors"],
                   ["GZVer", "Community"],
                 ].map(([label, sub]) => (
                   <div key={label} className="border-r border-slate-200 p-4 last:border-r-0 dark:border-slate-800">
@@ -210,11 +225,11 @@ const HomeBrandSections = () => {
         <div className="container">
           <div className="flex flex-col gap-5 border-y border-slate-200 py-8 md:flex-row md:items-center md:justify-between dark:border-slate-800">
             <div>
-              <p className="text-xs font-black uppercase text-[#ed1c24]">Lộ trình phát triển của GZV</p>
+              <p className="text-xs font-black uppercase text-[#ed1c24]">Lá»™ trÃ¬nh phÃ¡t triá»ƒn cá»§a GZV</p>
               <h2 className="mt-2 text-2xl font-black uppercase text-slate-950 dark:text-white">{aboutCta?.title || "Mentoring model, project network, next-gen growth."}</h2>
             </div>
             <Link href={aboutCta?.button_url || "/gioi-thieu"} className="inline-flex items-center justify-center bg-[#00539b] px-6 py-4 text-xs font-black uppercase text-white transition hover:bg-[#ed1c24]">
-              {aboutCta?.button_label || "Tìm hiểu thêm"} <Rocket className="ml-2 h-4 w-4" />
+              {aboutCta?.button_label || "TÃ¬m hiá»ƒu thÃªm"} <Rocket className="ml-2 h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -224,3 +239,4 @@ const HomeBrandSections = () => {
 }
 
 export default HomeBrandSections
+
