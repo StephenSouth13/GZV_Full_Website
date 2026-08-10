@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useAuth } from "@/contexts/auth-context"
 import { Card, CardContent } from "@/components/ui/card"

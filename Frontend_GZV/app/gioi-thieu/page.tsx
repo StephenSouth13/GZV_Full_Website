@@ -2,9 +2,8 @@ import type { Metadata } from "next"
 import AboutPageClient from "./AboutPageClient"
 
 export const metadata: Metadata = {
-  
-  title: "Giới thiệu - GZV Center",
-  description: "Tìm hiểu về GZV Center - Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp hàng đầu Việt Nam",
+  title: "Giới thiệu - GZV",
+  description: "Câu chuyện, sứ mệnh, tầm nhìn, giá trị cốt lõi và mô hình mentoring của GZV.",
 }
 
 export default function AboutPage() {

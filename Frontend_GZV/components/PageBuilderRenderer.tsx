@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Award, BookOpen, Target, Users, ArrowRight } from "lucide-react"
+import { Award, BookOpen, Target, Users, ArrowRight, CheckCircle2, Compass, Cpu, Megaphone, Rocket, ShieldCheck, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { api, type Program } from "@/lib/api-supabase"
@@ -17,6 +17,12 @@ const iconMap: Record<string, any> = {
   book: BookOpen,
   target: Target,
   users: Users,
+  compass: Compass,
+  shield: ShieldCheck,
+  megaphone: Megaphone,
+  cpu: Cpu,
+  rocket: Rocket,
+  trend: TrendingUp,
 }
 
 export default function PageBuilderRenderer({ slug, fallback }: { slug: string; fallback?: React.ReactNode }) {
@@ -48,6 +54,20 @@ function RenderBlock({ block }: { block: PageBlock }) {
       return <HeroStats {...props} />
     case "msc_words":
       return <MscWords {...props} />
+    case "story_split":
+      return <StorySplit {...props} />
+    case "timeline":
+      return <TimelineBlock {...props} />
+    case "mentoring_model":
+      return <MentoringModel {...props} />
+    case "services_three":
+      return <ServicesThree {...props} />
+    case "why_columns":
+      return <WhyColumns {...props} />
+    case "about_boxes":
+      return <AboutBoxes {...props} />
+    case "people_grid":
+      return <PeopleGrid {...props} />
     case "feature_grid":
       return <FeatureGrid {...props} />
     case "programs_grid":
@@ -77,9 +97,202 @@ function RenderBlock({ block }: { block: PageBlock }) {
   }
 }
 
+function SectionIntro({ eyebrow, title, subtitle, align = "left", invert = false }: any) {
+  if (!eyebrow && !title && !subtitle) return null
+  return (
+    <div className={`${align === "center" ? "mx-auto text-center" : ""} mb-10 max-w-4xl`}>
+      {eyebrow && <p className={`mb-3 border-l-4 border-[#ed1c24] pl-3 text-xs font-black uppercase tracking-[0.2em] ${align === "center" ? "inline-block text-left" : ""} ${invert ? "text-white/70" : "text-slate-500"}`}>{eyebrow}</p>}
+      {title && <h2 className={`text-3xl font-black uppercase leading-tight tracking-normal sm:text-5xl ${invert ? "text-white" : "text-slate-950 dark:text-white"}`}>{title}</h2>}
+      {subtitle && <p className={`mt-4 text-base font-semibold leading-8 ${invert ? "text-white/70" : "text-slate-600 dark:text-slate-300"}`}>{subtitle}</p>}
+    </div>
+  )
+}
+
+function StorySplit({ eyebrow, title, subtitle, body, image_url, image_alt, position_x = 50, position_y = 50, image_size = 100, stats = [] }: any) {
+  return (
+    <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
+      <div className="container grid gap-10 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+        <div>
+          <SectionIntro eyebrow={eyebrow} title={title} subtitle={subtitle} />
+          {body && <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>}
+          {stats.length > 0 && (
+            <div className="mt-8 grid grid-cols-3 border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
+              {stats.map((stat: any, index: number) => (
+                <div key={index} className="border-r border-slate-200 p-4 last:border-r-0 dark:border-white/10">
+                  <p className="text-2xl font-black text-[#ed1c24]">{stat.value}</p>
+                  <p className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-500">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="relative min-h-[420px] overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900">
+          <img
+            src={image_url || "/gioi-thieu/19.webp"}
+            alt={image_alt || title || "GZV"}
+            className="h-full w-full object-cover"
+            style={{ objectPosition: `${Number(position_x)}% ${Number(position_y)}%`, transform: `scale(${Number(image_size) / 100})` }}
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-[#ed1c24]" />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TimelineBlock({ eyebrow, title, subtitle, items = [] }: any) {
+  return (
+    <section className="bg-[#050505] py-16 text-white lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow} title={title} subtitle={subtitle} invert />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {items.map((item: any, index: number) => (
+            <article key={index} className="border border-white/12 bg-white/[0.04] p-6">
+              <p className="text-sm font-black uppercase tracking-[0.2em] text-[#ed1c24]">{item.year || item.label}</p>
+              <h3 className="mt-4 text-xl font-black uppercase leading-tight">{item.title}</h3>
+              {item.description && <p className="mt-3 text-sm font-semibold leading-7 text-white/65">{item.description}</p>}
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function MentoringModel({ eyebrow, title, subtitle, steps = [] }: any) {
+  return (
+    <section className="bg-slate-50 py-16 dark:bg-slate-900 lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow} title={title} subtitle={subtitle} align="center" />
+        <div className="grid gap-5 md:grid-cols-3">
+          {steps.map((step: any, index: number) => (
+            <article key={index} className="border border-slate-200 bg-white p-7 shadow-[12px_12px_0_rgba(237,28,36,0.08)] dark:border-white/10 dark:bg-slate-950">
+              <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#ed1c24] text-lg font-black text-white">{index + 1}</div>
+              <h3 className="text-xl font-black uppercase text-slate-950 dark:text-white">{step.title}</h3>
+              {step.description && <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{step.description}</p>}
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ServicesThree({ eyebrow, title, subtitle, items = [] }: any) {
+  const icons = [Megaphone, TrendingUp, Cpu]
+  return (
+    <section id="dich-vu" className="relative overflow-hidden bg-[#050505] py-16 text-white lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow || "Services"} title={title} subtitle={subtitle} invert />
+        <div className="grid gap-5 lg:grid-cols-3">
+          {items.map((item: any, index: number) => {
+            const Icon = iconMap[item.icon] || icons[index] || Rocket
+            return (
+              <article key={index} className="group border border-white/15 bg-white/[0.05] p-7 transition hover:border-[#ed1c24]">
+                <div className="mb-8 flex items-center justify-between">
+                  <div className="flex h-14 w-14 items-center justify-center bg-[#ed1c24] text-white"><Icon className="h-7 w-7" /></div>
+                  <span className="text-5xl font-black text-white/10">0{index + 1}</span>
+                </div>
+                <h3 className="text-2xl font-black uppercase">{item.title}</h3>
+                <p className="mt-4 text-sm font-semibold leading-7 text-white/70">{item.description || item.text}</p>
+              </article>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function WhyColumns({ eyebrow, title, subtitle, columns = [] }: any) {
+  return (
+    <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow} title={title} subtitle={subtitle} align="center" />
+        <div className="grid gap-5 md:grid-cols-3">
+          {columns.map((column: any, index: number) => (
+            <article key={index} className="border border-slate-200 bg-slate-50 p-7 dark:border-white/10 dark:bg-slate-900">
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">Cột {index + 1}</p>
+              <h3 className="text-xl font-black uppercase text-slate-950 dark:text-white">{column.title}</h3>
+              <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{column.description}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function AboutBoxes({ eyebrow, title, subtitle, boxes = [] }: any) {
+  return (
+    <section className="bg-slate-50 py-16 dark:bg-slate-900 lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow || "Về chúng tôi"} title={title} subtitle={subtitle} />
+        <div className="grid gap-5 md:grid-cols-3">
+          {boxes.map((box: any, index: number) => (
+            <Link key={index} href={box.href || "#"} className="group block border border-slate-200 bg-white p-7 transition hover:border-[#ed1c24] hover:bg-[#ed1c24] dark:border-white/10 dark:bg-slate-950">
+              <Users className="mb-8 h-8 w-8 text-[#ed1c24] transition group-hover:text-white" />
+              <h3 className="text-2xl font-black uppercase text-slate-950 transition group-hover:text-white dark:text-white">{box.title}</h3>
+              {box.description && <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 transition group-hover:text-white/80 dark:text-slate-300">{box.description}</p>}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function PeopleGrid({ eyebrow, title, subtitle, type = "directors", limit = 6 }: any) {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    api.getGzvers().then((data) => {
+      if (!active) return
+      let rows = data || []
+      if (type === "directors") rows = rows.filter((item: any) => item.is_director && item.is_active)
+      else rows = rows.filter((item: any) => item.is_active)
+      setItems(rows.slice(0, Number(limit) || 6))
+      setLoading(false)
+    }).catch(() => {
+      if (!active) return
+      setItems([])
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [type, limit])
+
+  if (!loading && items.length === 0) return null
+  return (
+    <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
+      <div className="container px-4">
+        <SectionIntro eyebrow={eyebrow} title={title} subtitle={subtitle} align="center" />
+        {loading ? <div className="mx-auto h-12 w-12 animate-spin border-b-2 border-[#ed1c24]" /> : (
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <Link key={item.id} href={`/gzver/${item.slug}`} className="group border border-slate-200 bg-slate-50 p-5 transition hover:border-[#ed1c24] dark:border-white/10 dark:bg-slate-900">
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-200">
+                  <img src={item.avatar_url || "/gzvers/default.webp"} alt={item.full_name} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                </div>
+                <h3 className="mt-5 text-xl font-black uppercase text-slate-950 group-hover:text-[#ed1c24] dark:text-white">{item.full_name}</h3>
+                <p className="mt-1 text-sm font-black uppercase text-[#ed1c24]">{item.position || item.company}</p>
+                {item.achievement_summary && <p className="mt-3 line-clamp-3 text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">{item.achievement_summary}</p>}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 function DynamicGrid({ source, title, subtitle, limit = 9, background = "#ffffff" }: any) {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const isDark = String(background).toLowerCase() !== "#ffffff" && String(background).toLowerCase() !== "white"
 
   useEffect(() => {
     let active = true
@@ -111,8 +324,8 @@ function DynamicGrid({ source, title, subtitle, limit = 9, background = "#ffffff
       <div className="container px-4">
         {(title || subtitle) && (
           <div className="mx-auto mb-12 max-w-4xl text-center">
-            {title && <h2 className="text-3xl font-black text-gray-900 dark:text-white sm:text-5xl">{title}</h2>}
-            {subtitle && <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>}
+            {title && <h2 className={`text-3xl font-black uppercase sm:text-5xl ${isDark ? "text-white" : "text-gray-900 dark:text-white"}`}>{title}</h2>}
+            {subtitle && <p className={`mt-4 text-lg ${isDark ? "text-white/70" : "text-gray-600 dark:text-gray-300"}`}>{subtitle}</p>}
           </div>
         )}
         {loading ? (
@@ -185,8 +398,8 @@ function HeroStats({ title, subtitle, stats = [], backgroundFrom = "#050505", ba
           {stats.length > 0 && (
             <div className="mt-10 grid grid-cols-2 gap-5 md:grid-cols-4">
               {stats.map((stat: any, index: number) => (
-                <div key={index} className="rounded-xl bg-white/5 p-3">
-                  <div className="text-3xl font-black text-teal-300">{stat.value}</div>
+                <div key={index} className="bg-white/5 p-3">
+                  <div className="text-3xl font-black text-[#ed1c24]">{stat.value}</div>
                   <div className="mt-1 text-sm text-white/75">{stat.label}</div>
                 </div>
               ))}
@@ -234,8 +447,8 @@ function FeatureGrid({ title, subtitle, items = [], columns = 3 }: any) {
             const Icon = iconMap[item.icon] || Award
             return (
               <motion.div key={index} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.06 }}>
-                <div className="h-full rounded-2xl border border-slate-100 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
-                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm dark:bg-slate-800">
+                <div className="h-full border border-slate-100 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#ed1c24] hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center bg-white shadow-sm dark:bg-slate-800">
                     <Icon className="h-7 w-7" style={{ color: item.color || "#ed1c24" }} />
                   </div>
                   <h3 className="text-xl font-black text-gray-900 dark:text-white">{item.title}</h3>

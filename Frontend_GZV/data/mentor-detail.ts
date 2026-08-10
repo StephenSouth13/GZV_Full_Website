@@ -148,7 +148,7 @@ export const mentorDetails: MentorDetail[] = [
         "Factors affecting green purchase behaviour of young people with dairy products through new trends and packaging (2025)",
         "Mindfulness Practice and Work Performance: The Mediating Role of Emotional Intelligence and Psychological Capital (2025)",
         "Blockchain technology applications in retail branding: Insights from retailers in the developing world (2023)",
-        "The impact of business simulation games on Vietnamese students’ entrepreneurial intention (2023)",
+        "The impact of business simulation games on Vietnamese students' entrepreneurial intention (2023)",
         "Strategic Groups Assessment: The Case of Vietnam Beer Market (2020)",
       ],
     },

@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Handshake,
   Image,
+  KeyRound,
   LayoutDashboard,
   Mail,
   PenTool,
@@ -34,6 +35,7 @@ interface AdminSidebarProps {
 const adminMenuItems = [
   { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ["admin", "collab"] },
   { title: "Website Control", href: "/admin/site-content", icon: Blocks, roles: ["admin", "collab"] },
+  { title: "Trang đăng nhập", href: "/admin/auth-pages", icon: KeyRound, roles: ["admin", "collab"] },
   { title: "GZVers", href: "/admin/gzvers", icon: UserCircle2, roles: ["admin", "collab"] },
   { title: "Mentors", href: "/admin/mentors", icon: GraduationCap, roles: ["admin", "collab"] },
   { title: "Đối tác", href: "/admin/partners", icon: Handshake, roles: ["admin", "collab"] },
@@ -149,7 +151,7 @@ export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProp
         <div className="border-t border-white/10 bg-black/30 p-4">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 bg-emerald-500" />
-            <span className="text-[10px] font-black uppercase text-gray-400">Hệ thống sẵn sàng</span>
+            <span className="text-[10px] font-black uppercase text-gray-400">HỆ THỐNG SẴN SÀNG</span>
           </div>
           <p className="ml-4 mt-1 text-[9px] font-medium uppercase text-gray-600">v3.0 GZV Control</p>
         </div>
