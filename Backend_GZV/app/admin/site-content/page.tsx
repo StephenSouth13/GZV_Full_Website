@@ -15,7 +15,7 @@ import { GZVRichEditor } from "@/components/editor/GZVRichEditor"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, Image as ImageIcon, Layers, Loader2, MonitorCog, Plus, RotateCcw, Save, Settings2, Trash2, Video } from "lucide-react"
+import { ArrowDown, ArrowUp, Bot, Copy, Eye, EyeOff, GripVertical, Image as ImageIcon, Layers, Loader2, MessageCircle, MonitorCog, Plus, RotateCcw, Save, Settings2, Trash2, Video } from "lucide-react"
 
 type NavItem = { id?: string; href: string; label_vi: string; label_en?: string | null; sort_order: number; is_visible: boolean; is_page_enabled: boolean }
 type PageContent = { id?: string; slug: string; title: string; menu_title?: string | null; banner_badge?: string | null; banner_title?: string | null; banner_subtitle?: string | null; banner_description?: string | null; banner_image_url?: string | null; content_html?: string | null; is_visible: boolean; seo_title?: string | null; seo_description?: string | null }
@@ -311,6 +311,21 @@ function SiteContentManager() {
     setHomeSections((items) => items.map((item, index) => {
       if (index === current.index) return { ...item, sort_order: swapWith.section.sort_order }
       if (index === swapWith.index) return { ...item, sort_order: current.section.sort_order }
+      return item
+    }))
+  }
+
+  const moveFloatingAction = (actionIndex: number, direction: -1 | 1) => {
+    const ordered = floating
+      .map((item, index) => ({ item, index }))
+      .sort((a, b) => (a.item.sort_order || 0) - (b.item.sort_order || 0))
+    const currentPosition = ordered.findIndex((entry) => entry.index === actionIndex)
+    const current = ordered[currentPosition]
+    const swapWith = ordered[currentPosition + direction]
+    if (!current || !swapWith) return
+    setFloating((items) => items.map((item, index) => {
+      if (index === current.index) return { ...item, sort_order: swapWith.item.sort_order }
+      if (index === swapWith.index) return { ...item, sort_order: current.item.sort_order }
       return item
     }))
   }
@@ -935,23 +950,101 @@ function SiteContentManager() {
         </TabsContent>
 
         <TabsContent value="floating">
-          <Card>
-            <CardHeader><CardTitle>Floating chat/buttons</CardTitle><CardDescription>Chỉnh label, link, icon, thứ tự và bật/tắt từng nút nổi.</CardDescription></CardHeader>
-            <CardContent className="space-y-4">
-              {floating.map((item, index) => (
-                <div key={item.action_key} className="grid gap-3 rounded-none border bg-white p-4 md:grid-cols-[1fr_1fr_1fr_0.7fr_0.7fr_auto] dark:bg-slate-900">
-                  <Field label="Key"><Input value={item.action_key} onChange={(e) => updateFloating(index, { action_key: e.target.value })} /></Field>
-                  <Field label="Label"><Input value={item.label} onChange={(e) => updateFloating(index, { label: e.target.value })} /></Field>
-                  <Field label="Href"><Input value={item.href || ""} onChange={(e) => updateFloating(index, { href: e.target.value })} /></Field>
-                  <Field label="Type"><Select value={item.action_type} onValueChange={(v: "link" | "chatbot") => updateFloating(index, { action_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="chatbot">Chatbot</SelectItem></SelectContent></Select></Field>
-                  <Field label="Thứ tự"><Input type="number" value={item.sort_order} onChange={(e) => updateFloating(index, { sort_order: Number(e.target.value) })} /></Field>
-                  <div className="flex items-end gap-2"><Switch checked={item.is_visible} onCheckedChange={(v) => updateFloating(index, { is_visible: v })} /><Button variant="outline" size="icon" className="rounded-none" onClick={() => setPickerOpen({ floatingIndex: index })}><ImageIcon className="h-4 w-4" /></Button><Button variant="destructive" size="icon" className="rounded-none" onClick={() => deleteFloatingAction(index)}><Trash2 className="h-4 w-4" /></Button></div>
+          <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Floating chat/buttons</CardTitle>
+                <CardDescription>Chỉnh chatbot, social media, link gọi điện, Zalo, Facebook, YouTube. Public sẽ hiển thị dạng dock, không đè nút lên đầu trang.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {floating
+                  .map((item, index) => ({ item, index }))
+                  .sort((a, b) => (a.item.sort_order || 0) - (b.item.sort_order || 0))
+                  .map(({ item, index }, position, ordered) => (
+                    <div key={`${item.action_key}-${index}`} className="grid gap-4 border bg-white p-4 dark:bg-slate-900 lg:grid-cols-[92px_1fr_auto]">
+                      <div className="flex flex-col items-center justify-center gap-2 border bg-slate-50 p-3 dark:bg-slate-950">
+                        <div className="flex h-14 w-14 items-center justify-center bg-[#050505] text-white">
+                          {item.icon_url ? <img src={item.icon_url} alt={item.label} className="h-8 w-8 object-contain" /> : <MessageCirclePreview label={item.label} type={item.action_type} />}
+                        </div>
+                        <span className={`px-2 py-1 text-[10px] font-black uppercase ${item.is_visible ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500"}`}>
+                          {item.is_visible ? "Hiện" : "Ẩn"}
+                        </span>
+                      </div>
+
+                      <div className="grid gap-3 md:grid-cols-2">
+                        <Field label="Mã nút"><Input value={item.action_key} onChange={(e) => updateFloating(index, { action_key: e.target.value })} placeholder="facebook, zalo, chatbot..." /></Field>
+                        <Field label="Tên hiển thị"><Input value={item.label} onChange={(e) => updateFloating(index, { label: e.target.value })} placeholder="Facebook" /></Field>
+                        <Field label="Link liên kết"><Input value={item.href || ""} onChange={(e) => updateFloating(index, { href: e.target.value })} placeholder="https://, tel:, mailto:, zalo..." /></Field>
+                        <Field label="Loại nút"><Select value={item.action_type} onValueChange={(v: "link" | "chatbot") => updateFloating(index, { action_type: v })}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="link">Link / Social</SelectItem><SelectItem value="chatbot">Chatbot</SelectItem></SelectContent></Select></Field>
+                        <Field label="URL icon"><Input value={item.icon_url || ""} onChange={(e) => updateFloating(index, { icon_url: e.target.value })} placeholder="/icons/zalo.png" /></Field>
+                        <Field label="Thứ tự"><Input type="number" value={item.sort_order} onChange={(e) => updateFloating(index, { sort_order: Number(e.target.value) })} /></Field>
+                      </div>
+
+                      <div className="flex flex-row items-end gap-2 lg:flex-col lg:items-stretch lg:justify-end">
+                        <Button type="button" variant="outline" size="icon" className="rounded-none" disabled={position === 0} onClick={() => moveFloatingAction(index, -1)} title="Đưa lên">
+                          <ArrowUp className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="outline" size="icon" className="rounded-none" disabled={position === ordered.length - 1} onClick={() => moveFloatingAction(index, 1)} title="Đưa xuống">
+                          <ArrowDown className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="outline" size="icon" className="rounded-none" onClick={() => setPickerOpen({ floatingIndex: index })} title="Chọn icon">
+                          <ImageIcon className="h-4 w-4" />
+                        </Button>
+                        <Switch checked={item.is_visible} onCheckedChange={(v) => updateFloating(index, { is_visible: v })} />
+                        <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteFloatingAction(index)} title="Xóa nút">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" className="rounded-none" onClick={() => setFloating((rows) => [...rows, { action_key: `action-${Date.now()}`, label: "Nút mới", href: "", icon_url: "", action_type: "link", sort_order: rows.length * 10 + 10, is_visible: true }])}>
+                    <Plus className="mr-2 h-4 w-4" /> Thêm nút
+                  </Button>
+                  <Button onClick={saveFloating} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]">
+                    <Save className="h-4 w-4" /> Lưu floating
+                  </Button>
                 </div>
-              ))}
-              <Button variant="outline" className="rounded-none" onClick={() => setFloating((rows) => [...rows, { action_key: `action-${Date.now()}`, label: "Nút mới", href: "", icon_url: "", action_type: "link", sort_order: rows.length * 10 + 10, is_visible: true }])}><Plus className="mr-2 h-4 w-4" /> Thêm nút</Button>
-              <Button onClick={saveFloating} disabled={saving} className="ml-2 gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> Lưu floating</Button>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            <Card className="self-start">
+              <CardHeader>
+                <CardTitle>Preview dock</CardTitle>
+                <CardDescription>Back-to-top nằm riêng bên trái, dock liên hệ nằm bên phải.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="border bg-slate-50 p-4 dark:bg-slate-950">
+                  <div className="mb-3 flex justify-end">
+                    <div className="w-[230px] border bg-white shadow-xl">
+                      <div className="bg-[#050505] px-4 py-3 text-white">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">GZV Connect</p>
+                        <p className="text-sm font-black uppercase">Kết nối nhanh</p>
+                      </div>
+                      <div className="space-y-1 p-2">
+                        {floating.filter((item) => item.is_visible).slice(0, 4).map((item) => (
+                          <div key={item.action_key} className="flex items-center gap-3 px-3 py-2">
+                            <span className="flex h-9 w-9 items-center justify-center bg-[#050505] text-white">
+                              {item.icon_url ? <img src={item.icon_url} alt="" className="h-5 w-5 object-contain" /> : <MessageCirclePreview label={item.label} type={item.action_type} />}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-black">{item.label}</p>
+                              <p className="truncate text-[10px] font-bold text-slate-500">{item.action_type === "chatbot" ? "Mở chatbot" : item.href || "Chưa có link"}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center border bg-white"><ArrowUp className="h-4 w-4" /></span>
+                    <span className="flex h-11 items-center gap-2 bg-[#ed1c24] px-4 text-xs font-black uppercase text-white"><Plus className="h-4 w-4" /> Liên hệ</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="loading">
@@ -1323,6 +1416,13 @@ function PickerInput({ value, onChange, onPick }: { value: string; onChange: (va
 
 function SwitchLine({ label, checked, onChange }: { label: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <div className="flex items-center justify-between gap-3 rounded-lg border p-3"><Label>{label}</Label><Switch checked={checked} onCheckedChange={onChange} /></div>
+}
+
+function MessageCirclePreview({ label, type }: { label: string; type: "link" | "chatbot" }) {
+  const key = label.toLowerCase()
+  if (type === "chatbot") return <Bot className="h-5 w-5" />
+  if (key.includes("zalo") || key.includes("chat")) return <MessageCircle className="h-5 w-5" />
+  return <Plus className="h-5 w-5" />
 }
 
 function ListCard({ title, children }: { title: string; children: React.ReactNode }) {
