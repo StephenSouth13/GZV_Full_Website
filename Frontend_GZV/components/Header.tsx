@@ -125,7 +125,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="https://gzver.gzv.one/" target="_blank" className="hidden xl:block">
+            <Link href="https://www.gzv.one/login" target="_blank" className="hidden xl:block">
               <Button className="h-11 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase text-white hover:bg-[#c91218]">
                 <LogIn className="mr-2 h-4 w-4" />
                 GZVer Login
