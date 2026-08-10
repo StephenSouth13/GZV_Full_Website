@@ -15,7 +15,7 @@ import { GZVRichEditor } from "@/components/editor/GZVRichEditor"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Image as ImageIcon, Layers, Loader2, MonitorCog, Plus, RotateCcw, Save, Settings2, Trash2, Video } from "lucide-react"
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, Image as ImageIcon, Layers, Loader2, MonitorCog, Plus, RotateCcw, Save, Settings2, Trash2, Video } from "lucide-react"
 
 type NavItem = { id?: string; href: string; label_vi: string; label_en?: string | null; sort_order: number; is_visible: boolean; is_page_enabled: boolean }
 type PageContent = { id?: string; slug: string; title: string; menu_title?: string | null; banner_badge?: string | null; banner_title?: string | null; banner_subtitle?: string | null; banner_description?: string | null; banner_image_url?: string | null; content_html?: string | null; is_visible: boolean; seo_title?: string | null; seo_description?: string | null }
@@ -188,6 +188,18 @@ function SiteContentManager() {
     [pageBlocks, builderSlug],
   )
   const selectedSection = useMemo(() => homeSections.find((section) => section.section_key === selectedSectionKey) || null, [homeSections, selectedSectionKey])
+  const builderSlugs = useMemo(() => {
+    const navSlugs = defaultNav
+      .map((item) => item.href.split("#")[0].replace("/", ""))
+      .filter((slug) => slug && slug !== "")
+    return [...new Set([...navSlugs, ...pages.map((page) => page.slug), ...pageBlocks.map((block) => block.page_slug)])]
+  }, [pages, pageBlocks])
+  const orderedHomeSections = useMemo(
+    () => homeSections
+      .map((section, index) => ({ section, index }))
+      .sort((a, b) => (a.section.sort_order || 0) - (b.section.sort_order || 0)),
+    [homeSections],
+  )
 
   useEffect(() => {
     const load = async () => {
@@ -289,6 +301,26 @@ function SiteContentManager() {
       if (index === swapWith.index) return { ...item, sort_order: current.block.sort_order }
       return item
     }))
+  }
+
+  const moveHomeSection = (sectionKey: string, direction: -1 | 1) => {
+    const currentPosition = orderedHomeSections.findIndex((item) => item.section.section_key === sectionKey)
+    const current = orderedHomeSections[currentPosition]
+    const swapWith = orderedHomeSections[currentPosition + direction]
+    if (!current || !swapWith) return
+    setHomeSections((items) => items.map((item, index) => {
+      if (index === current.index) return { ...item, sort_order: swapWith.section.sort_order }
+      if (index === swapWith.index) return { ...item, sort_order: current.section.sort_order }
+      return item
+    }))
+  }
+
+  const normalizeHomeSectionOrder = () => {
+    setHomeSections((items) => {
+      const rank = new Map(orderedHomeSections.map((item, position) => [item.section.section_key, (position + 1) * 10]))
+      return items.map((item) => ({ ...item, sort_order: rank.get(item.section_key) || item.sort_order }))
+    })
+    toast.success("Đã sắp lại thứ tự section. Bấm Lưu section trang chủ để ghi lên Supabase.")
   }
 
   const duplicateBlock = (block: PageBlock) => {
@@ -573,7 +605,7 @@ function SiteContentManager() {
                 <Button type="button" variant="outline" onClick={addPage} className="mb-2 w-full rounded-none">
                   <Plus className="mr-2 h-4 w-4" /> Trang mới
                 </Button>
-                {[...new Set([...pages.map((p) => p.slug), ...pageBlocks.map((b) => b.page_slug)])].map((slug) => (
+                {builderSlugs.map((slug) => (
                   <button key={slug} onClick={() => setBuilderSlug(slug)} className={`w-full rounded-none px-3 py-2 text-left text-sm font-bold ${builderSlug === slug ? "bg-[#ed1c24] text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>{slug}</button>
                 ))}
               </CardContent>
@@ -692,15 +724,30 @@ function SiteContentManager() {
 
         <TabsContent value="home">
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-            <ListCard title="Section trang chá»§">
-              <Button type="button" variant="outline" onClick={addHomeSection} className="mb-2 w-full rounded-none">
-                <Plus className="mr-2 h-4 w-4" /> Thêm section
-              </Button>
-              {homeSections.map((section) => (
-                <button key={section.section_key} onClick={() => setSelectedSectionKey(section.section_key)} className={`flex w-full items-center justify-between rounded-none px-3 py-2 text-left text-sm font-bold transition ${selectedSectionKey === section.section_key ? "bg-[#ed1c24] text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
-                  <span>{section.title}</span>
-                  {section.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                </button>
+            <ListCard title="Section trang chủ">
+              <div className="mb-2 grid grid-cols-[1fr_auto] gap-2">
+                <Button type="button" variant="outline" onClick={addHomeSection} className="w-full rounded-none">
+                  <Plus className="mr-2 h-4 w-4" /> Thêm section
+                </Button>
+                <Button type="button" variant="outline" onClick={normalizeHomeSectionOrder} className="rounded-none px-3" title="Chuẩn hóa thứ tự">
+                  <GripVertical className="h-4 w-4" />
+                </Button>
+              </div>
+              {orderedHomeSections.map(({ section }, position) => (
+                <div key={section.section_key} className={`mb-2 grid grid-cols-[1fr_auto] border ${selectedSectionKey === section.section_key ? "border-[#ed1c24]" : "border-slate-200 dark:border-white/10"}`}>
+                  <button onClick={() => setSelectedSectionKey(section.section_key)} className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm font-bold transition ${selectedSectionKey === section.section_key ? "bg-[#ed1c24] text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>
+                    <span className="line-clamp-2">{section.title}</span>
+                    {section.is_visible ? <Eye className="h-4 w-4 shrink-0" /> : <EyeOff className="h-4 w-4 shrink-0" />}
+                  </button>
+                  <div className="flex border-l bg-white dark:bg-slate-950">
+                    <Button type="button" variant="ghost" size="icon" className="h-full rounded-none" disabled={position === 0} onClick={() => moveHomeSection(section.section_key, -1)} title="Đưa section lên">
+                      <ArrowUp className="h-4 w-4" />
+                    </Button>
+                    <Button type="button" variant="ghost" size="icon" className="h-full rounded-none" disabled={position === orderedHomeSections.length - 1} onClick={() => moveHomeSection(section.section_key, 1)} title="Đưa section xuống">
+                      <ArrowDown className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </ListCard>
             {selectedSection && (
@@ -960,6 +1007,7 @@ function BlockPropsEditor({
   onChange: (value: Record<string, any>) => void
   onPickImage: (imageIndex: number) => void
 }) {
+  const [dragImageIndex, setDragImageIndex] = useState<number | null>(null)
   if (block.component_type !== "image_gallery") {
     return <PropsEditor value={block.props || {}} onChange={onChange} />
   }
@@ -969,6 +1017,24 @@ function BlockPropsEditor({
   const updateImage = (imageIndex: number, patch: Record<string, any>) => {
     const nextImages = images.map((image: any, idx: number) => idx === imageIndex ? { ...image, ...patch } : image)
     onChange({ ...props, images: nextImages })
+  }
+  const moveImage = (imageIndex: number, direction: -1 | 1) => {
+    const swapIndex = imageIndex + direction
+    if (swapIndex < 0 || swapIndex >= images.length) return
+    const nextImages = [...images]
+    ;[nextImages[imageIndex], nextImages[swapIndex]] = [nextImages[swapIndex], nextImages[imageIndex]]
+    onChange({ ...props, images: nextImages })
+  }
+  const dropImage = (targetIndex: number) => {
+    if (dragImageIndex === null || dragImageIndex === targetIndex) {
+      setDragImageIndex(null)
+      return
+    }
+    const nextImages = [...images]
+    const [moved] = nextImages.splice(dragImageIndex, 1)
+    nextImages.splice(targetIndex, 0, moved)
+    onChange({ ...props, images: nextImages })
+    setDragImageIndex(null)
   }
   const addImage = () => {
     onChange({
@@ -1000,40 +1066,70 @@ function BlockPropsEditor({
         </Button>
       </div>
       <div className="space-y-3">
-        {images.map((image: any, imageIndex: number) => (
-          <div key={`${blockIndex}-${imageIndex}`} className="grid gap-3 border bg-white p-3 dark:border-white/10 dark:bg-slate-900 md:grid-cols-[160px_1fr_auto]">
-            <div className="space-y-2">
-              <div className="aspect-video overflow-hidden bg-slate-200 dark:bg-slate-800">
-                {image.src ? <img src={image.src} alt={image.alt || image.title || ""} className="h-full w-full object-cover" /> : null}
+        {images.map((image: any, imageIndex: number) => {
+          const positionX = Number(image.position_x ?? 50)
+          const positionY = Number(image.position_y ?? 50)
+          return (
+            <div
+              key={`${blockIndex}-${imageIndex}`}
+              draggable
+              onDragStart={() => setDragImageIndex(imageIndex)}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={() => dropImage(imageIndex)}
+              onDragEnd={() => setDragImageIndex(null)}
+              className={`grid gap-3 border bg-white p-3 transition dark:border-white/10 dark:bg-slate-900 md:grid-cols-[180px_1fr_auto] ${dragImageIndex === imageIndex ? "border-[#ed1c24] opacity-60" : ""}`}
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <span className="inline-flex items-center gap-1"><GripVertical className="h-3.5 w-3.5" /> Kéo ảnh</span>
+                  <span>#{imageIndex + 1}</span>
+                </div>
+                <div className="aspect-video overflow-hidden bg-slate-200 dark:bg-slate-800">
+                  {image.src ? <img src={image.src} alt={image.alt || image.title || ""} className="h-full w-full object-cover" style={{ objectPosition: `${positionX}% ${positionY}%` }} /> : null}
+                </div>
+                <Button type="button" variant="outline" size="sm" className="w-full rounded-none" onClick={() => onPickImage(imageIndex)}>
+                  <ImageIcon className="mr-2 h-4 w-4" /> Chọn ảnh
+                </Button>
+                <div className="grid grid-cols-2 gap-1">
+                  <Button type="button" variant="outline" size="sm" className="rounded-none" disabled={imageIndex === 0} onClick={() => moveImage(imageIndex, -1)}>
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" className="rounded-none" disabled={imageIndex === images.length - 1} onClick={() => moveImage(imageIndex, 1)}>
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              <Button type="button" variant="outline" size="sm" className="w-full rounded-none" onClick={() => onPickImage(imageIndex)}>
-                <ImageIcon className="mr-2 h-4 w-4" /> Chọn ảnh
-              </Button>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <Field label="URL ảnh">
-                <Input value={image.src || ""} onChange={(event) => updateImage(imageIndex, { src: event.target.value })} />
-              </Field>
-              <Field label="Alt">
-                <Input value={image.alt || ""} onChange={(event) => updateImage(imageIndex, { alt: event.target.value })} />
-              </Field>
-              <Field label="Tiêu đề">
-                <Input value={image.title || ""} onChange={(event) => updateImage(imageIndex, { title: event.target.value })} />
-              </Field>
-              <Field label="Category">
-                <Input value={image.category || ""} onChange={(event) => updateImage(imageIndex, { category: event.target.value })} />
-              </Field>
-              <div className="md:col-span-2">
-                <Field label="Mô tả">
-                  <Textarea value={image.description || ""} onChange={(event) => updateImage(imageIndex, { description: event.target.value })} />
+              <div className="grid gap-3 md:grid-cols-2">
+                <Field label="URL ảnh">
+                  <Input value={image.src || ""} onChange={(event) => updateImage(imageIndex, { src: event.target.value })} />
+                </Field>
+                <Field label="Alt">
+                  <Input value={image.alt || ""} onChange={(event) => updateImage(imageIndex, { alt: event.target.value })} />
+                </Field>
+                <Field label="Ti?u ??">
+                  <Input value={image.title || ""} onChange={(event) => updateImage(imageIndex, { title: event.target.value })} />
+                </Field>
+                <Field label="Category">
+                  <Input value={image.category || ""} onChange={(event) => updateImage(imageIndex, { category: event.target.value })} />
+                </Field>
+                <div className="md:col-span-2">
+                  <Field label="M? t?">
+                    <Textarea value={image.description || ""} onChange={(event) => updateImage(imageIndex, { description: event.target.value })} />
+                  </Field>
+                </div>
+                <Field label={`Vị trí ngang: ${positionX}%`}>
+                  <Input type="range" min={0} max={100} value={positionX} onChange={(event) => updateImage(imageIndex, { position_x: Number(event.target.value) })} />
+                </Field>
+                <Field label={`Vị trí dọc: ${positionY}%`}>
+                  <Input type="range" min={0} max={100} value={positionY} onChange={(event) => updateImage(imageIndex, { position_y: Number(event.target.value) })} />
                 </Field>
               </div>
+              <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteImage(imageIndex)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-            <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteImage(imageIndex)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
+          )
+        })}
       </div>
       <PropsEditor value={props} onChange={onChange} />
     </div>
@@ -1114,6 +1210,9 @@ function renderPropControl(value: any, onChange: (value: any) => void) {
     }
     return <Input value={value} onChange={(event) => onChange(event.target.value)} />
   }
+  if (Array.isArray(value)) {
+    return <ArrayPropEditor rows={value} onChange={onChange} />
+  }
 
   return (
     <Textarea
@@ -1130,13 +1229,85 @@ function renderPropControl(value: any, onChange: (value: any) => void) {
   )
 }
 
+function ArrayPropEditor({ rows, onChange }: { rows: any[]; onChange: (value: any[]) => void }) {
+  const isObjectArray = rows.every((row) => row && typeof row === "object" && !Array.isArray(row))
+  const move = (index: number, direction: -1 | 1) => {
+    const swapIndex = index + direction
+    if (swapIndex < 0 || swapIndex >= rows.length) return
+    const nextRows = [...rows]
+    ;[nextRows[index], nextRows[swapIndex]] = [nextRows[swapIndex], nextRows[index]]
+    onChange(nextRows)
+  }
+
+  if (!isObjectArray) {
+    return (
+      <Textarea
+        className="min-h-[120px] font-mono text-xs"
+        value={JSON.stringify(rows, null, 2)}
+        onChange={(event) => {
+          try {
+            const parsed = JSON.parse(event.target.value || "[]")
+            onChange(Array.isArray(parsed) ? parsed : rows)
+          } catch {
+            onChange(rows)
+          }
+        }}
+      />
+    )
+  }
+
+  const keys = Array.from(new Set(rows.flatMap((row) => Object.keys(row || {}))))
+  const updateRow = (index: number, key: string, nextValue: string) => {
+    onChange(rows.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: nextValue } : row))
+  }
+  const addRow = () => {
+    const template = Object.fromEntries((keys.length ? keys : ["title", "description"]).map((key) => [key, ""]))
+    onChange([...rows, template])
+  }
+
+  return (
+    <div className="space-y-3 border bg-white p-3 dark:bg-slate-900">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh sách item</span>
+        <Button type="button" variant="outline" size="sm" className="rounded-none" onClick={addRow}>
+          <Plus className="mr-2 h-4 w-4" /> Thêm item
+        </Button>
+      </div>
+      {rows.map((row, index) => (
+        <div key={index} className="border bg-slate-50 p-3 dark:bg-slate-950">
+          <div className="mb-3 flex items-center justify-between">
+            <span className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500"><GripVertical className="h-3.5 w-3.5" /> Item #{index + 1}</span>
+            <div className="flex gap-1">
+              <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-none" disabled={index === 0} onClick={() => move(index, -1)}><ArrowUp className="h-4 w-4" /></Button>
+              <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-none" disabled={index === rows.length - 1} onClick={() => move(index, 1)}><ArrowDown className="h-4 w-4" /></Button>
+              <Button type="button" variant="destructive" size="icon" className="h-8 w-8 rounded-none" onClick={() => onChange(rows.filter((_, rowIndex) => rowIndex !== index))}><Trash2 className="h-4 w-4" /></Button>
+            </div>
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            {keys.map((key) => (
+              <Field key={key} label={key}>
+                {String(row?.[key] || "").length > 80 ? (
+                  <Textarea value={String(row?.[key] || "")} onChange={(event) => updateRow(index, key, event.target.value)} />
+                ) : (
+                  <Input value={String(row?.[key] ?? "")} onChange={(event) => updateRow(index, key, event.target.value)} />
+                )}
+              </Field>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function normalizeSlug(value: string) {
   return value
     .toLowerCase()
     .trim()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/Ä'/g, "d")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "d")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
 }
