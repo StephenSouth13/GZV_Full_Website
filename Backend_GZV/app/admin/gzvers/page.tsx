@@ -1,173 +1,269 @@
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import type React from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { GZVersTable } from '@/components/admin/gzvers/GZVersTable'
 import { GZVerModal } from '@/components/admin/gzvers/GZVerModal'
 import { Button } from '@/components/ui/button'
-import { Plus, UserCircle2, Search, Loader2, RefreshCcw, Filter } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Plus, RefreshCcw, Search, Trash2, Users2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
-export default function AdmingzversPage() {
-  // State quản lý dữ liệu và hiển thị
-  const [gzvers, setgzvers] = useState<any[]>([])
-  const [filteredgzvers, setFilteredgzvers] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  
-  // State quản lý Modal
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedgzver, setSelectedgzver] = useState<any>(null)
+type Department = {
+  id?: string
+  name: string
+  slug: string
+  description?: string | null
+  color: string
+  sort_order: number
+  is_active: boolean
+}
 
-  // 1. Hàm lấy dữ liệu (READ)
-  const fetchgzvers = useCallback(async () => {
+const slugify = (text: string) => text
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[đĐ]/g, 'd')
+  .trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_-]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+
+export default function AdminGzversPage() {
+  const [gzvers, setGzvers] = useState<any[]>([])
+  const [departments, setDepartments] = useState<Department[]>([])
+  const [loading, setLoading] = useState(true)
+  const [savingDepartments, setSavingDepartments] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeDepartment, setActiveDepartment] = useState('all')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedGzver, setSelectedGzver] = useState<any>(null)
+
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('gzvers')
-        .select('*')
-        .order('order', { ascending: true })
-      
-      if (error) throw error
-      if (data) {
-        setgzvers(data)
-        setFilteredgzvers(data)
-      }
+      const [gzversResult, departmentsResult] = await Promise.all([
+        supabase.from('gzvers').select('*, gzver_departments(*)').order('order', { ascending: true }),
+        supabase.from('gzver_departments').select('*').order('sort_order', { ascending: true }),
+      ])
+      if (gzversResult.error) throw gzversResult.error
+      if (departmentsResult.error) throw departmentsResult.error
+      setGzvers(gzversResult.data || [])
+      setDepartments(departmentsResult.data || [])
     } catch (error: any) {
-      toast({
-        title: "Lỗi tải dữ liệu",
-        description: error.message,
-        variant: "destructive"
-      })
+      toast({ title: 'Không tải được dữ liệu GZVers', description: error.message, variant: 'destructive' })
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchgzvers()
-  }, [fetchgzvers])
+    fetchData()
+  }, [fetchData])
 
-  // 2. Xử lý tìm kiếm (Local Search)
-  useEffect(() => {
-    const results = gzvers.filter(m => 
-      m.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.position?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    setFilteredgzvers(results)
-  }, [searchQuery, gzvers])
+  const filteredGzvers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+    return gzvers.filter((item) => {
+      const departmentId = item.department_id || item.gzver_departments?.id || ''
+      const matchesDepartment = activeDepartment === 'all' || departmentId === activeDepartment
+      const haystack = `${item.full_name || ''} ${item.position || ''} ${item.company || ''} ${item.department_name || ''} ${item.gzver_departments?.name || ''}`.toLowerCase()
+      return matchesDepartment && (!query || haystack.includes(query))
+    })
+  }, [activeDepartment, gzvers, searchQuery])
 
-  // 3. Hàm xóa (DELETE)
-  const handleDelete = async (gzver: any) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa hồ sơ của ${gzver.full_name}? Hành động này không thể hoàn tác.`)) {
-      try {
-        const { error } = await supabase
-          .from('gzvers')
-          .delete()
-          .eq('id', gzver.id)
-        
-        if (error) throw error
-        
-        toast({ title: "Đã xóa thành công" })
-        fetchgzvers() // Tải lại danh sách
-      } catch (error: any) {
-        toast({
-          title: "Lỗi khi xóa",
-          description: error.message,
-          variant: "destructive"
-        })
-      }
-    }
-  }
-
-  // 4. Mở modal để thêm mới hoặc chỉnh sửa (CREATE/UPDATE)
   const handleOpenModal = (gzver: any = null) => {
-    setSelectedgzver(gzver)
+    setSelectedGzver(gzver)
     setIsModalOpen(true)
   }
 
+  const handleDelete = async (gzver: any) => {
+    if (!window.confirm(`Xóa hồ sơ của ${gzver.full_name}?`)) return
+    try {
+      const { error } = await supabase.from('gzvers').delete().eq('id', gzver.id)
+      if (error) throw error
+      toast({ title: 'Đã xóa GZVer' })
+      fetchData()
+    } catch (error: any) {
+      toast({ title: 'Không xóa được', description: error.message, variant: 'destructive' })
+    }
+  }
+
+  const addDepartment = () => {
+    const name = 'BAN MỚI'
+    setDepartments((items) => [
+      ...items,
+      {
+        name,
+        slug: `ban-moi-${Date.now()}`,
+        description: '',
+        color: '#ed1c24',
+        sort_order: (items.length + 1) * 10,
+        is_active: true,
+      },
+    ])
+  }
+
+  const updateDepartment = (index: number, patch: Partial<Department>) => {
+    setDepartments((items) => items.map((item, idx) => {
+      if (idx !== index) return item
+      const next = { ...item, ...patch }
+      if (patch.name && (!item.id || next.slug.startsWith('ban-moi-'))) next.slug = slugify(patch.name)
+      return next
+    }))
+  }
+
+  const deleteDepartment = async (department: Department, index: number) => {
+    if (!window.confirm(`Xóa ${department.name}? GZVers thuộc ban này sẽ chuyển sang chưa gán ban.`)) return
+    setDepartments((items) => items.filter((_, idx) => idx !== index))
+    if (!department.id) return
+    const { error } = await supabase.from('gzver_departments').delete().eq('id', department.id)
+    if (error) toast({ title: 'Không xóa được ban', description: error.message, variant: 'destructive' })
+    else {
+      toast({ title: 'Đã xóa ban' })
+      fetchData()
+    }
+  }
+
+  const saveDepartments = async () => {
+    setSavingDepartments(true)
+    try {
+      const rows = departments.map((department) => ({
+        ...department,
+        slug: department.slug || slugify(department.name),
+      }))
+      const { error } = await supabase.from('gzver_departments').upsert(rows, { onConflict: 'slug' })
+      if (error) throw error
+      toast({ title: 'Đã lưu danh sách ban' })
+      fetchData()
+    } catch (error: any) {
+      toast({ title: 'Không lưu được ban', description: error.message, variant: 'destructive' })
+    } finally {
+      setSavingDepartments(false)
+    }
+  }
+
   return (
-    <div className="p-8 space-y-8 bg-[#050505] min-h-screen text-white">
-      {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="min-h-screen bg-[#050505] p-5 text-white md:p-8">
+      <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
-              <UserCircle2 className="text-white" size={24} />
+          <p className="mb-3 border-l-4 border-[#ed1c24] pl-3 text-xs font-black uppercase tracking-[0.24em] text-[#ed1c24]">GZV Organization</p>
+          <h1 className="text-3xl font-black uppercase tracking-tight md:text-4xl">Quản lý GZVers theo ban</h1>
+          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-gray-400">Tạo ban như Ban Cố Vấn, Ban Điều Hành, Ban Thực Thi và gán từng GZVer vào đúng vị trí hiển thị trên website.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchData} className="h-11 rounded-none border-white/10 bg-white/5 text-white hover:bg-white/10">
+            <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
+          </Button>
+          <Button onClick={() => handleOpenModal()} className="h-11 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase text-white hover:bg-[#c91218]">
+            <Plus size={18} className="mr-2" /> Thêm GZVer
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
+        <aside className="space-y-4">
+          <div className="border border-white/10 bg-[#0b0b0b] p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-black uppercase">Danh sách ban</h2>
+                <p className="mt-1 text-xs text-gray-500">Admin tự tạo, đổi tên, sắp xếp và bật/tắt.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={addDepartment} className="rounded-none border-[#ed1c24] text-[#ed1c24]">
+                <Plus className="mr-1 h-4 w-4" /> Ban
+              </Button>
             </div>
-            <h1 className="text-3xl font-black uppercase tracking-tight">Quản lý gzvers</h1>
+            <div className="space-y-3">
+              {departments.map((department, index) => (
+                <div key={department.id || department.slug} className="space-y-3 border border-white/10 bg-white/[0.03] p-4">
+                  <div className="grid grid-cols-[1fr_82px] gap-2">
+                    <Field label="Tên ban">
+                      <Input className="h-10 rounded-none border-white/10 bg-white/5 text-white" value={department.name} onChange={(e) => updateDepartment(index, { name: e.target.value })} />
+                    </Field>
+                    <Field label="Thứ tự">
+                      <Input type="number" className="h-10 rounded-none border-white/10 bg-white/5 text-white" value={department.sort_order} onChange={(e) => updateDepartment(index, { sort_order: Number(e.target.value) || 0 })} />
+                    </Field>
+                  </div>
+                  <Field label="Mô tả">
+                    <Textarea className="min-h-20 rounded-none border-white/10 bg-white/5 text-white" value={department.description || ''} onChange={(e) => updateDepartment(index, { description: e.target.value })} />
+                  </Field>
+                  <div className="grid grid-cols-[1fr_auto_auto] items-end gap-2">
+                    <Field label="Màu">
+                      <Input type="color" className="h-10 rounded-none border-white/10 bg-white/5" value={department.color || '#ed1c24'} onChange={(e) => updateDepartment(index, { color: e.target.value })} />
+                    </Field>
+                    <div className="flex h-10 items-center gap-2 border border-white/10 px-3">
+                      <Switch checked={department.is_active} onCheckedChange={(is_active) => updateDepartment(index, { is_active })} />
+                      <span className="text-[10px] font-black uppercase text-gray-400">Bật</span>
+                    </div>
+                    <Button variant="destructive" size="icon" className="h-10 w-10 rounded-none" onClick={() => deleteDepartment(department, index)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button onClick={saveDepartments} disabled={savingDepartments} className="mt-4 h-11 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]">
+              {savingDepartments ? 'Đang lưu...' : 'Lưu danh sách ban'}
+            </Button>
           </div>
-          <p className="text-gray-500 font-medium text-sm mt-2">
-            Hệ thống quản trị hồ sơ chuyên gia, lộ trình thăng tiến và thành tựu của đội ngũ gzv.
-          </p>
-        </div>
-        
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={fetchgzvers} 
-            className="border-white/10 bg-white/5 hover:bg-white/10 rounded-full"
-          >
-            <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
-          </Button>
-          <Button 
-            onClick={() => handleOpenModal()} 
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 font-bold shadow-xl shadow-blue-600/30 transition-all hover:scale-105"
-          >
-            <Plus size={18} className="mr-2"/> Thêm chuyên gia mới
-          </Button>
-        </div>
+        </aside>
+
+        <main className="space-y-4">
+          <div className="border border-white/10 bg-[#0b0b0b] p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                <Input className="h-12 rounded-none border-white/10 bg-white/5 pl-11 text-white placeholder:text-gray-600" placeholder="Tìm theo tên, chức danh, ban..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <FilterButton active={activeDepartment === 'all'} onClick={() => setActiveDepartment('all')}>Tất cả</FilterButton>
+                {departments.map((department) => (
+                  <FilterButton key={department.id || department.slug} active={activeDepartment === department.id} onClick={() => setActiveDepartment(department.id || '')}>
+                    {department.name}
+                  </FilterButton>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex h-80 flex-col items-center justify-center border border-white/10 bg-[#0b0b0b]">
+              <RefreshCcw className="mb-4 h-10 w-10 animate-spin text-[#ed1c24]" />
+              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Đang đồng bộ dữ liệu...</p>
+            </div>
+          ) : (
+            <GZVersTable gzvers={filteredGzvers} onEdit={handleOpenModal} onDelete={handleDelete} />
+          )}
+
+          <div className="flex items-center justify-between border-t border-white/10 px-1 pt-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+            <span>Tổng hiển thị: {filteredGzvers.length}</span>
+            <span className="inline-flex items-center gap-2"><Users2 className="h-4 w-4 text-[#ed1c24]" /> {departments.length} ban</span>
+          </div>
+        </main>
       </div>
 
-      {/* FILTER & SEARCH BAR */}
-      <div className="flex flex-col md:flex-row items-center gap-4 bg-gray-900/40 p-4 rounded-[1.5rem] border border-white/5 backdrop-blur-md">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-          <Input 
-            className="pl-12 bg-white/5 border-white/10 h-12 rounded-xl focus-visible:ring-blue-500 text-gray-200 placeholder:text-gray-600" 
-            placeholder="Tìm theo tên, chức danh chuyên gia..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button variant="outline" className="h-12 px-6 border-white/10 bg-white/5 rounded-xl gap-2 font-bold text-gray-400">
-          <Filter size={18} /> Lọc trạng thái
-        </Button>
-      </div>
-
-      {/* DATA TABLE SECTION */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center h-80 border-2 border-dashed border-white/5 rounded-[2.5rem] bg-gray-900/20">
-          <Loader2 className="animate-spin text-blue-500 mb-4" size={40} />
-          <p className="text-gray-500 font-black uppercase text-xs tracking-widest animate-pulse">Đang đồng bộ dữ liệu gzvers...</p>
-        </div>
-      ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <GZVersTable 
-            gzvers={filteredgzvers} 
-            onEdit={handleOpenModal} 
-            onDelete={handleDelete} 
-          />
-        </div>
-      )}
-
-      {/* FOOTER INFO */}
-      <div className="flex justify-between items-center px-4 py-2 border-t border-white/5 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
-        <span>Tổng số chuyên gia: {filteredgzvers.length}</span>
-        <span className="flex items-center gap-2">
-           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> 
-           Kết nối Supabase ổn định
-        </span>
-      </div>
-
-      {/* MODAL COMPONENT */}
-      <GZVerModal 
-        open={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        gzver={selectedgzver} 
-        onSave={fetchgzvers} 
+      <GZVerModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        gzver={selectedGzver}
+        departments={departments.filter((department) => department.is_active)}
+        onSave={fetchData}
       />
     </div>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</Label>{children}</div>
+}
+
+function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} className={`h-10 border px-3 text-[10px] font-black uppercase transition ${active ? 'border-[#ed1c24] bg-[#ed1c24] text-white' : 'border-white/10 bg-white/5 text-gray-300 hover:border-[#ed1c24]'}`}>
+      {children}
+    </button>
   )
 }

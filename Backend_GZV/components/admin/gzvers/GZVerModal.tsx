@@ -1,102 +1,93 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogDescription
-} from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { 
-  Loader2, Upload, Save, FileText, Sparkles, 
-  Trophy, Briefcase, FileCheck, X, GraduationCap, TrendingUp, Heart,
-  Eye, EyeOff, Wrench, Hash, User,ShieldCheck
-} from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Briefcase, FileCheck, FileText, Hash, Loader2, Save, ShieldCheck, Sparkles, Upload, User, X } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
-const convertToSlug = (text: string) => {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[đĐ]/g, 'd')
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-};
+type Department = {
+  id: string
+  name: string
+  slug: string
+  color?: string | null
+  sort_order?: number | null
+}
 
-export function GZVerModal({ open, onClose, gzver, onSave }: any) {
+const convertToSlug = (text: string) => text
+  .toLowerCase()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/[đĐ]/g, 'd')
+  .trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_-]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+
+const defaultForm = {
+  full_name: '',
+  slug: '',
+  company: 'GZV',
+  position: '',
+  role_level: '',
+  department_id: '',
+  department_name: '',
+  avatar_url: '',
+  cv_url: '',
+  achievement_summary: '',
+  testimonial: '',
+  graduation_year: '',
+  promotion_path: '',
+  social_impact: '',
+  course_taken: '',
+  skills: [] as string[],
+  achievements_list: [] as string[],
+  mentoring_content: '',
+  background: { education: '', previous_role: '', experience: '' },
+  is_active: true,
+  is_director: false,
+  order: 0,
+}
+
+export function GZVerModal({ open, onClose, gzver, onSave, departments = [] }: any) {
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState<any>({
-    full_name: '',
-    slug: '',
-    company: 'gzv',
-    position: '',
-    avatar_url: '',
-    cv_url: '',
-    achievement_summary: '', // Sẽ dùng cho phần "Achievement" ở Card trang chủ
-    testimonial: '',
-    graduation_year: '',
-    promotion_path: '',
-    social_impact: '',
-    course_taken: '',
-    skills: [],
-    achievements_list: [],
-    mentoring_content: '',
-    background: { education: '', previous_role: '', experience: '' },
-    is_active: true,
-    order: 0 // Thêm trường sắp xếp
-  })
+  const [formData, setFormData] = useState<any>(defaultForm)
 
   useEffect(() => {
-  if (gzver) {
-    // Nếu có dữ liệu gzver (Edit mode), merge dữ liệu cũ với giá trị mặc định để tránh lỗi 'undefined'
-    setFormData({
-      ...gzver,
-      // Đảm bảo các trường dữ liệu luôn tồn tại
-      skills: gzver.skills || [],
-      achievements_list: gzver.achievements_list || [],
-      background: gzver.background || { education: '', previous_role: '', experience: '' },
-      is_active: gzver.is_active ?? true,
-      order: gzver.order ?? 0
-    });
-  } else {
-    // Reset mặc định khi tạo mới (Add mode)
-    setFormData({
-      full_name: '', 
-      slug: '', 
-      company: 'gzv', 
-      position: '', 
-      avatar_url: '', 
-      cv_url: '',
-      achievement_summary: '', 
-      testimonial: '', 
-      graduation_year: '',
-      promotion_path: '', 
-      social_impact: '', 
-      course_taken: '',
-      skills: [], 
-      achievements_list: [], 
-      mentoring_content: '',
-      background: { education: '', previous_role: '', experience: '' },
-      is_active: true,
-      order: 0,
-      is_director: false // Đừng quên trường mới này ông vừa thêm ở UI
-    });
-  }
-}, [gzver, open]);
+    if (!open) return
+    if (gzver) {
+      setFormData({
+        ...defaultForm,
+        ...gzver,
+        department_id: gzver.department_id || gzver.gzver_departments?.id || '',
+        department_name: gzver.department_name || gzver.gzver_departments?.name || '',
+        skills: gzver.skills || [],
+        achievements_list: gzver.achievements_list || [],
+        background: gzver.background || defaultForm.background,
+        is_active: gzver.is_active ?? true,
+        is_director: gzver.is_director ?? false,
+        order: gzver.order ?? 0,
+      })
+    } else {
+      const firstDepartment = departments[0]
+      setFormData({
+        ...defaultForm,
+        department_id: firstDepartment?.id || '',
+        department_name: firstDepartment?.name || '',
+      })
+    }
+  }, [gzver, open, departments])
 
   const handleFileUpload = async (e: any, folder: string, field: string) => {
-    const file = e.target.files[0]
+    const file = e.target.files?.[0]
     if (!file) return
     setLoading(true)
     try {
@@ -107,188 +98,176 @@ export function GZVerModal({ open, onClose, gzver, onSave }: any) {
       if (error) throw error
       const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path)
       setFormData((prev: any) => ({ ...prev, [field]: publicUrl }))
-      toast({ title: `Thành công`, description: `Đã tải ${field === 'cv_url' ? 'CV' : 'ảnh'} lên!` })
+      toast({ title: 'Đã tải lên', description: field === 'cv_url' ? 'CV đã sẵn sàng.' : 'Ảnh đại diện đã sẵn sàng.' })
     } catch (error: any) {
-      toast({ title: "Lỗi", description: error.message, variant: "destructive" })
-    } finally { setLoading(false) }
+      toast({ title: 'Lỗi upload', description: error.message, variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const setDepartment = (departmentId: string) => {
+    const department = departments.find((item: Department) => item.id === departmentId)
+    setFormData({ ...formData, department_id: departmentId, department_name: department?.name || '' })
   }
 
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      const { id, created_at, updated_at, ...payload } = formData;
-      const { error } = gzver?.id 
-        ? await supabase.from('gzvers').update(payload).eq('id', gzver.id)
-        : await supabase.from('gzvers').insert([payload])
+      const { id, created_at, updated_at, gzver_departments, ...payload } = formData
+      const cleanPayload = {
+        ...payload,
+        department_id: payload.department_id || null,
+        department_name: payload.department_name || null,
+        role_level: payload.role_level || null,
+        skills: (payload.skills || []).filter(Boolean),
+        achievements_list: (payload.achievements_list || []).filter(Boolean),
+      }
+      const { error } = gzver?.id
+        ? await supabase.from('gzvers').update(cleanPayload).eq('id', gzver.id)
+        : await supabase.from('gzvers').insert([cleanPayload])
       if (error) throw error
-      onSave(); onClose();
-      toast({ title: "Thành công", description: "Hồ sơ gzver đã được lưu." })
+      toast({ title: 'Đã lưu GZVer' })
+      onSave()
+      onClose()
     } catch (error: any) {
-      toast({ title: "Lỗi", description: error.message, variant: "destructive" })
-    } finally { setLoading(false) }
+      toast({ title: 'Không lưu được', description: error.message, variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl bg-gray-950 border-white/10 text-white p-0 overflow-hidden rounded-[2.5rem] shadow-2xl">
-        <div className="hidden"><DialogDescription>Quản lý hồ sơ học viên gzver ưu tú</DialogDescription></div>
-        <DialogHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
-              <Sparkles className="text-white" size={24}/>
+      <DialogContent className="max-w-5xl overflow-hidden rounded-none border-white/10 bg-gray-950 p-0 text-white shadow-2xl">
+        <DialogDescription className="sr-only">Quản lý hồ sơ GZVer</DialogDescription>
+        <DialogHeader className="border-b border-white/10 p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#ed1c24] p-3">
+                <Sparkles className="text-white" size={22} />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ GZVer</DialogTitle>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500">Profile, ban và vị trí hiển thị</p>
+              </div>
             </div>
-            <div>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ gzver</DialogTitle>
-              <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Hệ thống quản trị Profile</p>
+            <div className="flex items-center gap-3 border border-white/10 bg-white/5 px-4 py-3">
+              <Label className="text-[10px] font-black uppercase tracking-widest">Hiển thị public</Label>
+              <Switch checked={formData.is_active} onCheckedChange={(val) => setFormData({ ...formData, is_active: val })} />
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/5">
-            {formData.is_active ? <Eye className="text-emerald-500" size={18}/> : <EyeOff className="text-red-500" size={18}/>}
-            <Label className="text-[10px] font-black uppercase tracking-widest">Trạng thái hiển thị</Label>
-            <Switch 
-              checked={formData.is_active} 
-              onCheckedChange={(val) => setFormData({...formData, is_active: val})}
-            />
           </div>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="bg-transparent border-b border-white/5 w-full justify-start rounded-none px-8 h-12 gap-8 overflow-x-auto custom-scrollbar">
-            <TabsTrigger value="basic" className="data-[state=active]:text-blue-400 font-black uppercase text-[10px] tracking-widest flex-shrink-0">1. Thông tin Bìa</TabsTrigger>
-            <TabsTrigger value="education" className="data-[state=active]:text-blue-400 font-black uppercase text-[10px] tracking-widest flex-shrink-0">2. Học vấn & Kỹ năng</TabsTrigger>
-            <TabsTrigger value="path" className="data-[state=active]:text-blue-400 font-black uppercase text-[10px] tracking-widest flex-shrink-0">3. Lộ trình & Tác động</TabsTrigger>
-            <TabsTrigger value="experience" className="data-[state=active]:text-blue-400 font-black uppercase text-[10px] tracking-widest flex-shrink-0">4. Thành tựu</TabsTrigger>
-            <TabsTrigger value="documents" className="data-[state=active]:text-blue-400 font-black uppercase text-[10px] tracking-widest flex-shrink-0">5. CV & Tài liệu</TabsTrigger>
+          <TabsList className="h-12 w-full justify-start gap-4 overflow-x-auto rounded-none border-b border-white/10 bg-transparent px-6">
+            <TabsTrigger value="basic" className="rounded-none text-[10px] font-black uppercase tracking-widest data-[state=active]:text-[#ed1c24]">Thông tin</TabsTrigger>
+            <TabsTrigger value="story" className="rounded-none text-[10px] font-black uppercase tracking-widest data-[state=active]:text-[#ed1c24]">Năng lực</TabsTrigger>
+            <TabsTrigger value="docs" className="rounded-none text-[10px] font-black uppercase tracking-widest data-[state=active]:text-[#ed1c24]">CV</TabsTrigger>
           </TabsList>
 
-          <div className="p-8 max-h-[55vh] overflow-y-auto custom-scrollbar">
-            
-            {/* TAB: CƠ BẢN (DÙNG ĐỂ HIỂN THỊ NGOÀI CARD SECTION) */}
-            <TabsContent value="basic" className="mt-0 space-y-8 animate-in fade-in duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-                <div className="md:col-span-4 space-y-6">
-                  <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/10 rounded-[2.5rem] bg-white/5 transition-all hover:border-blue-500/50 group">
-                    <Label className="mb-4 uppercase text-[10px] font-black text-gray-500">Ảnh chân dung Card</Label>
-                    <div className="relative h-40 w-40 rounded-full overflow-hidden border-4 border-gray-900 shadow-2xl">
-                      <img src={formData.avatar_url || 'https://via.placeholder.com/300'} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Avatar"/>
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Upload size={24} className="text-white" />
-                      </div>
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" onChange={(e) => handleFileUpload(e, 'gzvers/avatars', 'avatar_url')} />
+          <div className="max-h-[60vh] overflow-y-auto p-6">
+            <TabsContent value="basic" className="mt-0 space-y-6">
+              <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+                <div className="space-y-4">
+                  <div className="border-2 border-dashed border-white/10 bg-white/5 p-5 text-center">
+                    <Label className="mb-4 block text-[10px] font-black uppercase text-gray-500">Ảnh đại diện</Label>
+                    <div className="relative mx-auto h-44 w-44 overflow-hidden bg-black">
+                      <img src={formData.avatar_url || 'https://via.placeholder.com/300'} className="h-full w-full object-cover" alt="Avatar" />
+                      <input type="file" className="absolute inset-0 cursor-pointer opacity-0" accept="image/*" onChange={(e) => handleFileUpload(e, 'gzvers/avatars', 'avatar_url')} />
                     </div>
+                    <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-gray-500">Click ảnh để upload</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-amber-500 flex items-center gap-1.5"><Hash size={12}/> Thứ tự sắp xếp ngoài trang chủ</Label>
-                    <Input type="number" className="bg-amber-500/5 border-amber-500/20 h-12 rounded-xl text-amber-500 font-black text-center text-lg" value={formData.order} onChange={(e) => setFormData({...formData, order: parseInt(e.target.value) || 0})} />
+                  <Field label="Thứ tự">
+                    <Input type="number" className="h-12 rounded-none border-white/10 bg-white/5 text-center text-lg font-black text-white" value={formData.order} onChange={(e) => setFormData({ ...formData, order: Number(e.target.value) || 0 })} />
+                  </Field>
+                  <div className="flex items-center justify-between border border-white/10 bg-white/5 p-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-[#ed1c24]" />
+                      <Label className="text-[10px] font-black uppercase tracking-widest">Ban chủ nhiệm</Label>
+                    </div>
+                    <Switch checked={formData.is_director} onCheckedChange={(val) => setFormData({ ...formData, is_director: val })} />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 bg-blue-500/10 px-4 py-2 rounded-2xl border border-blue-500/20">
-                 <ShieldCheck className="text-blue-500" size={18}/>
-                 <Label className="text-[10px] font-black uppercase tracking-widest text-blue-400">Ban Chủ Nhiệm</Label>
-                    <Switch 
-                  checked={formData.is_director} 
-                    onCheckedChange={(val) => setFormData({...formData, is_director: val})}
-                  />
-                            </div>
-                <div className="md:col-span-8 space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-gray-500">Họ và tên</Label>
-                      <Input className="bg-white/5 border-white/10 h-12 rounded-xl font-bold" value={formData.full_name} onChange={(e) => setFormData({...formData, full_name: e.target.value, slug: convertToSlug(e.target.value)})} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-blue-500">Slug Profile (Tự động)</Label>
-                      <Input className="bg-blue-500/5 border-blue-500/10 h-12 rounded-xl text-blue-400 font-mono italic" value={formData.slug} readOnly />
-                    </div>
+
+                <div className="space-y-5">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Field label="Họ và tên">
+                      <Input className="h-12 rounded-none border-white/10 bg-white/5 font-bold text-white" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value, slug: convertToSlug(e.target.value) })} />
+                    </Field>
+                    <Field label="Slug">
+                      <Input className="h-12 rounded-none border-white/10 bg-white/5 font-mono text-[#ed1c24]" value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: convertToSlug(e.target.value) })} />
+                    </Field>
+                    <Field label="Ban">
+                      <Select value={formData.department_id || ''} onValueChange={setDepartment}>
+                        <SelectTrigger className="h-12 rounded-none border-white/10 bg-white/5 text-white"><SelectValue placeholder="Chọn ban" /></SelectTrigger>
+                        <SelectContent className="rounded-none border-white/10 bg-gray-950 text-white">
+                          {departments.map((department: Department) => (
+                            <SelectItem key={department.id} value={department.id}>{department.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field label="Role level / nhãn nổi bật">
+                      <Input className="h-12 rounded-none border-white/10 bg-white/5 text-white" placeholder="VD: Founder, Lead, Member..." value={formData.role_level || ''} onChange={(e) => setFormData({ ...formData, role_level: e.target.value })} />
+                    </Field>
+                    <Field label="Chức danh">
+                      <Input className="h-12 rounded-none border-white/10 bg-white/5 text-white" value={formData.position} onChange={(e) => setFormData({ ...formData, position: e.target.value })} />
+                    </Field>
+                    <Field label="Đơn vị / công ty">
+                      <Input className="h-12 rounded-none border-white/10 bg-white/5 text-white" value={formData.company} onChange={(e) => setFormData({ ...formData, company: e.target.value })} />
+                    </Field>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-gray-500">Chức danh (Position)</Label>
-                      <Input className="bg-white/5 border-white/10 h-12 rounded-xl" placeholder="VD: Phó Giám Đốc" value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-gray-500">Công ty (Company)</Label>
-                      <Input className="bg-white/5 border-white/10 h-12 rounded-xl" placeholder="VD: gzv Center" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-teal-500 tracking-widest">Thành tích hiển thị Card (Achievement)</Label>
-                    <Textarea className="bg-teal-500/5 border-teal-500/10 rounded-xl resize-none h-20 text-sm font-medium" placeholder="VD: Tốt nghiệp và trưởng thành từ gzv..." value={formData.achievement_summary} onChange={(e) => setFormData({...formData, achievement_summary: e.target.value})} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-gray-500 ml-1">Quote / Lời chứng thực (Testimonial)</Label>
-                    <Textarea className="bg-white/5 border-white/10 rounded-xl resize-none h-24 italic text-sm" placeholder="Nhập câu nói tâm đắc..." value={formData.testimonial} onChange={(e) => setFormData({...formData, testimonial: e.target.value})} />
-                  </div>
+                  <Field label="Thành tích hiển thị trên card">
+                    <Textarea className="min-h-24 rounded-none border-white/10 bg-white/5 text-white" value={formData.achievement_summary || ''} onChange={(e) => setFormData({ ...formData, achievement_summary: e.target.value })} />
+                  </Field>
+                  <Field label="Quote / testimonial">
+                    <Textarea className="min-h-28 rounded-none border-white/10 bg-white/5 text-white" value={formData.testimonial || ''} onChange={(e) => setFormData({ ...formData, testimonial: e.target.value })} />
+                  </Field>
                 </div>
               </div>
             </TabsContent>
 
-            {/* TAB: HỌC VẤN & KỸ NĂNG */}
-            <TabsContent value="education" className="mt-0 space-y-8 animate-in fade-in duration-500">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <Label className="flex items-center gap-2 text-amber-400 font-black uppercase text-[10px] tracking-widest"><GraduationCap size={16}/> Nền tảng học vấn chi tiết</Label>
-                  <Textarea className="bg-white/5 border-white/10 h-48 rounded-2xl leading-relaxed text-sm" placeholder="VD: Thạc sĩ QTKD - Western Sydney University..." value={formData.background?.education} onChange={(e) => setFormData({...formData, background: {...formData.background, education: e.target.value}})} />
-                </div>
-                <div className="space-y-4">
-                  <Label className="flex items-center gap-2 text-blue-400 font-black uppercase text-[10px] tracking-widest"><Wrench size={16}/> Kỹ năng chuyên môn (Mỗi dòng 1 kỹ năng)</Label>
-                  <Textarea className="bg-white/5 border-white/10 h-48 rounded-2xl leading-relaxed text-sm" placeholder="Lãnh đạo đội ngũ&#10;Chiến lược Marketing..." value={formData.skills?.join('\n')} onChange={(e) => setFormData({...formData, skills: e.target.value.split('\n')})} />
-                </div>
+            <TabsContent value="story" className="mt-0 space-y-5">
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field label="Kỹ năng, mỗi dòng một mục">
+                  <Textarea className="min-h-44 rounded-none border-white/10 bg-white/5 text-white" value={(formData.skills || []).join('\n')} onChange={(e) => setFormData({ ...formData, skills: e.target.value.split('\n') })} />
+                </Field>
+                <Field label="Thành tựu, mỗi dòng một mục">
+                  <Textarea className="min-h-44 rounded-none border-white/10 bg-white/5 text-white" value={(formData.achievements_list || []).join('\n')} onChange={(e) => setFormData({ ...formData, achievements_list: e.target.value.split('\n') })} />
+                </Field>
+                <Field label="Học vấn">
+                  <Textarea className="min-h-36 rounded-none border-white/10 bg-white/5 text-white" value={formData.background?.education || ''} onChange={(e) => setFormData({ ...formData, background: { ...formData.background, education: e.target.value } })} />
+                </Field>
+                <Field label="Kinh nghiệm">
+                  <Textarea className="min-h-36 rounded-none border-white/10 bg-white/5 text-white" value={formData.background?.experience || ''} onChange={(e) => setFormData({ ...formData, background: { ...formData.background, experience: e.target.value } })} />
+                </Field>
               </div>
+              <Field label="Lộ trình phát triển">
+                <Textarea className="min-h-28 rounded-none border-white/10 bg-white/5 text-white" value={formData.promotion_path || ''} onChange={(e) => setFormData({ ...formData, promotion_path: e.target.value })} />
+              </Field>
+              <Field label="Tác động xã hội / cộng đồng">
+                <Textarea className="min-h-28 rounded-none border-white/10 bg-white/5 text-white" value={formData.social_impact || ''} onChange={(e) => setFormData({ ...formData, social_impact: e.target.value })} />
+              </Field>
             </TabsContent>
 
-            {/* TAB: LỘ TRÌNH & TÁC ĐỘNG */}
-            <TabsContent value="path" className="mt-0 space-y-6 animate-in fade-in duration-500">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <Label className="flex items-center gap-2 text-blue-400 font-black uppercase text-[10px] tracking-widest"><TrendingUp size={16}/> Lộ trình thăng tiến</Label>
-                    <Textarea className="bg-white/5 border-white/10 h-40 rounded-2xl text-sm" value={formData.promotion_path} onChange={(e) => setFormData({...formData, promotion_path: e.target.value})} />
-                  </div>
-                  <div className="space-y-4">
-                    <Label className="flex items-center gap-2 text-pink-400 font-black uppercase text-[10px] tracking-widest"><Heart size={16}/> Tác động xã hội & cộng đồng</Label>
-                    <Textarea className="bg-white/5 border-white/10 h-40 rounded-2xl text-sm" value={formData.social_impact} onChange={(e) => setFormData({...formData, social_impact: e.target.value})} />
-                  </div>
-               </div>
-            </TabsContent>
-
-            {/* TAB: KINH NGHIỆM & THÀNH TỰU CHI TIẾT */}
-            <TabsContent value="experience" className="mt-0 space-y-6 animate-in fade-in duration-500">
-               <div className="space-y-4">
-                  <Label className="flex items-center gap-2 text-indigo-400 font-black uppercase text-[10px] tracking-widest"><Briefcase size={16}/> Kinh nghiệm làm việc</Label>
-                  <Textarea className="bg-white/5 border-white/10 h-32 rounded-2xl text-sm leading-relaxed" value={formData.background?.experience} onChange={(e) => setFormData({...formData, background: {...formData.background, experience: e.target.value}})} />
-               </div>
-               <div className="space-y-4">
-                  <Label className="flex items-center gap-2 text-yellow-500 font-black uppercase text-[10px] tracking-widest"><Trophy size={16}/> Danh sách thành tựu nổi bật (Mỗi dòng 1 mục)</Label>
-                  <Textarea className="bg-white/5 border-white/10 h-32 rounded-2xl text-sm leading-relaxed" placeholder="Giải thưởng nhân viên xuất sắc 2023..." value={formData.achievements_list?.join('\n')} onChange={(e) => setFormData({...formData, achievements_list: e.target.value.split('\n')})} />
-               </div>
-            </TabsContent>
-
-            {/* TAB: CV & TÀI LIỆU */}
-            <TabsContent value="documents" className="mt-0 animate-in zoom-in-95 duration-500">
-              <div className="flex flex-col items-center justify-center min-h-[300px] border-2 border-dashed border-blue-500/20 rounded-[3rem] bg-blue-500/5 transition-all hover:bg-blue-500/10 group">
-                <div className="p-6 bg-blue-600/20 rounded-full mb-6 ring-8 ring-blue-600/5 group-hover:scale-110 transition-transform">
-                  <FileText size={48} className="text-blue-500 animate-pulse" />
+            <TabsContent value="docs" className="mt-0">
+              <div className="flex min-h-[280px] flex-col items-center justify-center border-2 border-dashed border-white/10 bg-white/5 p-8 text-center">
+                <div className="mb-5 bg-[#ed1c24]/15 p-5">
+                  <FileText size={44} className="text-[#ed1c24]" />
                 </div>
-                <h3 className="text-xl font-black uppercase tracking-tight mb-2 italic">Hồ sơ năng lực (CV)</h3>
-                <p className="text-gray-500 text-xs font-medium mb-8 text-center px-10 max-w-md">
-                  Đính kèm file PDF chuyên nghiệp. File này sẽ được hiển thị cho các đối tác chiến lược của gzv Center.
-                </p>
                 {formData.cv_url ? (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 px-8 py-4 rounded-[2rem]">
-                      <FileCheck className="text-emerald-500" size={24} />
-                      <div className="flex flex-col">
-                        <span className="text-emerald-500 font-black text-sm uppercase tracking-widest">Đã xác thực PDF</span>
-                        <a href={formData.cv_url} target="_blank" className="text-[10px] text-emerald-400/60 underline uppercase font-bold">Xem tài liệu</a>
-                      </div>
-                      <Button variant="ghost" size="icon" onClick={() => setFormData({...formData, cv_url: ''})} className="ml-4 h-10 w-10 rounded-full hover:bg-red-500/20 text-red-400"><X size={18}/></Button>
+                    <div className="flex items-center gap-3 border border-emerald-500/25 bg-emerald-500/10 px-6 py-4 text-emerald-400">
+                      <FileCheck size={22} />
+                      <a href={formData.cv_url} target="_blank" rel="noreferrer" className="text-xs font-black uppercase tracking-widest">Xem CV đã upload</a>
+                      <Button variant="ghost" size="icon" onClick={() => setFormData({ ...formData, cv_url: '' })} className="rounded-none text-red-400 hover:bg-red-500/20"><X size={16} /></Button>
                     </div>
                   </div>
                 ) : (
-                  <Button variant="outline" className="relative h-16 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white rounded-full px-16 font-black transition-all shadow-xl shadow-blue-500/10 active:scale-95">
-                    {loading ? <Loader2 className="animate-spin mr-3"/> : <Upload size={20} className="mr-3"/>} TẢI LÊN FILE PDF (MAX 10MB)
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept=".pdf" onChange={(e) => handleFileUpload(e, 'gzvers/cvs', 'cv_url')} disabled={loading} />
+                  <Button variant="outline" className="relative h-14 rounded-none border-[#ed1c24] px-10 text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white">
+                    {loading ? <Loader2 className="mr-2 animate-spin" /> : <Upload size={18} className="mr-2" />} Tải file PDF
+                    <input type="file" className="absolute inset-0 cursor-pointer opacity-0" accept=".pdf" onChange={(e) => handleFileUpload(e, 'gzvers/cvs', 'cv_url')} disabled={loading} />
                   </Button>
                 )}
               </div>
@@ -296,13 +275,25 @@ export function GZVerModal({ open, onClose, gzver, onSave }: any) {
           </div>
         </Tabs>
 
-        <div className="p-8 bg-gray-900 border-t border-white/5 flex justify-end gap-4 shadow-2xl relative z-10">
-          <Button variant="ghost" onClick={onClose} className="font-black text-gray-400 rounded-full px-10 hover:bg-white/5 uppercase text-xs tracking-widest">Hủy bỏ</Button>
-          <Button onClick={handleSubmit} disabled={loading} className="bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full px-14 h-14 shadow-2xl shadow-blue-600/20 transition-all hover:scale-105 active:scale-95 uppercase text-xs tracking-widest">
-            {loading ? <Loader2 className="animate-spin mr-3" size={20}/> : <Save size={20} className="mr-3"/>} LƯU HỒ SƠ CHI TIẾT
+        <div className="flex justify-end gap-3 border-t border-white/10 bg-[#0b0b0b] p-6">
+          <Button variant="ghost" onClick={onClose} className="rounded-none px-8 text-xs font-black uppercase text-gray-400 hover:bg-white/5">Hủy</Button>
+          <Button onClick={handleSubmit} disabled={loading} className="h-12 rounded-none bg-[#ed1c24] px-10 text-xs font-black uppercase text-white hover:bg-[#c91218]">
+            {loading ? <Loader2 className="mr-2 animate-spin" size={18} /> : <Save size={18} className="mr-2" />} Lưu hồ sơ
           </Button>
         </div>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-500">
+        <Hash className="h-3 w-3 text-[#ed1c24]" />
+        {label}
+      </Label>
+      {children}
+    </div>
   )
 }

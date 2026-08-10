@@ -138,6 +138,9 @@
     slug: string;
     company: string;
     position: string;
+    department_id?: string | null;
+    department_name?: string | null;
+    role_level?: string | null;
     avatar_url: string;
     cv_url?: string;
     achievement_summary: string;
@@ -157,6 +160,14 @@
     is_active: boolean;
     is_director: boolean;
     order?: number;
+    gzver_departments?: {
+      id: string;
+      name: string;
+      slug: string;
+      description?: string | null;
+      color?: string | null;
+      sort_order?: number | null;
+    } | null;
   }
 
   export interface Mentor {
@@ -363,7 +374,7 @@
       try {
         const { data, error } = await supabase
           .from('gzvers')
-          .select('*')
+          .select('*, gzver_departments(*)')
           .eq('is_active', true)
           .order('order', { ascending: true });
         if (error) throw error;
@@ -502,7 +513,7 @@
       try {
         const { data, error } = await supabase
           .from('gzvers')
-          .select('*')
+          .select('*, gzver_departments(*)')
           .eq('slug', slug)
           .single();
 

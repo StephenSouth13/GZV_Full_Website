@@ -1,205 +1,197 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
-import Link from "next/link"
-import { Star, ArrowRight, Loader2 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { api, gzver } from "@/lib/api-supabase"
-import PageBanner from "@/components/sections/PageBanner"
-import BuilderPageGate from "@/components/BuilderPageGate"
+import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowRight, Loader2, ShieldCheck, Users2 } from 'lucide-react'
+import { api, gzver } from '@/lib/api-supabase'
+import PageBanner from '@/components/sections/PageBanner'
+import BuilderPageGate from '@/components/BuilderPageGate'
 
-export default function gzverPage() {
-  const [gzvers, setgzvers] = useState<gzver[]>([])
+type DepartmentGroup = {
+  key: string
+  name: string
+  description: string
+  color: string
+  sortOrder: number
+  members: gzver[]
+}
+
+const fallbackDepartment = {
+  key: 'khac',
+  name: 'GZVers',
+  description: 'Những thành viên đang đóng góp trong hệ sinh thái GZV.',
+  color: '#ed1c24',
+  sortOrder: 999,
+}
+
+const getDepartmentMeta = (member: gzver) => {
+  const department = member.gzver_departments
+  return {
+    key: department?.slug || member.department_name || fallbackDepartment.key,
+    name: department?.name || member.department_name || fallbackDepartment.name,
+    description: department?.description || fallbackDepartment.description,
+    color: department?.color || fallbackDepartment.color,
+    sortOrder: department?.sort_order ?? fallbackDepartment.sortOrder,
+  }
+}
+
+export default function GzverPage() {
+  const [gzvers, setGzvers] = useState<gzver[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeGroup, setActiveGroup] = useState('all')
 
   useEffect(() => {
-    const fetchgzvers = async () => {
+    let active = true
+    const fetchGzvers = async () => {
       try {
         setLoading(true)
         const data = await api.getGzvers()
-        // Sắp xếp theo order để đảm bảo thứ tự như CMS
-        setgzvers(data.sort((a, b) => (a.order || 0) - (b.order || 0)))
+        if (active) setGzvers((data || []).sort((a, b) => (a.order || 0) - (b.order || 0)))
       } catch (error) {
-        console.error("❌ Error fetching gzvers:", error)
+        console.error('Error fetching gzvers:', error)
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
-    fetchgzvers()
+    fetchGzvers()
+    return () => {
+      active = false
+    }
   }, [])
+
+  const groups = useMemo(() => {
+    const map = new Map<string, DepartmentGroup>()
+    gzvers.forEach((member) => {
+      const meta = getDepartmentMeta(member)
+      const group = map.get(meta.key) || { ...meta, members: [] }
+      group.members.push(member)
+      map.set(meta.key, group)
+    })
+    return Array.from(map.values()).sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
+  }, [gzvers])
+
+  const visibleGroups = activeGroup === 'all' ? groups : groups.filter((group) => group.key === activeGroup)
 
   return (
     <BuilderPageGate slug="gzver">
-    <div className="bg-white dark:bg-gray-900">
-      <PageBanner
-        badge="Khám phá đội ngũ"
-        title="Đội Ngũ GZVer"
-        subtitle="Kết nối cùng chúng tôi thông qua các chương trình đào tạo và lộ trình phát triển năng lực chuyên sâu."
-        stats={[
-          { value: `${gzvers.length}+`, label: 'Chuyên gia' },
-          { value: '100%', label: 'Tâm huyết' },
-          { value: '5000+', label: 'Học viên' },
-          { value: '95%', label: 'Hài lòng' },
-        ]}
-      />
+      <div className="bg-white dark:bg-slate-950">
+        <PageBanner
+          badge="GZV ORGANIZATION"
+          title="GZVers"
+          subtitle="Hệ sinh thái nhân sự GZV được chia theo từng ban để thể hiện rõ vai trò, trách nhiệm và năng lực triển khai."
+          stats={[
+            { value: `${gzvers.length}+`, label: 'Thành viên' },
+            { value: `${groups.length}+`, label: 'Ban chuyên môn' },
+            { value: '3+', label: 'Mũi triển khai' },
+            { value: '100%', label: 'Thực chiến' },
+          ]}
+        />
 
-      {/* --- Grid Profiles --- */}
-      <section className="py-20 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-6">
-          {loading ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-32"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="mb-6"
+        <section className="border-b border-slate-200 bg-white py-8 dark:border-white/10 dark:bg-slate-950">
+          <div className="container">
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={() => setActiveGroup('all')}
+                className={`h-11 border px-5 text-xs font-black uppercase transition ${activeGroup === 'all' ? 'border-[#ed1c24] bg-[#ed1c24] text-white' : 'border-slate-200 bg-white text-slate-900 hover:border-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white'}`}
               >
-                <Loader2 className="text-blue-600" size={56} />
-              </motion.div>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="text-sm font-black uppercase tracking-widest text-slate-400"
-              >
-                Đang tải dữ liệu chuyên gia...
-              </motion.p>
-            </motion.div>
-          ) : gzvers.length > 0 ? (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto items-stretch"
-              >
-                <AnimatePresence mode="popLayout">
-                  {gzvers.map((gzver, index) => (
-                    <motion.div
-                      key={gzver.id}
-                      initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                      transition={{ duration: 0.4, delay: index * 0.08 }}
-                      layout
-                      className="flex"
-                    >
-                      <Card className="flex flex-col w-full border-none bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden group relative border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
-                        {/* Decorative top accent */}
-                        <motion.div
-                          className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                          layoutId="accent"
-                        />
-                        {/* Gloss effect overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+                Tất cả
+              </button>
+              {groups.map((group) => (
+                <button
+                  key={group.key}
+                  onClick={() => setActiveGroup(group.key)}
+                  className={`h-11 border px-5 text-xs font-black uppercase transition ${activeGroup === group.key ? 'border-[#ed1c24] bg-[#ed1c24] text-white' : 'border-slate-200 bg-white text-slate-900 hover:border-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white'}`}
+                >
+                  {group.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
-                        <CardContent className="p-8 md:p-10 flex flex-col items-center text-center h-full">
+        <section className="py-16 sm:py-20">
+          <div className="container">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-28">
+                <Loader2 className="mb-5 h-12 w-12 animate-spin text-[#ed1c24]" />
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-400">Đang tải dữ liệu GZVers...</p>
+              </div>
+            ) : visibleGroups.length > 0 ? (
+              <div className="space-y-16">
+                {visibleGroups.map((group, groupIndex) => (
+                  <motion.div
+                    key={group.key}
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: groupIndex * 0.06 }}
+                  >
+                    <div className="mb-8 grid gap-5 border-l-4 border-[#ed1c24] bg-slate-50 p-6 dark:bg-white/5 lg:grid-cols-[1fr_auto] lg:items-end">
+                      <div>
+                        <div className="mb-3 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-[#ed1c24]">
+                          <ShieldCheck className="h-4 w-4" />
+                          Department
+                        </div>
+                        <h2 className="text-3xl font-black uppercase leading-tight text-slate-950 dark:text-white md:text-4xl">{group.name}</h2>
+                        <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">{group.description}</p>
+                      </div>
+                      <div className="flex items-center gap-3 border border-slate-200 bg-white px-5 py-4 dark:border-white/10 dark:bg-slate-950">
+                        <Users2 className="h-5 w-5 text-[#ed1c24]" />
+                        <span className="text-2xl font-black text-slate-950 dark:text-white">{group.members.length}</span>
+                        <span className="text-[10px] font-black uppercase tracking-wide text-slate-500">GZVers</span>
+                      </div>
+                    </div>
 
-                          {/* Enhanced Avatar with ring effect */}
-                          <div className="relative mb-8 shrink-0">
-                            <motion.div
-                              whileHover={{ scale: 1.05 }}
-                              className="relative w-48 h-48 rounded-full p-1 bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-900/30 dark:to-purple-900/30 shadow-2xl overflow-hidden border-4 border-white dark:border-slate-800"
-                            >
-                              <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-slate-700">
-                                <Image
-                                  src={gzver.avatar_url || '/gzvers/default.webp'}
-                                  alt={gzver.full_name}
-                                  fill
-                                  unoptimized={true}
-                                  className="object-cover transition-transform duration-700 group-hover:scale-125"
-                                />
-                              </div>
-                            </motion.div>
-                            {/* Animated Star Badge */}
-                            <motion.div
-                              whileHover={{ scale: 1.2, rotate: 360 }}
-                              className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full border-4 border-white dark:border-slate-800 shadow-xl text-white"
-                            >
-                              <Star size={20} className="fill-white" />
-                            </motion.div>
-                          </div>
-
-                          {/* Information Container */}
-                          <div className="w-full flex flex-col flex-grow">
-                            {/* Role Badge */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.5, delay: index * 0.08 + 0.1 }}
-                              className="inline-flex items-center justify-center mb-4 mx-auto"
-                            >
-                              <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 text-blue-700 dark:text-blue-300">
-                                {gzver.position}
-                              </span>
-                            </motion.div>
-
-                            {/* Name */}
-                            <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
-                              {gzver.full_name}
-                            </h3>
-
-                            {/* Testimonial / Achievement */}
-                            <div className="flex-grow flex items-center justify-center mb-8">
-                              <blockquote className="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed italic font-medium line-clamp-4">
-                                "{gzver.testimonial || gzver.achievement_summary || 'Chuyên gia tài năng trong lĩnh vực của mình'}"
-                              </blockquote>
-                            </div>
-
-                            {/* View Profile Button */}
-                            <div className="w-full mt-auto">
-                              <Link href={`/gzver/${gzver.slug}`} className="block group/btn">
-                                <motion.button
-                                  whileHover={{ y: -2 }}
-                                  whileTap={{ y: 0 }}
-                                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl h-14 text-base font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center gap-2 group"
-                                >
-                                  Xem Hồ Sơ
-                                  <motion.div
-                                    className="group-hover:translate-x-1 transition-transform"
-                                  >
-                                    <ArrowRight size={20} />
-                                  </motion.div>
-                                </motion.button>
-                              </Link>
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                      {group.members.map((member, index) => (
+                        <motion.article
+                          key={member.id}
+                          initial={{ opacity: 0, y: 22 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.35, delay: index * 0.04 }}
+                          className="group flex min-h-[360px] flex-col overflow-hidden border border-slate-200 bg-white shadow-[0_14px_36px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:border-[#ed1c24] hover:shadow-[0_28px_60px_rgba(0,0,0,0.14)] dark:border-white/10 dark:bg-slate-900"
+                        >
+                          <div className="relative h-64 overflow-hidden bg-[#050505]">
+                            <Image
+                              src={member.avatar_url || '/gzvers/default.webp'}
+                              alt={member.full_name}
+                              fill
+                              unoptimized
+                              className="object-cover transition duration-700 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" />
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">
+                              <span className="bg-[#ed1c24] px-3 py-2 text-[10px] font-black uppercase tracking-wide text-white">{member.role_level || member.position}</span>
+                              {member.company && <span className="bg-black/75 px-3 py-2 text-[10px] font-black uppercase tracking-wide text-white">@{member.company}</span>}
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
 
-              {/* Result count */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-center mt-12"
-              >
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-                  Hiển thị <span className="font-bold text-slate-700 dark:text-slate-300">{gzvers.length}</span> chuyên gia
-                </p>
-              </motion.div>
-            </>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
-            >
-              <p className="text-slate-500 dark:text-slate-400 text-lg">Không có dữ liệu chuyên gia</p>
-            </motion.div>
-          )}
-        </div>
-      </section>
-    </div>
+                          <div className="flex flex-1 flex-col p-6">
+                            <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#ed1c24]">{group.name}</p>
+                            <h3 className="text-2xl font-black uppercase leading-tight text-slate-950 dark:text-white">{member.full_name}</h3>
+                            <p className="mt-2 text-sm font-bold text-slate-600 dark:text-slate-300">{member.position}</p>
+                            <blockquote className="mt-5 line-clamp-3 flex-1 border-l-2 border-slate-200 pl-4 text-sm font-medium italic leading-6 text-slate-500 dark:border-white/10 dark:text-slate-400">
+                              {member.testimonial || member.achievement_summary || 'Thành viên GZV với tinh thần triển khai thực chiến và trách nhiệm cao.'}
+                            </blockquote>
+                            <Link href={`/gzver/${member.slug}`} className="mt-6 inline-flex h-12 items-center justify-center bg-[#050505] px-5 text-xs font-black uppercase text-white transition hover:bg-[#ed1c24] dark:bg-white dark:text-[#050505] dark:hover:bg-[#ed1c24] dark:hover:text-white">
+                              Xem hồ sơ <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                          </div>
+                        </motion.article>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-slate-200 bg-slate-50 py-20 text-center dark:border-white/10 dark:bg-white/5">
+                <p className="text-lg font-bold text-slate-500">Chưa có dữ liệu GZVers.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </BuilderPageGate>
   )
 }
