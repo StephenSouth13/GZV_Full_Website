@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { supabase } from '@/lib/api-supabase'
 
@@ -125,12 +125,12 @@ export type SectionTemplate = {
 }
 
 export const defaultNavigation: SiteNavItem[] = [
-  { href: '/gioi-thieu', label_vi: 'GIá»šI THIá»†U', label_en: 'ABOUT', sort_order: 10, is_visible: true, is_page_enabled: true },
-  { href: '/#dich-vu', label_vi: 'Dá»ŠCH Vá»¤', label_en: 'SERVICES', sort_order: 20, is_visible: true, is_page_enabled: true },
-  { href: '/du-an', label_vi: 'Dá»° ÃN', label_en: 'PROJECTS', sort_order: 30, is_visible: true, is_page_enabled: true },
+  { href: '/gioi-thieu', label_vi: 'GIỚI THIỆU', label_en: 'ABOUT', sort_order: 10, is_visible: true, is_page_enabled: true },
+  { href: '/#dich-vu', label_vi: 'DỊCH VỤ', label_en: 'SERVICES', sort_order: 20, is_visible: true, is_page_enabled: true },
+  { href: '/du-an', label_vi: 'DỰ ÁN', label_en: 'PROJECTS', sort_order: 30, is_visible: true, is_page_enabled: true },
   { href: '/gzver', label_vi: 'GZVers', label_en: 'GZVers', sort_order: 40, is_visible: true, is_page_enabled: true },
-  { href: '/tin-tuc', label_vi: 'TIN Tá»¨C', label_en: 'NEWS', sort_order: 50, is_visible: true, is_page_enabled: true },
-  { href: '/lien-he', label_vi: 'LIÃŠN Há»†', label_en: 'CONTACT', sort_order: 60, is_visible: true, is_page_enabled: true },
+  { href: '/tin-tuc', label_vi: 'TIN TỨC', label_en: 'NEWS', sort_order: 50, is_visible: true, is_page_enabled: true },
+  { href: '/lien-he', label_vi: 'LIÊN HỆ', label_en: 'CONTACT', sort_order: 60, is_visible: true, is_page_enabled: true },
 ]
 
 export const defaultLoadingSettings: SiteLoadingSettings = {
@@ -148,17 +148,17 @@ export const defaultLoadingSettings: SiteLoadingSettings = {
 export const defaultFooterSettings: FooterSettings = {
   logo_url: '/logo.webp',
   intro_text: 'GZV - The Voice of Genzers',
-  background_color: '#095095',
-  bottom_background_color: '#074070',
+  background_color: '#050505',
+  bottom_background_color: '#111111',
   facebook_page_url: 'https://www.facebook.com/gzv.one',
-  address: '279 Nguyá»…n Tri PhÆ°Æ¡ng, PhÆ°á»ng DiÃªn Há»“ng, TP.Há»“ ChÃ­ Minh',
-  phone_label: 'Äiá»‡n Thoáº¡i: (+84) 329 381 489',
+  address: '279 Nguyễn Tri Phương, Phường Diên Hồng, TP.Hồ Chí Minh',
+  phone_label: 'Điện Thoại: (+84) 329 381 489',
   phone_url: 'tel:+84329381489',
   email_label: 'Email: gzv.one@gmail.com',
   email_url: 'mailto:gzv.one@gmail.com',
-  newsletter_title: 'Káº¿t ná»‘i vá»›i chÃºng tÃ´i',
-  newsletter_description: 'ÄÄƒng kÃ½ Ä‘á»ƒ nháº­n thÃ´ng tin vá» cÃ¡c khÃ³a há»c vÃ  sá»± kiá»‡n má»›i nháº¥t.',
-  copyright_text: 'gzv Center. PhÃ¡t triá»ƒn bá»Ÿi PhÃ²ng CÃ´ng nghá»‡ thÃ´ng tin.',
+  newsletter_title: 'Kết nối với chúng tôi',
+  newsletter_description: 'Đăng ký để nhận thông tin về các khóa học và sự kiện mới nhất.',
+  copyright_text: 'gzv Center. Phát triển bởi Phòng Công nghệ thông tin.',
   links: [
     { label: 'GIỚI THIỆU', href: '/gioi-thieu', visible: true },
     { label: 'DỊCH VỤ', href: '/#dich-vu', visible: true },
@@ -182,7 +182,7 @@ export const defaultBrandingSettings: BrandingSettings = {
   default_title: 'GZV - The Voice of Genzers',
   title_template: '%s | GZV',
   default_description: 'GZV Center',
-  default_keywords: 'GZV, Ä‘Ã o táº¡o, mentoring, coaching',
+  default_keywords: 'GZV, đào tạo, mentoring, coaching',
   og_image_url: '/og-image.jpg',
   topbar_email_label: 'gzv.one@gmail.com',
   topbar_phone_label: '(+84) 329 381 489',
@@ -366,4 +366,3 @@ export async function getSectionTemplates() {
     return []
   }
 }
-

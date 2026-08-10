@@ -95,6 +95,26 @@ interface Message {
   created_at: string
 }
 
+interface ContactSettings {
+  id: number
+  hero_badge: string
+  hero_title: string
+  hero_subtitle: string
+  form_title: string
+  form_description: string
+  submit_label: string
+  success_message: string
+  error_message: string
+  info_title: string
+  social_title: string
+  map_title: string
+  map_embed_url?: string | null
+  map_enabled: boolean
+  contact_items: Array<{ icon?: string; title: string; lines: string[]; href?: string }>
+  social_links: Array<{ icon?: string; label: string; href: string; visible?: boolean }>
+  stats: Array<{ value: string; label: string }>
+}
+
 const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "text", label: "Văn bản ngắn" },
   { value: "textarea", label: "Văn bản dài" },
@@ -109,10 +129,41 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
 ]
 
 const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  new: { label: "Mới", cls: "bg-blue-100 text-blue-700 border-blue-200" },
+  new: { label: "Mới", cls: "bg-red-50 text-[#ed1c24] border-red-200" },
   in_progress: { label: "Đang xử lý", cls: "bg-amber-100 text-amber-700 border-amber-200" },
   resolved: { label: "Đã xử lý", cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   spam: { label: "Spam", cls: "bg-red-100 text-red-700 border-red-200" },
+}
+
+const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
+  id: 1,
+  hero_badge: "LIÊN HỆ GZV",
+  hero_title: "KẾT NỐI VỚI GZV",
+  hero_subtitle: "Để lại thông tin, đội ngũ GZV sẽ phản hồi và đồng hành cùng nhu cầu của bạn.",
+  form_title: "Gửi lời nhắn cho chúng tôi",
+  form_description: "Điền thông tin bên dưới, đội ngũ GZV sẽ phản hồi trong vòng 24 giờ làm việc.",
+  submit_label: "Gửi tin nhắn",
+  success_message: "Cảm ơn bạn! Tin nhắn đã được gửi thành công.",
+  error_message: "Không gửi được tin nhắn. Vui lòng thử lại sau.",
+  info_title: "Thông tin liên hệ",
+  social_title: "Mạng xã hội",
+  map_title: "Bản đồ GZV",
+  map_embed_url: "",
+  map_enabled: true,
+  contact_items: [
+    { icon: "map", title: "Địa chỉ", lines: ["279 Nguyễn Tri Phương, Phường Diên Hồng, TP. Hồ Chí Minh"] },
+    { icon: "phone", title: "Điện thoại", lines: ["(+84) 329 381 489"], href: "tel:+84329381489" },
+    { icon: "mail", title: "Email", lines: ["gzv.one@gmail.com"], href: "mailto:gzv.one@gmail.com" },
+  ],
+  social_links: [
+    { icon: "facebook", label: "Facebook", href: "https://www.facebook.com/gzv.one", visible: true },
+    { icon: "zalo", label: "Zalo", href: "https://zalo.me/g/acumou501", visible: true },
+  ],
+  stats: [
+    { value: "+84", label: "Điện thoại" },
+    { value: "24h", label: "Phản hồi" },
+    { value: "100%", label: "Tin cậy" },
+  ],
 }
 
 export default function AdminContactsPage() {
@@ -121,7 +172,7 @@ export default function AdminContactsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Mail className="h-7 w-7 text-blue-600" /> Tin nhắn liên hệ
+          <Mail className="h-7 w-7 text-[#ed1c24]" /> Tin nhắn liên hệ
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           Quản lý tin nhắn người dùng gửi từ trang <span className="font-mono">/lien-he</span> và cấu hình các trường biểu mẫu.
@@ -129,13 +180,15 @@ export default function AdminContactsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-3 rounded-none">
           <TabsTrigger value="messages" className="gap-2"><Inbox className="h-4 w-4" /> Hộp thư đến</TabsTrigger>
           <TabsTrigger value="fields" className="gap-2"><Settings2 className="h-4 w-4" /> Cấu hình biểu mẫu</TabsTrigger>
+          <TabsTrigger value="page" className="gap-2"><Pencil className="h-4 w-4" /> Trang liên hệ</TabsTrigger>
         </TabsList>
 
         <TabsContent value="messages"><MessagesPanel /></TabsContent>
         <TabsContent value="fields"><FieldsPanel /></TabsContent>
+        <TabsContent value="page"><ContactPageSettingsPanel /></TabsContent>
       </Tabs>
     </div>
   )

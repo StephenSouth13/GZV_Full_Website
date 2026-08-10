@@ -53,14 +53,14 @@ const defaultNav: NavItem[] = [
   { href: "/lien-he", label_vi: "LIÊN HỆ", label_en: "CONTACT", sort_order: 60, is_visible: true, is_page_enabled: true },
 ]
 
-const defaultLoading: LoadingSettings = { id: 1, logo_url: "/logo.webp", title: "GZV", subtitle: "Đang tải dữ liệu...", effect: "orbit", background_from: "#031b3f", background_to: "#0f766e", accent_color: "#38bdf8", enabled: true, minimum_duration_ms: 900 }
+const defaultLoading: LoadingSettings = { id: 1, logo_url: "/logo.webp", title: "GZV", subtitle: "Đang tải dữ liệu...", effect: "orbit", background_from: "#050505", background_to: "#ed1c24", accent_color: "#ed1c24", enabled: true, minimum_duration_ms: 900 }
 const defaultBranding: BrandingSettings = { id: 1, site_name: "GZV", header_logo_url: "/logo.webp", footer_logo_url: "/logo.webp", favicon_url: "/logo/favicon.ico", default_title: "GZV - The Voice of Genzers", title_template: "%s | GZV", default_description: "GZV Center", default_keywords: "GZV, đào tạo, mentoring, coaching", og_image_url: "/og-image.jpg", topbar_email_label: "gzv.one@gmail.com", topbar_phone_label: "(+84) 329 381 489", topbar_badge_label: "GZV" }
 const defaultFooter: FooterSettings = {
   id: 1,
   logo_url: "/logo.webp",
   intro_text: "GZV - The Voice of Genzers",
-  background_color: "#095095",
-  bottom_background_color: "#074070",
+  background_color: "#050505",
+  bottom_background_color: "#111111",
   facebook_page_url: "https://www.facebook.com/gzv.one",
   address: "279 Nguyễn Tri Phương, Phường Diên Hồng, TP.Hồ Chí Minh",
   phone_label: "Điện Thoại: (+84) 329 381 489",
@@ -73,6 +73,92 @@ const defaultFooter: FooterSettings = {
   links: [],
   social_links: [],
 }
+
+const fallbackTemplates: SectionTemplate[] = [
+  {
+    template_key: "sharp-hero-stats",
+    name: "Hero sắc cạnh + số liệu",
+    category: "hero",
+    component_type: "hero_stats",
+    default_props: {
+      title: "TIÊU ĐỀ TRANG",
+      subtitle: "Mô tả ngắn, gọn và sắc nét cho trang.",
+      stats: [{ value: "10+", label: "Dự án" }, { value: "5000+", label: "Học viên" }, { value: "50+", label: "Đối tác" }],
+      backgroundFrom: "#050505",
+      backgroundTo: "#ed1c24",
+    },
+    sort_order: 1,
+    is_active: true,
+  },
+  {
+    template_key: "feature-grid-red",
+    name: "Lưới giá trị 3-4 cột",
+    category: "content",
+    component_type: "feature_grid",
+    default_props: {
+      title: "GIÁ TRỊ NỔI BẬT",
+      subtitle: "Các điểm mạnh có thể thêm, xóa, sửa trực tiếp trong props.",
+      columns: 3,
+      items: [
+        { title: "Tư duy chiến lược", description: "Mô tả ngắn cho giá trị này.", icon: "target", color: "#ed1c24" },
+        { title: "Triển khai thực chiến", description: "Mô tả ngắn cho giá trị này.", icon: "book", color: "#050505" },
+        { title: "Đo lường kết quả", description: "Mô tả ngắn cho giá trị này.", icon: "award", color: "#ed1c24" },
+      ],
+    },
+    sort_order: 2,
+    is_active: true,
+  },
+  {
+    template_key: "gallery-editor",
+    name: "Bộ ảnh + mô tả",
+    category: "media",
+    component_type: "image_gallery",
+    default_props: {
+      title: "THƯ VIỆN HÌNH ẢNH",
+      subtitle: "Quản lý từng ảnh, tiêu đề, mô tả và phân loại.",
+      images: [
+        { src: "/placeholder.jpg", title: "Ảnh 1", category: "GZV", description: "Mô tả ảnh", alt: "GZV" },
+        { src: "/placeholder.jpg", title: "Ảnh 2", category: "GZV", description: "Mô tả ảnh", alt: "GZV" },
+      ],
+    },
+    sort_order: 3,
+    is_active: true,
+  },
+  {
+    template_key: "rich-content",
+    name: "Khối nội dung rich text",
+    category: "content",
+    component_type: "html_rich",
+    default_props: { maxWidth: "980px" },
+    sort_order: 4,
+    is_active: true,
+  },
+  {
+    template_key: "contact-layout",
+    name: "Form liên hệ",
+    category: "contact",
+    component_type: "contact_form",
+    default_props: { title: "KẾT NỐI VỚI GZV", subtitle: "Để lại thông tin để đội ngũ GZV phản hồi." },
+    sort_order: 5,
+    is_active: true,
+  },
+  {
+    template_key: "cta-red-black",
+    name: "CTA đen đỏ",
+    category: "cta",
+    component_type: "cta_band",
+    default_props: {
+      title: "SẴN SÀNG ĐỒNG HÀNH?",
+      description: "Kết nối với GZV để trao đổi về dự án hoặc dịch vụ.",
+      buttonLabel: "Liên hệ ngay",
+      buttonUrl: "/lien-he",
+      backgroundFrom: "#050505",
+      backgroundTo: "#ed1c24",
+    },
+    sort_order: 6,
+    is_active: true,
+  },
+]
 
 function SiteContentManager() {
   const [navItems, setNavItems] = useState<NavItem[]>(defaultNav)
@@ -252,10 +338,10 @@ function SiteContentManager() {
       ...items,
       {
         slug,
-        title: "Trang má»›i",
-        menu_title: "Trang má»›i",
+        title: "Trang m?i",
+        menu_title: "Trang m?i",
         banner_badge: "GZV",
-        banner_title: "Trang má»›i",
+        banner_title: "Trang m?i",
         banner_subtitle: "",
         banner_description: "",
         banner_image_url: "",
@@ -287,7 +373,7 @@ function SiteContentManager() {
       ...items,
       {
         section_key: key,
-        title: "Section má»›i",
+        title: "Section m?i",
         subtitle: "",
         description: "",
         button_label: "",
@@ -469,7 +555,7 @@ function SiteContentManager() {
 
       <Tabs defaultValue="home" className="space-y-6">
         <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-none border bg-white p-1 md:grid-cols-8 dark:bg-[#0b0b0b]">
-          <TabsTrigger value="home">Trang chá»§</TabsTrigger>
+          <TabsTrigger value="home">Trang ch?</TabsTrigger>
           <TabsTrigger value="builder">Builder</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="navigation">Header</TabsTrigger>
@@ -485,7 +571,7 @@ function SiteContentManager() {
               <CardHeader><CardTitle>Trang</CardTitle><CardDescription>Chọn trang để nạp block layout.</CardDescription></CardHeader>
               <CardContent className="space-y-2">
                 <Button type="button" variant="outline" onClick={addPage} className="mb-2 w-full rounded-none">
-                  <Plus className="mr-2 h-4 w-4" /> Trang má»›i
+                  <Plus className="mr-2 h-4 w-4" /> Trang m?i
                 </Button>
                 {[...new Set([...pages.map((p) => p.slug), ...pageBlocks.map((b) => b.page_slug)])].map((slug) => (
                   <button key={slug} onClick={() => setBuilderSlug(slug)} className={`w-full rounded-none px-3 py-2 text-left text-sm font-bold ${builderSlug === slug ? "bg-[#ed1c24] text-white" : "hover:bg-slate-100 dark:hover:bg-slate-800"}`}>{slug}</button>
@@ -498,12 +584,12 @@ function SiteContentManager() {
                 <CardDescription>Kéo thả phiên bản nhẹ: đổi thứ tự bằng số, thêm template, sửa JSON props, HTML, slug trang và ẩn/hiện block.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-2xl border bg-slate-50 p-4 dark:bg-slate-950">
+                <div className="border bg-slate-50 p-4 dark:bg-slate-950">
                   <div className="mb-4 flex items-center gap-2">
-                    <Layers className="h-5 w-5 text-blue-600" />
+                    <Layers className="h-5 w-5 text-[#ed1c24]" />
                     <div>
-                      <p className="font-black text-slate-900 dark:text-white">Cau hinh trang dang edit</p>
-                      <p className="text-sm text-slate-500">Doi slug, title tab, SEO, banner va trang thai public cho tung trang.</p>
+                      <p className="font-black text-slate-900 dark:text-white">C?u h?nh trang ?ang edit</p>
+                      <p className="text-sm text-slate-500">??i slug, title tab, SEO, banner v? tr?ng th?i public cho t?ng trang.</p>
                     </div>
                   </div>
                   <div className="grid gap-4 md:grid-cols-2">
@@ -521,12 +607,13 @@ function SiteContentManager() {
                   </Field>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {templates.map((template) => (
+                <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                  {(templates.length ? templates : fallbackTemplates).map((template) => (
                     <Button
                       key={template.template_key}
                       type="button"
                       variant="outline"
+                      className="h-auto justify-start rounded-none border-slate-300 px-4 py-3 text-left font-black uppercase hover:border-[#ed1c24] hover:text-[#ed1c24]"
                       onClick={() => setPageBlocks((rows) => [...rows, {
                         page_slug: builderSlug,
                         block_key: `${template.template_key}-${Date.now()}`,
@@ -546,7 +633,7 @@ function SiteContentManager() {
                 </div>
 
                 {builderBlocks.map(({ block, index }, position) => (
-                  <div key={`${block.page_slug}-${block.block_key}-${index}`} className="space-y-3 rounded-2xl border bg-white p-4 dark:bg-slate-900">
+                  <div key={`${block.page_slug}-${block.block_key}-${index}`} className="space-y-3 border bg-white p-4 dark:bg-slate-900">
                     <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_0.5fr_auto]">
                       <Field label="Page slug"><Input value={block.page_slug} onChange={(e) => updateBlock(index, { page_slug: e.target.value })} /></Field>
                       <Field label="Block key"><Input value={block.block_key} onChange={(e) => updateBlock(index, { block_key: e.target.value })} /></Field>
@@ -572,8 +659,8 @@ function SiteContentManager() {
                     </Field>
                   </div>
                 ))}
-                <div className="sticky bottom-4 z-10 flex justify-end rounded-2xl border bg-white/95 p-3 shadow-xl backdrop-blur dark:bg-slate-950/95">
-                  <Button onClick={saveBuilderLayout} disabled={saving} className="gap-2"><Save className="h-4 w-4" /> Luu layout trang nay</Button>
+                <div className="sticky bottom-4 z-10 flex justify-end border bg-white/95 p-3 shadow-xl backdrop-blur dark:bg-slate-950/95">
+                  <Button onClick={saveBuilderLayout} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> L?u layout trang n?y</Button>
                 </div>
               </CardContent>
             </Card>
@@ -1092,4 +1179,3 @@ function EditableLinks({ title, rows, onChange, withIcon = false }: { title: str
 export default function SiteContentPage() {
   return <ProtectedRoute allowedRoles={["admin", "collab"]}><SiteContentManager /></ProtectedRoute>
 }
-
