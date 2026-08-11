@@ -32,7 +32,7 @@ const FooterHeading = ({ children }: { children: React.ReactNode }) => (
   </div>
 )
 
-const Footer = () => {
+export default function Footer() {
   const { language, t } = useLanguage()
   const [settings, setSettings] = useState<FooterSettings>(defaultFooterSettings)
 
@@ -46,10 +46,6 @@ const Footer = () => {
     }
   }, [])
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-  }
-
   const footerLinks = useMemo(() => {
     const configured = (settings.links || []).filter((item) => item.visible !== false && item.href)
     return (configured.length ? configured : fallbackLinks).map((item: any) => ({
@@ -58,12 +54,19 @@ const Footer = () => {
     }))
   }, [settings.links, language])
 
-  const socialLinks = (settings.social_links || []).filter((item) => item.visible !== false && item.href).map((item: any) => ({
+  const socialLinks = useMemo(() => (settings.social_links || []).filter((item) => item.visible !== false && item.href).map((item: any) => ({
     ...item,
     label: language === "en" ? (item.label_en || item.en?.label || item.label) : item.label,
-  }))
+  })), [settings.social_links, language])
+
+  const facebookPageUrl = settings.facebook_page_url || socialLinks.find((item) => (item.icon || item.label || "").toLowerCase().includes("facebook"))?.href || "https://www.facebook.com/gzv.one"
+  const facebookPluginUrl = `https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPageUrl)}&tabs=timeline&width=340&height=190&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`
   const backgroundColor = settings.background_color || "#050505"
   const bottomBackgroundColor = settings.bottom_background_color || backgroundColor
+
+  const handleNewsletterSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+  }
 
   return (
     <footer className="border-t-4 border-[#ed1c24] text-white" style={{ backgroundColor }}>
@@ -71,37 +74,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-[1.2fr_0.9fr_1fr_1.15fr] xl:gap-14">
           <div>
             <Link href="/" className="mb-6 inline-flex">
-              <Image
-                src={settings.logo_url || "/logo.webp"}
-                alt="GZV"
-                width={230}
-                height={86}
-                priority
-                unoptimized
-                className="h-auto w-[210px] object-contain"
-              />
+              <Image src={settings.logo_url || "/logo.webp"} alt="GZV" width={230} height={86} priority unoptimized className="h-auto w-[210px] object-contain" />
             </Link>
             {settings.intro_text && <p className="mb-5 max-w-sm text-sm font-bold leading-6 text-white/78">{settings.intro_text}</p>}
-
             <div className="space-y-4 text-sm font-bold leading-6 text-white/85">
-              {settings.address && (
-                <p className="flex gap-3">
-                  <MapPin className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" />
-                  <span>{settings.address}</span>
-                </p>
-              )}
-              {settings.phone_label && (
-                <a href={settings.phone_url || "#"} className="flex gap-3 transition hover:text-[#ed1c24]">
-                  <Phone className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" />
-                  <span>{settings.phone_label}</span>
-                </a>
-              )}
-              {settings.email_label && (
-                <a href={settings.email_url || "#"} className="flex gap-3 transition hover:text-[#ed1c24]">
-                  <Mail className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" />
-                  <span>{settings.email_label}</span>
-                </a>
-              )}
+              {settings.address && <p className="flex gap-3"><MapPin className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" /><span>{settings.address}</span></p>}
+              {settings.phone_label && <a href={settings.phone_url || "#"} className="flex gap-3 transition hover:text-[#ed1c24]"><Phone className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" /><span>{settings.phone_label}</span></a>}
+              {settings.email_label && <a href={settings.email_url || "#"} className="flex gap-3 transition hover:text-[#ed1c24]"><Mail className="mt-1 h-4 w-4 shrink-0 text-[#ed1c24]" /><span>{settings.email_label}</span></a>}
             </div>
           </div>
 
@@ -123,26 +102,29 @@ const Footer = () => {
             <FooterHeading>{t("footer.connect")}</FooterHeading>
             <div className="mb-5 flex gap-3">
               {socialLinks.map((item) => (
-                <Link
-                  key={`${item.label}-${item.href}`}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-11 w-11 items-center justify-center bg-[#ed1c24] text-white transition hover:bg-white hover:text-[#050505]"
-                  aria-label={item.label}
-                >
+                <Link key={`${item.label}-${item.href}`} href={item.href} target="_blank" rel="noopener noreferrer" className="flex h-11 w-11 items-center justify-center bg-[#ed1c24] text-white transition hover:bg-white hover:text-[#050505]" aria-label={item.label}>
                   {iconMap[item.icon || ""] || <MessageCircle className="h-5 w-5" />}
                 </Link>
               ))}
             </div>
-            <div className="border border-white/12 bg-white p-3 text-[#050505]">
-              <div className="flex items-center gap-3">
-                <Image src="/logo/favicon-32x32.png" alt="GZV" width={36} height={36} className="h-9 w-9" />
-                <div>
-                  <p className="line-clamp-1 text-sm font-black">GZV - The Next-Gen Company</p>
-                  <p className="text-xs font-bold text-slate-500">{settings.facebook_page_url || "facebook.com/gzv.one"}</p>
-                </div>
+            <div className="overflow-hidden border border-white/12 bg-white text-[#050505]">
+              <div className="border-b border-slate-200 px-3 py-3">
+                <p className="line-clamp-1 text-sm font-black">GZV - The Next-Gen Company</p>
+                <a href={facebookPageUrl} target="_blank" rel="noreferrer" className="text-xs font-bold text-[#ed1c24] hover:underline">
+                  {facebookPageUrl.replace(/^https?:\/\//, "")}
+                </a>
               </div>
+              <iframe
+                title="GZV Facebook Page"
+                src={facebookPluginUrl}
+                width="340"
+                height="190"
+                style={{ border: "none", overflow: "hidden", width: "100%", maxWidth: 340 }}
+                scrolling="no"
+                frameBorder="0"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                className="block bg-white"
+              />
             </div>
           </div>
 
@@ -152,15 +134,8 @@ const Footer = () => {
               {language === "en" ? ((settings as any).newsletter_description_en || t("footer.newsletterDesc")) : (settings.newsletter_description || t("footer.newsletterDesc"))}
             </p>
             <form onSubmit={handleNewsletterSubmit} className="mb-5 flex">
-              <Input
-                type="email"
-                placeholder={t("footer.emailPlaceholder")}
-                className="h-12 min-w-0 rounded-none border-0 bg-white px-4 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#ed1c24]"
-                required
-              />
-              <Button type="submit" className="h-12 w-14 shrink-0 rounded-none bg-[#ed1c24] text-white hover:bg-[#c91218]">
-                <Send className="h-4 w-4" />
-              </Button>
+              <Input type="email" placeholder={t("footer.emailPlaceholder")} className="h-12 min-w-0 rounded-none border-0 bg-white px-4 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#ed1c24]" required />
+              <Button type="submit" className="h-12 w-14 shrink-0 rounded-none bg-[#ed1c24] text-white hover:bg-[#c91218]"><Send className="h-4 w-4" /></Button>
             </form>
             <div className="border border-white/12 bg-white px-5 py-4 text-sm leading-6 text-slate-900">
               <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">{t("footer.contact")}</p>
@@ -181,5 +156,3 @@ const Footer = () => {
     </footer>
   )
 }
-
-export default Footer

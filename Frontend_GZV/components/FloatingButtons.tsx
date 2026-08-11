@@ -54,60 +54,70 @@ export default function FloatingButtons() {
 
   return (
     <>
-      <div className="fixed bottom-5 right-4 z-40 flex items-end gap-3 sm:bottom-6 sm:right-6">
+      <div className="fixed bottom-4 right-3 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
         <AnimatePresence>
-          {showScrollTop && (
-            <motion.button
-              type="button"
-              initial={{ opacity: 0, y: 16, scale: 0.92 }}
+          {isOpen && visibleActions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.92 }}
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="group flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-[#050505] shadow-[0_18px_44px_rgba(15,23,42,0.18)] transition hover:border-[#ed1c24] hover:bg-[#ed1c24] hover:text-white"
-              aria-label="Lên đầu trang"
+              exit={{ opacity: 0, y: 18, scale: 0.96 }}
+              transition={{ duration: 0.18 }}
+              className="w-[min(calc(100vw-1.5rem),360px)] overflow-hidden border border-white/12 bg-white shadow-[0_28px_90px_rgba(0,0,0,0.28)]"
             >
-              <ArrowUp className="h-5 w-5" />
-            </motion.button>
+              <div className="relative overflow-hidden bg-[#050505] px-5 py-4 text-white">
+                <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" />
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#ed1c24]">GZV Connect</p>
+                <div className="mt-2 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-lg font-black uppercase leading-none">{t("floating.connect")}</p>
+                    <p className="mt-2 text-xs font-semibold text-white/55">{language === "en" ? "Choose a channel to connect." : "Chọn kênh kết nối nhanh."}</p>
+                  </div>
+                  <div className="flex h-11 w-11 items-center justify-center border border-white/15 bg-white/8">
+                    <MessageSquare className="h-5 w-5 text-[#ed1c24]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-2 bg-slate-50 p-3">
+                {visibleActions.map((action) => (
+                  <FloatingActionButton key={action.action_key} action={action} language={language} onClick={() => openAction(action)} />
+                ))}
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
-        {visibleActions.length > 0 && (
-          <div className="relative flex flex-col items-end">
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 18, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 18, scale: 0.96 }}
-                  transition={{ duration: 0.18 }}
-                  className="mb-3 w-[260px] overflow-hidden border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]"
-                >
-                  <div className="border-b border-slate-200 bg-[#050505] px-4 py-3 text-white">
-                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ed1c24]">GZV Connect</p>
-                    <p className="mt-1 text-sm font-black uppercase">{t("floating.connect")}</p>
-                  </div>
-                  <div className="grid gap-1 p-2">
-                    {visibleActions.map((action) => (
-                      <FloatingActionButton key={action.action_key} action={action} language={language} onClick={() => openAction(action)} />
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {showScrollTop && (
+              <motion.button
+                type="button"
+                initial={{ opacity: 0, y: 12, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 12, scale: 0.92 }}
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="flex h-12 w-12 items-center justify-center border border-slate-200 bg-white text-[#050505] shadow-[0_18px_44px_rgba(15,23,42,0.18)] transition hover:border-[#ed1c24] hover:bg-[#ed1c24] hover:text-white"
+                aria-label="Lên đầu trang"
+              >
+                <ArrowUp className="h-5 w-5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
 
+          {visibleActions.length > 0 && (
             <button
               type="button"
               onClick={() => setIsOpen((value) => !value)}
-              className="flex h-14 items-center gap-3 bg-[#ed1c24] px-5 text-sm font-black uppercase text-white shadow-[0_18px_44px_rgba(237,28,36,0.28)] transition hover:bg-[#c91218]"
+              className="group flex h-14 items-center gap-3 bg-[#ed1c24] px-5 text-sm font-black uppercase text-white shadow-[0_18px_44px_rgba(237,28,36,0.28)] transition hover:bg-[#c91218]"
               aria-label={isOpen ? t("floating.close") : t("floating.open")}
             >
-              <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
-                {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-              </motion.span>
+              <span className="flex h-7 w-7 items-center justify-center bg-white text-[#ed1c24] transition group-hover:bg-[#050505] group-hover:text-white">
+                {isOpen ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              </span>
               {t("common.contact")}
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <AnimatePresence>
@@ -116,7 +126,7 @@ export default function FloatingButtons() {
             initial={{ opacity: 0, y: 26, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 26, scale: 0.96 }}
-            className="fixed bottom-24 right-4 z-50 w-[22rem] max-w-[calc(100vw-2rem)] sm:right-6"
+            className="fixed bottom-24 right-3 z-50 w-[22rem] max-w-[calc(100vw-1.5rem)] sm:right-6"
           >
             <Chatbot onClose={() => setShowChatbot(false)} />
           </motion.div>
@@ -128,16 +138,22 @@ export default function FloatingButtons() {
 
 function FloatingActionButton({ action, language, onClick }: { action: FloatingAction; language: "vi" | "en"; onClick: () => void }) {
   const label = language === "en" ? ((action as any).label_en || (action as any).en?.label || action.label) : action.label
+  const isChatbot = action.action_type === "chatbot"
+  const description = isChatbot
+    ? (language === "en" ? "Open GZV assistant" : "Mở trợ lý GZV")
+    : getActionDescription(action, language)
+
   const content = (
-    <span className="group flex w-full items-center gap-3 border border-transparent px-3 py-3 text-left transition hover:border-[#ed1c24] hover:bg-red-50">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-[#050505] text-white transition group-hover:bg-[#ed1c24]">
+    <span className="group flex w-full items-center gap-3 border border-slate-200 bg-white px-3 py-3 text-left transition hover:border-[#ed1c24] hover:bg-red-50">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#050505] text-white transition group-hover:bg-[#ed1c24]">
         <FloatingIcon action={action} />
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block truncate text-sm font-black text-slate-950">{label}</span>
-        <span className="block truncate text-[11px] font-bold text-slate-500">
-          {action.action_type === "chatbot" ? (language === "en" ? "Open chatbot" : "Mở chatbot") : action.href || (language === "en" ? "No link" : "Chưa có link")}
-        </span>
+        <span className="mt-0.5 block truncate text-[11px] font-bold text-slate-500">{description}</span>
+      </span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-slate-200 text-slate-400 transition group-hover:border-[#ed1c24] group-hover:bg-[#ed1c24] group-hover:text-white">
+        {isChatbot ? <Bot className="h-4 w-4" /> : <Plus className="h-4 w-4 rotate-45" />}
       </span>
     </span>
   )
@@ -155,6 +171,16 @@ function FloatingActionButton({ action, language, onClick }: { action: FloatingA
       {content}
     </button>
   )
+}
+
+function getActionDescription(action: FloatingAction, language: "vi" | "en") {
+  const key = `${action.action_key} ${action.label}`.toLowerCase()
+  if (key.includes("facebook")) return language === "en" ? "Follow GZV on Facebook" : "Theo dõi GZV trên Facebook"
+  if (key.includes("youtube")) return language === "en" ? "Watch GZV videos" : "Xem video GZV"
+  if (key.includes("zalo")) return language === "en" ? "Connect through Zalo" : "Kết nối qua Zalo"
+  if (key.includes("phone") || key.includes("call")) return language === "en" ? "Call GZV" : "Gọi trực tiếp GZV"
+  if (key.includes("mail") || key.includes("email")) return language === "en" ? "Send email" : "Gửi email"
+  return language === "en" ? "Open contact channel" : "Mở kênh liên hệ"
 }
 
 function FloatingIcon({ action }: { action: FloatingAction }) {
