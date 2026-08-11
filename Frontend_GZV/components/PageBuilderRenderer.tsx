@@ -89,6 +89,8 @@ function RenderBlock({ block, language }: { block: PageBlock; language: "vi" | "
       return <ContactFormBlock {...props} />
     case "page_banner":
       return <PageBanner {...props} />
+    case "core_showcase":
+      return <CoreShowcase {...props} />
     case "image_gallery":
       return <ImageGallery {...props} />
     case "cta_band":
@@ -98,6 +100,52 @@ function RenderBlock({ block, language }: { block: PageBlock; language: "vi" | "
     default:
       return null
   }
+}
+
+function CoreShowcase({ eyebrow = "GZV Core", title, subtitle, highlights = [], items = [] }: any) {
+  const coreItems = items.length ? items : [
+    { label: "01", title: "Sứ mệnh", description: "Kết nối tri thức, chuyên gia và doanh nghiệp để tạo ra năng lực tăng trưởng có thể đo lường." },
+    { label: "02", title: "Tầm nhìn", description: "Trở thành hệ sinh thái mentoring, coaching và triển khai dự án thế hệ mới tại Việt Nam." },
+    { label: "03", title: "Giá trị cốt lõi", description: "Thực chiến, minh bạch, học hỏi liên tục và cam kết tạo tác động thật cho đối tác." },
+  ]
+  const highlightItems = highlights.length ? highlights : ["Thực chiến", "Minh bạch", "Tăng trưởng"]
+
+  return (
+    <section className="relative overflow-hidden bg-[#050505] py-16 text-white lg:py-24">
+      <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" />
+      <div className="container px-4">
+        <div className="grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-stretch">
+          <div className="border border-white/12 bg-white/[0.04] p-7 lg:p-9">
+            {eyebrow && <p className="border-l-4 border-[#ed1c24] pl-3 text-xs font-black uppercase tracking-[0.24em] text-[#ed1c24]">{eyebrow}</p>}
+            <h2 className="mt-5 text-4xl font-black uppercase leading-none text-white md:text-5xl">
+              {title || "Sứ mệnh. Tầm nhìn. Giá trị cốt lõi."}
+            </h2>
+            <p className="mt-6 text-base font-semibold leading-8 text-white/68">
+              {subtitle || "GZV định hình một hệ sinh thái triển khai thực chiến, nơi tri thức, đội ngũ và doanh nghiệp cùng tăng trưởng bằng kết quả đo lường được."}
+            </p>
+            <div className="mt-8 grid grid-cols-3 border border-white/10">
+              {highlightItems.slice(0, 3).map((item: any) => (
+                <div key={String(item)} className="border-r border-white/10 p-3 text-center last:border-r-0">
+                  <p className="text-[10px] font-black uppercase tracking-wide text-white/62">{String(item)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-4">
+            {coreItems.map((item: any, index: number) => (
+              <article key={item.title || index} className="group grid gap-4 border border-white/12 bg-white p-5 text-[#050505] transition hover:border-[#ed1c24] md:grid-cols-[96px_1fr] md:items-center">
+                <div className="flex h-20 w-20 items-center justify-center bg-[#ed1c24] text-2xl font-black text-white">{item.label || `0${index + 1}`}</div>
+                <div>
+                  <h3 className="text-2xl font-black uppercase">{item.title}</h3>
+                  <p className="mt-2 text-sm font-semibold leading-7 text-slate-600">{item.description || item.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function SectionIntro({ eyebrow, title, subtitle, align = "left", invert = false }: any) {

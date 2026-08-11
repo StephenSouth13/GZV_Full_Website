@@ -5,7 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
-import { ChevronRight, LogIn, Mail, Menu, Phone, Search, X } from "lucide-react"
+import { ChevronRight, LogIn, Mail, Menu, Moon, Phone, Search, Sun, X } from "lucide-react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { defaultNavigation, getBrandingSettings, getSiteNavigation, type SiteNavItem } from "@/lib/site-content"
 import { useLanguage } from "@/components/language-provider"
@@ -13,7 +14,9 @@ import { useLanguage } from "@/components/language-provider"
 const Header = () => {
   const pathname = usePathname()
   const { language, toggleLanguage, t } = useLanguage()
+  const { resolvedTheme, setTheme } = useTheme()
   const [isScrolled, setIsScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [navItems, setNavItems] = useState<SiteNavItem[]>(defaultNavigation)
   const [headerLogo, setHeaderLogo] = useState("/logo.webp")
@@ -24,6 +27,7 @@ const Header = () => {
   })
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setIsScrolled(window.scrollY > 24)
     const handleResize = () => {
       if (window.innerWidth >= 1024) setIsMobileMenuOpen(false)
@@ -64,10 +68,12 @@ const Header = () => {
 
   const activePath = navItems.find((item) => item.href !== "/" && pathname.startsWith(item.href.split("#")[0]))?.href || null
   const getLabel = (item: SiteNavItem) => language === "en" ? (item.label_en || item.label_vi) : item.label_vi
+  const isDark = mounted && resolvedTheme === "dark"
+  const toggleTheme = () => setTheme(isDark ? "light" : "dark")
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[60] hidden h-9 border-b border-white/10 bg-[#050505] text-white lg:block">
+      <div className={`fixed inset-x-0 top-0 z-[60] hidden h-9 border-b border-white/10 bg-[#050505] text-white transition duration-300 lg:block ${isScrolled ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
         <div className="container flex h-full items-center justify-between text-[11px] font-bold uppercase">
           <div className="flex items-center gap-6 text-white/80">
             <span className="inline-flex items-center gap-2">
@@ -84,10 +90,10 @@ const Header = () => {
       </div>
 
       <motion.header
-        className={`fixed inset-x-0 z-50 border-b transition-all duration-300 ${
+        className={`fixed inset-x-0 z-[70] border-b transition-all duration-300 ${
           isScrolled
-            ? "top-0 border-slate-200 bg-white/96 shadow-[0_16px_38px_rgba(0,0,0,0.10)] backdrop-blur-xl lg:top-0"
-            : "top-0 border-slate-200 bg-white/94 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl lg:top-9"
+            ? "top-0 border-slate-200 bg-white/96 shadow-[0_16px_38px_rgba(0,0,0,0.10)] backdrop-blur-xl dark:border-white/10 dark:bg-[#050505]/96 lg:top-0"
+            : "top-0 border-slate-200 bg-white/94 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-[#050505]/94 lg:top-9"
         }`}
       >
         <div className="container flex h-[74px] items-center justify-between gap-4 lg:h-[82px]">
@@ -105,7 +111,7 @@ const Header = () => {
                   key={item.href}
                   href={item.href}
                   className={`group relative px-3 py-7 text-[12px] font-black transition-colors xl:px-4 ${
-                    isActive ? "text-[#ed1c24]" : "text-slate-900 hover:text-[#ed1c24]"
+                    isActive ? "text-[#ed1c24]" : "text-slate-900 hover:text-[#ed1c24] dark:text-white dark:hover:text-[#ed1c24]"
                   }`}
                 >
                   {getLabel(item)}
@@ -129,15 +135,23 @@ const Header = () => {
             <Button
               variant="outline"
               size="icon"
-              className="hidden h-11 w-11 rounded-none border-slate-300 text-slate-900 hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex"
+              className="hidden h-11 w-11 rounded-none border-slate-300 text-slate-900 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/15 dark:bg-[#101010] dark:text-white lg:inline-flex"
               aria-label={t("common.search")}
             >
               <Search className="h-4 w-4" />
             </Button>
             <button
               type="button"
+              onClick={toggleTheme}
+              className="hidden h-11 w-11 items-center justify-center border border-slate-300 bg-white text-slate-950 transition hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/15 dark:bg-[#101010] dark:text-white lg:inline-flex"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <button
+              type="button"
               onClick={toggleLanguage}
-              className="hidden h-11 border border-slate-300 bg-white px-3 text-xs font-black uppercase text-slate-950 transition hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex lg:items-center"
+              className="hidden h-11 border border-slate-300 bg-white px-3 text-xs font-black uppercase text-slate-950 transition hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/15 dark:bg-[#101010] dark:text-white lg:inline-flex lg:items-center"
               aria-label="Switch language"
             >
               {language === "vi" ? "EN" : "VI"}
@@ -145,7 +159,7 @@ const Header = () => {
             <Button
               variant="outline"
               size="icon"
-              className="h-11 w-11 rounded-none border-slate-300 lg:hidden"
+              className="h-11 w-11 rounded-none border-slate-300 dark:border-white/15 dark:bg-[#101010] dark:text-white lg:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label={t("nav.openMenu")}
             >
@@ -207,13 +221,23 @@ const Header = () => {
                     {t("nav.login")}
                   </Button>
                 </Link>
-                <button
-                  type="button"
-                  onClick={toggleLanguage}
-                  className="mt-3 h-12 w-full border border-white/15 text-xs font-black uppercase text-white"
-                >
-                  {language === "vi" ? "English" : "Tiếng Việt"}
-                </button>
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="flex h-12 items-center justify-center gap-2 border border-white/15 text-xs font-black uppercase text-white transition hover:border-[#ed1c24] hover:text-[#ed1c24]"
+                  >
+                    {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {isDark ? "Light" : "Dark"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={toggleLanguage}
+                    className="h-12 border border-white/15 text-xs font-black uppercase text-white transition hover:border-[#ed1c24] hover:text-[#ed1c24]"
+                  >
+                    {language === "vi" ? "English" : "Tiếng Việt"}
+                  </button>
+                </div>
               </div>
             </motion.aside>
           </>
