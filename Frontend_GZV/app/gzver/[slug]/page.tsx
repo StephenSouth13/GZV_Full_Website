@@ -1,10 +1,10 @@
-'use client'
+"use client"
 
-import { useEffect, useMemo, useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+import { motion } from "framer-motion"
 import {
   ArrowLeft,
   Award,
@@ -15,7 +15,6 @@ import {
   Github,
   Globe2,
   GraduationCap,
-  HeartHandshake,
   Linkedin,
   Mail,
   MapPin,
@@ -25,19 +24,19 @@ import {
   TrendingUp,
   UserRound,
   Youtube,
-} from 'lucide-react'
-import { api, gzver } from '@/lib/api-supabase'
+} from "lucide-react"
+import { api, gzver } from "@/lib/api-supabase"
 
-type ProfileTab = NonNullable<gzver['profile_tabs']>[number]
-type ProfileBadge = NonNullable<gzver['profile_badges']>[number]
-type SocialLink = NonNullable<gzver['social_links']>[number]
+type ProfileSectionData = NonNullable<gzver["profile_tabs"]>[number]
+type ProfileBadge = NonNullable<gzver["profile_badges"]>[number]
+type SocialLink = NonNullable<gzver["social_links"]>[number]
 
-const defaultTabs: ProfileTab[] = [
-  { key: 'overview', label: 'Tổng quan', type: 'overview', source: 'overview', sort_order: 10, visible: true },
-  { key: 'journey', label: 'Lộ trình', type: 'text', source: 'promotion_path', sort_order: 20, visible: true },
-  { key: 'achievements', label: 'Thành tựu', type: 'list', source: 'achievements_list', sort_order: 30, visible: true },
-  { key: 'experience', label: 'Kinh nghiệm', type: 'background', source: 'experience', sort_order: 40, visible: true },
-  { key: 'impact', label: 'Tác động', type: 'text', source: 'social_impact', sort_order: 50, visible: true },
+const defaultSections: ProfileSectionData[] = [
+  { key: "overview", label: "Tổng quan", type: "overview", source: "overview", sort_order: 10, visible: true },
+  { key: "journey", label: "Lộ trình phát triển", type: "text", source: "promotion_path", sort_order: 20, visible: true },
+  { key: "achievements", label: "Thành tựu nổi bật", type: "list", source: "achievements_list", sort_order: 30, visible: true },
+  { key: "experience", label: "Năng lực thực chiến", type: "background", source: "experience", sort_order: 40, visible: true },
+  { key: "impact", label: "Tác động xã hội", type: "text", source: "social_impact", sort_order: 50, visible: true },
 ]
 
 const socialIcons: Record<string, any> = {
@@ -61,25 +60,26 @@ const badgeIcons: Record<string, any> = {
   briefcase: Briefcase,
 }
 
-const getList = (value: unknown) => Array.isArray(value) ? value.filter(Boolean).map(String) : []
 const sortVisible = <T extends { visible?: boolean; sort_order?: number }>(items: T[] = []) =>
   items.filter((item) => item.visible !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
+const toList = (value: unknown) => Array.isArray(value) ? value.filter(Boolean).map(String) : []
+
 const getTextBySource = (member: gzver, source?: string) => {
-  if (!source || source === 'overview') return ''
-  if (source === 'experience') return member.background?.experience || ''
-  if (source === 'education') return member.background?.education || ''
-  if (source === 'previous_role') return member.background?.previous_role || ''
+  if (!source || source === "overview") return ""
+  if (source === "experience") return member.background?.experience || ""
+  if (source === "education") return member.background?.education || ""
+  if (source === "previous_role") return member.background?.previous_role || ""
   const value = (member as any)[source]
-  if (Array.isArray(value)) return value.join('\n')
-  if (value && typeof value === 'object') return Object.values(value).filter(Boolean).join('\n')
-  return value ? String(value) : ''
+  if (Array.isArray(value)) return value.join("\n")
+  if (value && typeof value === "object") return Object.values(value).filter(Boolean).join("\n")
+  return value ? String(value) : ""
 }
 
 function SocialButton({ link }: { link: SocialLink }) {
-  const href = link.href || link.url || ''
+  const href = link.href || link.url || ""
   if (!href) return null
-  const platform = (link.platform || link.icon || link.label || 'website').toLowerCase()
+  const platform = (link.platform || link.icon || link.label || "website").toLowerCase()
   const Icon = socialIcons[platform] || ExternalLink
   return (
     <a
@@ -95,80 +95,15 @@ function SocialButton({ link }: { link: SocialLink }) {
 }
 
 function BadgePill({ badge }: { badge: ProfileBadge }) {
-  const Icon = badgeIcons[(badge.icon || 'shield').toLowerCase()] || ShieldCheck
+  const Icon = badgeIcons[(badge.icon || "shield").toLowerCase()] || ShieldCheck
   return (
     <span
       className="inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em]"
-      style={{ borderColor: badge.color || '#ed1c24', color: badge.color || '#ed1c24' }}
+      style={{ borderColor: badge.color || "#ed1c24", color: badge.color || "#ed1c24" }}
     >
       <Icon className="h-3.5 w-3.5" />
       {badge.label}
     </span>
-  )
-}
-
-function TabPanel({ member, tab }: { member: gzver; tab: ProfileTab }) {
-  const label = tab.label || 'Nội dung'
-  const sourceText = getTextBySource(member, tab.source)
-  const listSource = tab.source === 'skills' ? member.skills : tab.source === 'achievements_list' ? member.achievements_list : getList(tab.items)
-
-  if (tab.type === 'overview') {
-    return (
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="border border-slate-200 bg-white p-6 lg:col-span-2 dark:border-white/10 dark:bg-[#0f0f0f]">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Professional profile</p>
-          <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">{member.headline || member.achievement_summary || member.position}</h2>
-          {member.testimonial && <p className="mt-5 border-l-4 border-[#ed1c24] bg-red-50 p-5 text-base font-semibold leading-8 text-slate-700 dark:bg-red-950/20 dark:text-slate-200">{member.testimonial}</p>}
-          {member.mentoring_content && <p className="mt-5 whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
-        </div>
-        <div className="border border-slate-200 bg-[#050505] p-6 text-white dark:border-white/10">
-          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Kỹ năng</p>
-          <div className="flex flex-wrap gap-2">
-            {(member.skills || []).map((skill) => (
-              <span key={skill} className="border border-white/15 px-3 py-2 text-xs font-bold text-white/85">{skill}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (tab.type === 'list') {
-    return (
-      <div className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
-        <h2 className="mb-6 flex items-center gap-3 text-2xl font-black uppercase text-slate-950 dark:text-white"><Award className="text-[#ed1c24]" />{label}</h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          {listSource.map((item, index) => (
-            <div key={`${item}-${index}`} className="border-l-4 border-[#ed1c24] bg-slate-50 p-5 dark:bg-white/5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">{String(index + 1).padStart(2, '0')}</span>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (tab.type === 'background') {
-    const education = member.background?.education
-    const experience = member.background?.experience
-    const previous = member.background?.previous_role
-    return (
-      <div className="grid gap-5 md:grid-cols-2">
-        <ProfileInfoCard icon={Briefcase} title="Kinh nghiệm" text={experience} />
-        <ProfileInfoCard icon={GraduationCap} title="Học vấn" text={education} />
-        {previous && <ProfileInfoCard icon={TrendingUp} title="Vai trò trước đây" text={previous} />}
-      </div>
-    )
-  }
-
-  return (
-    <div className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
-      <h2 className="mb-5 text-2xl font-black uppercase text-slate-950 dark:text-white">{label}</h2>
-      <div className="whitespace-pre-line text-base font-medium leading-8 text-slate-700 dark:text-slate-300">
-        {tab.content || sourceText || 'Admin có thể cập nhật nội dung section này trong hồ sơ GZVer.'}
-      </div>
-    </div>
   )
 }
 
@@ -179,15 +114,76 @@ function ProfileInfoCard({ icon: Icon, title, text }: { icon: any; title: string
         <Icon className="h-5 w-5 text-[#ed1c24]" />
         {title}
       </h3>
-      <p className="whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{text || 'Đang cập nhật.'}</p>
+      <p className="whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{text || "Đang cập nhật."}</p>
     </div>
+  )
+}
+
+function ProfileSection({ member, section, index }: { member: gzver; section: ProfileSectionData; index: number }) {
+  const title = section.label || "Nội dung"
+  const sourceText = getTextBySource(member, section.source)
+  const listSource = section.source === "skills" ? member.skills : section.source === "achievements_list" ? member.achievements_list : toList(section.items)
+
+  if (section.type === "overview") {
+    return (
+      <section className="grid gap-5 lg:grid-cols-3">
+        <div className="border border-slate-200 bg-white p-6 lg:col-span-2 dark:border-white/10 dark:bg-[#0f0f0f]">
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
+          <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">{member.headline || member.achievement_summary || member.position}</h2>
+          {member.testimonial && <p className="mt-5 border-l-4 border-[#ed1c24] bg-red-50 p-5 text-base font-semibold leading-8 text-slate-700 dark:bg-red-950/20 dark:text-slate-200">{member.testimonial}</p>}
+          {member.mentoring_content && <p className="mt-5 whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
+        </div>
+        <div className="border border-slate-200 bg-[#050505] p-6 text-white dark:border-white/10">
+          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Kỹ năng</p>
+          <div className="flex flex-wrap gap-2">
+            {(member.skills || []).map((skill) => <span key={skill} className="border border-white/15 px-3 py-2 text-xs font-bold text-white/85">{skill}</span>)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (section.type === "list") {
+    return (
+      <section className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
+        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
+        <h2 className="mb-6 flex items-center gap-3 text-2xl font-black uppercase text-slate-950 dark:text-white"><Award className="text-[#ed1c24]" />{title}</h2>
+        <div className="grid gap-3 md:grid-cols-2">
+          {listSource.map((item, itemIndex) => (
+            <div key={`${item}-${itemIndex}`} className="border-l-4 border-[#ed1c24] bg-slate-50 p-5 dark:bg-white/5">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">{String(itemIndex + 1).padStart(2, "0")}</span>
+              <p className="mt-2 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">{item}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  if (section.type === "background") {
+    return (
+      <section className="grid gap-5 md:grid-cols-2">
+        <ProfileInfoCard icon={Briefcase} title="Kinh nghiệm" text={member.background?.experience} />
+        <ProfileInfoCard icon={GraduationCap} title="Học vấn" text={member.background?.education} />
+        {member.background?.previous_role && <ProfileInfoCard icon={TrendingUp} title="Vai trò trước đây" text={member.background.previous_role} />}
+      </section>
+    )
+  }
+
+  return (
+    <section className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
+      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
+      <h2 className="mb-5 text-2xl font-black uppercase text-slate-950 dark:text-white">{title}</h2>
+      <div className="whitespace-pre-line text-base font-medium leading-8 text-slate-700 dark:text-slate-300">
+        {section.content || sourceText || "Admin có thể cập nhật nội dung section này trong hồ sơ GZVer."}
+      </div>
+    </section>
   )
 }
 
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
   const [member, setMember] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('')
 
   useEffect(() => {
     let active = true
@@ -197,7 +193,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
         const data = await api.getgzverBySlug(params.slug)
         if (active) setMember(data)
       } catch (error) {
-        console.error('Error fetching GZVer detail:', error)
+        console.error("Error fetching GZVer detail:", error)
       } finally {
         if (active) setLoading(false)
       }
@@ -208,14 +204,9 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
     }
   }, [params.slug])
 
-  const tabs = useMemo(() => sortVisible(member?.profile_tabs?.length ? member.profile_tabs : defaultTabs), [member])
+  const sections = useMemo(() => sortVisible(member?.profile_tabs?.length ? member.profile_tabs : defaultSections), [member])
   const badges = useMemo(() => sortVisible(member?.profile_badges || []), [member])
   const socials = useMemo(() => sortVisible(member?.social_links || []), [member])
-  const currentTab = tabs.find((tab) => (tab.key || tab.label) === activeTab) || tabs[0]
-
-  useEffect(() => {
-    if (!activeTab && tabs[0]) setActiveTab(tabs[0].key || tabs[0].label || 'overview')
-  }, [activeTab, tabs])
 
   if (loading) {
     return (
@@ -230,7 +221,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
 
   if (!member) notFound()
 
-  const departmentName = member.gzver_departments?.name || member.department_name || 'GZVers'
+  const departmentName = member.gzver_departments?.name || member.department_name || "GZVers"
   const avatarStyle = {
     objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
     transform: `scale(${(member.avatar_scale || 100) / 100})`,
@@ -277,16 +268,16 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
           <div className="grid gap-0 lg:grid-cols-[360px_1fr]">
             <aside className="border-b border-slate-200 bg-[#050505] p-6 text-white dark:border-white/10 lg:border-b-0 lg:border-r lg:border-white/10 sm:p-8">
               <div className="-mt-24 mb-6 h-48 w-48 overflow-hidden border-8 border-[#050505] bg-slate-100 shadow-2xl">
-                <Image src={member.avatar_url || '/gzvers/default.webp'} alt={member.full_name} width={260} height={260} unoptimized className="h-full w-full object-cover" style={avatarStyle} />
+                <Image src={member.avatar_url || "/gzvers/default.webp"} alt={member.full_name} width={260} height={260} unoptimized className="h-full w-full object-cover" style={avatarStyle} />
               </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ed1c24]">{member.role_level || 'GZVer profile'}</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ed1c24]">{member.role_level || "GZVer profile"}</p>
               <h2 className="mt-2 text-2xl font-black uppercase leading-tight">{member.position}</h2>
               {member.company && <p className="mt-3 text-sm font-bold text-white/60">@{member.company}</p>}
               {member.headline && <p className="mt-5 text-sm font-semibold leading-7 text-white/75">{member.headline}</p>}
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
-                {!badges.length && <BadgePill badge={{ label: departmentName, icon: 'shield', color: '#ed1c24' }} />}
+                {!badges.length && <BadgePill badge={{ label: departmentName, icon: "shield", color: "#ed1c24" }} />}
               </div>
 
               <div className="mt-7 space-y-3 border-t border-white/10 pt-6 text-sm font-semibold text-white/70">
@@ -297,27 +288,21 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
 
               <div className="mt-6 flex flex-wrap gap-2">
                 {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
-                {member.website_url && <SocialButton link={{ label: 'Website', platform: 'website', href: member.website_url }} />}
+                {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
               </div>
             </aside>
 
-            <div className="p-5 sm:p-8">
-              <div className="mb-6 flex gap-2 overflow-x-auto border-b border-slate-200 pb-3 dark:border-white/10">
-                {tabs.map((tab) => {
-                  const key = tab.key || tab.label || 'tab'
-                  const active = key === (currentTab?.key || currentTab?.label)
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => setActiveTab(key)}
-                      className={`h-11 shrink-0 border px-4 text-[10px] font-black uppercase tracking-[0.14em] transition ${active ? 'border-[#ed1c24] bg-[#ed1c24] text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-[#ed1c24] dark:border-white/10 dark:bg-[#111] dark:text-white/70'}`}
-                    >
-                      {tab.label || key}
-                    </button>
-                  )
-                })}
+            <div className="space-y-5 p-5 sm:p-8">
+              <div className="border-l-4 border-[#ed1c24] bg-slate-50 p-5 dark:bg-white/5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Profile sections</p>
+                <h2 className="mt-2 text-2xl font-black uppercase text-slate-950 dark:text-white">Hồ sơ chi tiết</h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">
+                  Các section bên dưới được quản trị tự do trong admin và hiển thị theo đúng thứ tự xuất bản.
+                </p>
               </div>
-              {currentTab && <TabPanel member={member} tab={currentTab} />}
+              {sections.map((section, index) => (
+                <ProfileSection key={section.key || `${section.label}-${index}`} member={member} section={section} index={index} />
+              ))}
             </div>
           </div>
         </motion.div>

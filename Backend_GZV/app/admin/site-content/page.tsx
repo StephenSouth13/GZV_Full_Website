@@ -53,6 +53,15 @@ const defaultNav: NavItem[] = [
   { href: "/lien-he", label_vi: "LIÊN HỆ", label_en: "CONTACT", sort_order: 60, is_visible: true, is_page_enabled: true },
 ]
 
+const quickBuilderPages = [
+  { slug: "dich-vu", label: "Dịch vụ", hint: "Trang riêng /dich-vu, không còn là anchor #dich-vu" },
+  { slug: "gioi-thieu", label: "Giới thiệu", hint: "Câu chuyện, sứ mệnh, tầm nhìn, đội ngũ" },
+  { slug: "du-an", label: "Dự án", hint: "Banner, block dự án, case study" },
+  { slug: "gzver", label: "GZVers", hint: "Cộng đồng, ban, profile" },
+  { slug: "tin-tuc", label: "Tin tức", hint: "Banner và block nội dung tin" },
+  { slug: "lien-he", label: "Liên hệ", hint: "Form, map, thông tin liên hệ" },
+]
+
 const defaultLoading: LoadingSettings = { id: 1, logo_url: "/logo.webp", title: "GZV", subtitle: "Đang tải dữ liệu...", effect: "orbit", background_from: "#050505", background_to: "#ed1c24", accent_color: "#ed1c24", enabled: true, minimum_duration_ms: 900 }
 const defaultBranding: BrandingSettings = { id: 1, site_name: "GZV", header_logo_url: "/logo.webp", footer_logo_url: "/logo.webp", favicon_url: "/logo/favicon.ico", default_title: "GZV - The Voice of Genzers", title_template: "%s | GZV", default_description: "GZV Center", default_keywords: "GZV, đào tạo, mentoring, coaching", og_image_url: "/og-image.jpg", topbar_email_label: "gzv.one@gmail.com", topbar_phone_label: "(+84) 329 381 489", topbar_badge_label: "GZV" }
 const defaultFooter: FooterSettings = {
@@ -613,6 +622,38 @@ function SiteContentManager() {
         </TabsList>
 
         <TabsContent value="builder">
+          <div className="mb-6 border border-slate-200 bg-[#050505] p-5 text-white">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="border-l-4 border-[#ed1c24] pl-3 text-[10px] font-black uppercase tracking-[0.24em] text-[#ed1c24]">Page Builder Control</p>
+                <h2 className="mt-3 text-2xl font-black uppercase">Chỉnh sửa từng trang public</h2>
+                <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-white/70">
+                  Trang Dịch vụ nằm ở <span className="font-black text-white">/dich-vu</span>. Chọn trang, thêm block, chỉnh ảnh bằng Media Library, rồi lưu layout.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" className="rounded-none border-white/20 bg-transparent text-white hover:bg-white hover:text-[#050505]">
+                  <a href="/admin/images"><ImageIcon className="mr-2 h-4 w-4" /> Mở Media Library</a>
+                </Button>
+                <Button asChild className="rounded-none bg-[#ed1c24] text-white hover:bg-[#c91218]">
+                  <a href={`https://www.gzv.one/${builderSlug}`} target="_blank" rel="noreferrer"><Eye className="mr-2 h-4 w-4" /> Xem trang public</a>
+                </Button>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-2 md:grid-cols-2 xl:grid-cols-6">
+              {quickBuilderPages.map((page) => (
+                <button
+                  key={page.slug}
+                  type="button"
+                  onClick={() => setBuilderSlug(page.slug)}
+                  className={`border p-4 text-left transition ${builderSlug === page.slug ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-white/10 bg-white/5 text-white hover:border-[#ed1c24]"}`}
+                >
+                  <p className="text-sm font-black uppercase">{page.label}</p>
+                  <p className={`mt-2 text-[11px] font-semibold leading-5 ${builderSlug === page.slug ? "text-white/85" : "text-white/50"}`}>{page.hint}</p>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
             <Card>
               <CardHeader><CardTitle>Trang</CardTitle><CardDescription>Chọn trang để nạp block layout.</CardDescription></CardHeader>
