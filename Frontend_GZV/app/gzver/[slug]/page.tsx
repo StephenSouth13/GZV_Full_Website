@@ -60,8 +60,22 @@ const badgeIcons: Record<string, any> = {
   briefcase: Briefcase,
 }
 
-const sortVisible = <T extends { visible?: boolean; sort_order?: number }>(items: T[] = []) =>
-  items.filter((item) => item.visible !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+const normalizeArray = <T,>(value: unknown): T[] => {
+  if (Array.isArray(value)) return value as T[]
+  if (!value) return []
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed as T[] : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
+
+const sortVisible = <T extends { visible?: boolean; sort_order?: number }>(items: unknown = []) =>
+  normalizeArray<T>(items).filter((item) => item.visible !== false).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
 const toList = (value: unknown) => Array.isArray(value) ? value.filter(Boolean).map(String) : []
 
@@ -204,9 +218,12 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
     }
   }, [params.slug])
 
-  const sections = useMemo(() => sortVisible(member?.profile_tabs?.length ? member.profile_tabs : defaultSections), [member])
-  const badges = useMemo(() => sortVisible(member?.profile_badges || []), [member])
-  const socials = useMemo(() => sortVisible(member?.social_links || []), [member])
+  const sections = useMemo(() => {
+    const customSections = sortVisible<ProfileSectionData>(member?.profile_tabs)
+    return customSections.length ? customSections : defaultSections
+  }, [member])
+  const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
+  const socials = useMemo(() => sortVisible<SocialLink>(member?.social_links), [member])
 
   if (loading) {
     return (
@@ -223,7 +240,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
 
   const departmentName = member.gzver_departments?.name || member.department_name || "GZVers"
   const avatarStyle = {
-    objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
+    objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 32}%`,
     transform: `scale(${(member.avatar_scale || 100) / 100})`,
   }
   const coverStyle = {

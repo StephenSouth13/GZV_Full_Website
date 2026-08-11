@@ -117,7 +117,7 @@ const defaultForm = {
   profile_tabs: defaultSections,
   profile_badges: [{ label: "GZVer", icon: "shield", color: "#ed1c24", visible: true, sort_order: 10 }] as ProfileBadge[],
   avatar_position_x: 50,
-  avatar_position_y: 50,
+  avatar_position_y: 32,
   avatar_scale: 100,
   cover_position_x: 50,
   cover_position_y: 50,
@@ -127,8 +127,22 @@ const defaultForm = {
   order: 0,
 }
 
-const sortByOrder = <T extends { sort_order?: number }>(items: T[] = []) =>
-  [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+const normalizeArray = <T,>(value: unknown): T[] => {
+  if (Array.isArray(value)) return value as T[]
+  if (!value) return []
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value)
+      return Array.isArray(parsed) ? parsed as T[] : []
+    } catch {
+      return []
+    }
+  }
+  return []
+}
+
+const sortByOrder = <T extends { sort_order?: number }>(items: unknown = []) =>
+  [...normalizeArray<T>(items)].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 
 export function GZVerModal({ open, onClose, gzver, onSave, departments = [] }: any) {
   const [loading, setLoading] = useState(false)
@@ -146,11 +160,11 @@ export function GZVerModal({ open, onClose, gzver, onSave, departments = [] }: a
         skills: gzver.skills || [],
         achievements_list: gzver.achievements_list || [],
         background: gzver.background || defaultForm.background,
-        social_links: sortByOrder(gzver.social_links?.length ? gzver.social_links : []),
-        profile_tabs: sortByOrder(gzver.profile_tabs?.length ? gzver.profile_tabs : defaultSections),
-        profile_badges: sortByOrder(gzver.profile_badges?.length ? gzver.profile_badges : defaultForm.profile_badges),
+        social_links: sortByOrder(gzver.social_links),
+        profile_tabs: sortByOrder(gzver.profile_tabs).length ? sortByOrder(gzver.profile_tabs) : defaultSections,
+        profile_badges: sortByOrder(gzver.profile_badges).length ? sortByOrder(gzver.profile_badges) : defaultForm.profile_badges,
         avatar_position_x: gzver.avatar_position_x ?? 50,
-        avatar_position_y: gzver.avatar_position_y ?? 50,
+        avatar_position_y: gzver.avatar_position_y ?? 32,
         avatar_scale: gzver.avatar_scale ?? 100,
         cover_position_x: gzver.cover_position_x ?? 50,
         cover_position_y: gzver.cover_position_y ?? 50,
@@ -172,17 +186,17 @@ export function GZVerModal({ open, onClose, gzver, onSave, departments = [] }: a
   const updateArrayItem = (field: string, index: number, patch: any) => {
     setFormData((prev: any) => ({
       ...prev,
-      [field]: (prev[field] || []).map((item: any, itemIndex: number) => itemIndex === index ? { ...item, ...patch } : item),
+      [field]: normalizeArray<any>(prev[field]).map((item: any, itemIndex: number) => itemIndex === index ? { ...item, ...patch } : item),
     }))
   }
 
   const removeArrayItem = (field: string, index: number) => {
-    setFormData((prev: any) => ({ ...prev, [field]: (prev[field] || []).filter((_: any, itemIndex: number) => itemIndex !== index) }))
+    setFormData((prev: any) => ({ ...prev, [field]: normalizeArray<any>(prev[field]).filter((_: any, itemIndex: number) => itemIndex !== index) }))
   }
 
   const moveArrayItem = (field: string, index: number, direction: -1 | 1) => {
     setFormData((prev: any) => {
-      const items = [...(prev[field] || [])]
+      const items = normalizeArray<any>(prev[field])
       const target = index + direction
       if (target < 0 || target >= items.length) return prev
       const current = items[index]
@@ -234,9 +248,9 @@ export function GZVerModal({ open, onClose, gzver, onSave, departments = [] }: a
         cover_image_url: payload.cover_image_url || null,
         skills: (payload.skills || []).map((item: string) => item.trim()).filter(Boolean),
         achievements_list: (payload.achievements_list || []).map((item: string) => item.trim()).filter(Boolean),
-        social_links: sortByOrder(payload.social_links || []).filter((item: SocialLink) => item.label || item.href),
-        profile_tabs: sortByOrder(payload.profile_tabs || []).filter((item: ProfileSection) => item.key && item.label),
-        profile_badges: sortByOrder(payload.profile_badges || []).filter((item: ProfileBadge) => item.label),
+        social_links: sortByOrder<SocialLink>(payload.social_links).filter((item: SocialLink) => item.label || item.href),
+        profile_tabs: sortByOrder<ProfileSection>(payload.profile_tabs).filter((item: ProfileSection) => item.key && item.label),
+        profile_badges: sortByOrder<ProfileBadge>(payload.profile_badges).filter((item: ProfileBadge) => item.label),
       }
       const { error } = gzver?.id
         ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id)

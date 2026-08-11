@@ -158,9 +158,9 @@ export default function GzverPage() {
                               alt={member.full_name}
                               fill
                               unoptimized
-                              className="object-cover transition duration-700 group-hover:scale-110"
+                              className="object-contain transition duration-700"
                               style={{
-                                objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
+                                objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 32}%`,
                                 transform: `scale(${(member.avatar_scale || 100) / 100})`,
                               }}
                             />

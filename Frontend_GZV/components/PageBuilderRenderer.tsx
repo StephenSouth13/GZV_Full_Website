@@ -369,9 +369,9 @@ function AboutBoxes({ eyebrow, title, subtitle, boxes = [], limitPerDepartment =
                     <img
                       src={member.avatar_url || "/gzvers/default.webp"}
                       alt={member.full_name}
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                      className="h-full w-full object-contain transition duration-700"
                       style={{
-                        objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
+                        objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 32}%`,
                         transform: `scale(${(member.avatar_scale || 100) / 100})`,
                       }}
                     />
@@ -431,9 +431,9 @@ function PeopleGrid({ eyebrow, title, subtitle, type = "directors", limit = 6 }:
                   <img
                     src={item.avatar_url || "/gzvers/default.webp"}
                     alt={item.full_name}
-                    className="h-full w-full object-cover transition duration-700"
+                    className="h-full w-full object-contain transition duration-700"
                     style={{
-                      objectPosition: `${item.avatar_position_x ?? 50}% ${item.avatar_position_y ?? 50}%`,
+                      objectPosition: `${item.avatar_position_x ?? 50}% ${item.avatar_position_y ?? 32}%`,
                       transform: `scale(${(item.avatar_scale || 100) / 100})`,
                     }}
                   />
