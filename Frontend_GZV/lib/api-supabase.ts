@@ -141,13 +141,52 @@
     department_id?: string | null;
     department_name?: string | null;
     role_level?: string | null;
+    headline?: string | null;
+    location?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    website_url?: string | null;
     avatar_url: string;
+    cover_image_url?: string | null;
+    avatar_position_x?: number;
+    avatar_position_y?: number;
+    avatar_scale?: number;
+    cover_position_x?: number;
+    cover_position_y?: number;
+    cover_scale?: number;
     cv_url?: string;
     achievement_summary: string;
     testimonial: string;
     graduation_year: string;
     promotion_path: string;
     social_impact: string;
+    social_links?: Array<{
+      label?: string;
+      platform?: string;
+      icon?: string;
+      href?: string;
+      url?: string;
+      visible?: boolean;
+      sort_order?: number;
+    }>;
+    profile_tabs?: Array<{
+      key?: string;
+      label?: string;
+      label_en?: string;
+      type?: string;
+      source?: string;
+      content?: string;
+      items?: string[];
+      visible?: boolean;
+      sort_order?: number;
+    }>;
+    profile_badges?: Array<{
+      label?: string;
+      icon?: string;
+      color?: string;
+      visible?: boolean;
+      sort_order?: number;
+    }>;
     course_taken: string;
     skills: string[];
     achievements_list: string[];
@@ -522,7 +561,8 @@
         // Xử lý ảnh đại diện qua Public URL
         return { 
           ...data, 
-          avatar_url: getPublicUrl(data.avatar_url) 
+          avatar_url: getPublicUrl(data.avatar_url),
+          cover_image_url: data.cover_image_url ? getPublicUrl(data.cover_image_url) : null,
         } as gzver;
       } catch (error) {
         console.error("❌ Error fetching gzver detail:", error);

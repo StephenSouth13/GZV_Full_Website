@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,29 +34,29 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
   const { toast } = useToast()
 
   const handleDelete = async (program: any) => {
-    if (confirm(`Sếp có chắc chắn muốn xóa khóa học "${program.title}"? Hành động này không thể hoàn tác.`)) {
+    if (confirm(`Sáº¿p cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a khÃ³a há»c "${program.title}"? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`)) {
       try {
         const success = await TrainingService.deleteProgram(program.id)
         if (success) {
-          toast({ title: "ĐÃ XÓA", description: "Dữ liệu tri thức đã được loại bỏ khỏi hệ thống." })
+          toast({ title: "ÄÃƒ XÃ“A", description: "Dá»¯ liá»‡u tri thá»©c Ä‘Ã£ Ä‘Æ°á»£c loáº¡i bá» khá»i há»‡ thá»‘ng." })
           onRefresh()
         }
       } catch (error) {
-        toast({ title: "LỖI", description: "Không thể xóa. Vui lòng kiểm tra lại kết nối.", variant: "destructive" })
+        toast({ title: "Lá»–I", description: "KhÃ´ng thá»ƒ xÃ³a. Vui lÃ²ng kiá»ƒm tra láº¡i káº¿t ná»‘i.", variant: "destructive" })
       }
     }
   }
 
   const getLevelBadge = (level: string) => {
     const config: any = {
-      'Cơ bản': 'bg-red-50 text-[#ed1c24] border-red-100',
-      'Trung cấp': 'bg-amber-50 text-amber-600 border-amber-100',
-      'Nâng cao': 'bg-purple-50 text-purple-600 border-purple-100',
-      'Chuyên gia': 'bg-rose-50 text-rose-600 border-rose-100'
+      'CÆ¡ báº£n': 'bg-red-50 text-[#ed1c24] border-red-100',
+      'Trung cáº¥p': 'bg-amber-50 text-amber-600 border-amber-100',
+      'NÃ¢ng cao': 'bg-purple-50 text-purple-600 border-purple-100',
+      'ChuyÃªn gia': 'bg-rose-50 text-rose-600 border-rose-100'
     }
     return (
       <Badge variant="outline" className={`${config[level] || 'bg-slate-50 text-slate-500'} font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest border-2`}>
-        {level || 'TỔNG HỢP'}
+        {level || 'Tá»”NG Há»¢P'}
       </Badge>
     )
   }
@@ -66,11 +66,11 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
       <Table>
         <TableHeader className="bg-slate-50/50">
           <TableRow className="hover:bg-transparent border-slate-100">
-            <TableHead className="w-[500px] font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] py-8 pl-12">Nội dung khóa học & Visual</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Chỉ số học viên</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Phân loại</TableHead>
+            <TableHead className="w-[500px] font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] py-8 pl-12">Ná»™i dung khÃ³a há»c & Visual</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Chá»‰ sá»‘ há»c viÃªn</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">PhÃ¢n loáº¡i</TableHead>
             <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Decor Color</TableHead>
-            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-12">Thao tác</TableHead>
+            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-12">Thao tÃ¡c</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,7 +81,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
                     <Trash2 size={32} />
                   </div>
-                  <p className="font-black text-slate-300 uppercase text-xs tracking-widest">Kho dữ liệu đang trống, thưa sếp!</p>
+                  <p className="font-black text-slate-300 uppercase text-xs tracking-widest">Kho dá»¯ liá»‡u Ä‘ang trá»‘ng, thÆ°a sáº¿p!</p>
                 </div>
               </TableCell>
             </TableRow>
@@ -90,7 +90,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
               <TableRow key={program.id} className="hover:bg-red-50/20 border-slate-50 transition-all duration-500 group">
                 <TableCell className="py-10 pl-12">
                   <div className="flex items-center gap-6">
-                    {/* Thumbnail xịn xò */}
+                    {/* Thumbnail xá»‹n xÃ² */}
                     <div className="relative h-24 w-40 shrink-0 rounded-[1.5rem] overflow-hidden shadow-xl group-hover:scale-105 transition-transform duration-700 bg-slate-100 border-2 border-white">
                       <img 
                         src={program.image || '/placeholder.jpg'} 
@@ -109,7 +109,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                           <Clock size={12} className="text-[#ed1c24]" /> {program.duration || 'Flexible'}
                         </div>
                         <Badge className={`w-fit text-[8px] h-5 px-3 font-black shadow-none border-none rounded-full ${program.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500'}`}>
-                          {program.status === 'published' ? '• LIVE' : '• DRAFT'}
+                          {program.status === 'published' ? 'â€¢ LIVE' : 'â€¢ DRAFT'}
                         </Badge>
                       </div>
                     </div>
@@ -123,7 +123,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     </div>
                     <div>
                       <p className="text-xl font-black text-slate-700 leading-none">{program.students || 0}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Đã đăng ký</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">ÄÃ£ Ä‘Äƒng kÃ½</p>
                     </div>
                   </div>
                 </TableCell>
@@ -150,15 +150,15 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     <DropdownMenuContent align="end" className="w-72 p-3 rounded-[2rem] shadow-2xl border-none bg-white/90 backdrop-blur-xl">
                       <Link href={`/admin/training/${program.id}`}>
                         <DropdownMenuItem className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-slate-600 focus:bg-[#ed1c24] focus:text-white transition-all">
-                          <Edit3 className="h-5 w-5" /> CHỈNH SỬA CHUYÊN SÂU
+                          <Edit3 className="h-5 w-5" /> CHá»ˆNH Sá»¬A CHUYÃŠN SÃ‚U
                         </DropdownMenuItem>
                       </Link>
                       
                       <DropdownMenuItem 
                         className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-slate-600 focus:bg-slate-900 focus:text-white transition-all"
-                        onClick={() => window.open('/#dich-vu', '_blank')}
+                        onClick={() => window.open('/dich-vu', '_blank')}
                       >
-                        <Eye className="h-5 w-5" /> XEM TRƯỚC GIAO DIỆN
+                        <Eye className="h-5 w-5" /> XEM TRÆ¯á»šC GIAO DIá»†N
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator className="my-2 bg-slate-100" />
@@ -167,7 +167,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                         className="rounded-2xl py-4 cursor-pointer gap-4 font-black text-red-600 focus:bg-red-500 focus:text-white transition-all"
                         onClick={() => handleDelete(program)}
                       >
-                        <Trash2 className="h-5 w-5" /> XÓA KHỎI HỆ THỐNG
+                        <Trash2 className="h-5 w-5" /> XÃ“A KHá»ŽI Há»† THá»NG
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -180,3 +180,4 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
     </div>
   )
 }
+

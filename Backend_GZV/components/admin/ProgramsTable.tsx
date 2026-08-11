@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,27 +34,27 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
   const { toast } = useToast()
 
   const handleDelete = async (program: any) => {
-    if (confirm(`Bạn có chắc muốn xóa khóa học "${program.title}"?`)) {
+    if (confirm(`Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a khÃ³a há»c "${program.title}"?`)) {
       const success = await TrainingService.deleteProgram(program.id)
       if (success) {
-        toast({ title: "Đã xóa khóa học thành công" })
+        toast({ title: "ÄÃ£ xÃ³a khÃ³a há»c thÃ nh cÃ´ng" })
         onRefresh()
       } else {
-        toast({ title: "Lỗi khi xóa khóa học", variant: "destructive" })
+        toast({ title: "Lá»—i khi xÃ³a khÃ³a há»c", variant: "destructive" })
       }
     }
   }
 
   const getLevelBadge = (level: string) => {
     const config: any = {
-      'Cơ bản': 'bg-red-50 text-[#c91218] border-red-200',
-      'Trung cấp': 'bg-amber-100 text-amber-700 border-amber-200',
-      'Nâng cao': 'bg-purple-100 text-purple-700 border-purple-200',
-      'Chuyên gia': 'bg-rose-100 text-rose-700 border-rose-200'
+      'CÆ¡ báº£n': 'bg-red-50 text-[#c91218] border-red-200',
+      'Trung cáº¥p': 'bg-amber-100 text-amber-700 border-amber-200',
+      'NÃ¢ng cao': 'bg-purple-100 text-purple-700 border-purple-200',
+      'ChuyÃªn gia': 'bg-rose-100 text-rose-700 border-rose-200'
     }
     return (
       <Badge variant="outline" className={`${config[level] || 'bg-slate-100 text-slate-600'} font-black text-[9px] px-3 py-0.5 rounded-full uppercase tracking-tighter`}>
-        {level || 'Tổng hợp'}
+        {level || 'Tá»•ng há»£p'}
       </Badge>
     )
   }
@@ -64,18 +64,18 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
       <Table>
         <TableHeader className="bg-slate-50/50">
           <TableRow className="hover:bg-transparent border-slate-100">
-            <TableHead className="w-[450px] font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] py-6 pl-10">Chương trình & Cấp độ</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Quy mô học viên</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Phân loại</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Học phí</TableHead>
-            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-10">Thao tác</TableHead>
+            <TableHead className="w-[450px] font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] py-6 pl-10">ChÆ°Æ¡ng trÃ¬nh & Cáº¥p Ä‘á»™</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Quy mÃ´ há»c viÃªn</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">PhÃ¢n loáº¡i</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Há»c phÃ­</TableHead>
+            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-10">Thao tÃ¡c</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {programs.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="py-20 text-center font-bold text-slate-400 italic">
-                Chưa có dữ liệu chương trình đào tạo.
+                ChÆ°a cÃ³ dá»¯ liá»‡u chÆ°Æ¡ng trÃ¬nh Ä‘Ã o táº¡o.
               </TableCell>
             </TableRow>
           ) : (
@@ -109,13 +109,13 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                   <div className="flex items-center gap-6">
                     <div className="text-center">
                       <p className="text-lg font-black text-slate-700 leading-none">{program.students || 0}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Học viên</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Há»c viÃªn</p>
                     </div>
                     <div className="text-center border-l border-slate-100 pl-6">
                       <div className="flex items-center gap-1 text-slate-700 justify-center">
                         <Users size={14} className="text-[#ed1c24]" />
                       </div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Lớp học</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Lá»›p há»c</p>
                     </div>
                   </div>
                 </TableCell>
@@ -124,8 +124,8 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
 
                 <TableCell>
                   <div className="flex flex-col">
-                    <p className="text-sm font-black text-slate-700 tracking-tight">{program.price || 'Thỏa thuận'}</p>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase">{program.category || 'Học viện'}</p>
+                    <p className="text-sm font-black text-slate-700 tracking-tight">{program.price || 'Thá»a thuáº­n'}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">{program.category || 'Há»c viá»‡n'}</p>
                   </div>
                 </TableCell>
 
@@ -139,15 +139,15 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     <DropdownMenuContent align="end" className="w-64 p-2 rounded-[1.5rem] shadow-2xl border-none">
                       <Link href={`/admin/training/${program.id}`}>
                         <DropdownMenuItem className="rounded-xl py-3 cursor-pointer gap-3 font-bold text-slate-600">
-                          <Edit3 className="h-4 w-4 text-[#ed1c24]" /> Chỉnh sửa chuyên sâu
+                          <Edit3 className="h-4 w-4 text-[#ed1c24]" /> Chá»‰nh sá»­a chuyÃªn sÃ¢u
                         </DropdownMenuItem>
                       </Link>
                       
                       <DropdownMenuItem 
                         className="rounded-xl py-3 cursor-pointer gap-3 font-bold text-slate-600"
-                        onClick={() => window.open('/#dich-vu', '_blank')}
+                        onClick={() => window.open('/dich-vu', '_blank')}
                       >
-                        <ExternalLink className="h-4 w-4 text-slate-400" /> Xem bản Preview
+                        <ExternalLink className="h-4 w-4 text-slate-400" /> Xem báº£n Preview
                       </DropdownMenuItem>
 
                       <div className="h-px bg-slate-50 my-2 mx-2" />
@@ -156,7 +156,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                         className="rounded-xl py-3 cursor-pointer gap-3 font-black text-red-600 focus:bg-red-50 focus:text-red-700"
                         onClick={() => handleDelete(program)}
                       >
-                        <Trash2 className="h-4 w-4" /> Xóa chương trình
+                        <Trash2 className="h-4 w-4" /> XÃ³a chÆ°Æ¡ng trÃ¬nh
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -169,3 +169,4 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
     </div>
   )
 }
+

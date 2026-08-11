@@ -46,7 +46,7 @@ type PageBlock = { id?: string; page_slug: string; block_key: string; component_
 
 const defaultNav: NavItem[] = [
   { href: "/gioi-thieu", label_vi: "GIỚI THIỆU", label_en: "ABOUT", sort_order: 10, is_visible: true, is_page_enabled: true },
-  { href: "/#dich-vu", label_vi: "DỊCH VỤ", label_en: "SERVICES", sort_order: 20, is_visible: true, is_page_enabled: true },
+  { href: "/dich-vu", label_vi: "DỊCH VỤ", label_en: "SERVICES", sort_order: 20, is_visible: true, is_page_enabled: true },
   { href: "/du-an", label_vi: "DỰ ÁN", label_en: "PROJECTS", sort_order: 30, is_visible: true, is_page_enabled: true },
   { href: "/gzver", label_vi: "GZVers", label_en: "GZVers", sort_order: 40, is_visible: true, is_page_enabled: true },
   { href: "/tin-tuc", label_vi: "TIN TỨC", label_en: "NEWS", sort_order: 50, is_visible: true, is_page_enabled: true },

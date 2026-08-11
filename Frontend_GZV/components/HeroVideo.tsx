@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowRight, Pause, Play } from "lucide-react"
 import { getHomeSectionConfig, type HomeSectionConfig } from "@/lib/site-content"
+import { useLanguage } from "@/components/language-provider"
 
 const DEFAULT_HERO = {
   title: "GZV Ltd",
@@ -12,7 +13,7 @@ const DEFAULT_HERO = {
   description:
     "Đồng hành cùng doanh nghiệp và thế hệ trẻ qua Marketing, Sales và Digital Transformation với tư duy triển khai thực chiến.",
   button_label: "Khám phá dịch vụ",
-  button_url: "/#dich-vu",
+  button_url: "/dich-vu",
   settings: {
     video_url: "/Intro.mp4",
     poster_url: "/og-image.jpg",
@@ -30,6 +31,7 @@ const getEmbedUrl = (url: string) => {
 const isDirectVideo = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
 
 const HeroVideo = () => {
+  const { language, t } = useLanguage()
   const [isPlaying, setIsPlaying] = useState(true)
   const [hero, setHero] = useState<HomeSectionConfig | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -54,12 +56,12 @@ const HeroVideo = () => {
   const visible = hero?.is_visible ?? true
   if (!visible) return null
 
-  const title = hero?.title || DEFAULT_HERO.title
-  const subtitle = hero?.subtitle || DEFAULT_HERO.subtitle
-  const description = hero?.description || DEFAULT_HERO.description
-  const buttonLabel = hero?.button_label || DEFAULT_HERO.button_label
-  const buttonUrl = hero?.button_url || DEFAULT_HERO.button_url
   const settings = { ...DEFAULT_HERO.settings, ...(hero?.settings || {}) }
+  const title = language === "en" ? (settings.title_en || hero?.title || DEFAULT_HERO.title) : (hero?.title || DEFAULT_HERO.title)
+  const subtitle = language === "en" ? (settings.subtitle_en || hero?.subtitle || DEFAULT_HERO.subtitle) : (hero?.subtitle || DEFAULT_HERO.subtitle)
+  const description = language === "en" ? (settings.description_en || hero?.description || DEFAULT_HERO.description) : (hero?.description || DEFAULT_HERO.description)
+  const buttonLabel = language === "en" ? (settings.button_label_en || hero?.button_label || DEFAULT_HERO.button_label) : (hero?.button_label || DEFAULT_HERO.button_label)
+  const buttonUrl = hero?.button_url || DEFAULT_HERO.button_url
   const videoUrl = settings.video_url || DEFAULT_HERO.settings.video_url
   const posterUrl = settings.poster_url || DEFAULT_HERO.settings.poster_url
   const directVideo = isDirectVideo(videoUrl)
@@ -134,7 +136,7 @@ const HeroVideo = () => {
               </Link>
               <Link href="/lien-he">
                 <span className="inline-flex h-[52px] items-center justify-center border border-slate-300 bg-white px-7 py-4 text-sm font-black uppercase text-[#050505] transition hover:border-[#050505] hover:bg-[#050505] hover:text-white">
-                  Liên hệ GZV
+                  {t("common.contact")} GZV
                 </span>
               </Link>
             </div>

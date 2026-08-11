@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
@@ -11,6 +11,7 @@ import { api, type Program } from "@/lib/api-supabase"
 import ContactForm from "@/components/ContactForm"
 import PageBanner from "@/components/sections/PageBanner"
 import { getActivePartners, getPageBlocks, type PageBlock } from "@/lib/site-content"
+import { localizeRecord, useLanguage } from "@/components/language-provider"
 
 const iconMap: Record<string, any> = {
   award: Award,
@@ -26,6 +27,7 @@ const iconMap: Record<string, any> = {
 }
 
 export default function PageBuilderRenderer({ slug, fallback }: { slug: string; fallback?: React.ReactNode }) {
+  const { language } = useLanguage()
   const [blocks, setBlocks] = useState<PageBlock[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -44,11 +46,12 @@ export default function PageBuilderRenderer({ slug, fallback }: { slug: string; 
   if (loading) return null
   if (blocks.length === 0) return <>{fallback || null}</>
 
-  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} />)}</>
+  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} />)}</>
 }
 
-function RenderBlock({ block }: { block: PageBlock }) {
-  const props = block.props || {}
+function RenderBlock({ block, language }: { block: PageBlock; language: "vi" | "en" }) {
+  const props = localizeRecord(block.props || {}, language)
+  const contentHtml = language === "en" ? ((block as any).content_html_en || props.content_html_en || block.content_html || "") : (block.content_html || "")
   switch (block.component_type) {
     case "hero_stats":
       return <HeroStats {...props} />
@@ -63,7 +66,7 @@ function RenderBlock({ block }: { block: PageBlock }) {
     case "services_three":
       return <ServicesThree {...props} />
     case "why_columns":
-      return <WhyColumns {...props} />
+      return <WhyColumns language={language} {...props} />
     case "about_boxes":
       return <AboutBoxes {...props} />
     case "people_grid":
@@ -71,7 +74,7 @@ function RenderBlock({ block }: { block: PageBlock }) {
     case "feature_grid":
       return <FeatureGrid {...props} />
     case "programs_grid":
-      return <ProgramsGrid {...props} />
+      return <ProgramsGrid language={language} {...props} />
     case "projects_grid":
       return <DynamicGrid source="projects" {...props} />
     case "news_grid":
@@ -91,7 +94,7 @@ function RenderBlock({ block }: { block: PageBlock }) {
     case "cta_band":
       return <CtaBand {...props} />
     case "html_rich":
-      return <HtmlBlock html={block.content_html || ""} maxWidth={props.maxWidth} />
+      return <HtmlBlock html={contentHtml} maxWidth={props.maxWidth} />
     default:
       return null
   }
@@ -204,7 +207,7 @@ function ServicesThree({ eyebrow, title, subtitle, items = [] }: any) {
   )
 }
 
-function WhyColumns({ eyebrow, title, subtitle, columns = [] }: any) {
+function WhyColumns({ eyebrow, title, subtitle, columns = [], language = "vi" }: any) {
   return (
     <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
       <div className="container px-4">
@@ -212,7 +215,7 @@ function WhyColumns({ eyebrow, title, subtitle, columns = [] }: any) {
         <div className="grid gap-5 md:grid-cols-3">
           {columns.map((column: any, index: number) => (
             <article key={index} className="border border-slate-200 bg-slate-50 p-7 dark:border-white/10 dark:bg-slate-900">
-              <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">Cột {index + 1}</p>
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">{language === "en" ? "Column" : "Cột"} {index + 1}</p>
               <h3 className="text-xl font-black uppercase text-slate-950 dark:text-white">{column.title}</h3>
               <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{column.description}</p>
             </article>
@@ -463,7 +466,7 @@ function FeatureGrid({ title, subtitle, items = [], columns = 3 }: any) {
   )
 }
 
-function ProgramsGrid({ title, subtitle, limit = 12 }: any) {
+function ProgramsGrid({ title, subtitle, limit = 12, language = "vi" }: any) {
   const [programs, setPrograms] = useState<Program[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -503,8 +506,8 @@ function ProgramsGrid({ title, subtitle, limit = 12 }: any) {
                 </CardHeader>
                 <CardContent>
                   <p className="mb-6 line-clamp-3 text-sm text-gray-600 dark:text-gray-400">{program.description}</p>
-                  <Link href="/#dich-vu">
-                    <Button className="w-full rounded-none bg-[#ed1c24] text-white hover:bg-[#ed1c24]">Chi tiết dịch vụ</Button>
+                  <Link href="/dich-vu">
+                    <Button className="w-full rounded-none bg-[#ed1c24] text-white hover:bg-[#ed1c24]">{language === "en" ? "Service details" : "Chi tiết dịch vụ"}</Button>
                   </Link>
                 </CardContent>
               </Card>
@@ -579,3 +582,4 @@ function HtmlBlock({ html, maxWidth = "960px" }: { html: string; maxWidth?: stri
     </section>
   )
 }
+

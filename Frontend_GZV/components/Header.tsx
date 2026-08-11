@@ -7,21 +7,15 @@ import { usePathname } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
 import { ChevronRight, LogIn, Mail, Menu, Phone, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getBrandingSettings } from "@/lib/site-content"
-
-const NAV_ITEMS = [
-  { href: "/gioi-thieu", label: "GIỚI THIỆU" },
-  { href: "/#dich-vu", label: "DỊCH VỤ" },
-  { href: "/du-an", label: "DỰ ÁN" },
-  { href: "/gzver", label: "GZVers" },
-  { href: "/tin-tuc", label: "TIN TỨC" },
-  { href: "/lien-he", label: "LIÊN HỆ" },
-]
+import { defaultNavigation, getBrandingSettings, getSiteNavigation, type SiteNavItem } from "@/lib/site-content"
+import { useLanguage } from "@/components/language-provider"
 
 const Header = () => {
   const pathname = usePathname()
+  const { language, toggleLanguage, t } = useLanguage()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [navItems, setNavItems] = useState<SiteNavItem[]>(defaultNavigation)
   const [headerLogo, setHeaderLogo] = useState("/logo.webp")
   const [topbar, setTopbar] = useState({
     email: "gzv.one@gmail.com",
@@ -53,9 +47,10 @@ const Header = () => {
 
   useEffect(() => {
     let active = true
-    getBrandingSettings().then((branding) => {
+    Promise.all([getBrandingSettings(), getSiteNavigation()]).then(([branding, navigation]) => {
       if (!active) return
       setHeaderLogo(branding.header_logo_url || "/logo.webp")
+      setNavItems(navigation.filter((item) => item.is_visible !== false))
       setTopbar({
         email: branding.topbar_email_label || "gzv.one@gmail.com",
         phone: branding.topbar_phone_label || "(+84) 329 381 489",
@@ -67,8 +62,8 @@ const Header = () => {
     }
   }, [])
 
-  const activePath =
-    NAV_ITEMS.find((item) => item.href !== "/#dich-vu" && pathname.startsWith(item.href))?.href || null
+  const activePath = navItems.find((item) => item.href !== "/" && pathname.startsWith(item.href.split("#")[0]))?.href || null
+  const getLabel = (item: SiteNavItem) => language === "en" ? (item.label_en || item.label_vi) : item.label_vi
 
   return (
     <>
@@ -103,7 +98,7 @@ const Header = () => {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive = item.href === activePath
               return (
                 <Link
@@ -113,7 +108,7 @@ const Header = () => {
                     isActive ? "text-[#ed1c24]" : "text-slate-900 hover:text-[#ed1c24]"
                   }`}
                 >
-                  {item.label}
+                  {getLabel(item)}
                   <span
                     className={`absolute bottom-0 left-3 right-3 h-[3px] bg-[#ed1c24] transition-transform duration-300 ${
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
@@ -135,16 +130,24 @@ const Header = () => {
               variant="outline"
               size="icon"
               className="hidden h-11 w-11 rounded-none border-slate-300 text-slate-900 hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex"
-              aria-label="Search"
+              aria-label={t("common.search")}
             >
               <Search className="h-4 w-4" />
             </Button>
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="hidden h-11 border border-slate-300 bg-white px-3 text-xs font-black uppercase text-slate-950 transition hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex lg:items-center"
+              aria-label="Switch language"
+            >
+              {language === "vi" ? "EN" : "VI"}
+            </button>
             <Button
               variant="outline"
               size="icon"
               className="h-11 w-11 rounded-none border-slate-300 lg:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
-              aria-label="Open menu"
+              aria-label={t("nav.openMenu")}
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -184,14 +187,14 @@ const Header = () => {
               </div>
 
               <nav className="flex-1 px-5 py-6">
-                {NAV_ITEMS.map((item) => (
+                {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center justify-between border-b border-white/10 py-5 text-sm font-black uppercase tracking-wide text-white transition hover:text-[#ed1c24]"
                   >
-                    {item.label}
+                    {getLabel(item)}
                     <ChevronRight className="h-4 w-4 text-[#ed1c24]" />
                   </Link>
                 ))}
@@ -201,9 +204,16 @@ const Header = () => {
                 <p className="mb-4 text-xs font-bold leading-6 text-white/70">{topbar.email}<br />{topbar.phone}</p>
                 <Link href="https://gzver.gzv.one/" target="_blank" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="h-12 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]">
-                    GZVer Login
+                    {t("nav.login")}
                   </Button>
                 </Link>
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="mt-3 h-12 w-full border border-white/15 text-xs font-black uppercase text-white"
+                >
+                  {language === "vi" ? "English" : "Tiếng Việt"}
+                </button>
               </div>
             </motion.aside>
           </>

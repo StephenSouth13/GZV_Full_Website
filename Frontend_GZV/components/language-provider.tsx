@@ -1,112 +1,130 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
 
-type Language = "vi" | "en"
+export type Language = "vi" | "en"
 
-interface LanguageContextType {
+type TranslationMap = Record<string, string>
+
+type LanguageContextType = {
   language: Language
   setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  toggleLanguage: () => void
+  t: (key: string, fallback?: string) => string
+  localize: <T,>(viValue: T, enValue?: T | null) => T
+}
+
+const translations: Record<Language, TranslationMap> = {
+  vi: {
+    "nav.about": "GIỚI THIỆU",
+    "nav.services": "DỊCH VỤ",
+    "nav.projects": "DỰ ÁN",
+    "nav.gzvers": "GZVers",
+    "nav.news": "TIN TỨC",
+    "nav.contact": "LIÊN HỆ",
+    "nav.login": "GZVer Login",
+    "nav.openMenu": "Mở menu",
+    "nav.closeMenu": "Đóng menu",
+    "common.search": "Tìm kiếm",
+    "common.loading": "Đang tải dữ liệu...",
+    "common.viewDetails": "Xem chi tiết",
+    "common.contact": "Liên hệ",
+    "common.backToTop": "Lên đầu trang",
+    "floating.connect": "Kết nối nhanh",
+    "floating.open": "Mở menu liên hệ",
+    "floating.close": "Đóng menu liên hệ",
+    "footer.links": "Liên kết",
+    "footer.connect": "Kết nối",
+    "footer.newsletter": "Đăng ký nhận tin mới",
+    "footer.newsletterDesc": "Nhận thông tin sự kiện, dự án và tin tức mới nhất từ GZV.",
+    "footer.emailPlaceholder": "Email của bạn...",
+    "footer.contact": "Liên hệ GZV",
+    "page.maintenanceTitle": "Trang đang được bảo trì",
+    "page.maintenanceDesc": "Nội dung này đang được admin tạm ẩn và sẽ quay lại khi hoàn tất cập nhật.",
+  },
+  en: {
+    "nav.about": "ABOUT",
+    "nav.services": "SERVICES",
+    "nav.projects": "PROJECTS",
+    "nav.gzvers": "GZVers",
+    "nav.news": "NEWS",
+    "nav.contact": "CONTACT",
+    "nav.login": "GZVer Login",
+    "nav.openMenu": "Open menu",
+    "nav.closeMenu": "Close menu",
+    "common.search": "Search",
+    "common.loading": "Loading data...",
+    "common.viewDetails": "View details",
+    "common.contact": "Contact",
+    "common.backToTop": "Back to top",
+    "floating.connect": "Quick connect",
+    "floating.open": "Open contact menu",
+    "floating.close": "Close contact menu",
+    "footer.links": "Links",
+    "footer.connect": "Connect",
+    "footer.newsletter": "Subscribe",
+    "footer.newsletterDesc": "Get the latest GZV events, projects and insights.",
+    "footer.emailPlaceholder": "Your email...",
+    "footer.contact": "Contact GZV",
+    "page.maintenanceTitle": "Page under maintenance",
+    "page.maintenanceDesc": "This content is temporarily hidden by admin and will return after the update is complete.",
+  },
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-const translations = {
-  vi: {
-    "nav.about": "Giới thiệu",
-    "nav.training": "Đào tạo",
-    "nav.projects": "Dự án",
-    "nav.mentors": "Mentors",
-    "nav.gzver": "gzver",
-    "nav.partners": "Đồng hành",
-    "nav.blog": "Chia sẻ",
-    "nav.contact": "Liên hệ",
-    "nav.login": "Đăng nhập",
-    "nav.gzverlogin": "gzvers",
-    "nav.hrm": "Hệ thống HRM",
-    "nav.register": "Đăng ký",
-    "nav.profile": "Hồ sơ năng lực",
-    "hero.title": "gzv Center – Viện đào tạo kĩ năng",
-    "hero.subtitle": "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp",
-    "hero.cta": "Đăng ký ngay",
-    "footer.contact": "Liên hệ",
-    "footer.social": "Mạng xã hội",
-    "footer.newsletter": "Đăng ký nhận tin",
-    "footer.copyright": "© 2025 gzv Center. Phát triển bởi Phòng Công nghệ thông tin",
-    "about.learning.title": "HỌC TẬP VÀ NỖ LỰC SUỐT ĐỜI",
-    "about.learning.subtitle": "GZV được thành lập bởi những người tâm huyết trong lĩnh vực \"Giáo Dục và Truyền Thừa\" của Việt Nam",
-    "about.yolo.title": "#YOLO",
-    "about.yolo.subtitle": "You Only Live Once",
-    "about.yolo.description": "Chúng ta chỉ sống một lần trên đời, nên hãy sống một cuộc đời thật trọn vẹn!",
-    "about.pdca.title": "PDCA",
-    "about.pdca.description": "PDCA được gzv ứng dụng để quản lý công việc, vận hành dự án và phát triển cá nhân.",
-    "about.kaizen.title": "Kaizen",
-    "about.kaizen.description": "Là nền tảng để phát triển mô hình học tập suốt đời và phát triển không giới hạn.",
-  },
-  en: {
-    "nav.about": "About",
-    "nav.training": "Training",
-    "nav.projects": "Projects",
-    "nav.mentors": "Mentors",
-    "nav.gzver": "gzver",
-    "nav.partners": "Partners",
-    "nav.blog": "Blog",
-    "nav.contact": "Contact",
-    "nav.login": "Login",
-    "nav.gzverlogin": "gzver",
-    "nav.register": "Register",
-    "nav.profile": "Profile",
-    "hero.title": "gzv Center – Mekong Skill Center",
-    "hero.subtitle": "Professional Training and Skill Development Center",
-    "hero.cta": "Register Now",
-    "footer.contact": "Contact",
-    "footer.social": "Social Media",
-    "footer.newsletter": "Newsletter",
-    "footer.copyright": "© 2025 gzv Center. Developed by IT Department",
-    "about.learning.title": "LIFELONG LEARNING AND EFFORT",
-    "about.learning.subtitle": "gzv was founded by passionate people in the field of \"Education and Heritage\" of Vietnam",
-    "about.yolo.title": "#YOLO",
-    "about.yolo.subtitle": "You Only Live Once",
-    "about.yolo.description": "We only live once in life, so let's live a truly fulfilling life!",
-    "about.pdca.title": "PDCA",
-    "about.pdca.description": "PDCA is applied by gzv to manage work, operate projects and develop individuals.",
-    "about.kaizen.title": "Kaizen",
-    "about.kaizen.description": "It is the foundation for developing lifelong learning models and unlimited development.",
-  },
-}
-
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("vi")
+  const [language, setLanguageState] = useState<Language>("vi")
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language") as Language
-    if (savedLanguage && (savedLanguage === "vi" || savedLanguage === "en")) {
-      setLanguage(savedLanguage)
-    }
+    const saved = localStorage.getItem("language")
+    if (saved === "vi" || saved === "en") setLanguageState(saved)
   }, [])
 
-  const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
-    localStorage.setItem("language", lang)
-  }
+  useEffect(() => {
+    document.documentElement.lang = language === "en" ? "en" : "vi"
+  }, [language])
 
-  const t = (key: string): string => {
-    return translations[language][key as keyof (typeof translations)[typeof language]] || key
-  }
+  const value = useMemo<LanguageContextType>(() => {
+    const setLanguage = (lang: Language) => {
+      setLanguageState(lang)
+      localStorage.setItem("language", lang)
+    }
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
-  )
+    return {
+      language,
+      setLanguage,
+      toggleLanguage: () => setLanguage(language === "vi" ? "en" : "vi"),
+      t: (key, fallback) => translations[language][key] || fallback || key,
+      localize: (viValue, enValue) => (language === "en" && enValue ? enValue : viValue),
+    }
+  }, [language])
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
 }
 
 export function useLanguage() {
   const context = useContext(LanguageContext)
-  if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider")
-  }
+  if (!context) throw new Error("useLanguage must be used within a LanguageProvider")
   return context
+}
+
+export function localizeRecord<T extends Record<string, any>>(record: T, language: Language): T {
+  if (language !== "en" || !record || typeof record !== "object") return record
+
+  const localized: Record<string, any> = { ...record, ...(record.en && typeof record.en === "object" ? record.en : {}) }
+
+  for (const [key, value] of Object.entries(record)) {
+    if (!key.endsWith("_en")) continue
+    const baseKey = key.slice(0, -3)
+    if (value !== undefined && value !== null && value !== "") localized[baseKey] = value
+  }
+
+  for (const [key, value] of Object.entries(localized)) {
+    if (Array.isArray(value)) localized[key] = value.map((item) => (item && typeof item === "object" ? localizeRecord(item, language) : item))
+    else if (value && typeof value === "object" && key !== "en") localized[key] = localizeRecord(value, language)
+  }
+
+  return localized as T
 }

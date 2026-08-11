@@ -8,10 +8,11 @@ import { Facebook, Mail, MapPin, MessageCircle, Phone, Send, Youtube } from "luc
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { defaultFooterSettings, getBrandingSettings, getFooterSettings, type FooterSettings } from "@/lib/site-content"
+import { useLanguage } from "@/components/language-provider"
 
 const fallbackLinks = [
   { label: "GIỚI THIỆU", href: "/gioi-thieu", visible: true },
-  { label: "DỊCH VỤ", href: "/#dich-vu", visible: true },
+  { label: "DỊCH VỤ", href: "/dich-vu", visible: true },
   { label: "DỰ ÁN", href: "/du-an", visible: true },
   { label: "GZVers", href: "/gzver", visible: true },
   { label: "TIN TỨC", href: "/tin-tuc", visible: true },
@@ -32,6 +33,7 @@ const FooterHeading = ({ children }: { children: React.ReactNode }) => (
 )
 
 const Footer = () => {
+  const { language, t } = useLanguage()
   const [settings, setSettings] = useState<FooterSettings>(defaultFooterSettings)
 
   useEffect(() => {
@@ -50,10 +52,16 @@ const Footer = () => {
 
   const footerLinks = useMemo(() => {
     const configured = (settings.links || []).filter((item) => item.visible !== false && item.href)
-    return configured.length ? configured : fallbackLinks
-  }, [settings.links])
+    return (configured.length ? configured : fallbackLinks).map((item: any) => ({
+      ...item,
+      label: language === "en" ? (item.label_en || item.en?.label || item.label) : item.label,
+    }))
+  }, [settings.links, language])
 
-  const socialLinks = (settings.social_links || []).filter((item) => item.visible !== false && item.href)
+  const socialLinks = (settings.social_links || []).filter((item) => item.visible !== false && item.href).map((item: any) => ({
+    ...item,
+    label: language === "en" ? (item.label_en || item.en?.label || item.label) : item.label,
+  }))
   const backgroundColor = settings.background_color || "#050505"
   const bottomBackgroundColor = settings.bottom_background_color || backgroundColor
 
@@ -98,7 +106,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <FooterHeading>Liên kết</FooterHeading>
+            <FooterHeading>{t("footer.links")}</FooterHeading>
             <ul className="space-y-3">
               {footerLinks.map((item) => (
                 <li key={`${item.label}-${item.href}`}>
@@ -112,7 +120,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <FooterHeading>Kết nối</FooterHeading>
+            <FooterHeading>{t("footer.connect")}</FooterHeading>
             <div className="mb-5 flex gap-3">
               {socialLinks.map((item) => (
                 <Link
@@ -139,14 +147,14 @@ const Footer = () => {
           </div>
 
           <div>
-            <FooterHeading>{settings.newsletter_title || "Đăng ký nhận tin mới"}</FooterHeading>
+            <FooterHeading>{language === "en" ? ((settings as any).newsletter_title_en || "Subscribe") : (settings.newsletter_title || t("footer.newsletter"))}</FooterHeading>
             <p className="mb-5 text-sm font-bold leading-6 text-white/80">
-              {settings.newsletter_description || "Nhận thông tin sự kiện, dự án và tin tức mới nhất từ GZV."}
+              {language === "en" ? ((settings as any).newsletter_description_en || t("footer.newsletterDesc")) : (settings.newsletter_description || t("footer.newsletterDesc"))}
             </p>
             <form onSubmit={handleNewsletterSubmit} className="mb-5 flex">
               <Input
                 type="email"
-                placeholder="Email của bạn..."
+                placeholder={t("footer.emailPlaceholder")}
                 className="h-12 min-w-0 rounded-none border-0 bg-white px-4 text-sm font-bold text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#ed1c24]"
                 required
               />
@@ -155,7 +163,7 @@ const Footer = () => {
               </Button>
             </form>
             <div className="border border-white/12 bg-white px-5 py-4 text-sm leading-6 text-slate-900">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">Liên hệ GZV</p>
+              <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-500">{t("footer.contact")}</p>
               <p className="font-black">GZV Ltd</p>
               <p className="font-semibold">{settings.phone_label || "(+84) 329 381 489"}</p>
               <p className="font-semibold">{settings.email_label || "Email: gzv.one@gmail.com"}</p>

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -9,22 +9,22 @@ import { Card, CardContent } from "@/components/ui/card"
 export default function NotFound() {
   const suggestions = [
     {
-      title: "Khám phá các khóa học",
-      description: "Tìm hiểu các chương trình đào tạo chuyên nghiệp",
-      href: "/#dich-vu",
+      title: "KhÃ¡m phÃ¡ cÃ¡c khÃ³a há»c",
+      description: "TÃ¬m hiá»ƒu cÃ¡c chÆ°Æ¡ng trÃ¬nh Ä‘Ã o táº¡o chuyÃªn nghiá»‡p",
+      href: "/dich-vu",
       icon: BookOpen,
       color: "from-red-500 to-[#050505]",
     },
     {
-      title: "Gặp gỡ Mentors",
-      description: "Kết nối với các chuyên gia hàng đầu",
+      title: "Gáº·p gá»¡ Mentors",
+      description: "Káº¿t ná»‘i vá»›i cÃ¡c chuyÃªn gia hÃ ng Ä‘áº§u",
       href: "/mentors",
       icon: Users,
       color: "from-green-500 to-green-600",
     },
     {
-      title: "Cộng đồng gzver",
-      description: "Tham gia cộng đồng học viên thành công",
+      title: "Cá»™ng Ä‘á»“ng gzver",
+      description: "Tham gia cá»™ng Ä‘á»“ng há»c viÃªn thÃ nh cÃ´ng",
       href: "/gzver",
       icon: Award,
       color: "from-red-500 to-purple-600",
@@ -100,9 +100,9 @@ export default function NotFound() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="mb-8"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">Oops! Trang không tồn tại</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">Oops! Trang khÃ´ng tá»“n táº¡i</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Có vẻ như bạn đã đi lạc trong hành trình học tập. Đừng lo lắng, gzv Center sẽ giúp bạn tìm đúng đường!
+              CÃ³ váº» nhÆ° báº¡n Ä‘Ã£ Ä‘i láº¡c trong hÃ nh trÃ¬nh há»c táº­p. Äá»«ng lo láº¯ng, gzv Center sáº½ giÃºp báº¡n tÃ¬m Ä‘Ãºng Ä‘Æ°á»ng!
             </p>
           </motion.div>
 
@@ -116,7 +116,7 @@ export default function NotFound() {
             <Link href="/">
               <Button size="lg" className="btn-primary px-8 py-4">
                 <Home className="mr-2 h-5 w-5" />
-                Về trang chủ
+                Vá» trang chá»§
               </Button>
             </Link>
             <Button
@@ -126,12 +126,12 @@ export default function NotFound() {
               onClick={() => window.history.back()}
             >
               <ArrowLeft className="mr-2 h-5 w-5" />
-              Quay lại
+              Quay láº¡i
             </Button>
             <Link href="/chia-se">
               <Button size="lg" variant="outline" className="bg-transparent px-8 py-4">
                 <Search className="mr-2 h-5 w-5" />
-                Tìm kiếm
+                TÃ¬m kiáº¿m
               </Button>
             </Link>
           </motion.div>
@@ -142,7 +142,7 @@ export default function NotFound() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Có thể bạn quan tâm</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-8">CÃ³ thá»ƒ báº¡n quan tÃ¢m</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {suggestions.map((suggestion, index) => (
                 <motion.div
@@ -180,18 +180,18 @@ export default function NotFound() {
             transition={{ duration: 0.8, delay: 1.2 }}
             className="mt-16 p-8 bg-gradient-to-r from-red-50 to-teal-50 rounded-2xl"
           >
-            <h4 className="text-xl font-bold text-gray-900 mb-4">Vẫn không tìm thấy những gì bạn cần?</h4>
-            <p className="text-gray-600 mb-6">Đội ngũ hỗ trợ của gzv Center luôn sẵn sàng giúp đỡ bạn 24/7</p>
+            <h4 className="text-xl font-bold text-gray-900 mb-4">Váº«n khÃ´ng tÃ¬m tháº¥y nhá»¯ng gÃ¬ báº¡n cáº§n?</h4>
+            <p className="text-gray-600 mb-6">Äá»™i ngÅ© há»— trá»£ cá»§a gzv Center luÃ´n sáºµn sÃ ng giÃºp Ä‘á»¡ báº¡n 24/7</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/lien-he">
-                <Button className="btn-secondary">Liên hệ hỗ trợ</Button>
+                <Button className="btn-secondary">LiÃªn há»‡ há»— trá»£</Button>
               </Link>
               <Button
                 variant="outline"
                 className="bg-transparent"
                 onClick={() => window.open("tel:(+84) 329 381 489", "_self")}
               >
-                Gọi hotline: (+84) 329 381 489
+                Gá»i hotline: (+84) 329 381 489
               </Button>
             </div>
           </motion.div>
@@ -204,7 +204,7 @@ export default function NotFound() {
             className="mt-12 text-center"
           >
             <p className="text-sm text-gray-500 italic">
-              💡 Fun fact: Lỗi 404 được đặt tên theo phòng 404 tại CERN - nơi máy chủ web đầu tiên được đặt!
+              ðŸ’¡ Fun fact: Lá»—i 404 Ä‘Æ°á»£c Ä‘áº·t tÃªn theo phÃ²ng 404 táº¡i CERN - nÆ¡i mÃ¡y chá»§ web Ä‘áº§u tiÃªn Ä‘Æ°á»£c Ä‘áº·t!
             </p>
           </motion.div>
         </div>
@@ -212,3 +212,4 @@ export default function NotFound() {
     </div>
   )
 }
+

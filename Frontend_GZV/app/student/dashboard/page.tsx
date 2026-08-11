@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useAuth } from "@/contexts/auth-context"
 // import { useCart } from "@/components/cart/CartProvider"
@@ -31,7 +31,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section với thông tin user thực */}
+      {/* Welcome Section vá»›i thÃ´ng tin user thá»±c */}
       <div className="bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 rounded-lg p-6">
         <div className="flex items-center space-x-4">
           <div className="h-16 w-16 bg-red-50 dark:bg-red-900 rounded-full flex items-center justify-center">
@@ -49,7 +49,7 @@ export default function StudentDashboard() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Chào mừng, {user?.fullName || user?.name || "Học viên"}!
+              ChÃ o má»«ng, {user?.fullName || user?.name || "Há»c viÃªn"}!
             </h1>
             <div className="text-gray-600 dark:text-gray-400 space-y-1 mt-2">
               {user?.email && (
@@ -66,7 +66,7 @@ export default function StudentDashboard() {
               )}
               {user?.role && (
                 <Badge variant="secondary" className="mt-2">
-                  {user.role === 'user' ? 'Học viên' : user.role}
+                  {user.role === 'user' ? 'Há»c viÃªn' : user.role}
                 </Badge>
               )}
             </div>
@@ -80,11 +80,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-[#ed1c24]" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Khóa học</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">KhÃ³a há»c</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.totalCourses}</div>
-              <p className="text-xs text-gray-500">Tổng số đăng ký</p>
+              <p className="text-xs text-gray-500">Tá»•ng sá»‘ Ä‘Äƒng kÃ½</p>
             </div>
           </CardContent>
         </Card>
@@ -93,11 +93,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Tiến độ</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Tiáº¿n Ä‘á»™</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.inProgressCourses}</div>
-              <p className="text-xs text-gray-500">Đang học</p>
+              <p className="text-xs text-gray-500">Äang há»c</p>
             </div>
           </CardContent>
         </Card>
@@ -106,11 +106,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <Award className="h-5 w-5 text-yellow-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Hoàn thành</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">HoÃ n thÃ nh</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.completedCourses}</div>
-              <p className="text-xs text-gray-500">Chứng chỉ</p>
+              <p className="text-xs text-gray-500">Chá»©ng chá»‰</p>
             </div>
           </CardContent>
         </Card>
@@ -119,11 +119,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-purple-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Thời gian</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Thá»i gian</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.totalHours}h</div>
-              <p className="text-xs text-gray-500">Đã học</p>
+              <p className="text-xs text-gray-500">ÄÃ£ há»c</p>
             </div>
           </CardContent>
         </Card>
@@ -134,13 +134,13 @@ export default function StudentDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <BookOpen className="h-5 w-5" />
-            <span>Tiếp tục học</span>
+            <span>Tiáº¿p tá»¥c há»c</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {userProgress.enrolledCourses.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Bạn chưa có khóa học nào. Thêm vào giỏ và thanh toán để bắt đầu.
+              Báº¡n chÆ°a cÃ³ khÃ³a há»c nÃ o. ThÃªm vÃ o giá» vÃ  thanh toÃ¡n Ä‘á»ƒ báº¯t Ä‘áº§u.
             </div>
           ) : (
             <div className="space-y-4">
@@ -156,12 +156,12 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <h4 className="font-semibold">{course.title}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      Tiến độ: {course.progress}% • {course.nextLesson}
+                      Tiáº¿n Ä‘á»™: {course.progress}% â€¢ {course.nextLesson}
                     </p>
                     <Progress value={course.progress} className="w-full" />
                   </div>
                   <Button variant="outline" size="sm">
-                    Tiếp tục học
+                    Tiáº¿p tá»¥c há»c
                   </Button>
                 </div>
               ))}
@@ -173,18 +173,18 @@ export default function StudentDashboard() {
       {/* Shopping Cart */}
       <Card>
         <CardHeader>
-          <CardTitle>Giỏ hàng</CardTitle>
+          <CardTitle>Giá» hÃ ng</CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Giỏ hàng trống. <Link className="text-[#ed1c24] hover:underline" href="/#dich-vu">Xem dịch vụ</Link>
+              Giá» hÃ ng trá»‘ng. <Link className="text-[#ed1c24] hover:underline" href="/dich-vu">Xem dá»‹ch vá»¥</Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-sm">{items.length} khóa học trong giỏ</span>
+              <span className="text-sm">{items.length} khÃ³a há»c trong giá»</span>
               <Link href="/cart">
-                <Button>Xem giỏ hàng</Button>
+                <Button>Xem giá» hÃ ng</Button>
               </Link>
             </div>
           )}
@@ -196,13 +196,13 @@ export default function StudentDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Award className="h-5 w-5" />
-            <span>Thành tích</span>
+            <span>ThÃ nh tÃ­ch</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {userProgress.achievements.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Chưa có thành tích nào. Hoàn thành khóa học để nhận thành tích!
+              ChÆ°a cÃ³ thÃ nh tÃ­ch nÃ o. HoÃ n thÃ nh khÃ³a há»c Ä‘á»ƒ nháº­n thÃ nh tÃ­ch!
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,7 +228,7 @@ export default function StudentDashboard() {
       <div>
         <h2 className="text-xl font-semibold mb-4 flex items-center space-x-2">
           <TrendingUp className="h-5 w-5" />
-          <span>Gợi ý cho bạn</span>
+          <span>Gá»£i Ã½ cho báº¡n</span>
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {recommended.map((course: Course) => (
@@ -244,7 +244,7 @@ export default function StudentDashboard() {
                 <CardTitle className="text-base">{course.title}</CardTitle>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Badge variant="outline">{course.level}</Badge>
-                  <span>•</span>
+                  <span>â€¢</span>
                   <span>{course.duration}</span>
                 </div>
               </CardHeader>
@@ -252,8 +252,8 @@ export default function StudentDashboard() {
                 <div className="text-sm font-semibold text-[#ed1c24]">
                   {formatCurrency(course.price)}
                 </div>
-                <Link href="/#dich-vu">
-                  <Button variant="outline" size="sm">Chi tiết</Button>
+                <Link href="/dich-vu">
+                  <Button variant="outline" size="sm">Chi tiáº¿t</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -263,3 +263,4 @@ export default function StudentDashboard() {
     </div>
   )
 }
+
