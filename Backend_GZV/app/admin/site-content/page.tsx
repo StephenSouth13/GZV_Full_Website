@@ -17,7 +17,7 @@ import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import { ArrowDown, ArrowUp, Bot, Copy, Eye, EyeOff, GripVertical, Image as ImageIcon, Layers, Loader2, MessageCircle, MonitorCog, Plus, RotateCcw, Save, Settings2, Trash2, Video } from "lucide-react"
 
-type NavItem = { id?: string; href: string; label_vi: string; label_en?: string | null; sort_order: number; is_visible: boolean; is_page_enabled: boolean }
+type NavItem = { id?: string; href: string; label_vi: string; label_en?: string | null; parent_href?: string | null; sort_order: number; is_visible: boolean; is_page_enabled: boolean; is_external?: boolean | null }
 type PageContent = { id?: string; slug: string; title: string; menu_title?: string | null; banner_badge?: string | null; banner_title?: string | null; banner_subtitle?: string | null; banner_description?: string | null; banner_image_url?: string | null; content_html?: string | null; is_visible: boolean; seo_title?: string | null; seo_description?: string | null }
 type HomeSection = { id?: string; section_key: string; title: string; subtitle?: string | null; description?: string | null; button_label?: string | null; button_url?: string | null; sort_order: number; item_limit: number; is_visible: boolean; content_html?: string | null; settings?: Record<string, any> }
 type LoadingSettings = { id: number; logo_url: string; title: string; subtitle: string; effect: "orbit" | "pulse" | "bars"; background_from: string; background_to: string; accent_color: string; enabled: boolean; minimum_duration_ms: number }
@@ -372,9 +372,11 @@ function SiteContentManager() {
         href: "/trang-moi",
         label_vi: "TRANG MỚI",
         label_en: "NEW PAGE",
+        parent_href: null,
         sort_order: (items.length + 1) * 10,
         is_visible: true,
         is_page_enabled: true,
+        is_external: false,
       },
     ])
   }
@@ -894,20 +896,33 @@ function SiteContentManager() {
                   <Plus className="mr-2 h-4 w-4" /> Thêm menu
                 </Button>
               </div>
-              {navItems.map((item, index) => (
-                <div key={`${item.href}-${index}`} className="grid gap-3 rounded-none border bg-white p-4 md:grid-cols-[1.2fr_1.2fr_0.7fr_0.7fr_0.7fr_auto] dark:bg-slate-900">
-                  <Field label="Đường dẫn"><Input value={item.href} onChange={(e) => updateNav(index, { href: e.target.value })} /></Field>
-                  <Field label="Tiêu đề header"><Input value={item.label_vi} onChange={(e) => updateNav(index, { label_vi: e.target.value })} /></Field>
-                  <Field label="Thứ tự"><Input type="number" value={item.sort_order} onChange={(e) => updateNav(index, { sort_order: Number(e.target.value) })} /></Field>
-                  <SwitchLine label="Hiện menu" checked={item.is_visible} onChange={(v) => updateNav(index, { is_visible: v })} />
-                  <SwitchLine label="Mở trang" checked={item.is_page_enabled} onChange={(v) => updateNav(index, { is_page_enabled: v })} />
-                  <div className="flex items-end">
-                    <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteNavItem(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              {navItems.map((item, index) => {
+                const parentOptions = navItems.filter((candidate) => candidate.href !== item.href && !candidate.parent_href)
+                return (
+                  <div key={`${item.href}-${index}`} className="grid gap-3 rounded-none border bg-white p-4 md:grid-cols-[1.2fr_1.2fr_0.85fr_0.55fr_0.65fr_0.65fr_0.65fr_auto] dark:bg-slate-900">
+                    <Field label="Đường dẫn / URL"><Input value={item.href} onChange={(e) => updateNav(index, { href: e.target.value })} /></Field>
+                    <Field label="Tiêu đề header"><Input value={item.label_vi} onChange={(e) => updateNav(index, { label_vi: e.target.value })} /></Field>
+                    <Field label="Menu cha">
+                      <Select value={item.parent_href || "__root"} onValueChange={(value) => updateNav(index, { parent_href: value === "__root" ? null : value })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__root">Menu chính</SelectItem>
+                          {parentOptions.map((parent) => <SelectItem key={parent.href} value={parent.href}>{parent.label_vi}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field label="Thứ tự"><Input type="number" value={item.sort_order} onChange={(e) => updateNav(index, { sort_order: Number(e.target.value) })} /></Field>
+                    <SwitchLine label="Hiện menu" checked={item.is_visible} onChange={(v) => updateNav(index, { is_visible: v })} />
+                    <SwitchLine label="Mở trang" checked={item.is_page_enabled} onChange={(v) => updateNav(index, { is_page_enabled: v })} />
+                    <SwitchLine label="Link ngoài" checked={Boolean(item.is_external)} onChange={(v) => updateNav(index, { is_external: v })} />
+                    <div className="flex items-end">
+                      <Button type="button" variant="destructive" size="icon" className="rounded-none" onClick={() => deleteNavItem(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
               <Button onClick={saveNavigation} disabled={saving} className="gap-2 rounded-none bg-[#ed1c24] hover:bg-[#c91218]"><Save className="h-4 w-4" /> Lưu menu header</Button>
             </CardContent>
           </Card>

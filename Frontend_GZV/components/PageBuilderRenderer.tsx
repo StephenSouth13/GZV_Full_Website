@@ -1,13 +1,13 @@
 ﻿"use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Award, BookOpen, Target, Users, ArrowRight, CheckCircle2, Compass, Cpu, Megaphone, Rocket, ShieldCheck, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { api, type Program } from "@/lib/api-supabase"
+import { api, supabase, type Program } from "@/lib/api-supabase"
 import ContactForm from "@/components/ContactForm"
 import PageBanner from "@/components/sections/PageBanner"
 import { getActivePartners, getPageBlocks, type PageBlock } from "@/lib/site-content"
@@ -274,19 +274,121 @@ function WhyColumns({ eyebrow, title, subtitle, columns = [], language = "vi" }:
   )
 }
 
-function AboutBoxes({ eyebrow, title, subtitle, boxes = [] }: any) {
+function AboutBoxes({ eyebrow, title, subtitle, boxes = [], limitPerDepartment = 6 }: any) {
+  const [departments, setDepartments] = useState<any[]>([])
+  const [members, setMembers] = useState<any[]>([])
+  const [activeDepartment, setActiveDepartment] = useState("")
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    Promise.all([
+      supabase.from("gzver_departments").select("*").eq("is_active", true).order("sort_order", { ascending: true }),
+      api.getGzvers(),
+    ]).then(([departmentResult, gzvers]) => {
+      if (!active) return
+      const departmentRows = departmentResult.data || []
+      setDepartments(departmentRows)
+      setMembers(gzvers || [])
+      setActiveDepartment((current) => current || departmentRows[0]?.id || "")
+      setLoading(false)
+    }).catch(() => {
+      if (!active) return
+      setDepartments([])
+      setMembers([])
+      setLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const visibleDepartments = useMemo(() => {
+    if (departments.length) return departments
+    return boxes.map((box: any, index: number) => ({
+      id: box.key || box.title || String(index),
+      name: box.title,
+      description: box.description,
+      color: "#ed1c24",
+      sort_order: index * 10,
+    }))
+  }, [departments, boxes])
+
+  const active = visibleDepartments.find((department) => department.id === activeDepartment) || visibleDepartments[0]
+  const activeMembers = useMemo(() => {
+    if (!active?.id) return []
+    const rows = members.filter((member) => {
+      const department = member.gzver_departments
+      return member.department_id === active.id || department?.id === active.id || member.department_name === active.name || department?.name === active.name
+    })
+    return rows.slice(0, Number(limitPerDepartment) || 6)
+  }, [active, members, limitPerDepartment])
+
   return (
     <section className="bg-slate-50 py-16 dark:bg-slate-900 lg:py-24">
       <div className="container px-4">
         <SectionIntro eyebrow={eyebrow || "Về chúng tôi"} title={title} subtitle={subtitle} />
         <div className="grid gap-5 md:grid-cols-3">
-          {boxes.map((box: any, index: number) => (
-            <Link key={index} href={box.href || "#"} className="group block border border-slate-200 bg-white p-7 transition hover:border-[#ed1c24] hover:bg-[#ed1c24] dark:border-white/10 dark:bg-slate-950">
-              <Users className="mb-8 h-8 w-8 text-[#ed1c24] transition group-hover:text-white" />
-              <h3 className="text-2xl font-black uppercase text-slate-950 transition group-hover:text-white dark:text-white">{box.title}</h3>
-              {box.description && <p className="mt-3 text-sm font-semibold leading-7 text-slate-600 transition group-hover:text-white/80 dark:text-slate-300">{box.description}</p>}
-            </Link>
-          ))}
+          {visibleDepartments.map((department) => {
+            const selected = active?.id === department.id
+            return (
+              <button
+                key={department.id}
+                type="button"
+                onClick={() => setActiveDepartment(department.id)}
+                className={`group min-h-[210px] border p-7 text-left transition ${
+                  selected
+                    ? "border-[#ed1c24] bg-[#ed1c24] text-white shadow-[14px_14px_0_rgba(237,28,36,0.16)]"
+                    : "border-slate-200 bg-white text-slate-950 hover:border-[#ed1c24] dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                }`}
+              >
+                <Users className={`mb-8 h-8 w-8 ${selected ? "text-white" : "text-[#ed1c24]"}`} />
+                <h3 className="text-2xl font-black uppercase">{department.name}</h3>
+                {department.description && <p className={`mt-3 text-sm font-semibold leading-7 ${selected ? "text-white/82" : "text-slate-600 dark:text-slate-300"}`}>{department.description}</p>}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="mt-8 border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-950 lg:p-7">
+          <div className="mb-6 flex flex-col gap-3 border-b border-slate-200 pb-5 dark:border-white/10 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Đội ngũ</p>
+              <h3 className="mt-2 text-3xl font-black uppercase text-slate-950 dark:text-white">{active?.name || "GZVers"}</h3>
+            </div>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-400">{activeMembers.length} hồ sơ đang hiển thị</p>
+          </div>
+
+          {loading ? (
+            <div className="h-36 animate-pulse bg-slate-100 dark:bg-white/5" />
+          ) : activeMembers.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {activeMembers.map((member) => (
+                <Link key={member.id} href={`/gzver/${member.slug}`} className="group grid grid-cols-[96px_1fr] overflow-hidden border border-slate-200 bg-slate-50 transition hover:border-[#ed1c24] dark:border-white/10 dark:bg-white/[0.04]">
+                  <div className="relative h-full min-h-[132px] overflow-hidden bg-slate-200 dark:bg-black">
+                    <img
+                      src={member.avatar_url || "/gzvers/default.webp"}
+                      alt={member.full_name}
+                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                      style={{
+                        objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
+                        transform: `scale(${(member.avatar_scale || 100) / 100})`,
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="text-[10px] font-black uppercase tracking-wide text-[#ed1c24]">{member.position || member.company || active?.name}</p>
+                    <h4 className="mt-2 text-lg font-black uppercase leading-tight text-slate-950 group-hover:text-[#ed1c24] dark:text-white">{member.full_name}</h4>
+                    {(member.headline || member.achievement_summary) && <p className="mt-3 line-clamp-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">{member.headline || member.achievement_summary}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="border border-dashed border-slate-300 p-8 text-center text-sm font-bold text-slate-500 dark:border-white/15 dark:text-slate-400">
+              Ban này chưa có hồ sơ public. Thêm GZVer vào đúng ban trong admin để hiển thị tại đây.
+            </div>
+          )}
         </div>
       </div>
     </section>

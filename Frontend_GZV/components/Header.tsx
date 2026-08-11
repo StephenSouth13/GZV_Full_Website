@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { AnimatePresence, motion } from "framer-motion"
-import { ChevronRight, LogIn, Mail, Menu, Moon, Phone, Search, Sun, X } from "lucide-react"
+import { ChevronDown, ChevronRight, LogIn, Mail, Menu, Moon, Phone, Search, Sun, X } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { defaultNavigation, getBrandingSettings, getSiteNavigation, type SiteNavItem } from "@/lib/site-content"
@@ -70,6 +70,21 @@ const Header = () => {
   const getLabel = (item: SiteNavItem) => language === "en" ? (item.label_en || item.label_vi) : item.label_vi
   const isDark = mounted && resolvedTheme === "dark"
   const toggleTheme = () => setTheme(isDark ? "light" : "dark")
+  const navTree = useMemo(() => {
+    const visible = navItems.filter((item) => item.is_visible !== false)
+    const childMap = new Map<string, SiteNavItem[]>()
+    visible.forEach((item) => {
+      if (!item.parent_href) return
+      childMap.set(item.parent_href, [...(childMap.get(item.parent_href) || []), item])
+    })
+    return visible
+      .filter((item) => !item.parent_href)
+      .map((item) => ({
+        item,
+        children: (childMap.get(item.href) || []).sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+      }))
+      .sort((a, b) => (a.item.sort_order || 0) - (b.item.sort_order || 0))
+  }, [navItems])
 
   return (
     <>
@@ -104,23 +119,42 @@ const Header = () => {
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
-            {navItems.map((item) => {
-              const isActive = item.href === activePath
+            {navTree.map(({ item, children }) => {
+              const isActive = item.href === activePath || children.some((child) => child.href === activePath)
+              const hasChildren = children.length > 0
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`group relative px-3 py-7 text-[12px] font-black transition-colors xl:px-4 ${
-                    isActive ? "text-[#ed1c24]" : "text-slate-900 hover:text-[#ed1c24] dark:text-white dark:hover:text-[#ed1c24]"
-                  }`}
-                >
-                  {getLabel(item)}
-                  <span
-                    className={`absolute bottom-0 left-3 right-3 h-[3px] bg-[#ed1c24] transition-transform duration-300 ${
-                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                <div key={item.href} className="group/menu relative">
+                  <Link
+                    href={item.href}
+                    target={item.is_external ? "_blank" : undefined}
+                    className={`group relative flex items-center gap-1 px-3 py-7 text-[12px] font-black transition-colors xl:px-4 ${
+                      isActive ? "text-[#ed1c24]" : "text-slate-900 hover:text-[#ed1c24] dark:text-white dark:hover:text-[#ed1c24]"
                     }`}
-                  />
-                </Link>
+                  >
+                    {getLabel(item)}
+                    {hasChildren && <ChevronDown className="h-3.5 w-3.5 transition group-hover/menu:rotate-180" />}
+                    <span
+                      className={`absolute bottom-0 left-3 right-3 h-[3px] bg-[#ed1c24] transition-transform duration-300 ${
+                        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+                      }`}
+                    />
+                  </Link>
+                  {hasChildren && (
+                    <div className="invisible absolute left-0 top-full w-72 translate-y-3 border border-slate-200 bg-white p-2 opacity-0 shadow-[0_24px_60px_rgba(0,0,0,0.16)] transition duration-200 group-hover/menu:visible group-hover/menu:translate-y-0 group-hover/menu:opacity-100 dark:border-white/10 dark:bg-[#080808]">
+                      {children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          target={child.is_external ? "_blank" : undefined}
+                          className="flex items-center justify-between border-b border-slate-100 px-4 py-3 text-xs font-black uppercase text-slate-900 transition last:border-b-0 hover:bg-[#ed1c24] hover:text-white dark:border-white/10 dark:text-white"
+                        >
+                          {getLabel(child)}
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )
             })}
           </nav>
@@ -200,17 +234,35 @@ const Header = () => {
                 </Button>
               </div>
 
-              <nav className="flex-1 px-5 py-6">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between border-b border-white/10 py-5 text-sm font-black uppercase tracking-wide text-white transition hover:text-[#ed1c24]"
-                  >
-                    {getLabel(item)}
-                    <ChevronRight className="h-4 w-4 text-[#ed1c24]" />
-                  </Link>
+              <nav className="flex-1 overflow-y-auto px-5 py-6">
+                {navTree.map(({ item, children }) => (
+                  <div key={item.href} className="border-b border-white/10 py-3">
+                    <Link
+                      href={item.href}
+                      target={item.is_external ? "_blank" : undefined}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center justify-between py-2 text-sm font-black uppercase tracking-wide text-white transition hover:text-[#ed1c24]"
+                    >
+                      {getLabel(item)}
+                      <ChevronRight className="h-4 w-4 text-[#ed1c24]" />
+                    </Link>
+                    {children.length > 0 && (
+                      <div className="mt-2 grid gap-2 border-l border-white/10 pl-4">
+                        {children.map((child) => (
+                          <Link
+                            key={child.href}
+                            href={child.href}
+                            target={child.is_external ? "_blank" : undefined}
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="flex items-center justify-between bg-white/[0.04] px-3 py-3 text-xs font-black uppercase text-white/78 transition hover:bg-[#ed1c24] hover:text-white"
+                          >
+                            {getLabel(child)}
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </nav>
 

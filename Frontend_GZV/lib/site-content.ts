@@ -7,9 +7,11 @@ export type SiteNavItem = {
   href: string
   label_vi: string
   label_en?: string | null
+  parent_href?: string | null
   sort_order: number
   is_visible: boolean
   is_page_enabled: boolean
+  is_external?: boolean | null
 }
 
 export type SitePageContent = {
