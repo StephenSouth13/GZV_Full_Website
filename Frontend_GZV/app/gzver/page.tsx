@@ -159,6 +159,10 @@ export default function GzverPage() {
                               fill
                               unoptimized
                               className="object-cover transition duration-700 group-hover:scale-110"
+                              style={{
+                                objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 50}%`,
+                                transform: `scale(${(member.avatar_scale || 100) / 100})`,
+                              }}
                             />
                             <div className="absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" />
                             <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">

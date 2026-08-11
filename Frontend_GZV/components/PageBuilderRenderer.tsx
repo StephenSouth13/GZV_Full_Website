@@ -278,7 +278,15 @@ function PeopleGrid({ eyebrow, title, subtitle, type = "directors", limit = 6 }:
             {items.map((item) => (
               <Link key={item.id} href={`/gzver/${item.slug}`} className="group border border-slate-200 bg-slate-50 p-5 transition hover:border-[#ed1c24] dark:border-white/10 dark:bg-slate-900">
                 <div className="relative aspect-[4/3] overflow-hidden bg-slate-200">
-                  <img src={item.avatar_url || "/gzvers/default.webp"} alt={item.full_name} className="h-full w-full object-cover transition duration-700 group-hover:scale-110" />
+                  <img
+                    src={item.avatar_url || "/gzvers/default.webp"}
+                    alt={item.full_name}
+                    className="h-full w-full object-cover transition duration-700"
+                    style={{
+                      objectPosition: `${item.avatar_position_x ?? 50}% ${item.avatar_position_y ?? 50}%`,
+                      transform: `scale(${(item.avatar_scale || 100) / 100})`,
+                    }}
+                  />
                 </div>
                 <h3 className="mt-5 text-xl font-black uppercase text-slate-950 group-hover:text-[#ed1c24] dark:text-white">{item.full_name}</h3>
                 <p className="mt-1 text-sm font-black uppercase text-[#ed1c24]">{item.position || item.company}</p>
@@ -334,7 +342,7 @@ function DynamicGrid({ source, title, subtitle, limit = 9, background = "#ffffff
         {loading ? (
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-[#ed1c24]" />
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className={source === "partners" ? "grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6" : "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"}>
             {items.map((item, index) => <DynamicCard key={item.id || item.slug || index} item={item} source={source} />)}
           </div>
         )}
@@ -348,6 +356,19 @@ function DynamicCard({ item, source }: { item: any; source: string }) {
   const image = item.image || item.avatar_url || item.logo_url || "/placeholder.jpg"
   const description = item.description || item.excerpt || item.role || item.company || item.website_url || ""
   const href = getDynamicHref(item, source)
+  if (source === "partners") {
+    const logo = (
+      <div className="flex h-28 flex-col justify-between overflow-hidden border border-slate-200 bg-white transition hover:border-[#ed1c24] dark:border-white/10">
+        <div className="flex h-20 items-center justify-center p-4">
+          <img src={image} alt={title} className="max-h-14 w-auto max-w-full object-contain" />
+        </div>
+        <div className="border-t border-slate-200 px-3 py-2 dark:border-white/10">
+          <p className="truncate text-xs font-black text-slate-950">{title}</p>
+        </div>
+      </div>
+    )
+    return href ? <Link href={href} target="_blank" rel="noreferrer">{logo}</Link> : logo
+  }
   const card = (
     <Card className="h-full overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-gray-800">
       <div className="relative h-52 bg-slate-100">

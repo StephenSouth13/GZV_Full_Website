@@ -66,63 +66,27 @@ const HomeBrandSections = () => {
   useEffect(() => {
     let active = true
     Promise.all([
-      getHomeSectionConfig("mission"),
       getHomeSectionConfig("services"),
       getHomeSectionConfig("why_choose"),
       getHomeSectionConfig("about_cta"),
-    ]).then(([mission, services, whyChoose, aboutCta]) => {
+    ]).then(([services, whyChoose, aboutCta]) => {
       if (!active) return
-      setSections({ mission, services, why_choose: whyChoose, about_cta: aboutCta })
+      setSections({ services, why_choose: whyChoose, about_cta: aboutCta })
     })
     return () => {
       active = false
     }
   }, [])
 
-  const mission = sections.mission
   const servicesConfig = sections.services
   const whyChoose = sections.why_choose
   const aboutCta = sections.about_cta
-  const missionPillars = Array.isArray(mission?.settings?.pillars) && mission.settings.pillars.length ? mission.settings.pillars : pillars
   const serviceItems = Array.isArray(servicesConfig?.settings?.services) && servicesConfig.settings.services.length ? servicesConfig.settings.services : services
   const reasonItems = Array.isArray(whyChoose?.settings?.reasons) && whyChoose.settings.reasons.length ? whyChoose.settings.reasons : reasons
   const whyImage = typeof whyChoose?.settings?.image_url === "string" && whyChoose.settings.image_url ? whyChoose.settings.image_url : "/gioi-thieu/19.webp"
 
   return (
     <>
-      {mission?.is_visible !== false && <section className="bg-white py-16 dark:bg-slate-950 lg:py-20">
-        <div className="container">
-          {(mission?.title || mission?.description) && (
-            <div className="mb-10 max-w-3xl">
-              <p className="section-kicker">GZV Core</p>
-              <h2 className="section-title">{mission.title}</h2>
-              {mission.description && <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{mission.description}</p>}
-            </div>
-          )}
-          <div className="grid gap-5 md:grid-cols-3">
-            {missionPillars.map((item: any, index: number) => {
-              const Icon = typeof item.icon === "string" ? iconMap[item.icon] || Target : item.icon || pillars[index]?.icon || Target
-              return (
-                <motion.div
-                  key={item.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: index * 0.08 }}
-                  viewport={{ once: true }}
-                  className="group border border-slate-200 bg-white p-7 shadow-[0_16px_38px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:border-[#ed1c24] dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center bg-[#ed1c24] text-white transition group-hover:bg-[#ed1c24]">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h2 className="mb-3 text-2xl font-black uppercase text-slate-950 dark:text-white">{item.title}</h2>
-                  <p className="text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{item.text || item.description}</p>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      </section>}
-
       {servicesConfig?.is_visible !== false && <section id="dich-vu" className="relative overflow-hidden bg-[#050505] py-16 text-white lg:py-24">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-[#ed1c24]/20" />
         <div className="container relative z-10">
@@ -239,4 +203,3 @@ const HomeBrandSections = () => {
 }
 
 export default HomeBrandSections
-

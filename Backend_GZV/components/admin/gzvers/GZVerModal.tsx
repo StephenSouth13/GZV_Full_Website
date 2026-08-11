@@ -476,28 +476,41 @@ function MediaEditor({ title, field, folder, formData, setFormData, handleFileUp
           <input type="file" className="absolute inset-0 cursor-pointer opacity-0" accept="image/*" onChange={(e) => handleFileUpload(e, folder, field)} />
         </Button>
       </div>
-      <div className={`relative overflow-hidden bg-black ${wide ? "aspect-[16/7]" : "mx-auto aspect-square max-w-[260px]"}`}>
-        {formData[field] ? (
-          <img
-            src={formData[field]}
-            alt={title}
-            className="h-full w-full object-cover"
-            style={{ objectPosition: `${formData[xField] || 50}% ${formData[yField] || 50}%`, transform: `scale(${(formData[scaleField] || 100) / 100})` }}
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs font-black uppercase tracking-widest text-white/25">Chưa có ảnh</div>
-        )}
-      </div>
-      <Field label="URL ảnh">
-        <div className="flex gap-2">
-          <Input className="h-11 rounded-none border-white/10 bg-black text-white" value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} />
-          <Button variant="ghost" size="icon" className="rounded-none text-white hover:bg-white/10" asChild><a href={formData[field] || "#"} target="_blank" rel="noreferrer"><Link2 className="h-4 w-4" /></a></Button>
+      <div className="grid gap-4 xl:grid-cols-[minmax(220px,0.9fr)_1.1fr]">
+        <div className={`relative overflow-hidden border border-white/10 bg-black ${wide ? "aspect-[16/7]" : "mx-auto aspect-square w-full max-w-[300px]"}`}>
+          {formData[field] ? (
+            <img
+              src={formData[field]}
+              alt={title}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: `${formData[xField] || 50}% ${formData[yField] || 50}%`, transform: `scale(${(formData[scaleField] || 100) / 100})` }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs font-black uppercase tracking-widest text-white/25">Chưa có ảnh</div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 bg-black/70 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white">
+            Crop: X {formData[xField] || 50} · Y {formData[yField] || 50} · Zoom {formData[scaleField] || 100}
+          </div>
         </div>
-      </Field>
-      <div className="grid gap-4 md:grid-cols-3">
-        <RangeField label="X" value={formData[xField] || 50} onChange={(value) => setFormData({ ...formData, [xField]: value })} />
-        <RangeField label="Y" value={formData[yField] || 50} onChange={(value) => setFormData({ ...formData, [yField]: value })} />
-        <RangeField label="Zoom" min={80} max={160} value={formData[scaleField] || 100} onChange={(value) => setFormData({ ...formData, [scaleField]: value })} />
+        <div className="space-y-4">
+          <Field label="URL ảnh">
+            <div className="flex gap-2">
+              <Input className="h-11 rounded-none border-white/10 bg-black text-white" value={formData[field] || ""} onChange={(e) => setFormData({ ...formData, [field]: e.target.value })} />
+              <Button variant="ghost" size="icon" className="rounded-none text-white hover:bg-white/10" asChild><a href={formData[field] || "#"} target="_blank" rel="noreferrer"><Link2 className="h-4 w-4" /></a></Button>
+            </div>
+          </Field>
+          <div className="border border-[#ed1c24]/35 bg-black p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Crop ảnh trong khung</p>
+              <Button type="button" variant="outline" className="h-8 rounded-none border-white/10 bg-white/5 px-3 text-[10px] text-white" onClick={() => setFormData({ ...formData, [xField]: 50, [yField]: 50, [scaleField]: 100 })}>Reset</Button>
+            </div>
+            <div className="grid gap-4">
+              <RangeField label="Trái / phải" value={formData[xField] || 50} onChange={(value) => setFormData({ ...formData, [xField]: value })} />
+              <RangeField label="Trên / dưới" value={formData[yField] || 50} onChange={(value) => setFormData({ ...formData, [yField]: value })} />
+              <RangeField label="Zoom" min={80} max={180} value={formData[scaleField] || 100} onChange={(value) => setFormData({ ...formData, [scaleField]: value })} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

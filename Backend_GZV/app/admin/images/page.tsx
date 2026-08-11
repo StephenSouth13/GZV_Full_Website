@@ -41,6 +41,7 @@ import {
 
 const BUCKET = "media"
 const DEFAULT_FOLDERS = [
+  "all",
   "site",
   "site/hero",
   "site/pages",
@@ -111,7 +112,7 @@ function sanitizeFolder(value: string) {
 
 export default function AdminImagesPage() {
   const [folders, setFolders] = useState<string[]>(DEFAULT_FOLDERS)
-  const [currentFolder, setCurrentFolder] = useState("site/pages")
+  const [currentFolder, setCurrentFolder] = useState("all")
   const [items, setItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -149,25 +150,31 @@ export default function AdminImagesPage() {
   const loadFolder = useCallback(async (folder: string) => {
     setLoading(true)
     try {
-      const { data, error } = await supabase.storage.from(BUCKET).list(folder, {
-        limit: 1000,
-        sortBy: { column: "created_at", order: "desc" },
-      })
-      if (error) throw error
-      const mapped: MediaItem[] = (data || []).filter((file) => file.metadata).map((file) => {
-        const path = `${folder}/${file.name}`
-        const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
-        return {
-          name: file.name,
-          path,
-          folder,
-          url: publicUrl,
-          size: (file.metadata as any)?.size ?? 0,
-          mimetype: (file.metadata as any)?.mimetype ?? "",
-          created_at: file.created_at ?? "",
-          updated_at: file.updated_at ?? "",
-        }
-      })
+      const foldersToLoad = folder === "all" ? DEFAULT_FOLDERS.filter((item) => item !== "all") : [folder]
+      const results = await Promise.allSettled(foldersToLoad.map(async (targetFolder) => {
+        const { data, error } = await supabase.storage.from(BUCKET).list(targetFolder, {
+          limit: 1000,
+          sortBy: { column: "created_at", order: "desc" },
+        })
+        if (error) return []
+        return (data || []).filter((file) => file.metadata).map((file) => {
+          const path = `${targetFolder}/${file.name}`
+          const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
+          return {
+            name: file.name,
+            path,
+            folder: targetFolder,
+            url: publicUrl,
+            size: (file.metadata as any)?.size ?? 0,
+            mimetype: (file.metadata as any)?.mimetype ?? "",
+            created_at: file.created_at ?? "",
+            updated_at: file.updated_at ?? "",
+          } as MediaItem
+        })
+      }))
+      const mapped = results
+        .flatMap((result) => result.status === "fulfilled" ? result.value : [])
+        .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
       setItems(mapped)
       setSelectedItem((prev) => prev ? mapped.find((item) => item.path === prev.path) || mapped[0] || null : mapped[0] || null)
     } catch (error: any) {
@@ -217,10 +224,11 @@ export default function AdminImagesPage() {
   const handleUpload = async (files: FileList | null) => {
     if (!files?.length) return
     setUploading(true)
+    const uploadFolder = currentFolder === "all" ? "uploads" : currentFolder
     let ok = 0
     let fail = 0
     for (const file of Array.from(files)) {
-      const path = `${currentFolder}/${Date.now()}_${sanitizeFileName(file.name)}`
+      const path = `${uploadFolder}/${Date.now()}_${sanitizeFileName(file.name)}`
       const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
         cacheControl: "86400",
         upsert: false,

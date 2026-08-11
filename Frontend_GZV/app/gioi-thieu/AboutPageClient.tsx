@@ -136,6 +136,31 @@ const AboutPageClient = () => {
         ]}
       />
 
+      <section className="bg-white py-16 dark:bg-slate-950 lg:py-20">
+        <div className="container">
+          <div className="mb-10 max-w-4xl">
+            <p className="border-l-4 border-[#ed1c24] pl-3 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">GZV Core</p>
+            <h2 className="mt-4 text-4xl font-black uppercase leading-tight text-slate-950 dark:text-white">Sứ mệnh - Tầm nhìn - Giá trị cốt lõi</h2>
+            <p className="mt-4 text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">
+              Những nguyên tắc nền tảng định hướng cách GZV xây dựng đội ngũ, triển khai dịch vụ và đồng hành cùng thế hệ doanh nghiệp mới.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              { title: "Sứ mệnh", text: "Kết nối tri thức, chuyên gia và doanh nghiệp để tạo ra năng lực tăng trưởng có thể đo lường." },
+              { title: "Tầm nhìn", text: "Trở thành hệ sinh thái mentoring, coaching và triển khai dự án thế hệ mới tại Việt Nam." },
+              { title: "Giá trị cốt lõi", text: "Thực chiến, minh bạch, học hỏi liên tục và cam kết tạo tác động thật cho đối tác." },
+            ].map((item, index) => (
+              <article key={item.title} className="border border-slate-200 bg-slate-50 p-7 dark:border-white/10 dark:bg-slate-900">
+                <p className="mb-5 text-5xl font-black text-[#ed1c24]/20">0{index + 1}</p>
+                <h3 className="text-2xl font-black uppercase text-slate-950 dark:text-white">{item.title}</h3>
+                <p className="mt-4 text-sm font-semibold leading-7 text-slate-600 dark:text-slate-300">{item.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Philosophy Section */}
       <section className="py-20 bg-white dark:bg-gray-800 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5">
