@@ -251,13 +251,15 @@ const Header = () => {
 
           {/* Outer Right: Action Buttons */}
           <div className="flex items-center gap-2 shrink-0">
-            <Link href="https://www.gzv.one/login" target="_blank" className="hidden xl:block">
+            {/* GZVer Login - Ẩn UI */}
+            {/* <Link href="https://www.gzv.one/login" target="_blank" className="hidden xl:block">
               <Button className="h-11 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase text-white hover:bg-[#c91218]">
                 <LogIn className="mr-2 h-4 w-4" />
                 GZVer Login
               </Button>
-            </Link>
-            <Button
+            </Link> */}
+            {/* Search - Ẩn UI */}
+            {/* <Button
               variant="outline"
               size="icon"
               style={headerTextColor ? { color: headerTextColor, borderColor: `${headerTextColor}40` } : undefined}
@@ -265,7 +267,7 @@ const Header = () => {
               aria-label={t("common.search")}
             >
               <Search className="h-4 w-4" />
-            </Button>
+            </Button> */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -386,11 +388,12 @@ const Header = () => {
 
               <div className="border-t border-white/10 p-5">
                 <p className="mb-4 text-xs font-bold leading-6 text-white/70">{topbar.email}<br />{topbar.phone}</p>
-                <Link href="https://gzver.gzv.one/" target="_blank" onClick={() => setIsMobileMenuOpen(false)}>
+                {/* GZVer Login - Ẩn UI */}
+                {/* <Link href="https://gzver.gzv.one/" target="_blank" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="h-12 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]">
                     {t("nav.login")}
                   </Button>
-                </Link>
+                </Link> */}
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <button
                     type="button"
