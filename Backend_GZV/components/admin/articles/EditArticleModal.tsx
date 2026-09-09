@@ -49,9 +49,12 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
     }
     setLoading(true)
     try {
-      const authorIds = formData.author_ids?.length > 0
+      const validMemberIds = new Set(members.map((m) => m.id))
+      const requestedIds: string[] = formData.author_ids?.length > 0
         ? formData.author_ids
         : (formData.author_id ? [formData.author_id] : (members.length > 0 ? [members[0].id] : []))
+      // Loại các author_id đã bị xóa khỏi bảng authors để tránh vi phạm khóa ngoại (lỗi 409 khi xuất bản)
+      const authorIds = requestedIds.filter((id) => validMemberIds.has(id))
 
       const { data, error } = await supabase
         .from('articles')

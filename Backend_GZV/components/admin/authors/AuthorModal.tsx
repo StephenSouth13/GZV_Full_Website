@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Loader2,
   Save,
@@ -28,6 +29,7 @@ import {
   ImageIcon,
   Trash2,
   ExternalLink,
+  Link2,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
@@ -42,6 +44,8 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [isSlugLocked, setIsSlugLocked] = useState(true)
+  const [gzvers, setGzvers] = useState<any[]>([])
+  const [selectedGzverId, setSelectedGzverId] = useState("")
   const [formData, setFormData] = useState<any>({
     full_name: "",
     slug: "",
@@ -50,12 +54,14 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
     bio: "",
     linkedin_url: "",
     portfolio_url: "",
+    linked_gzver_id: null,
   })
 
   useEffect(() => {
     if (author && isOpen) {
       setFormData(author)
       setIsSlugLocked(true)
+      setSelectedGzverId(author.linked_gzver_id || "")
     } else if (isOpen) {
       setFormData({
         full_name: "",
@@ -65,10 +71,36 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         bio: "",
         linkedin_url: "",
         portfolio_url: "",
+        linked_gzver_id: null,
       })
       setIsSlugLocked(false)
+      setSelectedGzverId("")
     }
   }, [author, isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+    supabase
+      .from("gzvers")
+      .select("id, full_name, avatar_url, position, headline, achievement_summary, testimonial")
+      .order("full_name", { ascending: true })
+      .then(({ data }) => data && setGzvers(data))
+  }, [isOpen])
+
+  const handlePullFromGzver = () => {
+    const source = gzvers.find((g) => g.id === selectedGzverId)
+    if (!source) return
+    setFormData((prev: any) => ({
+      ...prev,
+      full_name: source.full_name || prev.full_name,
+      slug: isSlugLocked ? generateSlug(source.full_name || prev.full_name) : prev.slug,
+      avatar_url: source.avatar_url || prev.avatar_url,
+      title: source.position || source.headline || prev.title,
+      bio: source.testimonial || source.achievement_summary || prev.bio,
+      linked_gzver_id: source.id,
+    }))
+    toast({ title: "Đã kéo dữ liệu từ GZVer", description: "Bạn có thể chỉnh sửa lại trước khi lưu." })
+  }
 
   const generateSlug = (text: string) => {
     return text
@@ -125,6 +157,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         bio: formData.bio?.trim() || "",
         linkedin_url: formData.linkedin_url?.trim() || null,
         portfolio_url: formData.portfolio_url?.trim() || null,
+        linked_gzver_id: formData.linked_gzver_id || null,
         updated_at: new Date().toISOString(),
       }
 
@@ -172,6 +205,41 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
             </div>
           </div>
         </div>
+
+        {/* Pull from GZVer */}
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4 dark:border-white/10 dark:bg-slate-950/50 sm:flex-row sm:items-center">
+          <Label className="flex shrink-0 items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <Link2 className="h-3.5 w-3.5 text-[#ed1c24]" />
+            Kéo dữ liệu từ GZVer
+          </Label>
+          <Select value={selectedGzverId} onValueChange={setSelectedGzverId}>
+            <SelectTrigger className="h-9 flex-1 rounded-none border-slate-200 bg-white text-xs dark:border-white/10 dark:bg-slate-900">
+              <SelectValue placeholder="Chọn một GZVer để lấy tên, ảnh, chức danh, tiểu sử..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-none border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white">
+              {gzvers.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  {g.full_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!selectedGzverId}
+            onClick={handlePullFromGzver}
+            className="h-9 shrink-0 rounded-none border-[#ed1c24] text-xs font-black uppercase text-[#ed1c24] hover:bg-red-50 dark:hover:bg-red-950/30"
+          >
+            Áp dụng
+          </Button>
+        </div>
+        {formData.linked_gzver_id && (
+          <p className="flex items-center gap-1.5 border-b border-slate-100 bg-white px-6 py-2 text-[10px] font-bold text-slate-400 dark:border-white/5 dark:bg-slate-900">
+            <Link2 className="h-3 w-3" /> Đang liên kết với hồ sơ GZVer. Xóa tác giả này hoặc xóa GZVer đó sẽ không ảnh hưởng tới hồ sơ còn lại.
+          </p>
+        )}
 
         {/* Modal Body */}
         <div className="p-6">

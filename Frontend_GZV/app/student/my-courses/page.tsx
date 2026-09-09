@@ -19,9 +19,9 @@ export default function MyCoursesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold mb-2">KhÃ³a há»c của tôi</h1>
+        <h1 className="text-2xl font-bold mb-2">Khóa học của tôi</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Quản lý và tiếp tục h�c cÃ¡c khÃ³a há»c Ä‘Ã£ Ä‘Äƒng ký
+          Quản lý và tiếp tục học các khóa học đã đăng ký
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export default function MyCoursesPage() {
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-[#ed1c24]" />
-              <span className="font-medium">Äang há»c</span>
+              <span className="font-medium">Đang học</span>
             </div>
             <div className="text-2xl font-bold mt-1">{enrolledCourses.length}</div>
           </CardContent>
@@ -49,7 +49,7 @@ export default function MyCoursesPage() {
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-purple-600" />
-              <span className="font-medium">Tá»•ng giá»</span>
+              <span className="font-medium">Tổng giờ</span>
             </div>
             <div className="text-2xl font-bold mt-1">{userProgress.stats.totalHours}h</div>
           </CardContent>
@@ -58,15 +58,15 @@ export default function MyCoursesPage() {
 
       {/* Enrolled Courses */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">KhÃ³a há»c Ä‘ang há»c</h2>
+        <h2 className="text-xl font-semibold mb-4">Khóa học đang học</h2>
         {enrolledCourses.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-gray-600 dark:text-gray-400 mb-4">
-                Bạn chưa có khóa h�c nÃ o Ä‘ang há»c.
+                Bạn chưa có khóa học nào đang học.
               </div>
               <Link href="/dich-vu">
-                <Button>KhÃ¡m phÃ¡ dá»‹ch vá»¥</Button>
+                <Button>Khám phá dịch vụ</Button>
               </Link>
             </CardContent>
           </Card>
@@ -98,16 +98,16 @@ export default function MyCoursesPage() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Tiáº¿n Ä‘á»™</span>
+                        <span>Tiến độ</span>
                         <span>{course.progress}%</span>
                       </div>
                       <Progress value={course.progress} className="w-full" />
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-500">
-                        Truy cáº­p láº§n cuá»‘i: {new Date(course.lastAccessed).toLocaleDateString('vi-VN')}
+                        Truy cập lần cuối: {new Date(course.lastAccessed).toLocaleDateString('vi-VN')}
                       </span>
-                      <Button size="sm">Tiáº¿p tá»¥c há»c</Button>
+                      <Button size="sm">Tiếp tục học</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -120,7 +120,7 @@ export default function MyCoursesPage() {
       {/* Completed Courses */}
       {completedCourses.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4">KhÃ³a há»c Ä‘ã hoàn thành</h2>
+          <h2 className="text-xl font-semibold mb-4">Khóa học đã hoàn thành</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {completedCourses.map((course) => (
               <Card key={course.id} className="overflow-hidden">
@@ -150,11 +150,11 @@ export default function MyCoursesPage() {
                     {course.certificate && (
                       <Button variant="outline" size="sm">
                         <Award className="h-4 w-4 mr-2" />
-                        Táº£i chá»©ng chá»‰
+                        Tải chứng chỉ
                       </Button>
                     )}
                     <Button variant="ghost" size="sm">
-                      Xem láº¡i bÃ i há»c
+                      Xem lại bài học
                     </Button>
                   </div>
                 </CardContent>

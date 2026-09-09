@@ -31,7 +31,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section vá»›i thông tin user thực */}
+      {/* Welcome Section với thông tin user thực */}
       <div className="bg-gradient-to-r from-red-50 to-red-50 dark:from-red-950/20 dark:to-red-950/20 rounded-lg p-6">
         <div className="flex items-center space-x-4">
           <div className="h-16 w-16 bg-red-50 dark:bg-red-900 rounded-full flex items-center justify-center">
@@ -49,7 +49,7 @@ export default function StudentDashboard() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              ChÃ o má»«ng, {user?.fullName || user?.name || "Há»c viên"}!
+              Chào mừng, {user?.fullName || user?.name || "Học viên"}!
             </h1>
             <div className="text-gray-600 dark:text-gray-400 space-y-1 mt-2">
               {user?.email && (
@@ -66,7 +66,7 @@ export default function StudentDashboard() {
               )}
               {user?.role && (
                 <Badge variant="secondary" className="mt-2">
-                  {user.role === 'user' ? 'Há»c viên' : user.role}
+                  {user.role === 'user' ? 'Học viên' : user.role}
                 </Badge>
               )}
             </div>
@@ -80,11 +80,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <BookOpen className="h-5 w-5 text-[#ed1c24]" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">KhÃ³a há»c</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Khóa học</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.totalCourses}</div>
-              <p className="text-xs text-gray-500">Tá»•ng sá»‘ Ä‘Äƒng ký</p>
+              <p className="text-xs text-gray-500">Tổng số đăng ký</p>
             </div>
           </CardContent>
         </Card>
@@ -93,11 +93,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Tiáº¿n Ä‘á»™</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Tiến độ</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.inProgressCourses}</div>
-              <p className="text-xs text-gray-500">Äang há»c</p>
+              <p className="text-xs text-gray-500">Đang học</p>
             </div>
           </CardContent>
         </Card>
@@ -110,7 +110,7 @@ export default function StudentDashboard() {
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.completedCourses}</div>
-              <p className="text-xs text-gray-500">Chá»©ng chá»‰</p>
+              <p className="text-xs text-gray-500">Chứng chỉ</p>
             </div>
           </CardContent>
         </Card>
@@ -119,11 +119,11 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-purple-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Thá»i gian</span>
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Thời gian</span>
             </div>
             <div className="mt-2">
               <div className="text-2xl font-bold">{userProgress.stats.totalHours}h</div>
-              <p className="text-xs text-gray-500">ÄÃ£ há»c</p>
+              <p className="text-xs text-gray-500">Đã học</p>
             </div>
           </CardContent>
         </Card>
@@ -134,13 +134,13 @@ export default function StudentDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <BookOpen className="h-5 w-5" />
-            <span>Tiáº¿p tá»¥c há»c</span>
+            <span>Tiếp tục học</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {userProgress.enrolledCourses.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Bạn chưa có khóa h�c nào. Thêm vào gi� và thanh toán �‘á»ƒ báº¯t Ä‘ầu.
+              Bạn chưa có khóa học nào. Thêm vào giỏ và thanh toán để bắt đầu.
             </div>
           ) : (
             <div className="space-y-4">
@@ -156,12 +156,12 @@ export default function StudentDashboard() {
                   <div className="flex-1">
                     <h4 className="font-semibold">{course.title}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      Tiáº¿n Ä‘á»™: {course.progress}% â€¢ {course.nextLesson}
+                      Tiến độ: {course.progress}% • {course.nextLesson}
                     </p>
                     <Progress value={course.progress} className="w-full" />
                   </div>
                   <Button variant="outline" size="sm">
-                    Tiáº¿p tá»¥c há»c
+                    Tiếp tục học
                   </Button>
                 </div>
               ))}
@@ -173,18 +173,18 @@ export default function StudentDashboard() {
       {/* Shopping Cart */}
       <Card>
         <CardHeader>
-          <CardTitle>Giá» hàng</CardTitle>
+          <CardTitle>Giỏ hàng</CardTitle>
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Giá» hÃ ng trá»‘ng. <Link className="text-[#ed1c24] hover:underline" href="/dich-vu">Xem dá»‹ch vá»¥</Link>
+              Giỏ hàng trống. <Link className="text-[#ed1c24] hover:underline" href="/dich-vu">Xem dịch vụ</Link>
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <span className="text-sm">{items.length} khÃ³a há»c trong giá»</span>
+              <span className="text-sm">{items.length} khóa học trong giỏ</span>
               <Link href="/cart">
-                <Button>Xem giá» hàng</Button>
+                <Button>Xem giỏ hàng</Button>
               </Link>
             </div>
           )}
@@ -202,7 +202,7 @@ export default function StudentDashboard() {
         <CardContent>
           {userProgress.achievements.length === 0 ? (
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Chưa có thành tích nào. Hoàn thành khóa h�c Ä‘á»ƒ nhận thành tích!
+              Chưa có thành tích nào. Hoàn thành khóa học để nhận thành tích!
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -244,7 +244,7 @@ export default function StudentDashboard() {
                 <CardTitle className="text-base">{course.title}</CardTitle>
                 <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <Badge variant="outline">{course.level}</Badge>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span>{course.duration}</span>
                 </div>
               </CardHeader>

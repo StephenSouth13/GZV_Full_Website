@@ -30,6 +30,7 @@ import {
   Upload,
   UserCheck,
   X,
+  Link2,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
@@ -130,6 +131,7 @@ const defaultForm = {
   is_active: true,
   is_director: false,
   order: 0,
+  linked_author_id: null as string | null,
 }
 
 function normalizeArray<T>(value: any): T[] {
@@ -153,10 +155,37 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
   const [loading, setLoading] = useState(false)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [formData, setFormData] = useState<any>(defaultForm)
+  const [authors, setAuthors] = useState<any[]>([])
+  const [selectedAuthorId, setSelectedAuthorId] = useState("")
+
+  useEffect(() => {
+    if (!open) return
+    supabase
+      .from("authors")
+      .select("id, full_name, avatar_url, title, bio")
+      .order("full_name", { ascending: true })
+      .then(({ data }) => data && setAuthors(data))
+  }, [open])
+
+  const handlePullFromAuthor = () => {
+    const source = authors.find((a) => a.id === selectedAuthorId)
+    if (!source) return
+    setFormData((prev: any) => ({
+      ...prev,
+      full_name: source.full_name || prev.full_name,
+      slug: prev.slug || convertToSlug(source.full_name || prev.full_name),
+      avatar_url: source.avatar_url || prev.avatar_url,
+      position: source.title || prev.position,
+      headline: source.bio || prev.headline,
+      linked_author_id: source.id,
+    }))
+    toast({ title: "Đã kéo dữ liệu từ Tác giả", description: "Bạn có thể chỉnh sửa lại trước khi lưu." })
+  }
 
   useEffect(() => {
     if (!open) return
     if (gzver) {
+      setSelectedAuthorId(gzver.linked_author_id || "")
       setFormData({
         ...defaultForm,
         ...gzver,
@@ -179,6 +208,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         order: gzver.order ?? 0,
       })
     } else {
+      setSelectedAuthorId("")
       const firstDepartment = departments[0]
       setFormData({
         ...defaultForm,
@@ -247,6 +277,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
       const { id, created_at, updated_at, gzver_departments, ...payload } = formData
       const cleanPayload = {
         ...payload,
+        linked_author_id: payload.linked_author_id || null,
         department_id: payload.department_id || null,
         department_name: payload.department_name || null,
         role_level: payload.role_level || null,
@@ -361,6 +392,39 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
           <div className="max-h-[64vh] overflow-y-auto p-6 bg-white dark:bg-slate-950">
             {/* TAB 1: BASIC */}
             <TabsContent value="basic" className="mt-0 space-y-5">
+              <div className="flex flex-col gap-3 border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900 sm:flex-row sm:items-center">
+                <Label className="flex shrink-0 items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <Link2 className="h-3.5 w-3.5 text-[#ed1c24]" />
+                  Kéo dữ liệu từ Tác giả
+                </Label>
+                <Select value={selectedAuthorId} onValueChange={setSelectedAuthorId}>
+                  <SelectTrigger className="h-10 flex-1 rounded-none border-slate-200 bg-white text-xs dark:border-white/10 dark:bg-slate-950">
+                    <SelectValue placeholder="Chọn một Tác giả để lấy tên, ảnh, chức danh, tiểu sử..." />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-none border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white">
+                    {authors.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.full_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={!selectedAuthorId}
+                  onClick={handlePullFromAuthor}
+                  className="h-10 shrink-0 rounded-none border-[#ed1c24] text-xs font-black uppercase text-[#ed1c24] hover:bg-red-50 dark:hover:bg-red-950/30"
+                >
+                  Áp dụng
+                </Button>
+              </div>
+              {formData.linked_author_id && (
+                <p className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                  <Link2 className="h-3 w-3" /> Đang liên kết với hồ sơ Tác giả. Xóa GZVer này hoặc xóa Tác giả đó sẽ không ảnh hưởng tới hồ sơ còn lại.
+                </p>
+              )}
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Họ và tên *">
                   <Input
