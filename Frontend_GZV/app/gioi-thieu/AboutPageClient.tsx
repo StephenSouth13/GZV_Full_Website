@@ -10,12 +10,29 @@ import PeopleGrid from "@/components/sections/about/PeopleGrid"
 import TimelineBlock from "@/components/sections/about/TimelineBlock"
 import MentoringModel from "@/components/sections/about/MentoringModel"
 import CtaBand from "@/components/sections/common/CtaBand"
+import type { PageBlock, SitePageContent } from "@/lib/site-content"
 
-export default function AboutPageClient() {
+type AboutPageClientProps = {
+  initialBlocks?: PageBlock[]
+  initialPage?: SitePageContent | null
+  initialGlobalBanner?: Record<string, any> | null
+  initialSyncAllBanners?: boolean
+}
+
+export default function AboutPageClient({
+  initialBlocks = [],
+  initialPage = null,
+  initialGlobalBanner = null,
+  initialSyncAllBanners = true,
+}: AboutPageClientProps) {
   return (
     <>
-      <PageBanner />
-      <BuilderPageGate slug="gioi-thieu">
+      <PageBanner
+        initialPage={initialPage}
+        initialGlobalBanner={initialGlobalBanner}
+        initialSyncAllBanners={initialSyncAllBanners}
+      />
+      <BuilderPageGate slug="gioi-thieu" initialBlocks={initialBlocks}>
         <StatsBar
           stats={[
             { value: "50+", label: "Doanh nghiệp", description: "Đối tác chiến lược" },

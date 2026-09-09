@@ -25,6 +25,9 @@ interface PageBannerProps {
   overlayOpacity?: number
   imageOpacity?: number
   imageGrayscale?: boolean
+  initialPage?: SitePageContent | null
+  initialGlobalBanner?: Record<string, any> | null
+  initialSyncAllBanners?: boolean
 }
 
 export default function PageBanner({
@@ -43,21 +46,24 @@ export default function PageBanner({
   overlayOpacity,
   imageOpacity,
   imageGrayscale,
+  initialPage = null,
+  initialGlobalBanner = null,
+  initialSyncAllBanners = true,
 }: PageBannerProps) {
   const pathname = usePathname()
-  const [managedPage, setManagedPage] = useState<SitePageContent | null>(null)
-  const [globalBanner, setGlobalBanner] = useState<any>(null)
-  const [syncAll, setSyncAll] = useState(true)
+  const [managedPage, setManagedPage] = useState<SitePageContent | null>(initialPage)
+  const [globalBanner, setGlobalBanner] = useState<any>(initialGlobalBanner)
+  const [syncAll, setSyncAll] = useState(initialSyncAllBanners)
 
   useEffect(() => {
     let active = true
     const slug = getPageSlugFromPath(pathname)
 
-    getSitePageContent(slug).then((data) => {
+    const loadPage = () => getSitePageContent(slug).then((data) => {
       if (active && data) setManagedPage(data)
     })
 
-    getBrandingSettings().then((branding: any) => {
+    const loadBranding = () => getBrandingSettings().then((branding: any) => {
       if (!active || !branding) return
       try {
         if (branding.default_keywords && branding.default_keywords.startsWith('{')) {
@@ -72,10 +78,28 @@ export default function PageBanner({
       } catch (e) { }
     })
 
+    if (!initialPage) loadPage()
+    if (!initialGlobalBanner) loadBranding()
+
+    const channel = supabase
+      .channel(`page-banner:${slug}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_pages' },
+        () => loadPage()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'site_branding_settings' },
+        () => loadBranding()
+      )
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
-  }, [pathname])
+  }, [pathname, initialPage, initialGlobalBanner])
 
   const displayTitle = managedPage?.banner_title || title || globalBanner?.title || ''
   const displayDescription = managedPage?.banner_subtitle || managedPage?.banner_description || subtitle || description || globalBanner?.subtitle || ''

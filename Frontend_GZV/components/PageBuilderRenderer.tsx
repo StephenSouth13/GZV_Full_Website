@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getPageBlocks, type PageBlock } from "@/lib/site-content"
+import { supabase } from "@/lib/api-supabase"
 import { localizeRecord, useLanguage } from "@/components/language-provider"
 
 // Common Sections
@@ -35,26 +36,72 @@ import AboutBoxes from "@/components/sections/home/AboutBoxes"
 import TimelineBlock from "@/components/sections/about/TimelineBlock"
 import MentoringModel from "@/components/sections/about/MentoringModel"
 
-export default function PageBuilderRenderer({ slug, fallback }: { slug: string; fallback?: React.ReactNode }) {
+export default function PageBuilderRenderer({
+  slug,
+  fallback,
+  initialBlocks,
+}: {
+  slug: string
+  fallback?: React.ReactNode
+  initialBlocks?: PageBlock[]
+}) {
   const { language } = useLanguage()
-  const [blocks, setBlocks] = useState<PageBlock[]>([])
-  const [loading, setLoading] = useState(true)
+  const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || [])
+  const [loading, setLoading] = useState(initialBlocks === undefined)
+  const blocksRef = useRef<PageBlock[]>(initialBlocks || [])
+
+  useEffect(() => {
+    blocksRef.current = blocks
+  }, [blocks])
 
   useEffect(() => {
     let active = true
-    getPageBlocks(slug).then((data) => {
+    let refetchTimer: ReturnType<typeof setTimeout> | null = null
+
+    const loadBlocks = (options: { keepPreviousOnEmpty?: boolean } = {}) => getPageBlocks(slug).then((data) => {
       if (!active) return
       let filtered = data || []
       if (slug === "lien-he") {
         filtered = filtered.filter((b) => b.component_type !== "cta_band" && b.block_key !== "cta")
       }
+      if (options.keepPreviousOnEmpty && filtered.length === 0 && blocksRef.current.length > 0) {
+        if (refetchTimer) clearTimeout(refetchTimer)
+        refetchTimer = setTimeout(() => {
+          loadBlocks()
+        }, 500)
+        return
+      }
       setBlocks(filtered)
       setLoading(false)
     })
+
+    if (initialBlocks === undefined) {
+      loadBlocks()
+    } else {
+      setBlocks(initialBlocks)
+      setLoading(false)
+    }
+
+    const channel = supabase
+      .channel(`site-page-blocks:${slug}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "site_page_blocks" },
+        () => {
+          if (refetchTimer) clearTimeout(refetchTimer)
+          refetchTimer = setTimeout(() => {
+            loadBlocks({ keepPreviousOnEmpty: true })
+          }, 350)
+        }
+      )
+      .subscribe()
+
     return () => {
       active = false
+      if (refetchTimer) clearTimeout(refetchTimer)
+      supabase.removeChannel(channel)
     }
-  }, [slug])
+  }, [slug, initialBlocks])
 
   if (loading) return null
   if (blocks.length === 0) return <>{fallback || null}</>
