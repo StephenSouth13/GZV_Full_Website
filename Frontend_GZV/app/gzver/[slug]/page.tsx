@@ -365,20 +365,19 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
             <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
               {/* Sidebar Left */}
               <aside className="border-b border-slate-200 bg-slate-50/70 p-6 text-slate-900 sm:p-8 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
-                {/* Avatar Box */}
-                <div className="relative mb-6 aspect-square w-44 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-48 dark:border-[#0d0d0d] dark:bg-[#141414]">
+                {/* Avatar Box — cùng tỉ lệ khung ảnh 4/4.5 và bo góc như thẻ ở trang danh sách GZVers để đồng bộ hình ảnh */}
+                <div className="relative mb-6 aspect-[4/4.5] w-44 overflow-hidden rounded-2xl border-4 border-white bg-slate-200 shadow-xl sm:w-52 dark:border-[#0d0d0d] dark:bg-[#141414]">
                   {member.avatar_url ? (
                     <Image
                       src={member.avatar_url}
                       alt={member.full_name}
-                      width={260}
-                      height={260}
+                      fill
                       unoptimized
                       onError={(e) => {
                         const target = e.currentTarget as HTMLImageElement
                         target.style.display = "none"
                       }}
-                      className="h-full w-full object-cover"
+                      className="object-cover object-top"
                       style={avatarStyle}
                     />
                   ) : (
