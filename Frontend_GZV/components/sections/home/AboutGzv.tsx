@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import SectionIntro from "@/components/sections/common/SectionIntro"
 import { supabase } from "@/lib/api-supabase"
+import { isVideoUrl, looksLikeHtml, normalizeMediaUrl } from "@/lib/media-url"
 
 export interface AboutGzvProps {
   title?: string
@@ -13,6 +14,8 @@ export interface AboutGzvProps {
   body?: string
   description?: string
   image_url?: string
+  video_url?: string
+  media_type?: string
   image_alt?: string
   position_x?: number
   position_y?: number
@@ -22,127 +25,103 @@ export interface AboutGzvProps {
   show_button?: boolean
 }
 
-export default function AboutGzv({
-  title: propTitle,
-  subtitle: propSubtitle,
-  body: propBody,
-  description: propDescription,
-  image_url: propImageUrl,
-  image_alt: propImageAlt,
-  position_x: propPositionX,
-  position_y: propPositionY,
-  image_size: propImageSize,
-  button_label: propButtonLabel,
-  button_url: propButtonUrl,
-  show_button: propShowButton,
-}: AboutGzvProps) {
+export default function AboutGzv(props: AboutGzvProps) {
   const [dbData, setDbData] = useState<any>(null)
 
   useEffect(() => {
+    if (props.title || props.body || props.description) return
     let active = true
 
     async function loadData() {
-      try {
-        const { data: homeData } = await supabase
-          .from("site_home_sections")
-          .select("*")
-          .eq("section_key", "about_gzv")
-          .maybeSingle()
+      const { data } = await supabase
+        .from("site_home_sections")
+        .select("*")
+        .eq("section_key", "about_gzv")
+        .maybeSingle()
 
-        if (active && homeData) {
-          setDbData({
-            is_visible: homeData.is_visible,
-            title: homeData.title,
-            subtitle: homeData.subtitle,
-            body: homeData.description,
-            image_url: homeData.settings?.image_url || homeData.settings?.image || homeData.image_url,
-            image_alt: homeData.settings?.image_alt,
-            position_x: homeData.settings?.position_x,
-            position_y: homeData.settings?.position_y,
-            image_size: homeData.settings?.image_size,
-            button_label: homeData.button_label,
-            button_url: homeData.button_url,
-            show_button: homeData.settings?.show_button !== false,
-            ...homeData.settings,
-          })
-          return
-        }
-
-        const { data: blockData } = await supabase
-          .from("site_page_blocks")
-          .select("props")
-          .in("component_type", ["about_gzv", "story_split"])
-          .limit(1)
-          .maybeSingle()
-
-        if (active && blockData?.props) {
-          setDbData(blockData.props)
-        }
-      } catch (e) {
-        console.error("Lỗi khi tải dữ liệu AboutGzv:", e)
-      }
+      if (!active || !data) return
+      setDbData({
+        is_visible: data.is_visible,
+        title: data.title,
+        subtitle: data.subtitle,
+        body: data.description,
+        image_url: data.settings?.image_url || data.settings?.image || data.image_url,
+        ...data.settings,
+        button_label: data.button_label,
+        button_url: data.button_url,
+      })
     }
 
     loadData()
-
     return () => {
       active = false
     }
-  }, [])
+  }, [props.title, props.body, props.description])
 
-  if (dbData?.is_visible === false && !propTitle) {
-    return null
-  }
+  const data = { ...dbData, ...props }
+  if (data.is_visible === false) return null
 
-  const DEFAULT_TITLE = "CÂU CHUYỆN GZV"
-  const DEFAULT_SUBTITLE = "Từ một cộng đồng học hỏi đến hệ sinh thái triển khai thực chiến."
-  const DEFAULT_BODY = "GZV được xây dựng để kết nối thế hệ trẻ, chuyên gia và doanh nghiệp trong cùng một môi trường học tập - làm thật - tạo tác động thật. Chúng tôi tin rằng năng lực chỉ bền vững khi được rèn trong dự án thực tế, dưới sự đồng hành của những người có kinh nghiệm."
-  const DEFAULT_IMAGE = "/gioi-thieu/19.webp"
+  const body = data.body || data.description || ""
+  const mediaUrl = data.video_url || data.image_url || ""
+  const isVideo = data.media_type === "video" || isVideoUrl(mediaUrl)
+  const normalizedMediaUrl = normalizeMediaUrl(mediaUrl, isVideo ? "video" : "image")
+  const showButton = data.show_button !== false && (data.button_label || data.button_url)
 
-  const rawTitle = propTitle || dbData?.title
-  const title = (rawTitle && !rawTitle.includes("GZV LTD -")) ? rawTitle : DEFAULT_TITLE
-
-  const rawSubtitle = propSubtitle || dbData?.subtitle
-  const subtitle = (rawSubtitle && rawSubtitle.length > 5) ? rawSubtitle : DEFAULT_SUBTITLE
-
-  const rawBody = propBody || propDescription || dbData?.body || dbData?.description
-  const body = (rawBody && rawBody.length > 40) ? rawBody : DEFAULT_BODY
-
-  const imageUrl = propImageUrl || dbData?.image_url || DEFAULT_IMAGE
-  const imageAlt = propImageAlt || dbData?.image_alt || title
-  const positionX = propPositionX ?? dbData?.position_x ?? 50
-  const positionY = propPositionY ?? dbData?.position_y ?? 50
-  const imageSize = propImageSize ?? dbData?.image_size ?? 100
-  const buttonLabel = propButtonLabel || dbData?.button_label || "XEM CHI TIẾT"
-  const buttonUrl = propButtonUrl || dbData?.button_url || "/gioi-thieu"
-  const showButton = propShowButton ?? dbData?.show_button ?? true
+  if (!data.title && !data.subtitle && !body && !mediaUrl) return null
 
   return (
-    <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
-      <div className="container grid gap-10 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div>
-          <SectionIntro title={title} subtitle={subtitle} align="left" />
-          {body && <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>}
-          {showButton && (buttonLabel || buttonUrl) && (
+    <section className="overflow-hidden bg-white py-12 dark:bg-slate-950 sm:py-16 lg:py-20">
+      <div className={`container grid gap-8 px-4 sm:px-6 lg:items-stretch ${mediaUrl ? "lg:grid-cols-[0.95fr_1.05fr]" : ""}`}>
+        <div className="min-w-0 self-center">
+          <SectionIntro title={data.title} subtitle={data.subtitle} align="left" />
+          {body && looksLikeHtml(body) ? (
+            <div
+              className="prose prose-slate max-w-3xl text-slate-600 dark:prose-invert dark:text-slate-300"
+              dangerouslySetInnerHTML={{ __html: body }}
+            />
+          ) : body ? (
+            <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>
+          ) : null}
+          {showButton && (
             <div className="mt-8">
-              <Link href={buttonUrl || "/gioi-thieu"}>
-                <Button className="h-12 rounded-xl bg-[#ed1c24] px-8 text-sm font-black uppercase text-white hover:bg-[#c91218] transition">
-                  {buttonLabel || "Xem chi tiết"} <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href={data.button_url || "/gioi-thieu"}>
+                <Button className="h-12 rounded-xl bg-[#ed1c24] px-6 text-xs font-black uppercase text-white transition hover:bg-[#c91218] sm:px-8 sm:text-sm">
+                  {data.button_label || "Xem chi tiết"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
           )}
         </div>
-        <div className="relative min-h-[420px] overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900">
-          <img
-            src={imageUrl}
-            alt={imageAlt}
-            className="h-full w-full object-cover"
-            style={{ objectPosition: `${Number(positionX)}% ${Number(positionY)}%`, transform: `scale(${Number(imageSize) / 100})` }}
-          />
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-[#ed1c24]" />
-        </div>
+
+        {mediaUrl && (
+          <div className="relative min-h-[280px] overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900 sm:min-h-[360px] lg:h-full lg:min-h-[420px]">
+            {isVideo ? (
+              /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(normalizedMediaUrl) ? (
+                <video src={normalizedMediaUrl} className="h-full w-full object-cover" controls playsInline />
+              ) : (
+                <iframe
+                  src={normalizedMediaUrl}
+                  className="h-full w-full"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              )
+            ) : (
+              <img
+                src={normalizedMediaUrl}
+                alt={data.image_alt || data.title || "GZV"}
+                className="h-full w-full object-cover"
+                style={{
+                  objectPosition: `${Number(data.position_x ?? 50)}% ${Number(data.position_y ?? 50)}%`,
+                  transform: `scale(${Number(data.image_size ?? 100) / 100})`,
+                }}
+              />
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-[#ed1c24]" />
+          </div>
+        )}
       </div>
     </section>
   )
 }
+

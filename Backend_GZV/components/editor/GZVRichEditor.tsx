@@ -33,10 +33,12 @@ import {
   Type,
   Underline as UnderlineIcon,
   Undo2,
+  Upload,
   Video,
   Youtube as YoutubeIcon,
 } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { isVideoUrl, normalizeMediaUrl } from "@/lib/media-url"
 import { toast } from "@/hooks/use-toast"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
 
@@ -59,6 +61,7 @@ const FONTS = [
 
 const FONT_SIZES = ["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px", "40px", "56px", "72px"]
 const COLORS = ["#050505", "#334155", "#64748b", "#ed1c24", "#c91218", "#f59e0b", "#16a34a", "#2563eb", "#7c3aed", "#db2777", "#ffffff"]
+const HIGHLIGHT_COLORS = ["#fef08a", "#fde68a", "#fecaca", "#bfdbfe", "#bbf7d0", "#ddd6fe", "#fbcfe8", "#e2e8f0"]
 
 const TextFormat = Extension.create({
   name: "textFormat",
@@ -114,8 +117,8 @@ const editorSelectClass = "h-9 border border-slate-200 bg-white px-2 text-xs fon
 const sanitizeUrl = (url: string) => url.trim().replace(/"/g, "&quot;")
 
 const embedHtml = (url: string) => {
-  const cleanUrl = sanitizeUrl(url)
-  if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(cleanUrl)) {
+  const cleanUrl = sanitizeUrl(normalizeMediaUrl(url, "embed"))
+  if (isVideoUrl(cleanUrl) && !/drive\.google\.com/i.test(cleanUrl)) {
     return `<figure class="gzv-embed"><video src="${cleanUrl}" controls playsinline style="width:100%;aspect-ratio:16/9;background:#050505;"></video></figure>`
   }
   return `<figure class="gzv-embed"><iframe src="${cleanUrl}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;"></iframe></figure>`
@@ -130,7 +133,9 @@ export function GZVRichEditor({
 }: Props) {
   const [uploading, setUploading] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const imageFileRef = useRef<HTMLInputElement>(null)
+  const videoFileRef = useRef<HTMLInputElement>(null)
+  const fileRef = imageFileRef
 
   const editor = useEditor({
     extensions: [
@@ -198,6 +203,24 @@ export function GZVRichEditor({
     }
   }, [editor, uploadFolder])
 
+  const uploadVideo = useCallback(async (file: File) => {
+    if (!editor || !file) return
+    setUploading(true)
+    try {
+      const safe = file.name.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "")
+      const path = `${uploadFolder}/videos/${Date.now()}_${safe}`
+      const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type })
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path)
+      editor.chain().focus().insertContent(embedHtml(publicUrl)).run()
+      toast({ title: "Da chen video" })
+    } catch (error: any) {
+      toast({ title: "Loi tai video", description: error.message, variant: "destructive" })
+    } finally {
+      setUploading(false)
+    }
+  }, [editor, uploadFolder])
+
   const setLink = useCallback(() => {
     if (!editor) return
     const previous = editor.getAttributes("link").href
@@ -212,7 +235,7 @@ export function GZVRichEditor({
     const url = window.prompt("Dán URL ảnh:")
     if (!url) return
     const alt = window.prompt("Mô tả ảnh:", "") || ""
-    editor.chain().focus().setImage({ src: url, alt }).run()
+    editor.chain().focus().setImage({ src: normalizeMediaUrl(url, "image"), alt }).run()
   }, [editor])
 
   const insertYoutube = useCallback(() => {
@@ -321,7 +344,29 @@ export function GZVRichEditor({
             </div>
           </div>
 
-          <ToolButton title="Highlight" onClick={() => editor.chain().focus().toggleHighlight({ color: "#fef08a" }).run()} active={editor.isActive("highlight")}><Highlighter size={16} /></ToolButton>
+          <div className="group relative">
+            <ToolButton title="Highlight mau" active={editor.isActive("highlight")}><Highlighter size={16} /></ToolButton>
+            <div className="absolute left-0 top-full z-30 mt-1 hidden grid-cols-4 gap-1 border border-slate-200 bg-white p-2 shadow-xl group-hover:grid">
+              {HIGHLIGHT_COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => editor.chain().focus().toggleHighlight({ color }).run()}
+                  className="h-7 w-7 border border-slate-200 transition hover:scale-110"
+                  style={{ background: color }}
+                />
+              ))}
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => editor.chain().focus().unsetHighlight().run()}
+                className="col-span-4 mt-1 flex items-center justify-center gap-1 py-1 text-[11px] font-black uppercase text-slate-500 hover:text-slate-900"
+              >
+                <Eraser size={12} /> Bo highlight
+              </button>
+            </div>
+          </div>
 
           <Divider />
           <ToolButton title="Danh sách -" onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")}><List size={16} /></ToolButton>
@@ -337,6 +382,7 @@ export function GZVRichEditor({
           <ToolButton title="Ảnh từ thư viện" onClick={() => setPickerOpen(true)}><FolderOpen size={16} /></ToolButton>
           <ToolButton title="Ảnh bằng URL" onClick={insertImageUrl}><ImageIcon size={16} />URL</ToolButton>
           <ToolButton title="YouTube" onClick={insertYoutube}><YoutubeIcon size={16} /></ToolButton>
+          <ToolButton title="Upload video" onClick={() => videoFileRef.current?.click()}>{uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}<Video size={16} /></ToolButton>
           <ToolButton title="Video URL/embed" onClick={insertVideoUrl}><Video size={16} /></ToolButton>
 
           <input
@@ -347,6 +393,17 @@ export function GZVRichEditor({
             onChange={(event) => {
               const file = event.target.files?.[0]
               if (file) uploadImage(file)
+              event.target.value = ""
+            }}
+          />
+          <input
+            ref={videoFileRef}
+            type="file"
+            accept="video/*"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              if (file) uploadVideo(file)
               event.target.value = ""
             }}
           />
@@ -393,10 +450,10 @@ export function GZVRichEditor({
         defaultFolder={uploadFolder}
         onSelect={(result: MediaPickResult) => {
           if (!editor) return
-          if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(result.url)) {
+          if (isVideoUrl(result.url)) {
             editor.chain().focus().insertContent(embedHtml(result.url)).run()
           } else {
-            editor.chain().focus().insertContent(`<p><img src="${sanitizeUrl(result.url)}" alt="${sanitizeUrl(result.alt)}" style="width:${result.width};height:auto;" /></p>`).run()
+            editor.chain().focus().insertContent(`<p><img src="${sanitizeUrl(normalizeMediaUrl(result.url, "image"))}" alt="${sanitizeUrl(result.alt)}" style="width:${result.width};height:auto;" /></p>`).run()
           }
         }}
       />

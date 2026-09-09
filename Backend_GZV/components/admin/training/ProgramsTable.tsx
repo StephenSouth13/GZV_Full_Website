@@ -34,7 +34,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
   const { toast } = useToast()
 
   const handleDelete = async (program: any) => {
-    if (confirm(`Sáº¿p cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a khÃ³a há»c "${program.title}"? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.`)) {
+    if (confirm(`Sếp có chắc chắn mu�‘n xÃ³a khÃ³a há»c "${program.title}"? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoàn tác.`)) {
       try {
         const success = await TrainingService.deleteProgram(program.id)
         if (success) {
@@ -49,10 +49,10 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
 
   const getLevelBadge = (level: string) => {
     const config: any = {
-      'CÆ¡ báº£n': 'bg-red-50 text-[#ed1c24] border-red-100',
-      'Trung cáº¥p': 'bg-amber-50 text-amber-600 border-amber-100',
-      'NÃ¢ng cao': 'bg-purple-50 text-purple-600 border-purple-100',
-      'ChuyÃªn gia': 'bg-rose-50 text-rose-600 border-rose-100'
+      'Cơ bản': 'bg-red-50 text-[#ed1c24] border-red-100',
+      'Trung cấp': 'bg-amber-50 text-amber-600 border-amber-100',
+      'Nâng cao': 'bg-purple-50 text-purple-600 border-purple-100',
+      'Chuyên gia': 'bg-rose-50 text-rose-600 border-rose-100'
     }
     return (
       <Badge variant="outline" className={`${config[level] || 'bg-slate-50 text-slate-500'} font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest border-2`}>
@@ -67,10 +67,10 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
         <TableHeader className="bg-slate-50/50">
           <TableRow className="hover:bg-transparent border-slate-100">
             <TableHead className="w-[500px] font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] py-8 pl-12">Ná»™i dung khÃ³a há»c & Visual</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Chá»‰ sá»‘ há»c viÃªn</TableHead>
-            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">PhÃ¢n loáº¡i</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Chá»‰ sá»‘ há»c viên</TableHead>
+            <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Phân loại</TableHead>
             <TableHead className="font-black text-slate-400 uppercase text-[10px] tracking-[0.2em]">Decor Color</TableHead>
-            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-12">Thao tÃ¡c</TableHead>
+            <TableHead className="text-right font-black text-slate-400 uppercase text-[10px] tracking-[0.2em] pr-12">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,7 +81,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                   <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
                     <Trash2 size={32} />
                   </div>
-                  <p className="font-black text-slate-300 uppercase text-xs tracking-widest">Kho dá»¯ liá»‡u Ä‘ang trá»‘ng, thÆ°a sáº¿p!</p>
+                  <p className="font-black text-slate-300 uppercase text-xs tracking-widest">Kho dá»¯ liá»‡u Ä‘ang trá»‘ng, thưa sếp!</p>
                 </div>
               </TableCell>
             </TableRow>
@@ -90,7 +90,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
               <TableRow key={program.id} className="hover:bg-red-50/20 border-slate-50 transition-all duration-500 group">
                 <TableCell className="py-10 pl-12">
                   <div className="flex items-center gap-6">
-                    {/* Thumbnail xá»‹n xÃ² */}
+                    {/* Thumbnail xá»‹n xò */}
                     <div className="relative h-24 w-40 shrink-0 rounded-[1.5rem] overflow-hidden shadow-xl group-hover:scale-105 transition-transform duration-700 bg-slate-100 border-2 border-white">
                       <img 
                         src={program.image || '/placeholder.jpg'} 
@@ -123,7 +123,7 @@ export function ProgramsTable({ programs, onRefresh }: ProgramsTableProps) {
                     </div>
                     <div>
                       <p className="text-xl font-black text-slate-700 leading-none">{program.students || 0}</p>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">ÄÃ£ Ä‘Äƒng kÃ½</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">ÄÃ£ Ä‘Äƒng ký</p>
                     </div>
                   </div>
                 </TableCell>

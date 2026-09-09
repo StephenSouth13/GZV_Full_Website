@@ -44,28 +44,28 @@ export default function SiteMapPage() {
       title: "Giá»›i thiá»‡u",
       href: "/gioi-thieu",
       icon: <Info className="h-5 w-5" />,
-      description: "ThÃ´ng tin vá» gzv Center, táº§m nhÃ¬n, sá»© má»‡nh vÃ  giÃ¡ trá»‹ cá»‘t lÃµi"
+      description: "ThÃ´ng tin vá» gzv Center, táº§m nhÃ¬n, sá»© má»‡nh vÃ  giÃ¡ trá»‹ cá»‘t lõi"
     },
     {
-      title: "ÄÃ o táº¡o",
+      title: "Äào tạo",
       href: "/dich-vu",
       icon: <GraduationCap className="h-5 w-5" />,
-      description: "CÃ¡c khÃ³a há»c vÃ  chÆ°Æ¡ng trÃ¬nh Ä‘Ã o táº¡o chuyÃªn nghiá»‡p"
+      description: "CÃ¡c khÃ³a há»c và chương trình �‘ào tạo chuyên nghi�‡p"
     },
     {
-      title: "Dá»± Ã¡n",
+      title: "Dự án",
       href: "/du-an",
       icon: <FolderOpen className="h-5 w-5" />,
-      description: "Danh sÃ¡ch cÃ¡c dá»± Ã¡n Ä‘Ã£ vÃ  Ä‘ang triá»ƒn khai"
+      description: "Danh sách các dự án �‘ã và �‘ang triá»ƒn khai"
     },
     {
       title: "Mentors",
       href: "/mentors",
       icon: <Users className="h-5 w-5" />,
-      description: "Äá»™i ngÅ© mentor vÃ  chuyÃªn gia cá»§a gzv Center",
+      description: "Äá»™i ngũ mentor và chuyên gia của gzv Center",
       children: [
         {
-          title: "Chi tiáº¿t mentor",
+          title: "Chi tiết mentor",
           href: "/mentors/[id]",
           icon: <User className="h-4 w-4" />,
           description: "ThÃ´ng tin chi tiáº¿t vá»  tá»«ng mentor",
@@ -98,20 +98,20 @@ export default function SiteMapPage() {
       title: "Chia sẻ",
       href: "/tin-tuc",
       icon: <FileText className="h-5 w-5" />,
-      description: "Blog, bÃ i viáº¿t vÃ  tin tá»©c tá»« gzv Center",
+      description: "Blog, bài viết và tin tức từ gzv Center",
       children: [
         {
-          title: "Danh má»¥c bÃ i viáº¿t",
+          title: "Danh mục bài viết",
           href: "/tin-tuc/category/[category]",
           icon: <FolderOpen className="h-4 w-4" />,
-          description: "BÃ i viáº¿t theo danh má»¥c",
+          description: "Bài viết theo danh mục",
           isDynamic: true
         },
         {
-          title: "Chi tiáº¿t bÃ i viáº¿t",
+          title: "Chi tiết bài viết",
           href: "/tin-tuc/[slug]",
           icon: <FileText className="h-4 w-4" />,
-          description: "Ná»™i dung chi tiáº¿t cá»§a tá»«ng bÃ i viáº¿t",
+          description: "Ná»™i dung chi tiết của từng bài viết",
           isDynamic: true
         }
       ]
@@ -120,46 +120,46 @@ export default function SiteMapPage() {
       title: "LiÃªn há»‡",
       href: "/lien-he",
       icon: <Phone className="h-5 w-5" />,
-      description: "ThÃ´ng tin liÃªn há»‡ vÃ  form gá»­i tin nháº¯n"
+      description: "ThÃ´ng tin liÃªn há»‡ và form gửi tin nhắn"
     }
   ]
 
   const accountPages: SiteMapItem[] = [
     {
-      title: "ÄÄƒng nháº­p",
+      title: "ÄÄƒng nhập",
       href: "/login",
       icon: <LogIn className="h-5 w-5" />,
-      description: "ÄÄƒng nháº­p vÃ o tÃ i khoáº£n cÃ¡ nhÃ¢n"
+      description: "ÄÄƒng nhập vào tài khoản cá nhân"
     },
     {
-      title: "ÄÄƒng kÃ½",
+      title: "ÄÄƒng ký",
       href: "/register",
       icon: <UserPlus className="h-5 w-5" />,
-      description: "Táº¡o tÃ i khoáº£n má»›i"
+      description: "Tạo tài khoản m�›i"
     },
     {
-      title: "Há»“ sÆ¡ cÃ¡ nhÃ¢n",
+      title: "Há»“ sơ cá nhân",
       href: "/profile",
       icon: <User className="h-5 w-5" />,
-      description: "Quáº£n lÃ½ thÃ´ng tin vÃ  tiáº¿n Ä‘á»™ há»c táº­p"
+      description: "Quản lý thông tin và tiến �‘á»™ há»c tập"
     },
     {
       title: "CV Builder",
       href: "/cv",
       icon: <FileText className="h-5 w-5" />,
-      description: "CÃ´ng cá»¥ táº¡o CV trá»±c tuyáº¿n"
+      description: "Công cụ tạo CV trực tuyến"
     }
   ]
 
   const legalPages: SiteMapItem[] = [
     {
-      title: "ChÃ­nh sÃ¡ch báº£o máº­t",
+      title: "Chính sách bảo mật",
       href: "/chinh-sach-bao-mat",
       icon: <Shield className="h-5 w-5" />,
-      description: "ChÃ­nh sÃ¡ch báº£o vá»‡ thÃ´ng tin cÃ¡ nhÃ¢n"
+      description: "Chính sách bảo v�‡ thông tin cá nhân"
     },
     {
-      title: "Äiá»u khoáº£n sá»­ dá»¥ng",
+      title: "Äiá»u khoản sử dụng",
       href: "/dieu-khoan-su-dung",
       icon: <Scale className="h-5 w-5" />,
       description: "Quy Ä‘á»‹nh vÃ  Ä‘iá»u kiá»‡n sá»­ dá»¥ng dá»‹ch vá»¥"
@@ -168,7 +168,7 @@ export default function SiteMapPage() {
       title: "SÆ¡ Ä‘á»“ trang web",
       href: "/so-do-trang-web",
       icon: <MapPin className="h-5 w-5" />,
-      description: "Trang hiá»‡n táº¡i - Báº£n Ä‘á»“ Ä‘iá»u hÆ°á»›ng website"
+      description: "Trang hiá»‡n tại - Bản �‘á»“ Ä‘iá»u hÆ°á»›ng website"
     }
   ]
 
@@ -280,18 +280,18 @@ export default function SiteMapPage() {
               SÆ¡ Ä‘á»“ trang web
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              KhÃ¡m phÃ¡ táº¥t cáº£ cÃ¡c trang vÃ  dá»‹ch vá»¥ cÃ³ sáºµn trÃªn website gzv Center
+              Khám phá tất cả các trang và d�‹ch vụ có sẵn trên website gzv Center
             </p>
           </div>
 
           {/* Main Navigation */}
-          {renderSiteMapSection(siteMapData, "Trang chÃ­nh", 0.1)}
+          {renderSiteMapSection(siteMapData, "Trang chính", 0.1)}
 
           {/* Account Pages */}
-          {renderSiteMapSection(accountPages, "TÃ i khoáº£n ngÆ°á»i dÃ¹ng", 0.3)}
+          {renderSiteMapSection(accountPages, "Tài khoản ngư�i dùng", 0.3)}
 
           {/* Legal Pages */}
-          {renderSiteMapSection(legalPages, "ThÃ´ng tin phÃ¡p lÃ½", 0.5)}
+          {renderSiteMapSection(legalPages, "Thông tin pháp lý", 0.5)}
 
           {/* Additional Info */}
           <motion.div
@@ -300,10 +300,10 @@ export default function SiteMapPage() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="bg-gradient-to-r from-[#ed1c24] to-teal-600 rounded-2xl p-8 text-white text-center"
           >
-            <h3 className="text-2xl font-bold mb-4">Cáº§n há»— trá»£ thÃªm?</h3>
+            <h3 className="text-2xl font-bold mb-4">Cáº§n há»— trợ thêm?</h3>
             <p className="text-red-50 mb-6 max-w-2xl mx-auto">
-              Náº¿u báº¡n khÃ´ng tÃ¬m tháº¥y thÃ´ng tin cáº§n thiáº¿t hoáº·c gáº·p khÃ³ khÄƒn trong viá»‡c Ä‘iá»u hÆ°á»›ng, 
-              Ä‘á»«ng ngáº§n ngáº¡i liÃªn há»‡ vá»›i chÃºng tÃ´i.
+              Nếu bạn không tìm thấy thông tin cần thiết hoặc gặp khó kh�ƒn trong viá»‡c Ä‘iá»u hÆ°á»›ng, 
+              Ä‘ừng ngần ngại liên h�‡ vá»›i chúng tôi.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 

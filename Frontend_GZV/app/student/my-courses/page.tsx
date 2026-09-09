@@ -19,9 +19,9 @@ export default function MyCoursesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold mb-2">KhÃ³a há»c cá»§a tÃ´i</h1>
+        <h1 className="text-2xl font-bold mb-2">KhÃ³a há»c của tôi</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Quáº£n lÃ½ vÃ  tiáº¿p tá»¥c há»c cÃ¡c khÃ³a há»c Ä‘Ã£ Ä‘Äƒng kÃ½
+          Quản lý và tiếp tục h�c cÃ¡c khÃ³a há»c Ä‘Ã£ Ä‘Äƒng ký
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export default function MyCoursesPage() {
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
               <Award className="h-5 w-5 text-green-600" />
-              <span className="font-medium">HoÃ n thÃ nh</span>
+              <span className="font-medium">Hoàn thành</span>
             </div>
             <div className="text-2xl font-bold mt-1">{completedCourses.length}</div>
           </CardContent>
@@ -63,7 +63,7 @@ export default function MyCoursesPage() {
           <Card>
             <CardContent className="p-6 text-center">
               <div className="text-gray-600 dark:text-gray-400 mb-4">
-                Báº¡n chÆ°a cÃ³ khÃ³a há»c nÃ o Ä‘ang há»c.
+                Bạn chưa có khóa h�c nÃ o Ä‘ang há»c.
               </div>
               <Link href="/dich-vu">
                 <Button>KhÃ¡m phÃ¡ dá»‹ch vá»¥</Button>
@@ -91,7 +91,7 @@ export default function MyCoursesPage() {
                 <CardHeader>
                   <CardTitle className="text-lg">{course.title}</CardTitle>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Tiáº¿p theo: {course.nextLesson}
+                    Tiếp theo: {course.nextLesson}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -120,7 +120,7 @@ export default function MyCoursesPage() {
       {/* Completed Courses */}
       {completedCourses.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold mb-4">KhÃ³a há»c Ä‘Ã£ hoÃ n thÃ nh</h2>
+          <h2 className="text-xl font-semibold mb-4">KhÃ³a há»c Ä‘ã hoàn thành</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {completedCourses.map((course) => (
               <Card key={course.id} className="overflow-hidden">
@@ -135,14 +135,14 @@ export default function MyCoursesPage() {
                   <div className="absolute top-4 right-4">
                     <span className="bg-green-600 text-white px-2 py-1 rounded text-sm font-medium">
                       <Award className="inline h-3 w-3 mr-1" />
-                      HoÃ n thÃ nh
+                      Hoàn thành
                     </span>
                   </div>
                 </div>
                 <CardHeader>
                   <CardTitle className="text-lg">{course.title}</CardTitle>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    HoÃ n thÃ nh: {new Date(course.completedDate).toLocaleDateString('vi-VN')}
+                    Hoàn thành: {new Date(course.completedDate).toLocaleDateString('vi-VN')}
                   </div>
                 </CardHeader>
                 <CardContent>

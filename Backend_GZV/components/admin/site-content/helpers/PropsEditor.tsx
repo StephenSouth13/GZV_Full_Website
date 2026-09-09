@@ -28,6 +28,7 @@ import type { PageBlock } from "../types"
 import { Field } from "./BasicHelpers"
 import { ImagePositionAndZoomEditor } from "./ImagePositionAndZoomEditor"
 import { PartnersSectionEditor } from "./PartnersSectionEditor"
+import { GZVRichEditor } from "@/components/editor/GZVRichEditor"
 
 function GzversGridPropsEditor({
   value = {},
@@ -1252,18 +1253,18 @@ export function PropsEditor({
           <Label className="text-xs font-black uppercase tracking-wide text-slate-800 dark:text-slate-200">
             Nội dung chi tiết / Đoạn văn bản (Body / Description)
           </Label>
-          <Textarea
-            rows={4}
+          <GZVRichEditor
             value={value.body ?? value.description ?? ""}
-            onChange={(e) => {
+            minHeight={360}
+            uploadFolder="site-content"
+            placeholder="Nhập nội dung mô tả chi tiết của section..."
+            onChange={(html) => {
               if (value.description !== undefined) {
-                updateKey("description", e.target.value)
+                updateKey("description", html)
               } else {
-                updateKey("body", e.target.value)
+                updateKey("body", html)
               }
             }}
-            className="rounded-none text-xs leading-relaxed border-slate-300 bg-white dark:bg-slate-900 dark:border-white/10"
-            placeholder="Nhập nội dung mô tả chi tiết của section..."
           />
         </div>
       )}

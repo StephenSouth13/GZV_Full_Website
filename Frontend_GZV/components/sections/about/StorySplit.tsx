@@ -4,12 +4,15 @@ import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import SectionIntro from "@/components/sections/common/SectionIntro"
+import { isVideoUrl, looksLikeHtml, normalizeMediaUrl } from "@/lib/media-url"
 
 export interface StorySplitProps {
   title?: string
   subtitle?: string
   body?: string
   image_url?: string
+  video_url?: string
+  media_type?: string
   image_alt?: string
   position_x?: number
   position_y?: number
@@ -24,6 +27,8 @@ export default function StorySplit({
   subtitle,
   body,
   image_url,
+  video_url,
+  media_type,
   image_alt,
   position_x = 50,
   position_y = 50,
@@ -32,12 +37,23 @@ export default function StorySplit({
   button_label,
   button_url,
 }: StorySplitProps) {
+  const mediaUrl = video_url || image_url || ""
+  const video = media_type === "video" || isVideoUrl(mediaUrl)
+  const normalizedMediaUrl = normalizeMediaUrl(mediaUrl, video ? "video" : "image")
+
   return (
-    <section className="bg-white py-16 dark:bg-slate-950 lg:py-24">
-      <div className="container grid gap-10 px-4 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <div>
+    <section className="overflow-hidden bg-white py-12 dark:bg-slate-950 sm:py-16 lg:py-20">
+      <div className={`container grid gap-8 px-4 sm:px-6 lg:items-stretch ${mediaUrl ? "lg:grid-cols-[0.95fr_1.05fr]" : ""}`}>
+        <div className="min-w-0 self-center">
           <SectionIntro title={title} subtitle={subtitle} align="left" />
-          {body && <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>}
+          {body && looksLikeHtml(body) ? (
+            <div
+              className="prose prose-slate max-w-3xl text-slate-600 dark:prose-invert dark:text-slate-300"
+              dangerouslySetInnerHTML={{ __html: body }}
+            />
+          ) : body ? (
+            <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>
+          ) : null}
           {stats.length > 0 ? (
             <div className="mt-8 grid grid-cols-3 border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
               {stats.map((stat: any, index: number) => (
@@ -57,15 +73,30 @@ export default function StorySplit({
             </div>
           ) : null}
         </div>
-        <div className="relative min-h-[420px] overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900">
-          <img
-            src={image_url || "/gioi-thieu/19.webp"}
-            alt={image_alt || title || "GZV"}
-            className="h-full w-full object-cover"
-            style={{ objectPosition: `${Number(position_x)}% ${Number(position_y)}%`, transform: `scale(${Number(image_size) / 100})` }}
-          />
+        {mediaUrl && (
+        <div className="relative min-h-[280px] overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900 sm:min-h-[360px] lg:h-full lg:min-h-[420px]">
+          {video ? (
+            /\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(normalizedMediaUrl) ? (
+              <video src={normalizedMediaUrl} className="h-full w-full object-cover" controls playsInline />
+            ) : (
+              <iframe
+                src={normalizedMediaUrl}
+                className="h-full w-full"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+              />
+            )
+          ) : (
+            <img
+              src={normalizedMediaUrl}
+              alt={image_alt || title || "GZV"}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: `${Number(position_x)}% ${Number(position_y)}%`, transform: `scale(${Number(image_size) / 100})` }}
+            />
+          )}
           <div className="absolute inset-x-0 bottom-0 h-1 bg-[#ed1c24]" />
         </div>
+        )}
       </div>
     </section>
   )
