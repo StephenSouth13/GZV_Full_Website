@@ -18,6 +18,7 @@ import {
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
+import { ImageCropField } from '@/components/media/ImageCropField'
 
 export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -25,13 +26,16 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [members, setMembers] = useState<any[]>([])
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
-  const [formData, setFormData] = useState({ 
-    title: '', 
-    slug: '', 
-    excerpt: '', 
-    content: '', 
-    category: '', 
-    image: '', 
+  const [formData, setFormData] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    category: '',
+    image: '',
+    image_position_x: 50,
+    image_position_y: 50,
+    image_scale: 100,
     author_ids: [] as string[], // Nâng cấp: Mảng đa tác giả
     featured: false,
     status: 'published'
@@ -100,6 +104,9 @@ const handleSubmit = async () => {
       content: formData.content,
       excerpt: formData.excerpt || "",
       image: formData.image || "",
+      image_position_x: Number(formData.image_position_x) || 50,
+      image_position_y: Number(formData.image_position_y) || 50,
+      image_scale: Number(formData.image_scale) || 100,
       category: formData.category || "Tin tức",
       author_ids: authorIds,
       author_id: authorIds[0] || null,
@@ -208,7 +215,14 @@ const handleSubmit = async () => {
               <div className="relative aspect-video rounded-none bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-[#ed1c24] transition-all cursor-pointer shadow-xs">
                 {formData.image ? (
                   <>
-                    <img src={formData.image} className="w-full h-full object-cover" />
+                    <img
+                      src={formData.image}
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${formData.image_position_x ?? 50}% ${formData.image_position_y ?? 50}%`,
+                        transform: `scale(${(formData.image_scale ?? 100) / 100})`,
+                      }}
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
                       <Button variant="destructive" size="icon" className="rounded-none h-8 w-8" onClick={() => setFormData(prev => ({...prev, image: ''}))}>
                         <X className="h-4 w-4" />
@@ -253,6 +267,42 @@ const handleSubmit = async () => {
                   className="h-9 rounded-none border-slate-200 bg-white pl-8.5 text-xs font-mono"
                 />
               </div>
+
+              {formData.image && (
+                <ImageCropField
+                  imageUrl={formData.image}
+                  positionX={formData.image_position_x ?? 50}
+                  positionY={formData.image_position_y ?? 50}
+                  scale={formData.image_scale ?? 100}
+                  aspect="16/10"
+                  label="Căn chỉnh ảnh (áp dụng cho trang Tin tức & chi tiết bài viết)"
+                  onChange={(patch) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      image_position_x: patch.position_x ?? prev.image_position_x,
+                      image_position_y: patch.position_y ?? prev.image_position_y,
+                      image_scale: patch.scale ?? prev.image_scale,
+                    }))
+                  }
+                />
+              )}
+
+              {formData.image && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Preview thật tại /tin-tuc</p>
+                  <div className="w-full max-w-[220px] overflow-hidden border border-slate-200 bg-slate-100 aspect-[16/10]">
+                    <img
+                      src={formData.image}
+                      alt="Preview module"
+                      className="w-full h-full object-cover"
+                      style={{
+                        objectPosition: `${formData.image_position_x ?? 50}% ${formData.image_position_y ?? 50}%`,
+                        transform: `scale(${(formData.image_scale ?? 100) / 100})`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* AUTHORS SECTION (MULTI-SELECT) */}

@@ -149,6 +149,10 @@ export default function NewsPostPage({ params }: { params: { slug: string } }) {
                 unoptimized
                 priority
                 className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  objectPosition: `${post.image_position_x ?? 50}% ${post.image_position_y ?? 50}%`,
+                  transform: `scale(${(post.image_scale ?? 100) / 100})`,
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/60 to-[#070707]/20 dark:from-[#070707] dark:via-[#070707]/60 dark:to-[#070707]/20" />
             </>

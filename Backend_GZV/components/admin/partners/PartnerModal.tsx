@@ -34,6 +34,7 @@ import {
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
+import { ImageCropField } from "@/components/media/ImageCropField"
 import type { Partner, CategoryItem } from "@/app/admin/partners/page"
 
 interface Props {
@@ -49,6 +50,9 @@ interface Props {
 const empty: Omit<Partner, "id" | "created_at" | "updated_at"> = {
   name: "",
   logo_url: "",
+  logo_position_x: 50,
+  logo_position_y: 50,
+  logo_scale: 100,
   category: "doi-tac-khac",
   website_url: "",
   sort_order: 10,
@@ -177,6 +181,9 @@ export function PartnerModal({
     const payload = {
       name: form.name.trim(),
       logo_url: form.logo_url?.trim() || "",
+      logo_position_x: Number(form.logo_position_x) || 50,
+      logo_position_y: Number(form.logo_position_y) || 50,
+      logo_scale: Number(form.logo_scale) || 100,
       category: finalCategory,
       website_url: form.website_url?.trim() || null,
       sort_order: Number(form.sort_order) || 0,
@@ -238,7 +245,11 @@ export function PartnerModal({
                   <img
                     src={form.logo_url}
                     alt="Logo preview"
-                    className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
+                    className="max-h-full max-w-full object-contain transition-transform duration-300"
+                    style={{
+                      objectPosition: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
+                      transform: `scale(${(form.logo_scale ?? 100) / 100})`,
+                    }}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center text-slate-400">
@@ -304,6 +315,47 @@ export function PartnerModal({
                   />
                 </div>
               </div>
+
+              {form.logo_url && (
+                <ImageCropField
+                  imageUrl={form.logo_url}
+                  positionX={form.logo_position_x ?? 50}
+                  positionY={form.logo_position_y ?? 50}
+                  scale={form.logo_scale ?? 100}
+                  aspect="4/3"
+                  cropHeightClassName="h-40"
+                  label="Căn chỉnh logo trong khung"
+                  onChange={(patch) =>
+                    setForm((p: any) => ({
+                      ...p,
+                      logo_position_x: patch.position_x ?? p.logo_position_x,
+                      logo_position_y: patch.position_y ?? p.logo_position_y,
+                      logo_scale: patch.scale ?? p.logo_scale,
+                    }))
+                  }
+                />
+              )}
+
+              {form.logo_url && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Preview thật tại trang Đối tác
+                  </p>
+                  <div className="w-40 border border-slate-200 bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-slate-900">
+                    <div className="w-full h-24 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={form.logo_url}
+                        alt="Preview module"
+                        className="max-h-full max-w-full object-contain"
+                        style={{
+                          objectPosition: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
+                          transform: `scale(${(form.logo_scale ?? 100) / 100})`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Column: Form fields */}

@@ -186,6 +186,10 @@ export default function NewsGrid({
                         src={featured.thumbnail_url || featured.image}
                         alt={featured.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
+                        style={{
+                          objectPosition: `${featured.image_position_x ?? 50}% ${featured.image_position_y ?? 50}%`,
+                          transform: `scale(${(featured.image_scale ?? 100) / 100})`,
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#ed1c24]/10 to-slate-100 dark:to-slate-800 flex items-center justify-center text-slate-400 font-black text-xs uppercase">
@@ -247,6 +251,10 @@ export default function NewsGrid({
                           src={article.thumbnail_url || article.image}
                           alt={article.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
+                          style={{
+                            objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
+                            transform: `scale(${(article.image_scale ?? 100) / 100})`,
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[9px] font-black text-slate-400 uppercase">

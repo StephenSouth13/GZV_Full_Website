@@ -252,12 +252,16 @@ export default function PartnersListSection({
       >
         <Card className="group relative p-4 h-full bg-white border border-slate-200/90 rounded-none dark:border-white/10 dark:bg-slate-900 flex flex-col items-center justify-between transition-all duration-300 hover:border-[#ed1c24] hover:shadow-md overflow-hidden text-center">
           {/* Logo container */}
-          <div className="w-full h-24 flex items-center justify-center p-2">
+          <div className="w-full h-24 flex items-center justify-center overflow-hidden p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={partner.logo_url || "/placeholder.jpg"}
               alt={partner.name}
               className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-105"
+              style={{
+                objectPosition: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
+                transform: `scale(${(partner.logo_scale ?? 100) / 100})`,
+              }}
               loading="lazy"
             />
           </div>

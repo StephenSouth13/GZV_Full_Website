@@ -331,6 +331,10 @@ export default function NewsPage() {
                         src={featured.image}
                         alt={featured.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        style={{
+                          objectPosition: `${featured.image_position_x ?? 50}% ${featured.image_position_y ?? 50}%`,
+                          transform: `scale(${(featured.image_scale ?? 100) / 100})`,
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
@@ -422,6 +426,10 @@ export default function NewsPage() {
                               src={article.image}
                               alt={article.title}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              style={{
+                                objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
+                                transform: `scale(${(article.image_scale ?? 100) / 100})`,
+                              }}
                             />
                           ) : (
                             <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">

@@ -309,6 +309,9 @@
     content: string;
     excerpt?: string;
     image?: string;
+    image_position_x?: number;
+    image_position_y?: number;
+    image_scale?: number;
     category?: string;
     slug: string;
     publish_date: string;

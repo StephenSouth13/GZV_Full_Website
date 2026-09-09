@@ -54,6 +54,9 @@ export interface Partner {
   id: string
   name: string
   logo_url: string
+  logo_position_x?: number
+  logo_position_y?: number
+  logo_scale?: number
   category: string
   website_url: string | null
   sort_order: number
