@@ -12,16 +12,19 @@ import { Badge } from "@/components/ui/badge"
 import {
   X, Plus, Loader2, Send,
   Wand2, Globe,
-  Sparkles, Layout, UserCheck, Type
+  Sparkles, Layout, UserCheck, Type,
+  FolderOpen, Link as LinkIcon
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
+import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
 
 export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
   const [members, setMembers] = useState<any[]>([])
-  
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
+
   const [formData, setFormData] = useState({ 
     title: '', 
     slug: '', 
@@ -220,6 +223,36 @@ const handleSubmit = async () => {
                   </label>
                 )}
               </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <label className="block">
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumb')} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={uploading === 'thumb'}
+                    className="w-full rounded-none border-slate-300 text-[11px] font-black uppercase text-slate-700 hover:bg-slate-100 h-9 pointer-events-none"
+                  >
+                    <Plus className="mr-1.5 h-3.5 w-3.5" /> Tải lên
+                  </Button>
+                </label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setMediaPickerOpen(true)}
+                  className="w-full rounded-none border-slate-300 text-[11px] font-black uppercase text-slate-700 hover:bg-slate-100 h-9"
+                >
+                  <FolderOpen className="mr-1.5 h-3.5 w-3.5 text-[#ed1c24]" /> Thư viện ảnh
+                </Button>
+              </div>
+              <div className="relative mt-2">
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                <Input
+                  value={formData.image || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  placeholder="Hoặc dán URL ảnh trực tiếp..."
+                  className="h-9 rounded-none border-slate-200 bg-white pl-8.5 text-xs font-mono"
+                />
+              </div>
             </div>
 
             {/* AUTHORS SECTION (MULTI-SELECT) */}
@@ -299,6 +332,19 @@ const handleSubmit = async () => {
           </aside>
         </div>
       </DialogContent>
+
+      <MediaPickerDialog
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        defaultFolder="blog"
+        onSelect={(res) => {
+          if (res?.url) {
+            setFormData(prev => ({ ...prev, image: res.url }))
+            toast({ title: "Đã chọn ảnh", description: "Đã áp dụng ảnh bìa từ thư viện." })
+          }
+          setMediaPickerOpen(false)
+        }}
+      />
     </Dialog>
   )
 }

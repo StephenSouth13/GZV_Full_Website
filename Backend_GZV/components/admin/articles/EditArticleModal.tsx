@@ -8,15 +8,17 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Loader2, Edit3, Upload, CheckCircle2, Globe } from 'lucide-react'
+import { Loader2, Edit3, Upload, CheckCircle2, Globe, FolderOpen, Link as LinkIcon, Trash2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
+import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
 
 export function EditArticleModal({ open, onClose, article, onUpdateArticle }: any) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState<string | null>(null)
   const [members, setMembers] = useState<any[]>([])
   const [formData, setFormData] = useState<any>(null)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
   useEffect(() => {
     if (article && open) {
@@ -131,11 +133,50 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
                   {formData.image ? (
                     <>
                       <img src={formData.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" alt="Thumb" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><label className="bg-white text-[#ed1c24] px-4 py-1.5 rounded-none text-[10px] font-black cursor-pointer shadow-md uppercase">ĐỔI ẢNH<input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label></div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7 rounded-none shadow-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setFormData((p: any) => ({ ...p, image: '' }))}
+                        title="Xóa ảnh"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </>
                   ) : (
                     <label className="cursor-pointer flex flex-col items-center gap-2">{uploading === 'thumbnails' ? <Loader2 className="animate-spin text-[#ed1c24]" /> : <Upload size={28} className="text-slate-400" />}<span className="text-[10px] font-black text-slate-400 tracking-wider">TẢI LÊN THUMBNAIL</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label>
                   )}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block">
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleUpload(e, 'thumbnails')} />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={uploading === 'thumbnails'}
+                      className="w-full rounded-none border-slate-300 text-[11px] font-black uppercase text-slate-700 hover:bg-slate-100 h-9 pointer-events-none"
+                    >
+                      <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải lên
+                    </Button>
+                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setMediaPickerOpen(true)}
+                    className="w-full rounded-none border-slate-300 text-[11px] font-black uppercase text-slate-700 hover:bg-slate-100 h-9"
+                  >
+                    <FolderOpen className="mr-1.5 h-3.5 w-3.5 text-[#ed1c24]" /> Thư viện ảnh
+                  </Button>
+                </div>
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-3.5 w-3.5" />
+                  <Input
+                    value={formData.image || ''}
+                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                    placeholder="Hoặc dán URL ảnh trực tiếp..."
+                    className="h-9 rounded-none border-slate-200 bg-white pl-8.5 text-xs font-mono shadow-xs"
+                  />
                 </div>
               </div>
 
@@ -164,6 +205,19 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           </aside>
         </div>
       </DialogContent>
+
+      <MediaPickerDialog
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        defaultFolder="blog"
+        onSelect={(res) => {
+          if (res?.url) {
+            setFormData((p: any) => ({ ...p, image: res.url }))
+            toast({ title: "Đã chọn ảnh", description: "Đã áp dụng ảnh đại diện từ thư viện." })
+          }
+          setMediaPickerOpen(false)
+        }}
+      />
     </Dialog>
   )
 }
