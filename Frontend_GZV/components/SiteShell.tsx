@@ -16,32 +16,27 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   const [navigation, setNavigation] = useState<SiteNavItem[]>([])
   const [loadingSettings, setLoadingSettings] = useState<SiteLoadingSettings>(defaultLoadingSettings)
   const [booting, setBooting] = useState(false)
-  const [routeLoading, setRouteLoading] = useState(false)
 
   useEffect(() => {
     let active = true
     const started = Date.now()
+    const hasShownBootLoader = sessionStorage.getItem('gzv_boot_loader_shown') === '1'
+
     Promise.all([getSiteNavigation(), getSiteLoadingSettings()]).then(([nav, loading]) => {
       if (!active) return
       setNavigation(nav)
       setLoadingSettings(loading)
-      if (!loading.enabled) {
+      if (!loading.enabled || hasShownBootLoader) {
         setBooting(false)
         return
       }
       setBooting(true)
-      const wait = Math.max(0, loading.minimum_duration_ms - (Date.now() - started))
+      sessionStorage.setItem('gzv_boot_loader_shown', '1')
+      const wait = Math.max(0, Math.min(loading.minimum_duration_ms, 900) - (Date.now() - started))
       window.setTimeout(() => active && setBooting(false), wait)
     })
     return () => { active = false }
   }, [])
-
-  useEffect(() => {
-    if (booting || !loadingSettings.enabled) return
-    setRouteLoading(true)
-    const timer = window.setTimeout(() => setRouteLoading(false), Math.min(loadingSettings.minimum_duration_ms, 900))
-    return () => window.clearTimeout(timer)
-  }, [pathname, booting, loadingSettings.enabled, loadingSettings.minimum_duration_ms])
 
   const disabledPage = useMemo(() => {
     const slug = getPageSlugFromPath(pathname)
@@ -52,7 +47,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground">
       <ScrollToTop />
       <SeoBrandingManager />
-      <SiteLoadingOverlay settings={loadingSettings} show={booting || routeLoading} />
+      <SiteLoadingOverlay settings={loadingSettings} show={booting} />
       <Header />
       <main>
         {disabledPage ? (

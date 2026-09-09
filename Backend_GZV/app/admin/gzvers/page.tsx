@@ -299,6 +299,9 @@ export default function AdminGzversPage() {
       items.map((item, idx) => {
         if (idx !== index) return item
         const next = { ...item, ...patch }
+        if (patch.name !== undefined && patch.slug === undefined) {
+          next.slug = slugify(patch.name) || item.slug
+        }
         return next
       })
     )
@@ -358,6 +361,18 @@ export default function AdminGzversPage() {
           .upsert(toInsert, { onConflict: "slug" })
         if (insErr) throw insErr
       }
+
+      const { data: savedDepartments, error: readErr } = await supabase
+        .from("gzver_departments")
+        .select("id, name")
+      if (readErr) throw readErr
+
+      await Promise.all((savedDepartments || []).map((department: any) =>
+        supabase
+          .from("gzvers")
+          .update({ department_name: department.name })
+          .eq("department_id", department.id)
+      ))
 
       toast.success("Đã lưu danh sách ban thành công!")
       fetchData()
@@ -756,6 +771,28 @@ function SortableDepartmentCard({
           placeholder="Nhập tên phòng ban..."
           onChange={(e) => onUpdate({ name: e.target.value })}
         />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-[1fr_96px]">
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Slug URL</Label>
+          <Input
+            className="h-9 rounded-none border-slate-200 bg-white font-mono text-xs text-[#ed1c24] dark:border-white/10 dark:bg-slate-900"
+            value={department.slug}
+            placeholder="ban-dieu-hanh"
+            onChange={(e) => onUpdate({ slug: slugify(e.target.value) })}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Màu</Label>
+          <Input
+            type="color"
+            className="h-9 rounded-none border-slate-200 bg-white p-1 dark:border-white/10 dark:bg-slate-900"
+            value={department.color || "#ed1c24"}
+            onChange={(e) => onUpdate({ color: e.target.value })}
+          />
+        </div>
       </div>
 
       <div className="space-y-1">

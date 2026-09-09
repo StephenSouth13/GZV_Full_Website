@@ -21,10 +21,71 @@ import { Card, CardContent } from "@/components/ui/card"
 import { api, BlogPost, supabase } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/common/PageBanner"
 import StatsBar from "@/components/sections/common/StatsBar"
-import BuilderPageGate from "@/components/BuilderPageGate"
 import { toast } from "@/hooks/use-toast"
+import { useLanguage } from "@/components/language-provider"
+
+const copyByLanguage = {
+  vi: {
+    badge: "Knowledge Hub",
+    title: "Chia sẻ & Tri thức",
+    subtitle: "Nơi hội tụ kiến thức thực tiễn từ chuyên gia GZV Center, chia sẻ kinh nghiệm và phát triển chuyên môn.",
+    searchEyebrow: "Tìm kiếm tin tức",
+    searchPlaceholder: "Nhập từ khóa tìm kiếm bài viết...",
+    categories: "Chuyên mục:",
+    all: "Tất cả",
+    showing: "Hiển thị",
+    posts: "bài viết",
+    featured: "Bài viết nổi bật",
+    readFull: "Đọc bài đầy đủ",
+    latest: "Bài viết mới nhất",
+    readMore: "Đọc tiếp",
+    emptyTitle: "Không tìm thấy bài viết phù hợp",
+    emptyDesc: "Thử tìm kiếm với từ khóa khác hoặc chọn chuyên mục khác.",
+    previous: "Trước",
+    next: "Sau",
+    newsletterTitle: "Đăng ký nhận bản tin mới nhất",
+    newsletterDesc: "Nhận các thông báo mới nhất về tri thức, bài viết chuyên môn và các sự kiện từ GZV.",
+    emailPlaceholder: "Nhập email của bạn...",
+    subscribe: "Đăng ký",
+    subscribed: "Cảm ơn bạn đã đăng ký nhận bản tin thành công!",
+    privacy: "Chúng tôi cam kết bảo mật tuyệt đối email của bạn.",
+    updated: "Cập nhật thường xuyên",
+    articleCount: "bài viết",
+    categoryCount: "chuyên mục",
+  },
+  en: {
+    badge: "Knowledge Hub",
+    title: "Insights & Knowledge",
+    subtitle: "Practical insights from GZV experts, with field notes, experience sharing, and professional growth resources.",
+    searchEyebrow: "Search News",
+    searchPlaceholder: "Search articles by keyword...",
+    categories: "Categories:",
+    all: "All",
+    showing: "Showing",
+    posts: "posts",
+    featured: "Featured Article",
+    readFull: "Read Full Article",
+    latest: "Latest Articles",
+    readMore: "Read More",
+    emptyTitle: "No matching articles found",
+    emptyDesc: "Try another keyword or choose a different category.",
+    previous: "Previous",
+    next: "Next",
+    newsletterTitle: "Subscribe to the latest newsletter",
+    newsletterDesc: "Get the newest GZV insights, professional articles, and event updates.",
+    emailPlaceholder: "Enter your email...",
+    subscribe: "Subscribe",
+    subscribed: "Thank you for subscribing successfully!",
+    privacy: "We keep your email private and secure.",
+    updated: "Updated regularly",
+    articleCount: "articles",
+    categoryCount: "categories",
+  },
+}
 
 export default function NewsPage() {
+  const { language } = useLanguage()
+  const copy = copyByLanguage[language]
   const [articles, setArticles] = useState<BlogPost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -39,9 +100,9 @@ export default function NewsPage() {
   useEffect(() => {
     let active = true
 
-    const fetchPosts = async () => {
+    const fetchPosts = async (showLoading = true) => {
       try {
-        setIsLoading(true)
+        if (showLoading) setIsLoading(true)
         const data = await api.getBlogPosts()
         if (active) {
           setArticles(data || [])
@@ -55,8 +116,15 @@ export default function NewsPage() {
 
     fetchPosts()
 
+    const channel = supabase
+      .channel("news-page:articles")
+      .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => fetchPosts(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "authors" }, () => fetchPosts(false))
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [])
 
@@ -149,17 +217,24 @@ export default function NewsPage() {
         .insert({ email: newsletterEmail.trim().toLowerCase() })
       if (error) {
         if (error.code === "23505") {
-          toast({ title: "Thông báo", description: "Email này đã đăng ký nhận tin rồi!" })
+          toast({
+            title: language === "en" ? "Notice" : "Thông báo",
+            description: language === "en" ? "This email has already subscribed." : "Email này đã đăng ký nhận tin rồi!",
+          })
         } else {
           throw error
         }
       } else {
         setSubscribed(true)
-        toast({ title: "Thành công!", description: "Cảm ơn bạn đã đăng ký nhận bản tin thành công!" })
+        toast({ title: language === "en" ? "Success!" : "Thành công!", description: copy.subscribed })
       }
       setNewsletterEmail("")
     } catch {
-      toast({ title: "Lỗi", description: "Có lỗi xảy ra, vui lòng thử lại!", variant: "destructive" })
+      toast({
+        title: language === "en" ? "Error" : "Lỗi",
+        description: language === "en" ? "Something went wrong, please try again." : "Có lỗi xảy ra, vui lòng thử lại!",
+        variant: "destructive",
+      })
     } finally {
       setIsSubscribing(false)
     }
@@ -168,9 +243,9 @@ export default function NewsPage() {
   return (
     <>
       <PageBanner
-        badge="Knowledge Hub"
-        title="Chia sẻ & Tri thức"
-        subtitle="Nơi hội tụ kiến thức thực tiễn từ chuyên gia GZV Center, chia sẻ kinh nghiệm và phát triển chuyên môn."
+        badge={copy.badge}
+        title={copy.title}
+        subtitle={copy.subtitle}
       />
 
       <StatsBar
@@ -188,12 +263,12 @@ export default function NewsPage() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-l-4 border-l-[#ed1c24] rounded-none p-5 space-y-4 shadow-xs">
               <div className="max-w-md">
                 <span className="text-[10px] tracking-widest text-[#ed1c24] font-black uppercase block mb-1.5">
-                  TÌM KIẾM TIN TỨC
+                  {copy.searchEyebrow}
                 </span>
                 <div className="relative">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                   <Input
-                    placeholder="Nhập từ khóa tìm kiếm bài viết..."
+                    placeholder={copy.searchPlaceholder}
                     value={search}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="pl-10 h-9 rounded-none border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-950 text-xs font-semibold placeholder:text-slate-400 focus-visible:border-[#ed1c24] focus-visible:ring-1 focus-visible:ring-[#ed1c24]"
@@ -204,7 +279,7 @@ export default function NewsPage() {
               <div className="border-t border-slate-100 dark:border-white/10 pt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] tracking-widest text-slate-500 font-black uppercase mr-1 flex items-center gap-1">
-                    Chuyên mục:
+                    {copy.categories}
                   </span>
                   <button
                     type="button"
@@ -215,7 +290,7 @@ export default function NewsPage() {
                         : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    TẤT CẢ
+                    {copy.all}
                   </button>
                   {categories.map((c) => (
                     <button
@@ -234,7 +309,7 @@ export default function NewsPage() {
                 </div>
 
                 <div className="text-[10px] font-black uppercase tracking-widest text-slate-500 md:text-right select-none">
-                  Hiển thị <span className="text-slate-900 dark:text-white font-bold">{filtered.length}</span> / {articles.length} bài viết
+                  {copy.showing} <span className="text-slate-900 dark:text-white font-bold">{filtered.length}</span> / {articles.length} {copy.posts}
                 </div>
               </div>
             </div>
@@ -244,7 +319,7 @@ export default function NewsPage() {
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-t-4 border-t-[#ed1c24] rounded-none p-5 md:p-6 group relative overflow-hidden transition-all space-y-4 shadow-xs">
                 <div className="pb-1">
                   <h3 className="text-base md:text-xl font-black uppercase tracking-wider text-[#ed1c24]">
-                    BÀI VIẾT NỔI BẬT
+                    {copy.featured}
                   </h3>
                 </div>
 
@@ -300,7 +375,7 @@ export default function NewsPage() {
 
                       <Link href={`/tin-tuc/${featured.slug}`}>
                         <Button className="h-9 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase tracking-widest text-white hover:bg-[#c91218]">
-                          ĐỌC BÀI ĐẦY ĐỦ
+                          {copy.readFull}
                         </Button>
                       </Link>
                     </div>
@@ -313,7 +388,7 @@ export default function NewsPage() {
             <div className="space-y-6">
               <div className="border-b border-slate-200 dark:border-white/10 pb-2.5 text-center">
                 <h3 className="text-xs md:text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white inline-flex items-center justify-center gap-2">
-                  Bài viết mới nhất
+                  {copy.latest}
                 </h3>
               </div>
 
@@ -384,7 +459,7 @@ export default function NewsPage() {
                             )}
 
                             <span className="text-[#ed1c24] uppercase group-hover:underline flex items-center gap-0.5">
-                              ĐỌC TIẾP →
+                              {copy.readMore} →
                             </span>
                           </div>
                         </div>
@@ -398,10 +473,10 @@ export default function NewsPage() {
                     <Search className="h-5 w-5 text-slate-400" />
                   </div>
                   <p className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
-                    Không tìm thấy bài viết phù hợp
+                    {copy.emptyTitle}
                   </p>
                   <p className="text-[11px] text-slate-500 mt-1.5 px-6 leading-relaxed font-semibold">
-                    Thử tìm kiếm với từ khóa khác hoặc chọn chuyên mục khác.
+                    {copy.emptyDesc}
                   </p>
                 </div>
               )}
@@ -417,7 +492,7 @@ export default function NewsPage() {
                   size="sm"
                   className="h-8 text-xs font-bold rounded-none border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-900 dark:text-white"
                 >
-                  Trước
+                  {copy.previous}
                 </Button>
                 {getPaginationItems().map((item, idx) => {
                   if (item === "...") {
@@ -450,7 +525,7 @@ export default function NewsPage() {
                   size="sm"
                   className="h-8 text-xs font-bold rounded-none border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-900 dark:text-white"
                 >
-                  Sau
+                  {copy.next}
                 </Button>
               </div>
             )}
@@ -469,10 +544,10 @@ export default function NewsPage() {
                       <Mail className="h-5 w-5 text-white" />
                     </div>
                     <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-slate-950 dark:text-white mb-2">
-                      Đăng ký nhận bản tin mới nhất
+                      {copy.newsletterTitle}
                     </h2>
                     <p className="text-slate-500 mb-6 text-xs leading-relaxed font-semibold">
-                      Nhận các thông báo mới nhất về tri thức, bài viết chuyên môn và các sự kiện từ GZV.
+                      {copy.newsletterDesc}
                     </p>
 
                     {subscribed ? (
@@ -482,14 +557,14 @@ export default function NewsPage() {
                         className="flex items-center justify-center gap-2 text-emerald-600 font-bold text-xs bg-emerald-500/10 border border-emerald-500/20 py-3 px-5 rounded-none w-fit mx-auto"
                       >
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        Cảm ơn bạn đã đăng ký nhận bản tin thành công!
+                        {copy.subscribed}
                       </motion.div>
                     ) : (
                       <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
                         <Input
                           type="email"
                           required
-                          placeholder="Nhập email của bạn..."
+                          placeholder={copy.emailPlaceholder}
                           value={newsletterEmail}
                           onChange={(e) => setNewsletterEmail(e.target.value)}
                           className="h-10 rounded-none bg-white dark:bg-slate-950 border-slate-200 dark:border-white/10 flex-1 text-xs font-semibold placeholder:text-slate-400 focus-visible:border-[#ed1c24] focus-visible:ring-1 focus-visible:ring-[#ed1c24]"
@@ -504,13 +579,13 @@ export default function NewsPage() {
                           ) : (
                             <Send className="h-3.5 w-3.5" />
                           )}
-                          <span>Đăng ký</span>
+                          <span>{copy.subscribe}</span>
                         </Button>
                       </form>
                     )}
 
                     <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-3 font-bold select-none">
-                      Chúng tôi cam kết bảo mật tuyệt đối email của bạn.
+                      {copy.privacy}
                     </p>
                   </div>
                 </CardContent>
@@ -527,13 +602,13 @@ export default function NewsPage() {
               >
                 <div className="flex items-center justify-center gap-8 text-[9px] font-black uppercase tracking-widest text-slate-500">
                   <span className="flex items-center gap-1.5">
-                    <BookOpen className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> {articles.length} bài viết
+                    <BookOpen className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> {articles.length} {copy.articleCount}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Tag className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> {categories.length} chuyên mục
+                    <Tag className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> {categories.length} {copy.categoryCount}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <TrendingUp className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> Cập nhật thường xuyên
+                    <TrendingUp className="h-3.5 w-3.5 text-[#ed1c24] shrink-0" /> {copy.updated}
                   </span>
                 </div>
               </motion.div>

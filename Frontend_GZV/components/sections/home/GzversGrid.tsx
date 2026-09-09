@@ -36,8 +36,9 @@ export default function GzversGrid({
 
   useEffect(() => {
     let active = true
-    setLoading(true)
-    Promise.all([
+    const load = (showLoading = false) => {
+      if (showLoading) setLoading(true)
+      return Promise.all([
       supabase.from("site_home_sections").select("*").eq("section_key", "gzvers").maybeSingle(),
       api.getGzvers(),
       supabase
@@ -62,9 +63,20 @@ export default function GzversGrid({
       .finally(() => {
         if (active) setLoading(false)
       })
+    }
+
+    load(true)
+
+    const channel = supabase
+      .channel("gzvers-grid:data")
+      .on("postgres_changes", { event: "*", schema: "public", table: "gzvers" }, () => load(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "gzver_departments" }, () => load(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => load(false))
+      .subscribe()
 
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [])
 
@@ -124,18 +136,8 @@ export default function GzversGrid({
       })
     })
 
-    // Fallback if no departments from DB yet
-    if (tabs.length === 0 || (tabs.length === 1 && tabs[0].id === "all" && orderedDepts.length === 0 && !loading)) {
-      return [
-        { id: "all", label: "Tất cả" },
-        { id: "ban-dieu-hanh", label: "Ban điều hành" },
-        { id: "ban-co-van", label: "Ban cố vấn" },
-        { id: "ban-thuc-thi", label: "Ban thực thi" },
-      ]
-    }
-
     return tabs
-  }, [show_all_tab, orderedDepts, loading])
+  }, [show_all_tab, orderedDepts])
 
   // Ensure activeFilter is valid
   useEffect(() => {

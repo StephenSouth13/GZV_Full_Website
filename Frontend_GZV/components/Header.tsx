@@ -97,6 +97,17 @@ const Header = () => {
   const getLabel = (item: SiteNavItem) => language === "en" ? (item.label_en || item.label_vi) : item.label_vi
   const isDark = mounted && resolvedTheme === "dark"
   const toggleTheme = () => setTheme(isDark ? "light" : "dark")
+  const defaultHeaderClass = isDark
+    ? "border-white/10 bg-[#070707]/92 text-white shadow-[0_18px_45px_rgba(0,0,0,0.42)]"
+    : "border-slate-200/80 bg-white/88 text-slate-950 shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+  const defaultTopbarClass = isDark
+    ? "border-white/10 bg-[#050505] text-white"
+    : "border-slate-200/80 bg-slate-950 text-white"
+  const controlButtonClass = headerTextColor
+    ? ""
+    : isDark
+      ? "border-white/14 bg-white/[0.06] text-white hover:border-[#ed1c24] hover:bg-[#ed1c24]/10 hover:text-white"
+      : "border-slate-200 bg-white text-slate-900 shadow-sm hover:border-[#ed1c24] hover:bg-red-50 hover:text-[#ed1c24]"
   const navTree = useMemo(() => {
     const visible = navItems.filter((item) => item.is_visible !== false)
     const childMap = new Map<string, SiteNavItem[]>()
@@ -121,8 +132,8 @@ const Header = () => {
             backgroundColor: topbarBgColor || undefined,
             color: topbarTextColor || undefined,
           }}
-          className={`fixed inset-x-0 top-0 z-[60] hidden h-9 border-b border-white/10 ${
-            topbarBgColor ? "" : "bg-[#050505] text-white"
+          className={`fixed inset-x-0 top-0 z-[60] hidden h-9 border-b ${
+            topbarBgColor ? "" : defaultTopbarClass
           } transition duration-300 lg:block ${isScrolled ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}
         >
           <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 flex h-full items-center justify-between text-[11px] font-bold uppercase">
@@ -152,12 +163,12 @@ const Header = () => {
           backgroundColor: headerBgColor || undefined,
           color: headerTextColor || undefined,
         }}
-        className={`fixed inset-x-0 z-[70] border-b border-white/10 transition-all duration-300 ${
-          headerBgColor ? "" : "bg-[#050505]"
+        className={`fixed inset-x-0 z-[70] border-b transition-all duration-300 ${
+          headerBgColor ? "" : defaultHeaderClass
         } ${
           isScrolled || !showTopbar
-            ? "top-0 shadow-[0_16px_38px_rgba(0,0,0,0.50)] backdrop-blur-xl lg:top-0"
-            : "top-0 shadow-[0_10px_30px_rgba(0,0,0,0.30)] backdrop-blur-xl lg:top-9"
+            ? "top-0 backdrop-blur-xl lg:top-0"
+            : "top-0 backdrop-blur-xl lg:top-9"
         }`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 flex h-[74px] items-center justify-between gap-4 lg:h-[82px]">
@@ -199,7 +210,15 @@ const Header = () => {
                 </>
               )
 
-              const linkClass = `group relative flex items-center gap-1 px-3 py-7 text-[12px] font-black transition-colors xl:px-4 ${isActive ? "text-[#ed1c24]" : headerTextColor ? "" : "text-white hover:text-[#ed1c24]"}`
+              const linkClass = `group relative flex items-center gap-1 px-3 py-7 text-[12px] font-black transition-colors xl:px-4 ${
+                isActive
+                  ? "text-[#ed1c24]"
+                  : headerTextColor
+                    ? ""
+                    : isDark
+                      ? "text-white/88 hover:text-white"
+                      : "text-slate-800 hover:text-[#ed1c24]"
+              }`
               const linkStyle = !isActive && headerTextColor ? { color: headerTextColor } : undefined
 
               return (
@@ -219,11 +238,15 @@ const Header = () => {
                     </Link>
                   )}
                   {hasChildren && (
-                    <div className="invisible absolute left-0 top-full w-72 translate-y-3 border border-white/10 bg-[#080808] p-2 opacity-0 shadow-[0_24px_60px_rgba(0,0,0,0.5)] transition duration-200 group-hover/menu:visible group-hover/menu:translate-y-0 group-hover/menu:opacity-100">
+                    <div className={`invisible absolute left-0 top-full w-72 translate-y-3 border p-2 opacity-0 shadow-[0_24px_60px_rgba(15,23,42,0.18)] transition duration-200 group-hover/menu:visible group-hover/menu:translate-y-0 group-hover/menu:opacity-100 ${
+                      isDark ? "border-white/10 bg-[#080808]" : "border-slate-200 bg-white"
+                    }`}>
                       {children.map((child) => {
                         const childLabel = getLabel(child)
                         const isChildShop = childLabel.toLowerCase().includes("cửa hàng") || childLabel.toLowerCase().includes("shop") || childLabel.toLowerCase().includes("store") || (child.href && child.href.includes("cua-hang")) || child.href === "#"
-                        const childClass = "flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs font-black uppercase text-white transition last:border-b-0 hover:bg-[#ed1c24] hover:text-white"
+                        const childClass = `flex items-center justify-between border-b px-4 py-3 text-xs font-black uppercase transition last:border-b-0 hover:bg-[#ed1c24] hover:text-white ${
+                          isDark ? "border-white/10 text-white" : "border-slate-100 text-slate-800"
+                        }`
 
                         return isChildShop ? (
                           <span key={child.href || childLabel} className={`${childClass} cursor-pointer`}>
@@ -272,7 +295,7 @@ const Header = () => {
               type="button"
               onClick={toggleTheme}
               style={headerTextColor ? { color: headerTextColor, borderColor: `${headerTextColor}40` } : undefined}
-              className={`hidden h-11 w-11 items-center justify-center border border-white/15 bg-[#101010] transition hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex ${headerTextColor ? "" : "text-white"}`}
+              className={`hidden h-11 w-11 items-center justify-center border transition lg:inline-flex ${controlButtonClass}`}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -281,7 +304,7 @@ const Header = () => {
               type="button"
               onClick={toggleLanguage}
               style={headerTextColor ? { color: headerTextColor, borderColor: `${headerTextColor}40` } : undefined}
-              className={`hidden h-11 border border-white/15 bg-[#101010] px-3 text-xs font-black uppercase transition hover:border-[#ed1c24] hover:text-[#ed1c24] lg:inline-flex lg:items-center ${headerTextColor ? "" : "text-white"}`}
+              className={`hidden h-11 border px-3 text-xs font-black uppercase transition lg:inline-flex lg:items-center ${controlButtonClass}`}
               aria-label="Switch language"
             >
               {language === "vi" ? "EN" : "VI"}
@@ -290,7 +313,7 @@ const Header = () => {
               variant="outline"
               size="icon"
               style={headerTextColor ? { color: headerTextColor, borderColor: `${headerTextColor}40` } : undefined}
-              className={`h-11 w-11 rounded-none border-white/15 bg-[#101010] hover:border-[#ed1c24] hover:text-[#ed1c24] lg:hidden ${headerTextColor ? "" : "text-white"}`}
+              className={`h-11 w-11 rounded-none lg:hidden ${controlButtonClass}`}
               onClick={() => setIsMobileMenuOpen(true)}
               aria-label={t("nav.openMenu")}
             >
