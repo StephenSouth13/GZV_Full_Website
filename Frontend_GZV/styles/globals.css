@@ -84,8 +84,20 @@
   * {
     @apply border-border;
   }
+  html {
+    overflow-x: hidden;
+    width: 100%;
+  }
   body {
     @apply bg-background text-foreground;
     min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  img,
+  video,
+  svg,
+  iframe {
+    max-width: 100%;
   }
 }
