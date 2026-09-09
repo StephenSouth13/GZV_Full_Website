@@ -1,10 +1,6 @@
-import type { Metadata } from "next"
-import AboutPageClient from "./AboutPageClient"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Giới thiệu - GZV",
-  description: "Câu chuyện, sứ mệnh, tầm nhìn, giá trị cốt lõi và mô hình mentoring của GZV.",
-}
+import AboutPageClient from "./AboutPageClient"
 
 export default function AboutPage() {
   return <AboutPageClient />

@@ -151,155 +151,153 @@ export default function ArticlesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ed1c24] mx-auto"></div>
-          <p className="text-gray-500">Đang tải bài viết...</p>
-        </div>
+      <div className="mx-auto max-w-6xl py-32 flex flex-col items-center justify-center border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900">
+        <div className="animate-spin rounded-none h-8 w-8 border-2 border-[#ed1c24] border-t-transparent mx-auto"></div>
+        <p className="text-slate-400 mt-4 text-xs font-black uppercase tracking-widest">Đang tải danh sách bài viết...</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Quản lý bài viết</h1>
-          <p className="text-gray-500">Tạo và quản lý nội dung blog của bạn</p>
-        </div>
-        <Button onClick={() => setCreateModalOpen(true)} className="bg-[#ed1c24] hover:bg-[#c91218]">
-          <Plus className="h-4 w-4 mr-2" />
-          Tạo bài viết mới
-        </Button>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      {/* Top Header Card */}
+      <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tổng bài viết</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Đã xuất bản</CardTitle>
-            <Badge className="bg-green-100 text-green-800">Live</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.published}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Bản nháp</CardTitle>
-            <Badge className="bg-yellow-100 text-yellow-800">Draft</Badge>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.drafts}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lượt xem</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.views.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lượt thích</CardTitle>
-            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.likes.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Tìm kiếm bài viết..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 shrink-0 bg-[#ed1c24] text-white flex items-center justify-center font-black shadow-xs">
+              <FileText className="h-5 w-5" />
             </div>
-
-            {/* Status Filter */}
-            <div className="w-full md:w-48">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Trạng thái" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="published">Đã xuất bản</SelectItem>
-                  <SelectItem value="draft">Bản nháp</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Category Filter */}
-            <div className="w-full md:w-48">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Danh mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả danh mục</SelectItem>
-                  <SelectItem value="tutorial">Hướng dẫn</SelectItem>
-                  <SelectItem value="technical">Kỹ thuật</SelectItem>
-                  <SelectItem value="industry">Ngành nghề</SelectItem>
-                  <SelectItem value="ai">AI & Machine Learning</SelectItem>
-                  <SelectItem value="guide">Chỉ dẫn</SelectItem>
-                  <SelectItem value="news">Tin tức</SelectItem>
-                </SelectContent>
-              </Select>
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24] block leading-tight">
+                ARTICLES & BLOG POSTS
+              </span>
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Quản Trị Tin Tức & Bài Viết Blog
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                Tạo, chỉnh sửa và quản lý nội dung bài viết, tin tức công nghệ và cẩm nang GZV.
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Articles Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Danh sách bài viết ({filteredArticles.length})</span>
-            {filteredArticles.length !== articles.length && (
-              <Badge variant="outline">
-                Hiển thị {filteredArticles.length} / {articles.length}
-              </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadArticles}
+              disabled={isLoading}
+              className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200"
+            >
+              <Clock className={`mr-1.5 h-3.5 w-3.5 text-[#ed1c24] ${isLoading ? 'animate-spin' : ''}`} />
+              Làm mới
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setCreateModalOpen(true)}
+              className="h-9 px-4 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Tạo bài viết mới
+            </Button>
+          </div>
+        </div>
+
+        {/* 4 Control Stats */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Bài Viết</p>
+            <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{stats.total}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Đã Xuất Bản</p>
+            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{stats.published}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Bản Nháp</p>
+            <p className="mt-2 text-2xl font-black text-amber-600 dark:text-amber-400">{stats.drafts}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Lượt Xem</p>
+            <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">{stats.views.toLocaleString()}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Toolbar Card */}
+      <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-3">
+        <div className="flex flex-col md:flex-row gap-3">
+          {/* Search */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+            <Input
+              placeholder="Tìm kiếm theo tiêu đề, tóm tắt hoặc tác giả..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-11 pl-10 pr-12 rounded-none border-slate-200 bg-slate-50 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+              >
+                Xóa
+              </button>
             )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+          </div>
+
+          {/* Status Filter */}
+          <div className="w-full md:w-44">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-11 rounded-none border-slate-200 bg-slate-50 text-xs font-bold dark:border-white/10 dark:bg-slate-950">
+                <SelectValue placeholder="Trạng thái" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950">
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                <SelectItem value="published">Đã xuất bản</SelectItem>
+                <SelectItem value="draft">Bản nháp</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Category Filter */}
+          <div className="w-full md:w-48">
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="h-11 rounded-none border-slate-200 bg-slate-50 text-xs font-bold dark:border-white/10 dark:bg-slate-950">
+                <SelectValue placeholder="Danh mục" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950">
+                <SelectItem value="all">Tất cả danh mục</SelectItem>
+                <SelectItem value="tutorial">Hướng dẫn</SelectItem>
+                <SelectItem value="technical">Kỹ thuật</SelectItem>
+                <SelectItem value="industry">Ngành nghề</SelectItem>
+                <SelectItem value="ai">AI & Machine Learning</SelectItem>
+                <SelectItem value="guide">Chỉ dẫn</SelectItem>
+                <SelectItem value="news">Tin tức</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Articles Table Card */}
+      <div className="space-y-2">
+        <div className="overflow-hidden border border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-slate-900">
           <ArticlesTable
             articles={filteredArticles}
             onUpdateArticle={handleUpdateArticle}
             onDeleteArticle={handleDeleteArticle}
             onEditArticle={handleEditArticle}
           />
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <span>Hiển thị: {filteredArticles.length} / {articles.length} bài viết</span>
+          <span>Hệ thống xuất bản GZV</span>
+        </div>
+      </div>
 
       {/* Create Article Modal */}
       <CreateArticleModal

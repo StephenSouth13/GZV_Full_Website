@@ -7,12 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
@@ -51,20 +49,29 @@ import {
   Circle,
   Phone,
   AtSign,
-  User,
   Calendar,
-  Filter,
   Sparkles,
   Clock,
   ShieldAlert,
   CheckCheck,
   MailOpen,
+  MessageSquare,
+  Save,
+  Loader2,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 type FieldType =
-  | "text" | "email" | "tel" | "number" | "url"
-  | "textarea" | "select" | "radio" | "checkbox" | "date"
+  | "text"
+  | "email"
+  | "tel"
+  | "number"
+  | "url"
+  | "textarea"
+  | "select"
+  | "radio"
+  | "checkbox"
+  | "date"
 
 interface FormField {
   id: string
@@ -95,26 +102,6 @@ interface Message {
   created_at: string
 }
 
-interface ContactSettings {
-  id: number
-  hero_badge: string
-  hero_title: string
-  hero_subtitle: string
-  form_title: string
-  form_description: string
-  submit_label: string
-  success_message: string
-  error_message: string
-  info_title: string
-  social_title: string
-  map_title: string
-  map_embed_url?: string | null
-  map_enabled: boolean
-  contact_items: Array<{ icon?: string; title: string; lines: string[]; href?: string }>
-  social_links: Array<{ icon?: string; label: string; href: string; visible?: boolean }>
-  stats: Array<{ value: string; label: string }>
-}
-
 const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "text", label: "Văn bản ngắn" },
   { value: "textarea", label: "Văn bản dài" },
@@ -128,67 +115,67 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
   { value: "checkbox", label: "Hộp kiểm" },
 ]
 
-const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
-  new: { label: "Mới", cls: "bg-red-50 text-[#ed1c24] border-red-200" },
-  in_progress: { label: "Đang xử lý", cls: "bg-amber-100 text-amber-700 border-amber-200" },
-  resolved: { label: "Đã xử lý", cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  spam: { label: "Spam", cls: "bg-red-100 text-red-700 border-red-200" },
-}
-
-const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
-  id: 1,
-  hero_badge: "LIÊN HỆ GZV",
-  hero_title: "KẾT NỐI VỚI GZV",
-  hero_subtitle: "Để lại thông tin, đội ngũ GZV sẽ phản hồi và đồng hành cùng nhu cầu của bạn.",
-  form_title: "Gửi lời nhắn cho chúng tôi",
-  form_description: "Điền thông tin bên dưới, đội ngũ GZV sẽ phản hồi trong vòng 24 giờ làm việc.",
-  submit_label: "Gửi tin nhắn",
-  success_message: "Cảm ơn bạn! Tin nhắn đã được gửi thành công.",
-  error_message: "Không gửi được tin nhắn. Vui lòng thử lại sau.",
-  info_title: "Thông tin liên hệ",
-  social_title: "Mạng xã hội",
-  map_title: "Bản đồ GZV",
-  map_embed_url: "",
-  map_enabled: true,
-  contact_items: [
-    { icon: "map", title: "Địa chỉ", lines: ["279 Nguyễn Tri Phương, Phường Diên Hồng, TP. Hồ Chí Minh"] },
-    { icon: "phone", title: "Điện thoại", lines: ["(+84) 329 381 489"], href: "tel:+84329381489" },
-    { icon: "mail", title: "Email", lines: ["gzv.one@gmail.com"], href: "mailto:gzv.one@gmail.com" },
-  ],
-  social_links: [
-    { icon: "facebook", label: "Facebook", href: "https://www.facebook.com/gzv.one", visible: true },
-    { icon: "zalo", label: "Zalo", href: "https://zalo.me/g/acumou501", visible: true },
-  ],
-  stats: [
-    { value: "+84", label: "Điện thoại" },
-    { value: "24h", label: "Phản hồi" },
-    { value: "100%", label: "Tin cậy" },
-  ],
+const STATUS_LABELS: Record<string, { label: string; cls: string; dot: string }> = {
+  new: { label: "Mới", cls: "bg-red-50 text-[#ed1c24] border-red-200 dark:bg-red-950/40 dark:border-red-800", dot: "bg-[#ed1c24]" },
+  in_progress: { label: "Đang xử lý", cls: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800", dot: "bg-amber-500" },
+  resolved: { label: "Đã xử lý", cls: "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800", dot: "bg-emerald-500" },
+  spam: { label: "Spam", cls: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:border-white/10", dot: "bg-slate-400" },
 }
 
 export default function AdminContactsPage() {
   const [tab, setTab] = useState("messages")
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <Mail className="h-7 w-7 text-[#ed1c24]" /> Tin nhắn liên hệ
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Quản lý tin nhắn người dùng gửi từ trang <span className="font-mono">/lien-he</span> và cấu hình các trường biểu mẫu.
-        </p>
+    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      {/* Top Header Card */}
+      <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#ed1c24] text-white shadow-xs">
+              <Mail className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24] block leading-tight">
+                CONTACTS & INBOX
+              </span>
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Hộp Thư Liên Hệ & Cấu Hình Biểu Mẫu
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                Quản lý tin nhắn khách hàng gửi từ /lien-he và cấu hình các trường nhập biểu mẫu.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3 rounded-none">
-          <TabsTrigger value="messages" className="gap-2"><Inbox className="h-4 w-4" /> Hộp thư đến</TabsTrigger>
-          <TabsTrigger value="fields" className="gap-2"><Settings2 className="h-4 w-4" /> Cấu hình biểu mẫu</TabsTrigger>
-          <TabsTrigger value="page" className="gap-2"><Pencil className="h-4 w-4" /> Trang liên hệ</TabsTrigger>
+      {/* Tabs Navigation */}
+      <Tabs value={tab} onValueChange={setTab} className="space-y-6 w-full">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
+          <TabsTrigger
+            value="messages"
+            className="rounded-none py-2.5 px-2 text-xs font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-2"
+          >
+            <Inbox className="h-4 w-4 shrink-0" />
+            <span>Hộp Thư Đến</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="fields"
+            className="rounded-none py-2.5 px-2 text-xs font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-2"
+          >
+            <Settings2 className="h-4 w-4 shrink-0" />
+            <span>Cấu Hình Biểu Mẫu</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="messages"><MessagesPanel /></TabsContent>
-        <TabsContent value="fields"><FieldsPanel /></TabsContent>
-        <TabsContent value="page"><ContactPageSettingsPanel /></TabsContent>
+        <TabsContent value="messages" className="space-y-4 w-full">
+          <MessagesPanel />
+        </TabsContent>
+        <TabsContent value="fields" className="space-y-4 w-full">
+          <FieldsPanel />
+        </TabsContent>
       </Tabs>
     </div>
   )
@@ -211,14 +198,16 @@ function MessagesPanel() {
       .select("*")
       .order("created_at", { ascending: false })
     if (error) {
-      toast({ title: "Lỗi", description: error.message, variant: "destructive" })
+      toast({ title: "Lỗi tải tin nhắn", description: error.message, variant: "destructive" })
     } else {
       setMessages((data || []) as any)
     }
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+  }, [])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -231,186 +220,348 @@ function MessagesPanel() {
     })
   }, [messages, search, statusFilter])
 
-  const counts = useMemo(() => ({
-    total: messages.length,
-    unread: messages.filter((m) => !m.is_read).length,
-    today: messages.filter((m) => new Date(m.created_at).toDateString() === new Date().toDateString()).length,
-    new: messages.filter((m) => m.status === "new").length,
-    in_progress: messages.filter((m) => m.status === "in_progress").length,
-    resolved: messages.filter((m) => m.status === "resolved").length,
-    spam: messages.filter((m) => m.status === "spam").length,
-  }), [messages])
+  const counts = useMemo(
+    () => ({
+      total: messages.length,
+      unread: messages.filter((m) => !m.is_read).length,
+      today: messages.filter(
+        (m) => new Date(m.created_at).toDateString() === new Date().toDateString()
+      ).length,
+      new: messages.filter((m) => m.status === "new").length,
+      in_progress: messages.filter((m) => m.status === "in_progress").length,
+      resolved: messages.filter((m) => m.status === "resolved").length,
+      spam: messages.filter((m) => m.status === "spam").length,
+    }),
+    [messages]
+  )
 
   const markRead = async (m: Message, read: boolean) => {
-    const { error } = await supabase.from("contact_messages").update({ is_read: read }).eq("id", m.id)
-    if (!error) setMessages((prev) => prev.map((x) => x.id === m.id ? { ...x, is_read: read } : x))
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ is_read: read })
+      .eq("id", m.id)
+    if (!error) {
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, is_read: read } : x)))
+      if (selected?.id === m.id) setSelected({ ...selected, is_read: read })
+    }
   }
 
   const updateStatus = async (m: Message, status: string) => {
-    const { error } = await supabase.from("contact_messages").update({ status }).eq("id", m.id)
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ status })
+      .eq("id", m.id)
     if (!error) {
-      setMessages((prev) => prev.map((x) => x.id === m.id ? { ...x, status } : x))
-      if (selected?.id === m.id) setSelected({ ...m, status })
-      toast({ title: "Đã cập nhật trạng thái", description: STATUS_LABELS[status]?.label || status })
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, status } : x)))
+      if (selected?.id === m.id) setSelected({ ...selected, status })
+      toast({
+        title: "Đã cập nhật trạng thái",
+        description: STATUS_LABELS[status]?.label || status,
+      })
     }
   }
 
   const saveNote = async (m: Message, note: string) => {
-    const { error } = await supabase.from("contact_messages").update({ admin_note: note }).eq("id", m.id)
+    const { error } = await supabase
+      .from("contact_messages")
+      .update({ admin_note: note })
+      .eq("id", m.id)
     if (!error) {
-      setMessages((prev) => prev.map((x) => x.id === m.id ? { ...x, admin_note: note } : x))
-      toast({ title: "Đã lưu ghi chú" })
+      setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, admin_note: note } : x)))
+      if (selected?.id === m.id) setSelected({ ...selected, admin_note: note })
+      toast({ title: "Đã lưu ghi chú thành công" })
     }
   }
 
   const remove = async (m: Message) => {
     const { error } = await supabase.from("contact_messages").delete().eq("id", m.id)
     if (error) {
-      toast({ title: "Lỗi xóa", description: error.message, variant: "destructive" })
+      toast({ title: "Lỗi xóa tin nhắn", description: error.message, variant: "destructive" })
     } else {
       setMessages((prev) => prev.filter((x) => x.id !== m.id))
       if (selected?.id === m.id) setSelected(null)
-      toast({ title: "Đã xóa tin nhắn" })
+      toast({ title: "Đã xóa tin nhắn thành công" })
     }
   }
 
   return (
-    <div className="space-y-4">
-      {/* Stats overview */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatCard icon={<Inbox className="h-5 w-5" />} label="Tổng tin nhắn" value={counts.total} color="from-slate-600 to-slate-800" />
-        <StatCard icon={<Circle className="h-5 w-5" />} label="Chưa đọc" value={counts.unread} color="from-amber-500 to-orange-500" />
-        <StatCard icon={<Calendar className="h-5 w-5" />} label="Hôm nay" value={counts.today} color="from-emerald-500 to-teal-500" />
+    <div className="space-y-4 w-full">
+      {/* 3 Stats Overview Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Số Tin Nhắn</p>
+          <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{counts.total}</p>
+        </div>
+
+        <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tin Chưa Đọc</p>
+          <p className="mt-2 text-2xl font-black text-[#ed1c24]">{counts.unread}</p>
+        </div>
+
+        <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+          <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tin Nhận Hôm Nay</p>
+          <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{counts.today}</p>
+        </div>
       </div>
 
-      {/* Status filter pills */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-        <StatusPill active={statusFilter === "all"} onClick={() => setStatusFilter("all")}
-          icon={<Inbox className="h-4 w-4" />} label="Tất cả" value={counts.total}
-          activeCls="bg-gray-900 text-white border-gray-900" />
-        <StatusPill active={statusFilter === "new"} onClick={() => setStatusFilter("new")}
-          icon={<Sparkles className="h-4 w-4" />} label="Mới" value={counts.new}
-          activeCls="bg-[#ed1c24] text-white border-[#ed1c24]" />
-        <StatusPill active={statusFilter === "in_progress"} onClick={() => setStatusFilter("in_progress")}
-          icon={<Clock className="h-4 w-4" />} label="Đang xử lý" value={counts.in_progress}
-          activeCls="bg-amber-500 text-white border-amber-500" />
-        <StatusPill active={statusFilter === "resolved"} onClick={() => setStatusFilter("resolved")}
-          icon={<CheckCheck className="h-4 w-4" />} label="Đã xử lý" value={counts.resolved}
-          activeCls="bg-emerald-600 text-white border-emerald-600" />
-        <StatusPill active={statusFilter === "spam"} onClick={() => setStatusFilter("spam")}
-          icon={<ShieldAlert className="h-4 w-4" />} label="Spam" value={counts.spam}
-          activeCls="bg-red-600 text-white border-red-600" />
+      {/* Filter Tabs / Status Pills */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 w-full">
+        {[
+          { key: "all", label: "Tất cả", count: counts.total, icon: Inbox },
+          { key: "new", label: "Tin mới", count: counts.new, icon: Sparkles },
+          { key: "in_progress", label: "Đang xử lý", count: counts.in_progress, icon: Clock },
+          { key: "resolved", label: "Đã xử lý", count: counts.resolved, icon: CheckCheck },
+          { key: "spam", label: "Spam", count: counts.spam, icon: ShieldAlert },
+        ].map((tabItem) => {
+          const isSelected = statusFilter === tabItem.key
+          const Icon = tabItem.icon
+
+          return (
+            <button
+              key={tabItem.key}
+              type="button"
+              onClick={() => setStatusFilter(tabItem.key)}
+              className={`flex items-center justify-between p-2.5 transition-all text-left border cursor-pointer ${
+                isSelected
+                  ? "border-[#ed1c24] bg-[#ed1c24] text-white shadow-xs"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              }`}
+            >
+              <div className="flex items-center gap-2 min-w-0 pr-1">
+                <Icon className={`h-3.5 w-3.5 shrink-0 ${isSelected ? "text-white" : "text-slate-500"}`} />
+                <span className="text-xs font-black uppercase tracking-wide truncate">
+                  {tabItem.label}
+                </span>
+              </div>
+              <span
+                className={`px-1.5 py-0.5 text-[10px] font-bold shrink-0 ${
+                  isSelected
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                }`}
+              >
+                {tabItem.count}
+              </span>
+            </button>
+          )
+        })}
       </div>
 
-
-      {/* Toolbar */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input className="pl-9" placeholder="Tìm theo tên, email, nội dung..."
-                value={search} onChange={(e) => setSearch(e.target.value)} />
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
-                  {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="icon" onClick={load} title="Tải lại">
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* List */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-10 text-center text-gray-500">Đang tải...</div>
-          ) : filtered.length === 0 ? (
-            <div className="p-10 text-center text-gray-500">
-              <Mail className="h-10 w-10 mx-auto text-gray-300 mb-3" />
-              <p>Chưa có tin nhắn nào.</p>
-            </div>
-          ) : (
-            <ul className="divide-y">
-              {filtered.map((m) => {
-                const st = STATUS_LABELS[m.status] || STATUS_LABELS.new
-                return (
-                  <li key={m.id}
-                    className={`p-4 hover:bg-gray-50 cursor-pointer transition ${!m.is_read ? "bg-red-50/40" : ""}`}
-                    onClick={() => { setSelected(m); if (!m.is_read) markRead(m, true) }}>
-                    <div className="flex items-start gap-4">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#ed1c24] to-[#050505] flex items-center justify-center text-white font-semibold shrink-0">
-                        {(m.name || m.email || "?").slice(0, 1).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`font-semibold ${!m.is_read ? "text-gray-900" : "text-gray-700"}`}>
-                            {m.name || "Khách ẩn danh"}
-                          </span>
-                          {m.email && <span className="text-xs text-gray-500">· {m.email}</span>}
-                          <Badge variant="outline" className={st.cls}>{st.label}</Badge>
-                          {!m.is_read && <span className="h-2 w-2 rounded-full bg-[#ed1c24]" />}
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{m.message || "(Không có nội dung)"}</p>
-                        <p className="text-xs text-gray-400 mt-1">{new Date(m.created_at).toLocaleString("vi-VN")}</p>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" title={m.is_read ? "Đánh dấu chưa đọc" : "Đánh dấu đã đọc"}
-                          onClick={() => markRead(m, !m.is_read)}>
-                          {m.is_read ? <Circle className="h-4 w-4 text-gray-500" /> : <MailOpen className="h-4 w-4 text-[#ed1c24]" />}
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Đánh dấu đã xử lý"
-                          onClick={() => updateStatus(m, "resolved")}
-                          disabled={m.status === "resolved"}>
-                          <CheckCheck className={`h-4 w-4 ${m.status === "resolved" ? "text-emerald-300" : "text-emerald-600"}`} />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Đánh dấu spam"
-                          onClick={() => updateStatus(m, "spam")}
-                          disabled={m.status === "spam"}>
-                          <ShieldAlert className={`h-4 w-4 ${m.status === "spam" ? "text-red-300" : "text-red-600"}`} />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Xem chi tiết" onClick={() => setSelected(m)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" title="Xóa">
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Xóa tin nhắn này?</AlertDialogTitle>
-                              <AlertDialogDescription>Hành động không thể hoàn tác.</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Hủy</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => remove(m)} className="bg-red-600 hover:bg-red-700">Xóa</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
+      {/* Search Toolbar & Large Refresh Button */}
+      <div className="border border-slate-200 bg-white p-3.5 shadow-2xs dark:border-white/10 dark:bg-slate-900 flex flex-col sm:flex-row items-center gap-3 w-full">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Tìm theo họ tên, email, số điện thoại, tiêu đề..."
+            className="h-11 rounded-none border-slate-200 bg-slate-50/70 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+            >
+              Xóa
+            </button>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
+        <Button
+          variant="outline"
+          size="default"
+          onClick={load}
+          disabled={loading}
+          className="h-11 px-6 rounded-none border-slate-200 bg-white text-xs font-black uppercase tracking-wider text-slate-800 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 shrink-0 shadow-xs cursor-pointer"
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 text-[#ed1c24] ${loading ? "animate-spin" : ""}`} />
+          LÀM MỚI
+        </Button>
+      </div>
+
+      {/* Messages List Card */}
+      <div className="border border-slate-200 bg-white shadow-2xs dark:border-white/10 dark:bg-slate-900 overflow-hidden w-full">
+        {loading ? (
+          <div className="p-12 text-center text-slate-400 text-xs font-bold uppercase tracking-wider">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#ed1c24] mb-2" />
+            Đang tải dữ liệu hộp thư...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-16 text-center text-slate-400">
+            <Mail className="h-12 w-12 mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Không có tin nhắn nào phù hợp.
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-white/5">
+            {filtered.map((m) => {
+              const st = STATUS_LABELS[m.status] || STATUS_LABELS.new
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => {
+                    setSelected(m)
+                    if (!m.is_read) markRead(m, true)
+                  }}
+                  className={`p-4 transition-colors cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 ${
+                    !m.is_read
+                      ? "bg-red-50/30 dark:bg-red-950/10 border-l-3 border-l-[#ed1c24]"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
+                    {/* User initial avatar */}
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-[#ed1c24] text-white font-black text-xs shadow-xs">
+                      {(m.name || m.email || "G").slice(0, 1).toUpperCase()}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`text-xs font-black uppercase tracking-tight ${
+                            !m.is_read
+                              ? "text-slate-950 dark:text-white font-extrabold"
+                              : "text-slate-800 dark:text-slate-200"
+                          }`}
+                        >
+                          {m.name || "Khách liên hệ ẩn danh"}
+                        </span>
+
+                        {m.email && (
+                          <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                            &lt;{m.email}&gt;
+                          </span>
+                        )}
+
+                        <Badge
+                          variant="outline"
+                          className={`rounded-none text-[10px] font-bold uppercase py-0.5 px-2 ${st.cls}`}
+                        >
+                          {st.label}
+                        </Badge>
+
+                        {!m.is_read && (
+                          <span className="h-2 w-2 rounded-full bg-[#ed1c24] inline-block" />
+                        )}
+                      </div>
+
+                      {m.subject && (
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1 truncate">
+                          Chủ đề: {m.subject}
+                        </p>
+                      )}
+
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                        {m.message || "(Không có nội dung tin nhắn)"}
+                      </p>
+
+                      <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400 mt-1">
+                        <span>{new Date(m.created_at).toLocaleString("vi-VN")}</span>
+                        {m.phone && <span>· SĐT: {m.phone}</span>}
+                        {m.admin_note && (
+                          <span className="text-amber-600 dark:text-amber-400 font-bold">
+                            · Có ghi chú nội bộ
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions buttons */}
+                  <div
+                    className="flex items-center gap-1 shrink-0 self-end sm:self-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-none text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                      title={m.is_read ? "Đánh dấu chưa đọc" : "Đánh dấu đã đọc"}
+                      onClick={() => markRead(m, !m.is_read)}
+                    >
+                      {m.is_read ? (
+                        <Circle className="h-4 w-4 text-slate-400" />
+                      ) : (
+                        <MailOpen className="h-4 w-4 text-[#ed1c24]" />
+                      )}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-none text-slate-500 hover:text-emerald-600"
+                      title="Đánh dấu đã xử lý"
+                      onClick={() => updateStatus(m, "resolved")}
+                      disabled={m.status === "resolved"}
+                    >
+                      <CheckCheck
+                        className={`h-4 w-4 ${
+                          m.status === "resolved" ? "text-emerald-300" : "text-emerald-600"
+                        }`}
+                      />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-none text-slate-500 hover:text-[#ed1c24]"
+                      title="Xem chi tiết"
+                      onClick={() => setSelected(m)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-none text-slate-400 hover:text-red-600"
+                          title="Xóa tin nhắn"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="rounded-none border border-slate-200 bg-white p-0 dark:border-white/10 dark:bg-slate-900 overflow-hidden shadow-2xl">
+                        <div className="h-1 w-full bg-[#ed1c24]" />
+                        <div className="p-6">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-lg font-black uppercase text-slate-900 dark:text-white">
+                              Xóa tin nhắn này?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                              Dữ liệu tin nhắn của{" "}
+                              <span className="font-bold text-slate-900 dark:text-white">
+                                {m.name || m.email}
+                              </span>{" "}
+                              sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                        </div>
+                        <AlertDialogFooter className="border-t border-slate-200 bg-slate-50 px-6 py-3 dark:border-white/10 dark:bg-slate-950">
+                          <AlertDialogCancel className="h-8.5 rounded-none text-xs font-black uppercase">
+                            Hủy
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => remove(m)}
+                            className="h-8.5 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+                          >
+                            Xác nhận xóa
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Message Detail Modal */}
       <MessageDetailDialog
         message={selected}
         onClose={() => setSelected(null)}
@@ -422,40 +573,12 @@ function MessagesPanel() {
   )
 }
 
-function StatusPill({ active, onClick, icon, label, value, activeCls }: {
-  active: boolean; onClick: () => void; icon: React.ReactNode; label: string; value: number; activeCls: string
-}) {
-  return (
-    <button type="button" onClick={onClick}
-      className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition shadow-sm
-        ${active ? activeCls : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"}`}>
-      <span className="flex items-center gap-2 min-w-0">
-        <span className="shrink-0">{icon}</span>
-        <span className="truncate">{label}</span>
-      </span>
-      <span className={`text-xs font-bold rounded-full px-2 py-0.5 ${active ? "bg-white/20" : "bg-gray-100 text-gray-700"}`}>
-        {value}
-      </span>
-    </button>
-  )
-}
-
-function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: number; color: string }) {
-  return (
-    <div className={`rounded-2xl p-5 text-white shadow-lg bg-gradient-to-br ${color}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm/none opacity-90">{label}</p>
-          <p className="text-3xl font-bold mt-2">{value}</p>
-        </div>
-        <div className="h-12 w-12 rounded-xl bg-white/20 flex items-center justify-center">{icon}</div>
-      </div>
-    </div>
-  )
-}
-
 function MessageDetailDialog({
-  message, onClose, onStatusChange, onSaveNote, onToggleRead,
+  message,
+  onClose,
+  onStatusChange,
+  onSaveNote,
+  onToggleRead,
 }: {
   message: Message | null
   onClose: () => void
@@ -464,117 +587,208 @@ function MessageDetailDialog({
   onToggleRead: (m: Message, r: boolean) => void
 }) {
   const [note, setNote] = useState("")
-  useEffect(() => { setNote(message?.admin_note || "") }, [message?.id])
+  useEffect(() => {
+    setNote(message?.admin_note || "")
+  }, [message?.id, message?.admin_note])
 
   if (!message) return null
   const st = STATUS_LABELS[message.status] || STATUS_LABELS.new
-  const extra = Object.entries(message.data || {}).filter(([_, v]) => v !== null && v !== "" && v !== undefined)
+  const extra = Object.entries(message.data || {}).filter(
+    ([_, v]) => v !== null && v !== "" && v !== undefined
+  )
 
   return (
     <Dialog open={!!message} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-[#ed1c24]" /> Chi tiết tin nhắn
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 overflow-hidden select-none max-h-[90vh] overflow-y-auto">
+        <div className="h-1 w-full bg-[#ed1c24]" />
 
-        <div className="space-y-5">
+        {/* Dialog Header */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4.5 dark:border-white/10">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#ed1c24] to-[#050505] flex items-center justify-center text-white font-bold">
-              {(message.name || message.email || "?").slice(0, 1).toUpperCase()}
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-[#ed1c24] text-white shadow-xs">
+              <Mail className="h-5 w-5" />
             </div>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-900">{message.name || "Khách ẩn danh"}</p>
-              <p className="text-xs text-gray-500">{new Date(message.created_at).toLocaleString("vi-VN")}</p>
+            <div>
+              <span className="block text-[9px] font-black uppercase tracking-widest text-[#ed1c24] leading-tight">
+                CHI TIẾT TIN NHẮN LIÊN HỆ
+              </span>
+              <DialogTitle className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                {message.name || "Khách liên hệ ẩn danh"}
+              </DialogTitle>
             </div>
-            <Badge variant="outline" className={st.cls}>{st.label}</Badge>
+          </div>
+          <Badge variant="outline" className={`rounded-none text-xs font-bold uppercase ${st.cls}`}>
+            {st.label}
+          </Badge>
+        </div>
+
+        {/* Dialog Body */}
+        <div className="p-6 space-y-5">
+          {/* Info Rows */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {message.email && (
+              <div className="border border-slate-200 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-slate-950 flex items-center gap-2.5">
+                <AtSign className="h-4 w-4 text-[#ed1c24] shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase text-slate-500">Email</p>
+                  <a
+                    href={`mailto:${message.email}`}
+                    className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#ed1c24] truncate block"
+                  >
+                    {message.email}
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {message.phone && (
+              <div className="border border-slate-200 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-slate-950 flex items-center gap-2.5">
+                <Phone className="h-4 w-4 text-emerald-600 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase text-slate-500">Số điện thoại</p>
+                  <a
+                    href={`tel:${message.phone}`}
+                    className="text-xs font-bold text-slate-900 dark:text-white hover:text-[#ed1c24] truncate block"
+                  >
+                    {message.phone}
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {message.subject && (
+              <div className="border border-slate-200 bg-slate-50/70 p-3 dark:border-white/10 dark:bg-slate-950 flex items-center gap-2.5 sm:col-span-2">
+                <MessageSquare className="h-4 w-4 text-blue-600 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black uppercase text-slate-500">Tiêu đề / Chủ đề</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{message.subject}</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {message.email && <InfoRow icon={<AtSign className="h-4 w-4" />} label="Email" value={message.email} link={`mailto:${message.email}`} />}
-            {message.phone && <InfoRow icon={<Phone className="h-4 w-4" />} label="Điện thoại" value={message.phone} link={`tel:${message.phone}`} />}
-            {message.subject && <InfoRow icon={<User className="h-4 w-4" />} label="Chủ đề" value={message.subject} />}
-          </div>
-
-          <div>
-            <Label className="text-xs uppercase tracking-wider text-gray-500">Nội dung</Label>
-            <div className="mt-2 rounded-xl border bg-gray-50 p-4 whitespace-pre-wrap text-gray-800">
+          {/* Full Message Content */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Nội dung tin nhắn
+            </Label>
+            <div className="border border-slate-200 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-slate-950/60 text-xs leading-relaxed font-medium text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
               {message.message || "(Không có nội dung)"}
             </div>
+            <p className="text-[10px] font-semibold text-slate-400">
+              Gửi lúc: {new Date(message.created_at).toLocaleString("vi-VN")}
+            </p>
           </div>
 
+          {/* Extra Fields */}
           {extra.length > 0 && (
-            <div>
-              <Label className="text-xs uppercase tracking-wider text-gray-500">Trường tùy chỉnh</Label>
-              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Các trường dữ liệu bổ sung
+              </Label>
+              <div className="grid gap-2 sm:grid-cols-2">
                 {extra.map(([k, v]) => (
-                  <div key={k} className="rounded-lg border bg-white p-3 text-sm">
-                    <p className="text-xs text-gray-500">{k}</p>
-                    <p className="font-medium text-gray-800 break-words">{String(v)}</p>
+                  <div
+                    key={k}
+                    className="border border-slate-200 bg-slate-50/40 p-2.5 dark:border-white/10 dark:bg-slate-950 text-xs"
+                  >
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">{k}</p>
+                    <p className="font-bold text-slate-900 dark:text-white mt-0.5">{String(v)}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label>Trạng thái</Label>
-              <Select value={message.status} onValueChange={(v) => onStatusChange(message, v)}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
+          {/* Status & Read Toggle */}
+          <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-slate-100 dark:border-white/5">
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Trạng thái xử lý
+              </Label>
+              <Select
+                value={message.status}
+                onValueChange={(v) => onStatusChange(message, v)}
+              >
+                <SelectTrigger className="h-9.5 rounded-none border-slate-200 bg-white text-xs font-bold dark:border-white/10 dark:bg-slate-900">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-slate-200 dark:border-white/10">
                   {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                    <SelectItem key={k} value={k} className="text-xs font-bold">
+                      {v.label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="flex items-end">
-              <Button variant="outline" className="w-full gap-2"
-                onClick={() => onToggleRead(message, !message.is_read)}>
-                {message.is_read ? <Circle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
-                {message.is_read ? "Đánh dấu chưa đọc" : "Đánh dấu đã đọc"}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onToggleRead(message, !message.is_read)}
+                className="h-9.5 w-full rounded-none border-slate-200 text-xs font-black uppercase dark:border-white/10"
+              >
+                {message.is_read ? (
+                  <>
+                    <Circle className="mr-1.5 h-3.5 w-3.5 text-slate-400" />
+                    Đánh dấu chưa đọc
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-[#ed1c24]" />
+                    Đã đọc
+                  </>
+                )}
               </Button>
             </div>
           </div>
 
-          <div>
-            <Label>Ghi chú nội bộ</Label>
-            <Textarea className="mt-1" rows={3} value={note} onChange={(e) => setNote(e.target.value)}
-              placeholder="Thêm ghi chú cho đồng đội..." />
-            <div className="flex justify-end mt-2">
-              <Button size="sm" onClick={() => onSaveNote(message, note)}>Lưu ghi chú</Button>
+          {/* Admin Internal Note */}
+          <div className="space-y-1.5 pt-2">
+            <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Ghi chú nội bộ
+            </Label>
+            <Textarea
+              rows={3}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Thêm ghi chú xử lý tin nhắn cho đội ngũ nội bộ..."
+              className="rounded-none border-slate-200 bg-white text-xs dark:border-white/10 dark:bg-slate-900 resize-none"
+            />
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => onSaveNote(message, note)}
+                className="h-8.5 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+              >
+                <Save className="mr-1.5 h-3.5 w-3.5" />
+                Lưu ghi chú
+              </Button>
             </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Đóng</Button>
-        </DialogFooter>
+        {/* Dialog Footer */}
+        <div className="flex items-center justify-end border-t border-slate-200 bg-slate-50 px-6 py-3.5 dark:border-white/10 dark:bg-slate-950">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="h-8.5 rounded-none border-slate-300 text-xs font-black uppercase"
+          >
+            Đóng
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )
 }
 
-function InfoRow({ icon, label, value, link }: { icon: React.ReactNode; label: string; value: string; link?: string }) {
-  return (
-    <div className="rounded-lg border bg-white p-3 flex items-center gap-3">
-      <div className="h-9 w-9 rounded-lg bg-red-50 text-[#ed1c24] flex items-center justify-center">{icon}</div>
-      <div className="min-w-0">
-        <p className="text-xs text-gray-500">{label}</p>
-        {link ? (
-          <a href={link} className="font-medium text-gray-800 hover:text-[#ed1c24] truncate block">{value}</a>
-        ) : (
-          <p className="font-medium text-gray-800 truncate">{value}</p>
-        )}
-      </div>
-    </div>
-  )
-}
-
 /* ============================================================
-   FIELDS PANEL
+   FIELDS PANEL (FORM BUILDER)
 ============================================================ */
 function FieldsPanel() {
   const [fields, setFields] = useState<FormField[]>([])
@@ -588,19 +802,25 @@ function FieldsPanel() {
       .from("contact_form_fields")
       .select("*")
       .order("sort_order", { ascending: true })
-    if (error) toast({ title: "Lỗi", description: error.message, variant: "destructive" })
-    else {
-      setFields((data || []).map((d: any) => ({
-        ...d,
-        options: Array.isArray(d.options)
-          ? d.options.map((o: any) => typeof o === "string" ? { label: o, value: o } : o)
-          : [],
-        width: d.width === "half" ? "half" : "full",
-      })))
+    if (error) {
+      toast({ title: "Lỗi tải trường", description: error.message, variant: "destructive" })
+    } else {
+      setFields(
+        (data || []).map((d: any) => ({
+          ...d,
+          options: Array.isArray(d.options)
+            ? d.options.map((o: any) => (typeof o === "string" ? { label: o, value: o } : o))
+            : [],
+          width: d.width === "half" ? "half" : "full",
+        }))
+      )
     }
     setLoading(false)
   }
-  useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    load()
+  }, [])
 
   const openNew = () => {
     setEditing({
@@ -619,102 +839,198 @@ function FieldsPanel() {
     setOpen(true)
   }
 
-  const openEdit = (f: FormField) => { setEditing({ ...f }); setOpen(true) }
+  const openEdit = (f: FormField) => {
+    setEditing({ ...f })
+    setOpen(true)
+  }
 
   const remove = async (f: FormField) => {
     const { error } = await supabase.from("contact_form_fields").delete().eq("id", f.id)
-    if (error) toast({ title: "Lỗi", description: error.message, variant: "destructive" })
-    else {
+    if (error) {
+      toast({ title: "Lỗi xóa trường", description: error.message, variant: "destructive" })
+    } else {
       setFields((prev) => prev.filter((x) => x.id !== f.id))
-      toast({ title: "Đã xóa trường" })
+      toast({ title: "Đã xóa trường thành công" })
     }
   }
 
   const toggleActive = async (f: FormField) => {
-    const { error } = await supabase.from("contact_form_fields")
-      .update({ is_active: !f.is_active }).eq("id", f.id)
-    if (!error) setFields((prev) => prev.map((x) => x.id === f.id ? { ...x, is_active: !f.is_active } : x))
+    const nextStatus = !f.is_active
+    const { error } = await supabase
+      .from("contact_form_fields")
+      .update({ is_active: nextStatus })
+      .eq("id", f.id)
+    if (!error) {
+      setFields((prev) => prev.map((x) => (x.id === f.id ? { ...x, is_active: nextStatus } : x)))
+    }
   }
 
   const move = async (f: FormField, dir: -1 | 1) => {
     const idx = fields.findIndex((x) => x.id === f.id)
     const swapIdx = idx + dir
     if (swapIdx < 0 || swapIdx >= fields.length) return
-    const a = fields[idx], b = fields[swapIdx]
+    const a = fields[idx]
+    const b = fields[swapIdx]
     await supabase.from("contact_form_fields").update({ sort_order: b.sort_order }).eq("id", a.id)
     await supabase.from("contact_form_fields").update({ sort_order: a.sort_order }).eq("id", b.id)
     load()
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Trường biểu mẫu liên hệ</CardTitle>
-            <p className="text-sm text-gray-500 mt-1">Cấu hình các trường hiển thị ở trang <span className="font-mono">/lien-he</span>. Hỗ trợ nhiều kiểu dữ liệu: văn bản, email, select, radio, checkbox...</p>
+    <div className="space-y-4 w-full">
+      {/* Header card */}
+      <div className="border border-slate-200 bg-white p-5 shadow-2xs dark:border-white/10 dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-base font-black uppercase tracking-wide text-slate-900 dark:text-white">
+            Danh sách trường biểu mẫu liên hệ
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Cấu hình các ô nhập liệu hiển thị trên biểu mẫu trang liên hệ.
+          </p>
+        </div>
+        <Button
+          onClick={openNew}
+          className="h-10 px-5 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218] shadow-xs shrink-0"
+        >
+          <Plus className="mr-1.5 h-4 w-4" /> Thêm trường mới
+        </Button>
+      </div>
+
+      {/* Fields List */}
+      <div className="border border-slate-200 bg-white shadow-2xs dark:border-white/10 dark:bg-slate-900 overflow-hidden w-full">
+        {loading ? (
+          <div className="p-10 text-center text-xs font-bold uppercase text-slate-400">
+            <Loader2 className="h-5 w-5 animate-spin mx-auto text-[#ed1c24] mb-2" />
+            Đang tải danh sách trường...
           </div>
-          <Button onClick={openNew} className="gap-2"><Plus className="h-4 w-4" /> Thêm trường</Button>
-        </CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="p-10 text-center text-gray-500">Đang tải...</div>
-          ) : fields.length === 0 ? (
-            <div className="p-10 text-center text-gray-500">Chưa có trường nào.</div>
-          ) : (
-            <ul className="divide-y">
-              {fields.map((f, i) => (
-                <li key={f.id} className="p-4 flex items-center gap-4 hover:bg-gray-50">
-                  <div className="flex flex-col">
-                    <Button variant="ghost" size="icon" className="h-6 w-6" disabled={i === 0} onClick={() => move(f, -1)}>
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" disabled={i === fields.length - 1} onClick={() => move(f, 1)}>
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </Button>
+        ) : fields.length === 0 ? (
+          <div className="p-12 text-center text-slate-400">
+            <p className="text-xs font-bold uppercase tracking-wider">Chưa có trường nào được tạo.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100 dark:divide-white/5">
+            {fields.map((f, i) => (
+              <div
+                key={f.id}
+                className="p-4 flex items-center gap-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-none text-slate-400 hover:text-slate-900"
+                    disabled={i === 0}
+                    onClick={() => move(f, -1)}
+                  >
+                    <ArrowUp className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-none text-slate-400 hover:text-slate-900"
+                    disabled={i === fields.length - 1}
+                    onClick={() => move(f, 1)}
+                  >
+                    <ArrowDown className="h-3 w-3" />
+                  </Button>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-black uppercase text-slate-900 dark:text-white">
+                      {f.label}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      {f.field_key}
+                    </span>
+                    <Badge
+                      variant="outline"
+                      className="rounded-none text-[10px] font-bold border-slate-200 dark:border-white/10"
+                    >
+                      {FIELD_TYPES.find((t) => t.value === f.field_type)?.label || f.field_type}
+                    </Badge>
+                    {f.is_required && (
+                      <Badge className="rounded-none bg-red-50 text-[#ed1c24] border border-red-200 text-[10px] font-bold">
+                        Bắt buộc
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className="rounded-none text-[10px] font-bold border-slate-200 text-slate-500"
+                    >
+                      {f.width === "half" ? "1/2 hàng" : "Full hàng"}
+                    </Badge>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-gray-900">{f.label}</span>
-                      <code className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{f.field_key}</code>
-                      <Badge variant="outline">{FIELD_TYPES.find(t => t.value === f.field_type)?.label || f.field_type}</Badge>
-                      {f.is_required && <Badge className="bg-red-100 text-red-700 border-red-200" variant="outline">Bắt buộc</Badge>}
-                      <Badge variant="outline" className="bg-gray-50">{f.width === "half" ? "1/2 hàng" : "Full hàng"}</Badge>
-                    </div>
-                    {f.placeholder && <p className="text-xs text-gray-500 mt-1">Placeholder: {f.placeholder}</p>}
+                  {f.placeholder && (
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Placeholder: {f.placeholder}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 mr-2">
+                    <Switch
+                      checked={f.is_active}
+                      onCheckedChange={() => toggleActive(f)}
+                    />
+                    <span className="text-[10px] font-black uppercase text-slate-500">
+                      {f.is_active ? "Bật" : "Tắt"}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Switch checked={f.is_active} onCheckedChange={() => toggleActive(f)} />
-                      <span className="text-xs text-gray-500">{f.is_active ? "Bật" : "Tắt"}</span>
-                    </div>
-                    <Button variant="outline" size="icon" onClick={() => openEdit(f)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => openEdit(f)}
+                    className="h-8.5 w-8.5 rounded-none border-slate-200 hover:border-[#ed1c24] hover:text-[#ed1c24]"
+                    title="Chỉnh sửa"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8.5 w-8.5 rounded-none border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-300"
+                        title="Xóa trường"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-none border border-slate-200 bg-white p-0 dark:border-white/10 dark:bg-slate-900 overflow-hidden shadow-2xl">
+                      <div className="h-1 w-full bg-[#ed1c24]" />
+                      <div className="p-6">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Xóa trường "{f.label}"?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Trường sẽ không còn hiển thị trên trang liên hệ. Hành động không thể hoàn tác.
+                          <AlertDialogTitle className="text-lg font-black uppercase text-slate-900 dark:text-white">
+                            Xóa trường "{f.label}"?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Trường này sẽ không còn hiển thị trên biểu mẫu trang liên hệ.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Hủy</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => remove(f)} className="bg-red-600 hover:bg-red-700">Xóa</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                      </div>
+                      <AlertDialogFooter className="border-t border-slate-200 bg-slate-50 px-6 py-3.5 dark:border-white/10 dark:bg-slate-950">
+                        <AlertDialogCancel className="h-9 rounded-none text-xs font-black uppercase">
+                          Hủy
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => remove(f)}
+                          className="h-9 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+                        >
+                          Xác nhận xóa
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <FieldEditorDialog
         open={open}
@@ -726,147 +1042,11 @@ function FieldsPanel() {
   )
 }
 
-function ContactPageSettingsPanel() {
-  const [settings, setSettings] = useState<ContactSettings>(DEFAULT_CONTACT_SETTINGS)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-
-  const load = async () => {
-    setLoading(true)
-    const { data, error } = await supabase.from("site_contact_settings").select("*").eq("id", 1).maybeSingle()
-    if (error) toast({ title: "Lỗi tải cấu hình trang liên hệ", description: error.message, variant: "destructive" })
-    else setSettings({ ...DEFAULT_CONTACT_SETTINGS, ...(data || {}) } as ContactSettings)
-    setLoading(false)
-  }
-
-  useEffect(() => { load() }, [])
-
-  const save = async () => {
-    setSaving(true)
-    const payload = { ...settings, id: 1 }
-    const { error } = await supabase.from("site_contact_settings").upsert(payload, { onConflict: "id" })
-    setSaving(false)
-    if (error) toast({ title: "Không lưu được trang liên hệ", description: error.message, variant: "destructive" })
-    else toast({ title: "Đã lưu trang liên hệ" })
-  }
-
-  const updateItem = (index: number, patch: Partial<ContactSettings["contact_items"][number]>) => {
-    setSettings((value) => ({
-      ...value,
-      contact_items: value.contact_items.map((item, idx) => idx === index ? { ...item, ...patch } : item),
-    }))
-  }
-  const updateSocial = (index: number, patch: Partial<ContactSettings["social_links"][number]>) => {
-    setSettings((value) => ({
-      ...value,
-      social_links: value.social_links.map((item, idx) => idx === index ? { ...item, ...patch } : item),
-    }))
-  }
-  const updateStat = (index: number, patch: Partial<ContactSettings["stats"][number]>) => {
-    setSettings((value) => ({
-      ...value,
-      stats: value.stats.map((item, idx) => idx === index ? { ...item, ...patch } : item),
-    }))
-  }
-
-  if (loading) return <div className="border bg-white p-10 text-center text-gray-500">Đang tải cấu hình trang liên hệ...</div>
-
-  return (
-    <div className="space-y-5">
-      <Card className="rounded-none">
-        <CardHeader>
-          <CardTitle>Hero và form</CardTitle>
-          <p className="text-sm text-gray-500">Chỉnh tiêu đề banner, mô tả form, nút gửi và thông báo sau khi gửi.</p>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <AdminField label="Badge banner"><Input value={settings.hero_badge} onChange={(e) => setSettings({ ...settings, hero_badge: e.target.value })} /></AdminField>
-          <AdminField label="Tiêu đề banner"><Input value={settings.hero_title} onChange={(e) => setSettings({ ...settings, hero_title: e.target.value })} /></AdminField>
-          <div className="md:col-span-2"><AdminField label="Mô tả banner"><Textarea value={settings.hero_subtitle} onChange={(e) => setSettings({ ...settings, hero_subtitle: e.target.value })} /></AdminField></div>
-          <AdminField label="Tiêu đề form"><Input value={settings.form_title} onChange={(e) => setSettings({ ...settings, form_title: e.target.value })} /></AdminField>
-          <AdminField label="Nút gửi"><Input value={settings.submit_label} onChange={(e) => setSettings({ ...settings, submit_label: e.target.value })} /></AdminField>
-          <div className="md:col-span-2"><AdminField label="Mô tả form"><Textarea value={settings.form_description} onChange={(e) => setSettings({ ...settings, form_description: e.target.value })} /></AdminField></div>
-          <AdminField label="Thông báo thành công"><Input value={settings.success_message} onChange={(e) => setSettings({ ...settings, success_message: e.target.value })} /></AdminField>
-          <AdminField label="Thông báo lỗi"><Input value={settings.error_message} onChange={(e) => setSettings({ ...settings, error_message: e.target.value })} /></AdminField>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-none">
-        <CardHeader>
-          <CardTitle>Thông tin liên hệ</CardTitle>
-          <p className="text-sm text-gray-500">Mỗi dòng hỗ trợ icon: map, phone, mail, clock.</p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <AdminField label="Tiêu đề khối"><Input value={settings.info_title} onChange={(e) => setSettings({ ...settings, info_title: e.target.value })} /></AdminField>
-          {settings.contact_items.map((item, index) => (
-            <div key={index} className="grid gap-3 border p-3 md:grid-cols-[0.6fr_1fr_1.4fr_1fr_auto]">
-              <Input value={item.icon || ""} onChange={(e) => updateItem(index, { icon: e.target.value })} placeholder="icon" />
-              <Input value={item.title || ""} onChange={(e) => updateItem(index, { title: e.target.value })} placeholder="Tiêu đề" />
-              <Textarea value={(item.lines || []).join("\n")} onChange={(e) => updateItem(index, { lines: e.target.value.split("\n").filter(Boolean) })} placeholder="Mỗi dòng một ý" />
-              <Input value={item.href || ""} onChange={(e) => updateItem(index, { href: e.target.value })} placeholder="tel:, mailto:, https://" />
-              <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, contact_items: settings.contact_items.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
-            </div>
-          ))}
-          <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, contact_items: [...settings.contact_items, { icon: "map", title: "Thông tin mới", lines: ["Nội dung"], href: "" }] })}><Plus className="mr-2 h-4 w-4" /> Thêm thông tin</Button>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="rounded-none">
-          <CardHeader><CardTitle>Social</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <AdminField label="Tiêu đề social"><Input value={settings.social_title} onChange={(e) => setSettings({ ...settings, social_title: e.target.value })} /></AdminField>
-            {settings.social_links.map((item, index) => (
-              <div key={index} className="grid gap-2 border p-3 md:grid-cols-[0.8fr_1fr_1.5fr_auto_auto]">
-                <Input value={item.icon || ""} onChange={(e) => updateSocial(index, { icon: e.target.value })} placeholder="icon" />
-                <Input value={item.label || ""} onChange={(e) => updateSocial(index, { label: e.target.value })} placeholder="Label" />
-                <Input value={item.href || ""} onChange={(e) => updateSocial(index, { href: e.target.value })} placeholder="URL" />
-                <Switch checked={item.visible !== false} onCheckedChange={(visible) => updateSocial(index, { visible })} />
-                <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, social_links: settings.social_links.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-            ))}
-            <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, social_links: [...settings.social_links, { icon: "message", label: "Social mới", href: "", visible: true }] })}><Plus className="mr-2 h-4 w-4" /> Thêm social</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-none">
-          <CardHeader><CardTitle>Stats banner</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            {settings.stats.map((item, index) => (
-              <div key={index} className="grid gap-2 border p-3 md:grid-cols-[1fr_1fr_auto]">
-                <Input value={item.value} onChange={(e) => updateStat(index, { value: e.target.value })} placeholder="10+" />
-                <Input value={item.label} onChange={(e) => updateStat(index, { label: e.target.value })} placeholder="Nhãn" />
-                <Button variant="destructive" size="icon" className="rounded-none" onClick={() => setSettings({ ...settings, stats: settings.stats.filter((_, i) => i !== index) })}><Trash2 className="h-4 w-4" /></Button>
-              </div>
-            ))}
-            <Button variant="outline" className="rounded-none" onClick={() => setSettings({ ...settings, stats: [...settings.stats, { value: "10+", label: "Chỉ số" }] })}><Plus className="mr-2 h-4 w-4" /> Thêm stat</Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="rounded-none">
-        <CardHeader><CardTitle>Google Map</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <AdminField label="Tiêu đề map"><Input value={settings.map_title} onChange={(e) => setSettings({ ...settings, map_title: e.target.value })} /></AdminField>
-            <div className="flex items-end justify-between border px-4 py-3"><Label>Bật bản đồ</Label><Switch checked={settings.map_enabled} onCheckedChange={(map_enabled) => setSettings({ ...settings, map_enabled })} /></div>
-          </div>
-          <AdminField label="Google Map embed URL"><Textarea rows={4} value={settings.map_embed_url || ""} onChange={(e) => setSettings({ ...settings, map_embed_url: e.target.value })} placeholder="Dán URL trong src của iframe Google Maps" /></AdminField>
-        </CardContent>
-      </Card>
-
-      <div className="sticky bottom-4 flex justify-end border bg-white/95 p-3 shadow-xl backdrop-blur">
-        <Button onClick={save} disabled={saving} className="rounded-none bg-[#ed1c24] px-8 font-black uppercase hover:bg-[#c91218]">{saving ? "Đang lưu..." : "Lưu trang liên hệ"}</Button>
-      </div>
-    </div>
-  )
-}
-
-function AdminField({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-2"><Label className="text-xs font-black uppercase tracking-wide text-slate-600">{label}</Label>{children}</div>
-}
-
 function FieldEditorDialog({
-  open, onOpenChange, field, onSaved,
+  open,
+  onOpenChange,
+  field,
+  onSaved,
 }: {
   open: boolean
   onOpenChange: (b: boolean) => void
@@ -880,7 +1060,9 @@ function FieldEditorDialog({
   useEffect(() => {
     setForm(field)
     setOptionsText(
-      field?.options?.map((o) => o.label === o.value ? o.value : `${o.label}|${o.value}`).join("\n") || ""
+      field?.options
+        ?.map((o) => (o.label === o.value ? o.value : `${o.label}|${o.value}`))
+        .join("\n") || ""
     )
   }, [field])
 
@@ -890,17 +1072,24 @@ function FieldEditorDialog({
 
   const save = async () => {
     if (!form.label.trim()) {
-      toast({ title: "Vui lòng nhập nhãn", variant: "destructive" }); return
+      toast({ title: "Vui lòng nhập nhãn hiển thị", variant: "destructive" })
+      return
     }
     if (!form.field_key.trim()) {
-      toast({ title: "Vui lòng nhập field_key", variant: "destructive" }); return
+      toast({ title: "Vui lòng nhập mã định danh field_key", variant: "destructive" })
+      return
     }
+
     setSaving(true)
     const options = needsOptions
-      ? optionsText.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
-          const [label, value] = l.split("|").map((s) => s.trim())
-          return { label, value: value || label }
-        })
+      ? optionsText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .map((l) => {
+            const [label, value] = l.split("|").map((s) => s.trim())
+            return { label, value: value || label }
+          })
       : []
 
     const payload: any = {
@@ -922,9 +1111,9 @@ function FieldEditorDialog({
 
     setSaving(false)
     if (error) {
-      toast({ title: "Lỗi", description: error.message, variant: "destructive" })
+      toast({ title: "Lỗi lưu trường", description: error.message, variant: "destructive" })
     } else {
-      toast({ title: form.id ? "Đã cập nhật trường" : "Đã thêm trường" })
+      toast({ title: form.id ? "Đã cập nhật trường" : "Đã thêm trường mới" })
       onOpenChange(false)
       onSaved()
     }
@@ -934,89 +1123,159 @@ function FieldEditorDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{form.id ? "Sửa trường" : "Thêm trường mới"}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-xl rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 overflow-hidden select-none max-h-[90vh] overflow-y-auto">
+        <div className="h-1 w-full bg-[#ed1c24]" />
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Nhãn hiển thị *</Label>
-              <Input value={form.label} onChange={(e) => upd({ label: e.target.value })} placeholder="Ví dụ: Họ và tên" />
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4.5 dark:border-white/10">
+          <DialogTitle className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-white">
+            {form.id ? "Chỉnh sửa trường biểu mẫu" : "Thêm trường biểu mẫu mới"}
+          </DialogTitle>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Nhãn hiển thị *
+              </Label>
+              <Input
+                value={form.label}
+                onChange={(e) => upd({ label: e.target.value })}
+                placeholder="Ví dụ: Họ và tên, Ngành học..."
+                className="h-10 rounded-none border-slate-200 text-xs font-bold"
+              />
             </div>
-            <div>
-              <Label>Mã định danh (field_key) *</Label>
-              <Input value={form.field_key}
-                onChange={(e) => upd({ field_key: e.target.value.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() })}
-                placeholder="full_name" />
-              <p className="text-xs text-gray-500 mt-1">Chỉ chữ thường, số, _ (vd: full_name)</p>
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Mã định danh (field_key) *
+              </Label>
+              <Input
+                value={form.field_key}
+                onChange={(e) =>
+                  upd({
+                    field_key: e.target.value.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase(),
+                  })
+                }
+                placeholder="full_name"
+                className="h-10 rounded-none border-slate-200 font-mono text-xs font-bold"
+              />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Kiểu dữ liệu</Label>
-              <Select value={form.field_type} onValueChange={(v: FieldType) => upd({ field_type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FIELD_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Kiểu dữ liệu
+              </Label>
+              <Select
+                value={form.field_type}
+                onValueChange={(v: FieldType) => upd({ field_type: v })}
+              >
+                <SelectTrigger className="h-10 rounded-none border-slate-200 text-xs font-bold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-slate-200 dark:border-white/10">
+                  {FIELD_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value} className="text-xs font-bold">
+                      {t.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Chiều rộng</Label>
-              <Select value={form.width} onValueChange={(v: "full" | "half") => upd({ width: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="full">Full hàng</SelectItem>
-                  <SelectItem value="half">1/2 hàng</SelectItem>
+
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Độ rộng trên hàng
+              </Label>
+              <Select
+                value={form.width}
+                onValueChange={(v: "full" | "half") => upd({ width: v })}
+              >
+                <SelectTrigger className="h-10 rounded-none border-slate-200 text-xs font-bold">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-slate-200 dark:border-white/10">
+                  <SelectItem value="full" className="text-xs font-bold">
+                    Toàn bộ hàng (Full)
+                  </SelectItem>
+                  <SelectItem value="half" className="text-xs font-bold">
+                    1/2 hàng (Nửa hàng)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div>
-            <Label>Placeholder</Label>
-            <Input value={form.placeholder || ""} onChange={(e) => upd({ placeholder: e.target.value })} />
-          </div>
-
-          <div>
-            <Label>Mô tả phụ (help text)</Label>
-            <Input value={form.help_text || ""} onChange={(e) => upd({ help_text: e.target.value })} />
+          <div className="space-y-1">
+            <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Gợi ý nhập (Placeholder)
+            </Label>
+            <Input
+              value={form.placeholder || ""}
+              onChange={(e) => upd({ placeholder: e.target.value })}
+              placeholder="Nhập gợi ý mờ trong ô..."
+              className="h-10 rounded-none border-slate-200 text-xs"
+            />
           </div>
 
           {needsOptions && (
-            <div>
-              <Label>Tùy chọn (mỗi dòng 1 mục, có thể dùng <code>nhãn|giá_trị</code>)</Label>
-              <Textarea rows={5} value={optionsText} onChange={(e) => setOptionsText(e.target.value)}
-                placeholder={"Tư vấn khóa học\nHợp tác doanh nghiệp|partnership\nKhác|other"} />
+            <div className="space-y-1">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Danh sách lựa chọn (mỗi dòng 1 mục, có thể dùng <code>nhãn|giá_trị</code>)
+              </Label>
+              <Textarea
+                rows={4}
+                value={optionsText}
+                onChange={(e) => setOptionsText(e.target.value)}
+                placeholder={"Tư vấn khóa học\nHợp tác doanh nghiệp|partnership\nKhác|other"}
+                className="rounded-none border-slate-200 text-xs font-mono"
+              />
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Thứ tự</Label>
-              <Input type="number" value={form.sort_order}
-                onChange={(e) => upd({ sort_order: Number(e.target.value) || 0 })} />
+          <div className="grid gap-3 sm:grid-cols-2 pt-2 border-t border-slate-100 dark:border-white/5">
+            <div className="flex items-center justify-between border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950">
+              <span className="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">
+                Bắt buộc nhập
+              </span>
+              <Switch
+                checked={form.is_required}
+                onCheckedChange={(v) => upd({ is_required: v })}
+              />
             </div>
-            <div className="flex flex-col gap-2 justify-end">
-              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
-                <span className="text-sm">Bắt buộc</span>
-                <Switch checked={form.is_required} onCheckedChange={(v) => upd({ is_required: v })} />
-              </div>
-              <div className="flex items-center justify-between border rounded-lg px-3 py-2">
-                <span className="text-sm">Đang bật</span>
-                <Switch checked={form.is_active} onCheckedChange={(v) => upd({ is_active: v })} />
-              </div>
+
+            <div className="flex items-center justify-between border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950">
+              <span className="text-xs font-bold uppercase text-slate-700 dark:text-slate-300">
+                Trạng thái kích hoạt
+              </span>
+              <Switch
+                checked={form.is_active}
+                onCheckedChange={(v) => upd({ is_active: v })}
+              />
             </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Hủy</Button>
-          <Button onClick={save} disabled={saving}>{saving ? "Đang lưu..." : "Lưu"}</Button>
-        </DialogFooter>
+        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-3.5 dark:border-white/10 dark:bg-slate-950">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="h-9 rounded-none text-xs font-black uppercase"
+          >
+            Hủy
+          </Button>
+          <Button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="h-9 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+          >
+            {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
+            Lưu trường
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )

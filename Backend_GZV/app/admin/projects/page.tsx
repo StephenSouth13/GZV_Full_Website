@@ -109,96 +109,145 @@ function ProjectsManagementContent() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-[1600px] mx-auto font-montserrat">
-      {/* Header Section - Đã tối ưu hóa Montserrat & Italic */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-800">
-        <div>
-          <h1 className="text-3xl font-black text-white tracking-tighter uppercase italic">
-            Hệ thống <span className="text-[#ed1c24]">Dự án</span>
-          </h1>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">
-            Quản trị & Sắp xếp mức độ ưu tiên hiển thị Portfolio
-          </p>
+    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      {/* Top Header Card */}
+      <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 shrink-0 bg-[#ed1c24] text-white flex items-center justify-center font-black shadow-xs">
+              <FolderOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24] block leading-tight">
+                PROJECTS & PORTFOLIO
+              </span>
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Quản Trị Dự Án & Portfolio GZV
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                Quản lý các dự án, case study, hình ảnh và sắp xếp thứ tự ưu tiên hiển thị.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fetchProjects(currentPage, true)}
+              disabled={isRefreshing}
+              className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200"
+            >
+              <RefreshCcw className={`mr-1.5 h-3.5 w-3.5 text-[#ed1c24] ${isRefreshing ? 'animate-spin' : ''}`} />
+              Làm mới
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="h-9 px-4 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Thêm dự án mới
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" className="rounded-xl border-slate-700 text-white hover:bg-slate-800" onClick={() => fetchProjects(currentPage, true)} disabled={isRefreshing}>
-            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-          <Button onClick={() => setIsCreateModalOpen(true)} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black uppercase text-[10px] tracking-widest px-8 h-12 rounded-xl shadow-lg shadow-red-500/20">
-            <Plus className="h-4 w-4 mr-2" /> Thêm dự án mới
-          </Button>
+
+        {/* 4 Control Stats */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Dự Án</p>
+            <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{totalCount}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Đang Tải Trang</p>
+            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{projects.length}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Trang Hiện Tại</p>
+            <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">{currentPage} / {totalPages || 1}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Số Lượng / Trang</p>
+            <p className="mt-2 text-2xl font-black text-purple-600 dark:text-purple-400">{ITEMS_PER_PAGE}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Card */}
+      <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input 
+            className="h-11 rounded-none border-slate-200 bg-slate-50 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white" 
+            placeholder="Tìm kiếm dự án theo tên hoặc danh mục..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+            >
+              Xóa
+            </button>
+          )}
         </div>
       </div>
 
       {/* Main Content */}
-      <Card className="border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
-        <CardHeader className="border-b border-slate-50 px-10 py-8">
-          <div className="flex flex-col md:flex-row justify-between gap-6">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input 
-                placeholder="TÌM KIẾM DỰ ÁN..." 
-                className="pl-12 bg-slate-50 border-none h-12 rounded-xl font-black text-[10px] uppercase tracking-widest focus:ring-2 focus:ring-[#ed1c24]/20"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      <div className="border border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-slate-900 overflow-hidden">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <div className="py-32 flex flex-col items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-[#ed1c24]" />
+              <p className="text-slate-400 mt-4 font-black uppercase text-xs tracking-widest">Đang tải danh sách dự án...</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-red-50 text-[#ed1c24] border-red-100 px-5 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">
-                DATABASE: {totalCount} DỰ ÁN
-              </Badge>
+          ) : filteredProjects.length === 0 ? (
+            <div className="py-24 text-center">
+              <AlertCircle className="h-12 w-12 text-slate-300 dark:text-slate-700 mx-auto mb-3" />
+              <p className="text-slate-400 font-bold uppercase text-xs tracking-wider">Không tìm thấy dự án nào phù hợp</p>
             </div>
-          </div>
-        </CardHeader>
+          ) : (
+            <ProjectsTable 
+              projects={filteredProjects}
+              onEdit={setEditingProject}
+              onDelete={setDeletingProject}
+              currentPage={currentPage}
+              itemsPerPage={ITEMS_PER_PAGE}
+              onReorder={handleReorder}
+            />
+          )}
+        </AnimatePresence>
 
-        <CardContent className="p-0">
-          <AnimatePresence mode="wait">
-            {loading ? (
-              <div className="py-40 flex flex-col items-center justify-center">
-                <Loader2 className="h-12 w-12 animate-spin text-[#ed1c24]" />
-                <p className="text-slate-400 mt-6 font-black uppercase text-[10px] tracking-[0.3em]">Đang đồng bộ dữ liệu...</p>
-              </div>
-            ) : filteredProjects.length === 0 ? (
-              <div className="py-40 text-center">
-                <AlertCircle className="h-16 w-16 text-slate-100 mx-auto mb-4" />
-                <p className="text-slate-400 font-black uppercase text-[10px] tracking-widest">Không tìm thấy kết quả phù hợp</p>
-              </div>
-            ) : (
-              <ProjectsTable 
-                projects={filteredProjects}
-                onEdit={setEditingProject}
-                onDelete={setDeletingProject}
-                currentPage={currentPage}
-                itemsPerPage={ITEMS_PER_PAGE}
-                onReorder={handleReorder}
-              />
-            )}
-          </AnimatePresence>
-        </CardContent>
-
-        {/* Pagination Footer - Đã tinh chỉnh font Montserrat */}
+        {/* Pagination Footer */}
         {totalPages > 1 && (
-          <div className="px-10 py-8 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-              Trang <span className="text-[#ed1c24]">{currentPage}</span> / {totalPages}
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
+            <p className="text-xs font-bold uppercase text-slate-500 tracking-wider">
+              Trang <span className="text-[#ed1c24] font-black">{currentPage}</span> / {totalPages}
             </p>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 disabled={currentPage === 1}
                 onClick={() => handlePageChange(currentPage - 1)}
-                className="rounded-xl font-black text-[9px] uppercase tracking-tighter"
+                className="h-8 rounded-none border-slate-200 dark:border-white/10 font-bold text-xs"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" /> Trước
               </Button>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 {[...Array(totalPages)].map((_, i) => (
                   <Button
                     key={i}
-                    variant={currentPage === i + 1 ? "default" : "ghost"}
+                    variant={currentPage === i + 1 ? "default" : "outline"}
                     size="sm"
-                    className={`w-10 h-10 p-0 rounded-xl font-black text-[10px] ${currentPage === i + 1 ? 'bg-[#ed1c24] shadow-lg shadow-red-500/30 text-white' : ''}`}
+                    className={`w-8 h-8 p-0 rounded-none font-bold text-xs ${
+                      currentPage === i + 1 ? 'bg-[#ed1c24] text-white border-[#ed1c24]' : 'border-slate-200 dark:border-white/10'
+                    }`}
                     onClick={() => handlePageChange(i + 1)}
                   >
                     {i + 1}
@@ -210,16 +259,16 @@ function ProjectsManagementContent() {
                 size="sm" 
                 disabled={currentPage === totalPages}
                 onClick={() => handlePageChange(currentPage + 1)}
-                className="rounded-xl font-black text-[9px] uppercase tracking-tighter"
+                className="h-8 rounded-none border-slate-200 dark:border-white/10 font-bold text-xs"
               >
                 Sau <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
         )}
-      </Card>
+      </div>
 
-      {/* Modals - Truyền props chuẩn để kích hoạt CRUD */}
+      {/* Modals */}
       <CreateProjectModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 

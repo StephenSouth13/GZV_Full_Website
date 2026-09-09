@@ -43,6 +43,24 @@ const nextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['*'],
+  experimental: {
+    outputFileTracingExcludes: {
+      '*': [
+        './public/**/*',
+        './public/Intro.mp4',
+        './public/media/**/*',
+      ],
+    },
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = {
+        type: "memory",
+      }
+    }
+    return config
+  },
 }
 
 export default nextConfig

@@ -33,7 +33,25 @@ const nextConfig = {
       },
     ];
   },
+  experimental: {
+    outputFileTracingExcludes: {
+      '*': [
+        './public/**/*',
+        './public/dao-tao/**/*',
+        './public/gioi-thieu/**/*',
+        './public/Intro.mp4',
+      ],
+    },
+  },
   allowedDevOrigins: ['*'],
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = {
+        type: 'memory',
+      }
+    }
+    return config
+  },
 }
 
 export default nextConfig

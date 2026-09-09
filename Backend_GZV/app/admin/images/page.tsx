@@ -15,22 +15,17 @@ import {
   Copy,
   Download,
   ExternalLink,
-  FileImage,
   Film,
   Folder,
-  FolderInput,
   FolderPlus,
   Grid3X3,
   HardDrive,
   Image as ImageIcon,
   Info,
-  Layers3,
-  LayoutPanelTop,
-  Link2,
   List,
   Loader2,
   Maximize2,
-  Pencil,
+  Plus,
   RefreshCw,
   Search,
   Square,
@@ -40,33 +35,17 @@ import {
 } from "lucide-react"
 
 const BUCKET = "media"
-const DEFAULT_FOLDERS = [
+const INITIAL_FOLDERS = [
   "all",
   "site",
-  "site/hero",
-  "site/pages",
-  "site/footer",
+  "uploads",
   "articles",
   "projects",
-  "project-thumbnails",
-  "project-videos",
   "courses",
   "mentors",
   "authors",
   "gzvers",
-  "gzvers/avatars",
-  "gzvers/covers",
   "partners",
-  "uploads",
-]
-
-const QUICK_TARGETS = [
-  { folder: "site/hero", label: "Hero website", hint: "Banner, video poster, ảnh đầu trang" },
-  { folder: "site/pages", label: "Page builder", hint: "Ảnh cho /gioi-thieu, /dich-vu, /lien-he..." },
-  { folder: "gzvers/avatars", label: "Avatar GZVers", hint: "Ảnh đại diện hồ sơ" },
-  { folder: "gzvers/covers", label: "Cover GZVers", hint: "Ảnh bìa profile" },
-  { folder: "projects", label: "Dự án", hint: "Ảnh dự án và case study" },
-  { folder: "articles", label: "Tin tức", hint: "Ảnh bài viết" },
 ]
 
 type MediaItem = {
@@ -76,8 +55,8 @@ type MediaItem = {
   url: string
   size: number
   mimetype: string
-  created_at: string
-  updated_at: string
+  created_at?: string
+  updated_at?: string
 }
 
 function formatBytes(bytes: number) {
@@ -94,98 +73,134 @@ function isImage(mime?: string, name?: string) {
 
 function isVideo(mime?: string, name?: string) {
   if (mime?.startsWith("video/")) return true
-  return /\.(mp4|webm|mov|m4v)$/i.test(name || "")
-}
-
-function sanitizeFileName(name: string) {
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9._-]/g, "")
-}
-
-function sanitizeFolder(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9-_/]/g, "-").replace(/-+/g, "-").replace(/^\/+|\/+$/g, "")
+  return /\.(mp4|webm|mov|m4v|ogg)$/i.test(name || "")
 }
 
 export default function AdminImagesPage() {
-  const [folders, setFolders] = useState<string[]>(DEFAULT_FOLDERS)
-  const [currentFolder, setCurrentFolder] = useState("all")
+  const [folders, setFolders] = useState<string[]>(INITIAL_FOLDERS)
+  const [currentFolder, setCurrentFolder] = useState<string>("all")
   const [items, setItems] = useState<MediaItem[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [search, setSearch] = useState("")
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
-  const [creatingFolder, setCreatingFolder] = useState(false)
-  const [newFolder, setNewFolder] = useState("")
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false)
+  const [newFolderName, setNewFolderName] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [typeFilter, setTypeFilter] = useState<"all" | "image" | "video" | "file">("all")
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [renameTarget, setRenameTarget] = useState<MediaItem | null>(null)
-  const [renameValue, setRenameValue] = useState("")
-  const [moveOpen, setMoveOpen] = useState(false)
-  const [moveTargetFolder, setMoveTargetFolder] = useState("")
-  const [busy, setBusy] = useState(false)
+  const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => ({
     count: items.length,
-    size: items.reduce((sum, item) => sum + item.size, 0),
+    size: items.reduce((sum, item) => sum + (item.size || 0), 0),
     images: items.filter((item) => isImage(item.mimetype, item.name)).length,
     videos: items.filter((item) => isVideo(item.mimetype, item.name)).length,
   }), [items])
 
-  const loadRootFolders = useCallback(async () => {
-    const { data } = await supabase.storage.from(BUCKET).list("", { limit: 200 })
-    if (!data) return
-    const dirs = data.filter((item) => !item.metadata).map((item) => item.name)
-    setFolders((prev) => Array.from(new Set([...DEFAULT_FOLDERS, ...dirs, ...prev])).sort())
+  // 1. Tải danh sách thư mục (giống MediaPickerDialog)
+  const loadFolders = useCallback(async () => {
+    let custom: string[] = []
+    try {
+      const saved = localStorage.getItem("gzv_custom_folders")
+      if (saved) custom = JSON.parse(saved)
+    } catch (e) {}
+
+    let dirs: string[] = []
+    try {
+      const { data } = await supabase.storage.from(BUCKET).list("", { limit: 200 })
+      dirs = (data || []).filter((o) => !o.metadata || o.id === null).map((o) => o.name)
+    } catch (e) {}
+
+    const combined = Array.from(new Set([...INITIAL_FOLDERS, ...custom, ...dirs])).filter(Boolean)
+    const sorted = ["all", ...combined.filter((f) => f !== "all").sort()]
+    setFolders(sorted)
   }, [])
 
-  const loadFolder = useCallback(async (folder: string) => {
+  // 2. Tải danh sách file theo thư mục (Logic hợp nhất từ API + Supabase Storage như MediaPickerDialog)
+  const loadFolder = useCallback(async (f: string) => {
     setLoading(true)
     try {
-      const foldersToLoad = folder === "all" ? DEFAULT_FOLDERS.filter((item) => item !== "all") : [folder]
-      const results = await Promise.allSettled(foldersToLoad.map(async (targetFolder) => {
-        const { data, error } = await supabase.storage.from(BUCKET).list(targetFolder, {
-          limit: 1000,
-          sortBy: { column: "created_at", order: "desc" },
+      let fileItems: MediaItem[] = []
+      const targetFolders = f === "all" ? INITIAL_FOLDERS.filter((item) => item !== "all") : [f]
+
+      await Promise.allSettled(
+        targetFolders.map(async (targetF) => {
+          // A. Fetch from Next.js server API (reads local uploads + synced assets)
+          try {
+            const res = await fetch(`/api/images?folder=${encodeURIComponent(targetF)}`)
+            const json = await res.json()
+            if (json.success && Array.isArray(json.data?.files)) {
+              for (const file of json.data.files) {
+                if (!fileItems.some((it) => it.name === (file.name || file.file_name))) {
+                  fileItems.push({
+                    name: file.name || file.file_name,
+                    path: file.path || file.storage_path || `${targetF}/${file.name || file.file_name}`,
+                    folder: targetF,
+                    url: file.url || file.file_url,
+                    size: file.size || file.file_size_bytes || 0,
+                    mimetype: file.mimetype || file.mime_type || "",
+                    created_at: file.created_at,
+                    updated_at: file.updated_at,
+                  })
+                }
+              }
+            }
+          } catch (e) {}
+
+          // B. Also fetch from Supabase Storage bucket and merge unique files
+          try {
+            const { data } = await supabase.storage.from(BUCKET).list(targetF, {
+              limit: 500,
+              sortBy: { column: "created_at", order: "desc" },
+            })
+            if (data && data.length > 0) {
+              const validFiles = data.filter(
+                (o) => o.name && o.name !== ".keep" && /\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov|pdf|docx?)$/i.test(o.name)
+              )
+              for (const file of validFiles) {
+                if (!fileItems.some((item) => item.name === file.name)) {
+                  const path = `${targetF}/${file.name}`
+                  const {
+                    data: { publicUrl },
+                  } = supabase.storage.from(BUCKET).getPublicUrl(path)
+                  fileItems.push({
+                    name: file.name,
+                    path,
+                    folder: targetF,
+                    url: publicUrl,
+                    size: (file.metadata as any)?.size ?? 0,
+                    mimetype: (file.metadata as any)?.mimetype ?? "",
+                    created_at: file.created_at || undefined,
+                    updated_at: file.updated_at || undefined,
+                  })
+                }
+              }
+            }
+          } catch (e) {}
         })
-        if (error) return []
-        return (data || []).filter((file) => file.metadata).map((file) => {
-          const path = `${targetFolder}/${file.name}`
-          const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
-          return {
-            name: file.name,
-            path,
-            folder: targetFolder,
-            url: publicUrl,
-            size: (file.metadata as any)?.size ?? 0,
-            mimetype: (file.metadata as any)?.mimetype ?? "",
-            created_at: file.created_at ?? "",
-            updated_at: file.updated_at ?? "",
-          } as MediaItem
-        })
-      }))
-      const mapped = results
-        .flatMap((result) => result.status === "fulfilled" ? result.value : [])
-        .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
-      setItems(mapped)
-      setSelectedItem((prev) => prev ? mapped.find((item) => item.path === prev.path) || mapped[0] || null : mapped[0] || null)
-    } catch (error: any) {
-      toast({ title: "Lỗi tải thư mục", description: error.message, variant: "destructive" })
+      )
+
+      setItems(fileItems)
+      setSelectedItem((prev) => (prev ? fileItems.find((it) => it.path === prev.path) || fileItems[0] || null : fileItems[0] || null))
+    } catch (err: any) {
+      toast({ title: "Lỗi tải thư mục", description: err.message, variant: "destructive" })
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { loadRootFolders() }, [loadRootFolders])
-  useEffect(() => { loadFolder(currentFolder) }, [currentFolder, loadFolder])
+  useEffect(() => {
+    loadFolders()
+  }, [loadFolders])
+
+  useEffect(() => {
+    loadFolder(currentFolder)
+  }, [currentFolder, loadFolder])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -210,7 +225,7 @@ export default function AdminImagesPage() {
     })
   }
 
-  const copy = async (text: string, key: string, label = "Đã sao chép") => {
+  const copy = async (text: string, key: string, label = "Đã sao chép liên kết") => {
     try {
       await navigator.clipboard.writeText(text)
       setCopiedKey(key)
@@ -221,400 +236,742 @@ export default function AdminImagesPage() {
     }
   }
 
-  const handleUpload = async (files: FileList | null) => {
-    if (!files?.length) return
+  // 3. Tải lên media (Trực tiếp Supabase Storage + API Sync)
+  const handleUpload = async (files: FileList | File[] | null) => {
+    if (!files || files.length === 0) return
     setUploading(true)
-    const uploadFolder = currentFolder === "all" ? "uploads" : currentFolder
+    const targetFolder = currentFolder === "all" ? "uploads" : currentFolder
     let ok = 0
     let fail = 0
-    for (const file of Array.from(files)) {
-      const path = `${uploadFolder}/${Date.now()}_${sanitizeFileName(file.name)}`
-      const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-        cacheControl: "86400",
-        upsert: false,
-        contentType: file.type,
-      })
-      if (error) fail += 1
-      else ok += 1
+    let lastError = ""
+
+    try {
+      const fileArray = Array.from(files)
+      for (const file of fileArray) {
+        let uploaded = false
+
+        // 1. Direct Supabase Storage Upload
+        try {
+          const safe = file.name.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "")
+          const path = `${targetFolder}/${Date.now()}_${safe}`
+          
+          const { data, error: supaErr } = await supabase.storage.from(BUCKET).upload(path, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: file.type || "image/jpeg",
+          })
+
+          if (!supaErr && data) {
+            uploaded = true
+            ok += 1
+          } else if (supaErr) {
+            lastError = supaErr.message
+          }
+        } catch (e: any) {
+          lastError = e.message || "Lỗi Supabase Storage"
+        }
+
+        // 2. Fallback via Local Server API if direct storage failed
+        if (!uploaded) {
+          try {
+            const formData = new FormData()
+            formData.append("file", file)
+            formData.append("folder", targetFolder)
+
+            const res = await fetch("/api/images", {
+              method: "POST",
+              body: formData,
+            })
+
+            const json = await res.json()
+            if (res.ok && json.success) {
+              uploaded = true
+              ok += 1
+            } else {
+              fail += 1
+              lastError = json.error || json.message || lastError
+            }
+          } catch (apiErr: any) {
+            fail += 1
+            lastError = apiErr.message || lastError
+          }
+        }
+      }
+
+      if (fail && !ok) {
+        toast({
+          title: "Tải lên thất bại",
+          description: lastError || "Không thể tải tệp lên",
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Tải lên thành công",
+          description: `Đã tải lên ${ok} tệp tin vào thư mục "${targetFolder}"${fail > 0 ? ` (${fail} lỗi: ${lastError})` : ""}`,
+          variant: fail > 0 ? "destructive" : "default",
+        })
+      }
+      await loadFolder(currentFolder)
+    } catch (err: any) {
+      toast({ title: "Lỗi tải tệp", description: err.message, variant: "destructive" })
+    } finally {
+      setUploading(false)
     }
-    setUploading(false)
-    toast({ title: "Upload hoàn tất", description: `${ok} thành công · ${fail} thất bại`, variant: fail ? "destructive" : "default" })
-    loadFolder(currentFolder)
   }
 
-  const createFolder = async () => {
-    const folder = sanitizeFolder(newFolder)
-    if (!folder) return
-    const placeholder = new Blob([""], { type: "text/plain" })
-    const { error } = await supabase.storage.from(BUCKET).upload(`${folder}/.keep`, placeholder, { upsert: true })
-    if (error) return toast({ title: "Không tạo được thư mục", description: error.message, variant: "destructive" })
-    setFolders((prev) => Array.from(new Set([...prev, folder])).sort())
-    setCurrentFolder(folder)
-    setNewFolder("")
-    setCreatingFolder(false)
-    toast({ title: `Đã tạo thư mục ${folder}` })
+  // 4. Tạo thư mục mới
+  const handleCreateFolder = () => {
+    if (!newFolderName.trim()) return
+    const clean = newFolderName
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9_-]/g, "")
+    if (!clean) return
+
+    if (!folders.includes(clean)) {
+      const updated = Array.from(new Set([...folders, clean])).sort()
+      setFolders(updated)
+      try {
+        localStorage.setItem("gzv_custom_folders", JSON.stringify(updated))
+      } catch (e) {}
+    }
+
+    setCurrentFolder(clean)
+    setNewFolderName("")
+    setIsCreatingFolder(false)
+    toast({ title: `Đã tạo thư mục mới: ${clean}` })
   }
 
+  // 5. Xóa thư mục tùy chỉnh
+  const handleDeleteFolder = (targetFolder: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (INITIAL_FOLDERS.includes(targetFolder)) {
+      toast({ title: "Không thể xóa thư mục hệ thống mặc định", variant: "destructive" })
+      return
+    }
+
+    const updated = folders.filter((f) => f !== targetFolder)
+    setFolders(updated)
+    try {
+      localStorage.setItem("gzv_custom_folders", JSON.stringify(updated))
+    } catch (err) {}
+
+    if (currentFolder === targetFolder) {
+      setCurrentFolder("all")
+    }
+    toast({ title: `Đã xóa thư mục ${targetFolder}` })
+  }
+
+  // 6. Xóa tệp (đồng bộ qua API + Supabase Storage)
   const handleDelete = async (item: MediaItem) => {
     if (!confirm(`Xóa vĩnh viễn "${item.name}"?`)) return
-    const { error } = await supabase.storage.from(BUCKET).remove([item.path])
-    if (error) return toast({ title: "Lỗi xóa", description: error.message, variant: "destructive" })
-    toast({ title: "Đã xóa file" })
-    setItems((prev) => prev.filter((media) => media.path !== item.path))
-    if (selectedItem?.path === item.path) setSelectedItem(null)
+    try {
+      // Try DELETE via API
+      try {
+        await fetch(`/api/images?path=${encodeURIComponent(item.path)}`, { method: "DELETE" })
+      } catch (e) {}
+
+      // Delete from Supabase Storage
+      await supabase.storage.from(BUCKET).remove([item.path])
+
+      toast({ title: "Đã xóa file thành công" })
+      setItems((prev) => prev.filter((media) => media.path !== item.path))
+      if (selectedItem?.path === item.path) setSelectedItem(null)
+    } catch (err: any) {
+      toast({ title: "Lỗi xóa file", description: err.message, variant: "destructive" })
+    }
   }
 
+  // 7. Xóa hàng loạt
   const handleBulkDelete = async () => {
     if (!selected.size) return
     if (!confirm(`Xóa vĩnh viễn ${selected.size} file đã chọn?`)) return
-    setBusy(true)
     const paths = Array.from(selected)
-    const { error } = await supabase.storage.from(BUCKET).remove(paths)
-    setBusy(false)
-    if (error) return toast({ title: "Lỗi xóa hàng loạt", description: error.message, variant: "destructive" })
-    toast({ title: `Đã xóa ${paths.length} file` })
-    setItems((prev) => prev.filter((item) => !selected.has(item.path)))
-    clearSelection()
-  }
-
-  const handleRename = async () => {
-    if (!renameTarget) return
-    const safe = sanitizeFileName(renameValue.trim())
-    if (!safe || safe === renameTarget.name) {
-      setRenameTarget(null)
-      return
+    try {
+      await supabase.storage.from(BUCKET).remove(paths)
+      toast({ title: `Đã xóa ${paths.length} file` })
+      setItems((prev) => prev.filter((item) => !selected.has(item.path)))
+      clearSelection()
+    } catch (err: any) {
+      toast({ title: "Lỗi xóa hàng loạt", description: err.message, variant: "destructive" })
     }
-    setBusy(true)
-    const { error } = await supabase.storage.from(BUCKET).move(renameTarget.path, `${renameTarget.folder}/${safe}`)
-    setBusy(false)
-    if (error) return toast({ title: "Lỗi đổi tên", description: error.message, variant: "destructive" })
-    toast({ title: "Đã đổi tên" })
-    setRenameTarget(null)
-    loadFolder(currentFolder)
-  }
-
-  const handleMove = async () => {
-    const target = sanitizeFolder(moveTargetFolder)
-    if (!target || target === currentFolder) return toast({ title: "Chọn thư mục đích khác", variant: "destructive" })
-    const paths = Array.from(selected)
-    if (!paths.length) return
-    setBusy(true)
-    let ok = 0
-    let fail = 0
-    for (const path of paths) {
-      const name = path.split("/").pop()!
-      const { error } = await supabase.storage.from(BUCKET).move(path, `${target}/${name}`)
-      if (error) fail += 1
-      else ok += 1
-    }
-    setBusy(false)
-    toast({ title: "Di chuyển hoàn tất", description: `${ok} thành công · ${fail} thất bại`, variant: fail ? "destructive" : "default" })
-    setMoveOpen(false)
-    setMoveTargetFolder("")
-    clearSelection()
-    loadFolder(currentFolder)
-  }
-
-  const selectFolder = (folder: string) => {
-    setCurrentFolder(folder)
-    setSelectedItem(null)
-    clearSelection()
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f5f7] font-montserrat text-slate-950">
-      <div className="sticky top-0 z-20 border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-[1680px] flex-col gap-5 px-5 py-5 xl:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-[#050505] p-4 text-white"><HardDrive size={24} /></div>
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#ed1c24]">GZV Media Control</p>
-                <h1 className="text-3xl font-black uppercase tracking-tight">Thư viện ảnh & media</h1>
-                <p className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                  Bucket <span className="text-[#ed1c24]">{BUCKET}</span> · {stats.count} file · {formatBytes(stats.size)}
-                </p>
-              </div>
-            </div>
+    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      {/* Top Header Card */}
+      <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <Input placeholder="Tìm file, path, tên ảnh..." value={search} onChange={(event) => setSearch(event.target.value)} className="h-11 w-full rounded-none border-slate-300 pl-9 font-semibold lg:w-80" />
-              </div>
-              <Button onClick={() => loadFolder(currentFolder)} variant="outline" className="h-11 rounded-none border-slate-300">
-                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              </Button>
-              <Button onClick={() => fileRef.current?.click()} disabled={uploading} className="h-11 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase text-white hover:bg-[#c91218]">
-                {uploading ? <Loader2 className="mr-2 animate-spin" size={16} /> : <Upload size={16} className="mr-2" />}
-                Upload media
-              </Button>
-              <input ref={fileRef} type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx" className="hidden" onChange={(event) => { handleUpload(event.target.files); event.target.value = "" }} />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 shrink-0 bg-[#ed1c24] text-white flex items-center justify-center font-black shadow-xs">
+              <HardDrive className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24] block leading-tight">
+                GZV MEDIA STORAGE
+              </span>
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Quản Trị Thư Viện Media & Ảnh
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                Kho media đồng bộ với MediaPicker cho toàn bộ hệ thống website GZV.
+              </p>
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-            {QUICK_TARGETS.map((target) => (
-              <button
-                key={target.folder}
-                onClick={() => selectFolder(target.folder)}
-                className={`border p-4 text-left transition ${currentFolder === target.folder ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 bg-slate-50 text-slate-900 hover:border-[#ed1c24]"}`}
-              >
-                <p className="text-[10px] font-black uppercase tracking-widest">{target.label}</p>
-                <p className={`mt-2 text-xs font-semibold leading-5 ${currentFolder === target.folder ? "text-white/80" : "text-slate-500"}`}>{target.hint}</p>
-              </button>
-            ))}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadFolder(currentFolder)}
+              disabled={loading}
+              className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200"
+            >
+              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-[#ed1c24] ${loading ? "animate-spin" : ""}`} />
+              Làm mới
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="h-9 px-4 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+            >
+              {uploading ? <Loader2 className="mr-2 animate-spin h-3.5 w-3.5" /> : <Upload className="mr-2 h-3.5 w-3.5" />}
+              Tải lên media
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              accept="image/*,video/*,.pdf,.doc,.docx"
+              className="hidden"
+              onChange={(event) => {
+                handleUpload(event.target.files)
+                event.target.value = ""
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 4 Control Stats */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Số File</p>
+            <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{stats.count}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng Dung Lượng</p>
+            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{formatBytes(stats.size)}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Thư Mục Đang Xem</p>
+            <p className="mt-2 text-base font-black text-blue-600 dark:text-blue-400 truncate font-mono">/{currentFolder}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Số File Đang Chọn</p>
+            <p className="mt-2 text-2xl font-black text-purple-600 dark:text-purple-400">{selected.size}</p>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-[1680px] grid-cols-1 gap-6 px-5 py-6 xl:grid-cols-[280px_1fr_360px] xl:px-8">
-        <aside className="space-y-4">
-          <div className="border border-slate-200 bg-white p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Folders</p>
-                <h2 className="font-black uppercase">Kho media</h2>
-              </div>
-              <Button size="icon" variant="outline" className="h-9 w-9 rounded-none" onClick={() => setCreatingFolder((value) => !value)}>
-                <FolderPlus size={16} />
-              </Button>
-            </div>
-            {creatingFolder && (
-              <div className="mb-4 grid grid-cols-[1fr_auto_auto] gap-1">
-                <Input autoFocus placeholder="site/new-folder" value={newFolder} onChange={(event) => setNewFolder(event.target.value)} onKeyDown={(event) => event.key === "Enter" && createFolder()} className="h-10 rounded-none font-mono text-xs" />
-                <Button size="icon" className="h-10 w-10 rounded-none bg-[#ed1c24]" onClick={createFolder}><Check size={15} /></Button>
-                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-none" onClick={() => setCreatingFolder(false)}><X size={15} /></Button>
-              </div>
+      {/* Toolbar & Folders */}
+      <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-3">
+        <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Input
+              placeholder="Tìm file, tên ảnh, định dạng..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              className="h-11 w-full rounded-none border-slate-200 bg-slate-50 pl-10 pr-12 text-sm font-medium dark:border-white/10 dark:bg-slate-950 text-slate-900 dark:text-white"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+              >
+                Xóa
+              </button>
             )}
-            <div className="max-h-[58vh] space-y-1 overflow-y-auto pr-1">
-              {folders.map((folder) => (
-                <button key={folder} onClick={() => selectFolder(folder)} className={`flex w-full items-center gap-3 border px-3 py-3 text-left text-sm font-black transition ${currentFolder === folder ? "border-[#ed1c24] bg-[#050505] text-white" : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-50"}`}>
-                  <Folder className={`h-4 w-4 ${currentFolder === folder ? "text-[#ed1c24]" : "text-slate-400"}`} />
-                  <span className="min-w-0 flex-1 truncate">{folder}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
-          <div className="border border-slate-200 bg-[#050505] p-5 text-white">
-            <div className="mb-3 flex items-center gap-2 text-[#ed1c24]"><Info size={16} /><span className="text-[10px] font-black uppercase tracking-widest">Dùng cho site-content</span></div>
-            <p className="text-xs font-semibold leading-6 text-white/70">
-              Copy URL ảnh rồi dán vào Page Builder, footer, hero, profile GZVers hoặc các block nội dung trong `/admin/site-content`.
-            </p>
-          </div>
-        </aside>
-
-        <main className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border border-slate-200 bg-white p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant={selectMode ? "default" : "outline"} onClick={() => { setSelectMode((value) => !value); clearSelection() }} className={`h-10 rounded-none text-[11px] font-black uppercase ${selectMode ? "bg-[#ed1c24] hover:bg-[#c91218]" : "border-slate-300"}`}>
-                {selectMode ? <CheckSquare size={14} className="mr-2" /> : <Square size={14} className="mr-2" />}
-                {selectMode ? "Đang chọn" : "Chọn nhiều"}
+          <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex items-center border border-slate-200 dark:border-white/10">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="sm"
+                className={`h-9 rounded-none px-3 text-xs font-black uppercase ${
+                  viewMode === "grid" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : ""
+                }`}
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 size={14} className="mr-1.5" /> Lưới
               </Button>
-              <Button size="sm" variant={typeFilter === "all" ? "default" : "outline"} onClick={() => setTypeFilter("all")} className="h-10 rounded-none text-[11px] font-black uppercase">Tất cả</Button>
-              <Button size="sm" variant={typeFilter === "image" ? "default" : "outline"} onClick={() => setTypeFilter("image")} className="h-10 rounded-none text-[11px] font-black uppercase"><FileImage size={14} className="mr-2" />Ảnh</Button>
-              <Button size="sm" variant={typeFilter === "video" ? "default" : "outline"} onClick={() => setTypeFilter("video")} className="h-10 rounded-none text-[11px] font-black uppercase"><Film size={14} className="mr-2" />Video</Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                className={`h-9 rounded-none px-3 text-xs font-black uppercase ${
+                  viewMode === "list" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : ""
+                }`}
+                onClick={() => setViewMode("list")}
+              >
+                <List size={14} className="mr-1.5" /> Bảng
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
-              {selectMode && (
-                <>
-                  <Badge className="rounded-none bg-red-50 px-3 py-2 text-[10px] font-black uppercase text-[#c91218]">{selected.size} đã chọn</Badge>
-                  <Button size="sm" variant="outline" className="h-10 rounded-none" onClick={() => setSelected(new Set(filtered.map((item) => item.path)))}>Chọn tất cả</Button>
-                  <Button size="sm" disabled={!selected.size || busy} className="h-10 rounded-none bg-[#050505] text-white hover:bg-[#ed1c24]" onClick={() => setMoveOpen(true)}><FolderInput size={14} className="mr-2" />Di chuyển</Button>
-                  <Button size="sm" disabled={!selected.size || busy} className="h-10 rounded-none bg-red-600 text-white hover:bg-red-700" onClick={handleBulkDelete}><Trash2 size={14} className="mr-2" />Xóa</Button>
-                </>
-              )}
-              <Button size="icon" variant={viewMode === "grid" ? "default" : "outline"} className="h-10 w-10 rounded-none" onClick={() => setViewMode("grid")}><Grid3X3 size={15} /></Button>
-              <Button size="icon" variant={viewMode === "list" ? "default" : "outline"} className="h-10 w-10 rounded-none" onClick={() => setViewMode("list")}><List size={15} /></Button>
-            </div>
-          </div>
 
-          <div
-            onDragOver={(event) => { event.preventDefault(); setDragging(true) }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(event) => { event.preventDefault(); setDragging(false); handleUpload(event.dataTransfer.files) }}
-            className={`min-h-[62vh] border-2 border-dashed bg-white p-5 transition ${dragging ? "border-[#ed1c24] bg-red-50" : "border-slate-200"}`}
-          >
-            {loading ? (
-              <div className="flex h-80 items-center justify-center text-slate-500"><Loader2 className="mr-2 animate-spin" />Đang tải media...</div>
-            ) : filtered.length === 0 ? (
-              <div className="flex h-80 flex-col items-center justify-center text-center">
-                <div className="mb-5 border border-slate-200 bg-slate-50 p-6"><ImageIcon size={42} className="text-slate-300" /></div>
-                <p className="text-lg font-black uppercase">Chưa có media</p>
-                <p className="mt-2 text-sm font-semibold text-slate-500">Kéo thả file vào đây hoặc bấm Upload media.</p>
-              </div>
-            ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 2xl:grid-cols-4">
-                {filtered.map((item) => <MediaCard key={item.path} item={item} selected={selected.has(item.path)} selectMode={selectMode} copiedKey={copiedKey} onPick={setSelectedItem} onToggle={toggleSelected} onCopy={copy} onRename={(target) => { setRenameTarget(target); setRenameValue(target.name) }} onDelete={handleDelete} />)}
+            <Button
+              variant={selectMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                setSelectMode(!selectMode)
+                if (selectMode) clearSelection()
+              }}
+              className={`h-9 rounded-none text-xs font-black uppercase ${
+                selectMode ? "bg-[#ed1c24] text-white hover:bg-[#c91218]" : "border-slate-200"
+              }`}
+            >
+              {selectMode ? <CheckSquare className="mr-1.5 h-3.5 w-3.5" /> : <Square className="mr-1.5 h-3.5 w-3.5" />}
+              {selectMode ? "Hủy chọn" : "Chọn nhiều"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Folder Navigation Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 border-t border-slate-100 dark:border-white/5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {folders.map((f) => {
+              const active = currentFolder === f
+              const isDefault = INITIAL_FOLDERS.includes(f)
+              return (
+                <div
+                  key={f}
+                  onClick={() => {
+                    setCurrentFolder(f)
+                    setSelectedItem(null)
+                    clearSelection()
+                  }}
+                  className={`group inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase tracking-wider cursor-pointer border transition-colors ${
+                    active
+                      ? "bg-[#ed1c24] text-white border-[#ed1c24]"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-white/10"
+                  }`}
+                >
+                  <Folder size={13} className={active ? "text-white" : "text-slate-400"} />
+                  <span>{f === "all" ? "Tất cả file" : f}</span>
+                  {!isDefault && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteFolder(f, e)}
+                      className="ml-1 opacity-60 hover:opacity-100 hover:text-white"
+                      title="Xóa thư mục"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              )
+            })}
+
+            {/* Create Folder Inline Input */}
+            {isCreatingFolder ? (
+              <div className="flex items-center gap-1">
+                <Input
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  placeholder="Tên folder..."
+                  className="h-8 w-32 rounded-none text-xs font-mono"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCreateFolder()
+                    if (e.key === "Escape") setIsCreatingFolder(false)
+                  }}
+                />
+                <Button size="sm" onClick={handleCreateFolder} className="h-8 rounded-none bg-[#ed1c24] text-white text-xs px-2">
+                  <Check size={13} />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsCreatingFolder(false)} className="h-8 rounded-none text-xs px-2">
+                  <X size={13} />
+                </Button>
               </div>
             ) : (
-              <div className="divide-y divide-slate-200 border border-slate-200">
-                {filtered.map((item) => <MediaRow key={item.path} item={item} selected={selected.has(item.path)} selectMode={selectMode} copiedKey={copiedKey} onPick={setSelectedItem} onToggle={toggleSelected} onCopy={copy} onRename={(target) => { setRenameTarget(target); setRenameValue(target.name) }} onDelete={handleDelete} />)}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCreatingFolder(true)}
+                className="h-8 rounded-none border-dashed border-slate-300 text-xs font-bold text-slate-600 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/20 dark:text-slate-300 px-2.5"
+              >
+                <Plus size={13} className="mr-1" /> Thư mục mới
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bulk Action Toolbar */}
+      {selectMode && selected.size > 0 && (
+        <div className="flex items-center justify-between p-4 bg-white text-slate-900 rounded-none border border-slate-200 shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-white animate-in fade-in">
+          <div className="flex items-center gap-3">
+            <CheckSquare size={18} className="text-[#ed1c24]" />
+            <span className="text-xs font-black uppercase tracking-wider">Đã chọn {selected.size} tệp tin</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={clearSelection}
+              className="h-8 rounded-none text-xs font-bold uppercase text-slate-600 border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:bg-white/5"
+            >
+              Bỏ chọn
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleBulkDelete}
+              className="h-8 rounded-none text-xs font-black uppercase bg-[#ed1c24] hover:bg-[#c91218] text-white"
+            >
+              <Trash2 size={13} className="mr-1.5" /> Xóa tất cả đã chọn
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content: Files List / Grid + Detail Panel */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Files Grid / Table */}
+        <div
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setDragging(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setDragging(false)
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setDragging(false)
+            if (e.dataTransfer?.files?.length) {
+              handleUpload(e.dataTransfer.files)
+            }
+          }}
+          className={`lg:col-span-8 border relative transition-all bg-white dark:border-white/10 dark:bg-slate-900 shadow-xs min-h-[420px] ${
+            dragging ? "border-dashed border-[#ed1c24] bg-red-50/20 ring-2 ring-[#ed1c24]/30" : "border-slate-200"
+          }`}
+        >
+          {dragging && (
+            <div className="absolute inset-0 z-30 bg-red-500/10 backdrop-blur-[2px] flex flex-col items-center justify-center border-2 border-dashed border-[#ed1c24]">
+              <Upload className="h-10 w-10 text-[#ed1c24] animate-bounce mb-2" />
+              <p className="text-sm font-black uppercase text-[#ed1c24]">Thả tệp vào đây để tải lên /{currentFolder === "all" ? "uploads" : currentFolder}</p>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="py-28 flex flex-col items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-[#ed1c24]" />
+              <p className="text-slate-400 mt-4 font-black uppercase text-xs tracking-widest">Đang tải danh sách media...</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="py-28 text-center space-y-3">
+              <ImageIcon className="h-12 w-12 text-slate-300 dark:text-slate-700 mx-auto" />
+              <p className="text-slate-400 font-bold uppercase text-xs tracking-wider">Thư mục trống hoặc không có file phù hợp</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                className="rounded-none text-xs font-bold border-slate-200"
+              >
+                <Upload size={13} className="mr-1.5 text-[#ed1c24]" /> Tải ảnh ngay
+              </Button>
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {filtered.map((item) => {
+                const isSelected = selected.has(item.path)
+                const isCurrentActive = selectedItem?.path === item.path
+
+                return (
+                  <div
+                    key={item.path}
+                    onClick={() => {
+                      if (selectMode) toggleSelected(item.path)
+                      else setSelectedItem(item)
+                    }}
+                    className={`group relative aspect-square border overflow-hidden cursor-pointer transition-all ${
+                      isSelected
+                        ? "border-[#ed1c24] ring-2 ring-[#ed1c24] bg-red-50/20"
+                        : isCurrentActive
+                        ? "border-[#ed1c24] ring-1 ring-[#ed1c24]"
+                        : "border-slate-200 dark:border-white/10 hover:border-slate-400 bg-slate-50 dark:bg-slate-950"
+                    }`}
+                  >
+                    {isImage(item.mimetype, item.name) ? (
+                      <img src={item.url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : isVideo(item.mimetype, item.name) ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-white p-2">
+                        <Film size={28} className="text-[#ed1c24] mb-1" />
+                        <span className="text-[9px] font-mono truncate max-w-full">{item.name}</span>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 dark:bg-slate-800 p-2">
+                        <Info size={28} className="text-slate-400 mb-1" />
+                        <span className="text-[9px] font-mono truncate max-w-full">{item.name}</span>
+                      </div>
+                    )}
+
+                    {/* Checkbox overlay */}
+                    {selectMode && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <div
+                          className={`w-5 h-5 flex items-center justify-center border ${
+                            isSelected ? "bg-[#ed1c24] border-[#ed1c24] text-white" : "bg-white/90 border-slate-300"
+                          }`}
+                        >
+                          {isSelected && <Check size={13} />}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Hover Quick Overlay */}
+                    <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2">
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-8 w-8 rounded-none bg-white/90 hover:bg-white text-slate-900"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setPreviewItem(item)
+                        }}
+                        title="Xem phóng to"
+                      >
+                        <Maximize2 size={13} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="h-8 w-8 rounded-none bg-white/90 hover:bg-white text-slate-900"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          copy(item.url, item.path, "Đã sao chép URL")
+                        }}
+                        title="Sao chép URL"
+                      >
+                        <Copy size={13} />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        className="h-8 w-8 rounded-none bg-[#ed1c24] hover:bg-[#c91218] text-white"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(item)
+                        }}
+                        title="Xóa tệp"
+                      >
+                        <Trash2 size={13} />
+                      </Button>
+                    </div>
+
+                    <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5">
+                      <p className="text-[10px] text-white font-semibold truncate leading-tight">{item.name}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
+              {filtered.map((item) => (
+                <div
+                  key={item.path}
+                  onClick={() => setSelectedItem(item)}
+                  className={`p-3.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${
+                    selectedItem?.path === item.path ? "bg-slate-50 dark:bg-slate-800/80" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 border border-slate-200 dark:border-white/10 shrink-0 bg-slate-100 overflow-hidden">
+                      {isImage(item.mimetype, item.name) ? (
+                        <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400">
+                          <Film size={16} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{item.name}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{formatBytes(item.size)} · /{item.folder}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 rounded-none text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        copy(item.url, item.path, "Đã sao chép URL")
+                      }}
+                    >
+                      <Copy size={13} className="mr-1" /> Copy
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-none text-red-600 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDelete(item)
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Detail & Action Inspector Panel */}
+        <div className="lg:col-span-4 border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-slate-900 shadow-xs space-y-5 sticky top-20">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+              <Info size={14} className="text-[#ed1c24]" /> Chi Tiết Media
+            </h3>
+            {selectedItem && (
+              <Badge variant="outline" className="rounded-none text-[9px] uppercase font-bold">
+                {selectedItem.folder}
+              </Badge>
+            )}
+          </div>
+
+          {selectedItem ? (
+            <div className="space-y-4">
+              {/* Preview Box */}
+              <div className="relative aspect-video w-full border border-slate-200 dark:border-white/10 bg-slate-950 flex items-center justify-center overflow-hidden">
+                {isImage(selectedItem.mimetype, selectedItem.name) ? (
+                  <img src={selectedItem.url} alt={selectedItem.name} className="w-full h-full object-contain" />
+                ) : isVideo(selectedItem.mimetype, selectedItem.name) ? (
+                  <video src={selectedItem.url} controls className="w-full h-full" />
+                ) : (
+                  <div className="text-slate-400 text-center p-4">
+                    <Info size={32} className="mx-auto mb-2" />
+                    <p className="text-xs font-bold">{selectedItem.name}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Meta information */}
+              <div className="space-y-2 text-xs">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-slate-400 block">Tên file:</span>
+                  <p className="font-bold text-slate-800 dark:text-slate-200 break-words">{selectedItem.name}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Dung lượng:</span>
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">{formatBytes(selectedItem.size)}</p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-slate-400 block">Thư mục:</span>
+                    <p className="font-mono text-slate-700 dark:text-slate-300">/{selectedItem.folder}</p>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase text-slate-400 block">Đường dẫn Storage:</span>
+                  <p className="font-mono text-[10px] text-slate-600 dark:text-slate-400 break-words">{selectedItem.path}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                <Button
+                  className="w-full rounded-none bg-[#ed1c24] hover:bg-[#c91218] text-white text-xs font-black uppercase tracking-wider h-10 gap-2"
+                  onClick={() => copy(selectedItem.url, "detail-url", "Đã sao chép Direct URL")}
+                >
+                  <Copy size={14} /> Sao chép URL Ảnh
+                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    className="rounded-none border-slate-200 text-xs font-bold uppercase h-9 gap-1.5"
+                    onClick={() => copy(`![${selectedItem.name}](${selectedItem.url})`, "md", "Đã sao chép Markdown")}
+                  >
+                    <Code2 size={13} /> Markdown
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-none border-slate-200 text-xs font-bold uppercase h-9 gap-1.5"
+                    onClick={() => copy(`<img src="${selectedItem.url}" alt="${selectedItem.name}" />`, "html", "Đã sao chép HTML")}
+                  >
+                    <Code2 size={13} /> HTML Tag
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 rounded-none border-slate-200 text-xs font-bold h-9 gap-1.5"
+                    onClick={() => window.open(selectedItem.url, "_blank")}
+                  >
+                    <ExternalLink size={13} /> Mở tab mới
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-none border-slate-200 text-red-600 hover:bg-red-50 h-9 px-3"
+                    onClick={() => handleDelete(selectedItem)}
+                  >
+                    <Trash2 size={14} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="py-16 text-center text-slate-400 space-y-2">
+              <Info size={28} className="mx-auto text-slate-300" />
+              <p className="text-xs font-semibold">Chọn một tệp bất kỳ bên trái để xem chi tiết và lấy mã nhúng</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Lightbox / Preview Dialog */}
+      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+        <DialogContent className="max-w-4xl p-0 bg-slate-950 border border-slate-800 text-white rounded-none overflow-hidden">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+            <p className="text-xs font-black uppercase tracking-wider truncate max-w-lg">{previewItem?.name}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => copy(previewItem?.url || "", "lightbox", "Đã copy link")}
+              className="text-xs text-white rounded-none hover:bg-white/10"
+            >
+              <Copy size={13} className="mr-1.5" /> Copy link
+            </Button>
+          </div>
+          <div className="p-6 flex items-center justify-center max-h-[75vh] overflow-auto">
+            {previewItem && isImage(previewItem.mimetype, previewItem.name) ? (
+              <img src={previewItem.url} alt={previewItem.name} className="max-h-[68vh] object-contain" />
+            ) : previewItem && isVideo(previewItem.mimetype, previewItem.name) ? (
+              <video src={previewItem.url} controls autoPlay className="max-h-[68vh] w-full" />
+            ) : (
+              <div className="p-12 text-center text-slate-400">
+                <Info size={40} className="mx-auto mb-2" />
+                <p className="text-sm font-bold">{previewItem?.name}</p>
               </div>
             )}
           </div>
-        </main>
-
-        <MediaInspector item={selectedItem} copiedKey={copiedKey} onCopy={copy} />
-      </div>
-
-      <Dialog open={!!renameTarget} onOpenChange={(open) => !open && setRenameTarget(null)}>
-        <DialogContent className="max-w-md rounded-none">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-black uppercase"><Pencil size={16} className="text-[#ed1c24]" />Đổi tên file</DialogTitle>
-            <DialogDescription>Đường dẫn cũ: <code className="text-[#ed1c24]">{renameTarget?.path}</code></DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tên mới</Label>
-            <Input value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onKeyDown={(event) => event.key === "Enter" && handleRename()} className="h-11 rounded-none font-mono" />
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setRenameTarget(null)} className="rounded-none">Hủy</Button>
-            <Button disabled={busy} onClick={handleRename} className="rounded-none bg-[#ed1c24] hover:bg-[#c91218]">{busy ? <Loader2 size={14} className="mr-2 animate-spin" /> : <Check size={14} className="mr-2" />}Đổi tên</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={moveOpen} onOpenChange={setMoveOpen}>
-        <DialogContent className="max-w-md rounded-none">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-base font-black uppercase"><FolderInput size={16} className="text-[#ed1c24]" />Di chuyển {selected.size} file</DialogTitle>
-            <DialogDescription>Từ <code>{currentFolder}</code> sang thư mục đích.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Thư mục đích</Label>
-            <div className="grid max-h-56 grid-cols-2 gap-2 overflow-y-auto">
-              {folders.filter((folder) => folder !== currentFolder).map((folder) => (
-                <button key={folder} onClick={() => setMoveTargetFolder(folder)} className={`border px-3 py-2 text-left text-xs font-bold ${moveTargetFolder === folder ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 hover:border-[#ed1c24]"}`}>{folder}</button>
-              ))}
-            </div>
-            <Input placeholder="hoặc nhập thư mục mới" value={moveTargetFolder} onChange={(event) => setMoveTargetFolder(sanitizeFolder(event.target.value))} className="h-11 rounded-none font-mono text-xs" />
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setMoveOpen(false)} className="rounded-none">Hủy</Button>
-            <Button disabled={busy || !moveTargetFolder} onClick={handleMove} className="rounded-none bg-[#ed1c24] hover:bg-[#c91218]">{busy ? <Loader2 size={14} className="mr-2 animate-spin" /> : <FolderInput size={14} className="mr-2" />}Di chuyển</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
-
-function MediaCard({ item, selected, selectMode, copiedKey, onPick, onToggle, onCopy, onRename, onDelete }: any) {
-  return (
-    <article onClick={() => selectMode ? onToggle(item.path) : onPick(item)} className={`group overflow-hidden border bg-white transition ${selected ? "border-[#ed1c24] ring-4 ring-red-100" : "border-slate-200 hover:border-[#ed1c24] hover:shadow-xl"} ${selectMode ? "cursor-pointer" : "cursor-default"}`}>
-      <div className="relative aspect-square overflow-hidden bg-slate-100">
-        <MediaThumb item={item} />
-        <Badge className="absolute left-2 top-2 rounded-none bg-black/75 text-[9px] font-black uppercase text-white">{isVideo(item.mimetype, item.name) ? "Video" : isImage(item.mimetype, item.name) ? "Image" : "File"}</Badge>
-        {selectMode && <div className={`absolute right-2 top-2 flex h-8 w-8 items-center justify-center border ${selected ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-white bg-white text-slate-500"}`}>{selected ? <Check size={15} /> : <Square size={14} />}</div>}
-        {!selectMode && (
-          <div className="absolute inset-x-0 bottom-0 flex translate-y-full gap-1 bg-black/82 p-2 transition group-hover:translate-y-0">
-            <IconButton title="Copy URL" onClick={() => onCopy(item.url, item.path)} active={copiedKey === item.path}><Copy size={14} /></IconButton>
-            <IconButton title="Đổi tên" onClick={() => onRename(item)}><Pencil size={14} /></IconButton>
-            <IconLink title="Mở file" href={item.url}><ExternalLink size={14} /></IconLink>
-            <IconLink title="Tải xuống" href={item.url} download={item.name}><Download size={14} /></IconLink>
-            <IconButton title="Xóa" danger onClick={() => onDelete(item)}><Trash2 size={14} /></IconButton>
-          </div>
-        )}
-      </div>
-      <div className="p-3">
-        <p className="truncate text-xs font-black text-slate-900" title={item.name}>{item.name}</p>
-        <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-slate-500">
-          <span>{formatBytes(item.size)}</span>
-          <button onClick={(event) => { event.stopPropagation(); onCopy(item.url, `${item.path}:small`) }} className="text-[#ed1c24]">{copiedKey === `${item.path}:small` ? "Đã chép" : "Copy"}</button>
-        </div>
-      </div>
-    </article>
-  )
-}
-
-function MediaRow({ item, selected, selectMode, copiedKey, onPick, onToggle, onCopy, onRename, onDelete }: any) {
-  return (
-    <div onClick={() => selectMode ? onToggle(item.path) : onPick(item)} className={`grid grid-cols-[72px_1fr_auto] items-center gap-4 bg-white p-3 ${selected ? "bg-red-50" : ""}`}>
-      <div className="relative h-16 w-16 overflow-hidden bg-slate-100"><MediaThumb item={item} /></div>
-      <div className="min-w-0">
-        <p className="truncate text-sm font-black">{item.name}</p>
-        <p className="truncate text-xs font-semibold text-slate-500">{item.path} · {formatBytes(item.size)}</p>
-      </div>
-      <div className="flex gap-1">
-        <IconButton title="Copy URL" onClick={() => onCopy(item.url, item.path)} active={copiedKey === item.path}><Copy size={14} /></IconButton>
-        <IconButton title="Đổi tên" onClick={() => onRename(item)}><Pencil size={14} /></IconButton>
-        <IconButton title="Xóa" danger onClick={() => onDelete(item)}><Trash2 size={14} /></IconButton>
-      </div>
-    </div>
-  )
-}
-
-function MediaThumb({ item }: { item: MediaItem }) {
-  if (isImage(item.mimetype, item.name)) return <img src={item.url} alt={item.name} loading="lazy" className="h-full w-full object-cover" />
-  if (isVideo(item.mimetype, item.name)) return <video src={item.url} className="h-full w-full object-cover" muted />
-  return <div className="flex h-full w-full items-center justify-center text-slate-300"><ImageIcon size={30} /></div>
-}
-
-function MediaInspector({ item, copiedKey, onCopy }: { item: MediaItem | null; copiedKey: string | null; onCopy: (text: string, key: string, label?: string) => void }) {
-  if (!item) {
-    return (
-      <aside className="border border-slate-200 bg-white p-6">
-        <div className="flex h-full min-h-[420px] flex-col items-center justify-center text-center">
-          <Layers3 className="mb-4 h-12 w-12 text-slate-200" />
-          <p className="font-black uppercase">Chọn một media</p>
-          <p className="mt-2 text-sm font-semibold text-slate-500">Preview, copy URL và thông tin file sẽ hiện ở đây.</p>
-        </div>
-      </aside>
-    )
-  }
-  return (
-    <aside className="space-y-4 border border-slate-200 bg-white p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Inspector</p>
-          <h2 className="font-black uppercase">Chi tiết media</h2>
-        </div>
-        <a href={item.url} target="_blank" rel="noreferrer" className="flex h-10 w-10 items-center justify-center border border-slate-200 hover:border-[#ed1c24] hover:text-[#ed1c24]"><Maximize2 size={16} /></a>
-      </div>
-      <div className="aspect-video overflow-hidden border border-slate-200 bg-slate-100"><MediaThumb item={item} /></div>
-      <div>
-        <p className="break-all text-sm font-black">{item.name}</p>
-        <p className="mt-1 text-xs font-semibold text-slate-500">{item.mimetype || "unknown"} · {formatBytes(item.size)}</p>
-      </div>
-      <div className="space-y-2">
-        <CopyBox label="Public URL" value={item.url} copyKey={`${item.path}:url`} copiedKey={copiedKey} onCopy={onCopy} />
-        <CopyBox label="Storage path" value={item.path} copyKey={`${item.path}:path`} copiedKey={copiedKey} onCopy={onCopy} />
-        <CopyBox label="Markdown image" value={`![${item.name}](${item.url})`} copyKey={`${item.path}:md`} copiedKey={copiedKey} onCopy={onCopy} />
-      </div>
-      <div className="border border-slate-200 bg-slate-50 p-4">
-        <div className="mb-2 flex items-center gap-2 text-[#ed1c24]"><LayoutPanelTop size={15} /><span className="text-[10px] font-black uppercase tracking-widest">Gắn vào website</span></div>
-        <p className="text-xs font-semibold leading-6 text-slate-600">Dùng Public URL cho hero, banner, gallery, footer, floating, GZVer profile hoặc block ảnh trong site-content.</p>
-      </div>
-    </aside>
-  )
-}
-
-function CopyBox({ label, value, copyKey, copiedKey, onCopy }: any) {
-  return (
-    <div className="border border-slate-200">
-      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-3 py-2">
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</span>
-        <button onClick={() => onCopy(value, copyKey)} className="text-[#ed1c24]"><Copy size={14} /></button>
-      </div>
-      <p className="break-all p-3 text-[11px] font-semibold leading-5 text-slate-600">{copiedKey === copyKey ? "Đã sao chép" : value}</p>
-    </div>
-  )
-}
-
-function IconButton({ children, title, onClick, danger, active }: any) {
-  return (
-    <button title={title} onClick={(event) => { event.stopPropagation(); onClick?.() }} className={`flex h-9 w-9 items-center justify-center border border-white/10 bg-white text-slate-900 transition ${danger ? "hover:bg-red-600 hover:text-white" : "hover:bg-[#ed1c24] hover:text-white"} ${active ? "bg-[#ed1c24] text-white" : ""}`}>
-      {children}
-    </button>
-  )
-}
-
-function IconLink({ children, title, href, download }: any) {
-  return (
-    <a title={title} href={href} download={download} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()} className="flex h-9 w-9 items-center justify-center border border-white/10 bg-white text-slate-900 transition hover:bg-[#ed1c24] hover:text-white">
-      {children}
-    </a>
   )
 }

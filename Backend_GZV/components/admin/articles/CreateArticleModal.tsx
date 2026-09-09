@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -74,28 +74,35 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   }
 
 const handleSubmit = async () => {
-  // Kiểm tra mảng author_ids (phải có ít nhất 1 người)
-  if (!formData.title || formData.author_ids.length === 0 || !formData.content) {
+  if (!formData.title?.trim() || !formData.content?.trim()) {
     return toast({ 
       title: "Thiếu thông tin", 
-      description: "Vui lòng nhập tiêu đề, nội dung và chọn ít nhất 1 tác giả.", 
+      description: "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết.", 
       variant: "destructive" 
     });
   }
 
+  // Tự động chọn tác giả đầu tiên nếu chưa chọn
+  const authorIds = formData.author_ids?.length > 0 
+    ? formData.author_ids 
+    : (members.length > 0 ? [members[0].id] : []);
+
+  const safeSlug = (formData.slug?.trim() || generateSlug(formData.title) || `article-${Date.now()}`);
+
   setLoading(true);
   try {
-    const payload = {
-      title: formData.title,
-      slug: formData.slug,
+    const payload: any = {
+      title: formData.title.trim(),
+      slug: safeSlug,
       content: formData.content,
-      excerpt: formData.excerpt,
-      image: formData.image, // Đây là link ảnh đã up thành công trong hình bạn gửi
-      category: formData.category,
-      author_ids: formData.author_ids, // Gửi mảng ID tác giả
+      excerpt: formData.excerpt || "",
+      image: formData.image || "",
+      category: formData.category || "Tin tức",
+      author_ids: authorIds,
+      author_id: authorIds[0] || null,
       status: 'published',
-      featured: formData.featured,
-      published_at: new Date().toISOString() // Dùng đúng tên cột trong DB
+      featured: !!formData.featured,
+      published_at: new Date().toISOString()
     };
 
     const { data, error } = await supabase
@@ -106,13 +113,15 @@ const handleSubmit = async () => {
     if (error) throw error;
 
     toast({ title: "Thành công!", description: "Bài viết đã được xuất bản." });
-    onCreateArticle(data[0]);
+    if (data && data[0]) {
+      onCreateArticle(data[0]);
+    }
     onClose();
   } catch (err: any) {
     console.error("Lỗi xuất bản:", err);
     toast({ 
       title: "Lỗi xuất bản", 
-      description: err.message || "Vui lòng kiểm tra lại các cột dữ liệu.", 
+      description: err.message || "Vui lòng kiểm tra lại thông tin.", 
       variant: "destructive" 
     });
   } finally {
@@ -123,22 +132,24 @@ const handleSubmit = async () => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] lg:max-w-7xl h-[95vh] p-0 border-none shadow-2xl overflow-hidden bg-slate-50">
+        <DialogTitle className="sr-only">Tạo bài viết mới</DialogTitle>
+        <DialogDescription className="sr-only">Biểu mẫu soạn thảo và xuất bản bài viết</DialogDescription>
         
         {/* TOP NAVIGATION BAR */}
-        <div className="h-16 bg-white border-b flex items-center justify-between px-6 sticky top-0 z-50">
+        <div className="h-16 bg-white border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-6 sticky top-0 z-50">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-[#ed1c24] rounded-lg">
-              <Wand2 className="text-white h-5 w-5 animate-pulse" />
+            <div className="p-2 bg-[#ed1c24] rounded-none">
+              <Wand2 className="text-white h-5 w-5" />
             </div>
-            <span className="font-bold text-slate-800 tracking-tight uppercase text-sm">gzv Content Studio</span>
-            <Badge variant="outline" className="ml-2 bg-red-50 text-[#ed1c24] border-red-200">v3.0 PRO</Badge>
+            <span className="font-black text-slate-900 tracking-tight uppercase text-sm">GZV Content Studio</span>
+            <Badge variant="outline" className="ml-2 bg-red-50 text-[#ed1c24] border-red-200 rounded-none font-bold text-[10px]">v3.0 PRO</Badge>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-slate-500 font-medium rounded-full" onClick={onClose}>Hủy bỏ</Button>
+            <Button variant="ghost" className="text-slate-500 font-bold rounded-none text-xs uppercase" onClick={onClose}>Hủy bỏ</Button>
             <Button 
               disabled={loading} 
-              className="bg-slate-900 hover:bg-black text-white font-bold px-8 rounded-full shadow-lg shadow-slate-200"
+              className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-6 rounded-none text-xs uppercase shadow-sm h-10"
               onClick={handleSubmit}
             >
               {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
@@ -155,15 +166,15 @@ const handleSubmit = async () => {
               {/* Title input */}
               <div className="space-y-4">
                 <input 
-                  className="text-5xl lg:text-6xl font-black w-full border-none focus:ring-0 placeholder:text-slate-200 text-slate-900 leading-tight" 
+                  className="text-4xl lg:text-5xl font-black w-full border-none focus:ring-0 placeholder:text-slate-200 text-slate-900 leading-tight" 
                   placeholder="Tiêu đề bài viết..."
                   value={formData.title}
                   onChange={handleTitleChange}
                 />
                 <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
                   <Globe className="h-3 w-3" />
-                  <span>gzventer.edu.vn/chia-se/</span>
-                  <span className="text-[#ed1c24] bg-red-50 px-2 py-0.5 rounded">{formData.slug || 'your-slug-here'}</span>
+                  <span>gzv.one/tin-tuc/</span>
+                  <span className="text-[#ed1c24] bg-red-50 px-2 py-0.5 rounded-none font-bold">{formData.slug || 'your-slug-here'}</span>
                 </div>
               </div>
 
@@ -184,19 +195,19 @@ const handleSubmit = async () => {
 
 
           {/* RIGHT SIDEBAR: SETTINGS */}
-          <aside className="w-[380px] border-l bg-slate-50/50 p-8 overflow-y-auto hidden lg:block space-y-8">
+          <aside className="w-[380px] border-l border-slate-200 bg-slate-50/50 p-8 overflow-y-auto hidden lg:block space-y-8">
             
             {/* THUMBNAIL SECTION */}
             <div className="space-y-4">
               <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
                 <Layout className="h-3 w-3" /> Ảnh bìa (16:9)
               </Label>
-              <div className="relative aspect-video rounded-[2rem] bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-[#ed1c24] transition-all cursor-pointer shadow-sm">
+              <div className="relative aspect-video rounded-none bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group hover:border-[#ed1c24] transition-all cursor-pointer shadow-xs">
                 {formData.image ? (
                   <>
                     <img src={formData.image} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
-                      <Button variant="destructive" size="icon" className="rounded-full" onClick={() => setFormData(prev => ({...prev, image: ''}))}>
+                      <Button variant="destructive" size="icon" className="rounded-none h-8 w-8" onClick={() => setFormData(prev => ({...prev, image: ''}))}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -225,15 +236,15 @@ const handleSubmit = async () => {
                       const next = current.includes(m.id) ? current.filter(id => id !== m.id) : [...current, m.id];
                       setFormData(prev => ({...prev, author_ids: next}))
                     }}
-                    className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${
+                    className={`flex items-center gap-3 p-3 rounded-none border transition-all cursor-pointer ${
                       formData.author_ids.includes(m.id) 
-                      ? 'bg-[#ed1c24] border-[#ed1c24] text-white shadow-md' 
-                      : 'bg-white border-slate-100 hover:border-red-200'
+                      ? 'bg-[#ed1c24] border-[#ed1c24] text-white shadow-xs' 
+                      : 'bg-white border-slate-200 hover:border-red-200'
                     }`}
                   >
-                    <Avatar className="h-8 w-8 border-2 border-white/20">
+                    <Avatar className="h-8 w-8 rounded-none border border-white/20">
                       <AvatarImage src={m.avatar_url} />
-                      <AvatarFallback>{m.full_name[0]}</AvatarFallback>
+                      <AvatarFallback className="rounded-none">{m.full_name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
                       <span className="text-xs font-black leading-none">{m.full_name}</span>
@@ -253,25 +264,25 @@ const handleSubmit = async () => {
               </Label>
               <Textarea 
                 placeholder="Tóm tắt bài viết của bạn trong khoảng 160 ký tự..." 
-                className="bg-white rounded-2xl border-slate-100 h-32 text-xs font-medium leading-relaxed" 
+                className="bg-white rounded-none border-slate-200 h-32 text-xs font-medium leading-relaxed resize-none" 
                 value={formData.excerpt}
                 onChange={(e) => setFormData(prev => ({...prev, excerpt: e.target.value}))}
               />
             </div>
 
             {/* CATEGORY & OPTIONS */}
-            <div className="space-y-6 pt-4 border-t">
+            <div className="space-y-6 pt-4 border-t border-slate-200">
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục & Lĩnh vực</Label>
                 <Input 
                   placeholder="VD: Coaching, Marketing..." 
-                  className="bg-white h-12 rounded-xl border-slate-100" 
+                  className="bg-white h-10 rounded-none border-slate-200 text-xs font-semibold" 
                   value={formData.category} 
                   onChange={(e) => setFormData(prev => ({...prev, category: e.target.value}))}
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl">
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-none border border-red-100">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#ed1c24]" />
                   <span className="text-xs font-black text-red-950 uppercase">Bài viết nổi bật</span>
@@ -280,7 +291,7 @@ const handleSubmit = async () => {
                   type="checkbox" 
                   checked={formData.featured}
                   onChange={(e) => setFormData(prev => ({...prev, featured: e.target.checked}))}
-                  className="h-5 w-5 rounded-full border-slate-300 text-[#ed1c24] focus:ring-[#ed1c24]"
+                  className="h-4 w-4 rounded-none border-slate-300 text-[#ed1c24] focus:ring-[#ed1c24]"
                 />
               </div>
             </div>

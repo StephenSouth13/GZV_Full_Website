@@ -15,15 +15,21 @@ const upsertMeta = (name: string, content?: string | null) => {
   tag.content = content
 }
 
-const upsertLink = (rel: string, href?: string | null) => {
-  if (!href) return
-  let tag = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null
-  if (!tag) {
-    tag = document.createElement("link")
-    tag.rel = rel
-    document.head.appendChild(tag)
-  }
-  tag.href = href
+const updateFavicons = (faviconUrl?: string | null) => {
+  if (!faviconUrl || typeof document === "undefined") return
+
+  const rels = ["icon", "shortcut icon", "apple-touch-icon"]
+  rels.forEach((rel) => {
+    let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null
+    if (link) {
+      link.href = faviconUrl
+    } else {
+      link = document.createElement("link")
+      link.rel = rel
+      link.href = faviconUrl
+      document.head.appendChild(link)
+    }
+  })
 }
 
 export default function SeoBrandingManager() {
@@ -33,14 +39,31 @@ export default function SeoBrandingManager() {
     let active = true
     Promise.all([getBrandingSettings(), getSitePageContent(getPageSlugFromPath(pathname))]).then(([branding, page]) => {
       if (!active) return
-      const rawTitle = page?.seo_title || page?.title || branding.default_title
-      document.title = rawTitle === branding.default_title
-        ? rawTitle
-        : branding.title_template.replace("%s", rawTitle)
+      const isHome = getPageSlugFromPath(pathname) === "home" || !getPageSlugFromPath(pathname)
+      const defaultSiteTitle = branding.default_title || branding.site_name || "GZV - The Voice of Genzers"
+
+      if (isHome) {
+        document.title = defaultSiteTitle
+      } else {
+        const slug = getPageSlugFromPath(pathname)
+        const DEFAULT_PAGE_NAMES: Record<string, string> = {
+          "gioi-thieu": "Giới thiệu",
+          "dich-vu": "Dịch vụ",
+          "du-an": "Dự án",
+          "gzver": "GZVers",
+          "doi-tac": "Đối tác",
+          "tin-tuc": "Tin tức",
+          "lien-he": "Liên hệ",
+        }
+
+        const pageTitle = page?.title || page?.seo_title || DEFAULT_PAGE_NAMES[slug] || slug
+        const siteBrand = branding.site_name || "GZV"
+        document.title = siteBrand ? `${pageTitle} | ${siteBrand}` : pageTitle
+      }
+
       upsertMeta("description", page?.seo_description || branding.default_description)
       upsertMeta("keywords", branding.default_keywords)
-      upsertLink("icon", branding.favicon_url)
-      upsertLink("apple-touch-icon", branding.favicon_url)
+      updateFavicons(branding.favicon_url)
     })
     return () => {
       active = false

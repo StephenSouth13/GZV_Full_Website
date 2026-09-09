@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { motion } from "framer-motion"
 import Link from "next/link"
@@ -68,34 +68,34 @@ export default function SiteMapPage() {
           title: "Chi tiáº¿t mentor",
           href: "/mentors/[id]",
           icon: <User className="h-4 w-4" />,
-          description: "ThÃ´ng tin chi tiáº¿t vá» tá»«ng mentor",
+          description: "ThÃ´ng tin chi tiáº¿t vá»  tá»«ng mentor",
           isDynamic: true
         }
       ]
     },
     {
-      title: "gzvers",
+      title: "GZVers",
       href: "/gzver",
       icon: <UserCheck className="h-5 w-5" />,
-      description: "Cá»™ng Ä‘á»“ng há»c viÃªn vÃ  cá»±u há»c viÃªn gzv",
+      description: "Cộng đồng học viên và nhân sự GZV",
       children: [
         {
-          title: "Há»“ sÆ¡ gzver",
+          title: "Hồ sơ gzver",
           href: "/gzver/[id]",
           icon: <User className="h-4 w-4" />,
-          description: "ThÃ´ng tin chi tiáº¿t vá» tá»«ng gzver",
+          description: "Thông tin chi tiết về từng gzver",
           isDynamic: true
         }
       ]
     },
     {
-      title: "Äá»“ng hÃ nh",
-      href: "/dong-hanh",
+      title: "Đối tác",
+      href: "/doi-tac",
       icon: <Handshake className="h-5 w-5" />,
-      description: "Äá»‘i tÃ¡c vÃ  nhÃ  tÃ i trá»£ cá»§a gzv Center"
+      description: "Mạng lưới đối tác doanh nghiệp và trường học đồng hành cùng GZV"
     },
     {
-      title: "Chia sáº»",
+      title: "Chia sẻ",
       href: "/tin-tuc",
       icon: <FileText className="h-5 w-5" />,
       description: "Blog, bÃ i viáº¿t vÃ  tin tá»©c tá»« gzv Center",

@@ -15,10 +15,7 @@ const montserrat = Montserrat({
 // Metadata này sẽ được tự động đưa vào thẻ <head>
 // Nó cũng sẽ được sử dụng để tạo các thẻ OpenGraph và Twitter Card
 export const metadata: Metadata = {
-  title: {
-    default: "GZV - The Voice of Genzers",
-    template: "%s | gzv Center",
-  },
+  title: "GZV - The Voice of Genzers",
   description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center - Học tập và nỗ lực suốt đời",
   keywords: "gzv Center, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân, life long learning, Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
   authors: [{ name: "gzv Center", url: "https://gzv.one" }],
@@ -72,21 +69,7 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [
-      { url: "/logo/favicon.ico" },
-      { url: "/logo/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [
-      { url: "/logo/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    other: [
-      {
-        rel: "mask-icon",
-        url: "/safari-pinned-tab.svg",
-        color: "#0c3c78",
-      },
-    ],
+    icon: "/logo/favicon.ico",
   },
   manifest: "/logo/site.webmanifest",
   generator: "gzv-IT Department",

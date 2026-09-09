@@ -100,52 +100,52 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[1200px] w-[95vw] max-h-[95vh] overflow-y-auto bg-white rounded-[3rem] p-0 font-montserrat shadow-2xl border-none">
-        <DialogHeader className="p-8 bg-slate-900 text-white rounded-t-[3rem]">
+      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[96vh] overflow-y-auto p-0 bg-white border border-slate-200 shadow-2xl rounded-none">
+        
+        {/* HEADER */}
+        <DialogHeader className="p-8 bg-slate-900 text-white rounded-none sticky top-0 z-50">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="p-4 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/30">
-                <Edit size={28} className="text-white" />
-              </div>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#ed1c24] rounded-none shadow-xs text-white"><Edit size={22} /></div>
               <div>
-                <DialogTitle className="text-2xl font-black uppercase tracking-tight italic">Hiệu chỉnh dự án <span className="text-[#ed1c24]">Executive</span></DialogTitle>
-                <DialogDescription className="text-slate-400 font-medium text-[11px] uppercase tracking-[0.2em] mt-1">ID Dự án: {project.id.substring(0,8)}...</DialogDescription>
+                <DialogTitle className="text-xl font-black uppercase tracking-wider text-white">Hiệu chỉnh Dự án Portfolio</DialogTitle>
+                <DialogDescription className="text-slate-400 font-bold text-xs mt-1">ID: {project.id?.substring(0,8)}...</DialogDescription>
               </div>
             </div>
-            <Badge className="bg-[#ed1c24]/10 text-[#ed1c24] border-[#ed1c24]/20 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest">Priority Index: {formData.order_index}</Badge>
+            <Badge className="bg-[#ed1c24]/20 text-[#ed1c24] border border-[#ed1c24]/30 px-3 py-1 rounded-none font-black text-[10px] uppercase tracking-wider">Thứ tự: #{formData.order_index}</Badge>
           </div>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
           {/* CỘT TRÁI: CONTENT */}
-          <div className="lg:col-span-8 p-10 space-y-10 border-r border-slate-100">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Edit size={12}/> Tiêu đề H1</Label>
-                <Input className="h-14 text-lg font-bold rounded-2xl border-slate-200" value={formData.title} onChange={(e) => {
+          <div className="lg:col-span-8 p-8 md:p-10 space-y-8 bg-white border-r border-slate-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Edit size={12}/> Tên dự án *</Label>
+                <Input className="h-12 text-sm font-black rounded-none border-slate-200 focus-visible:ring-1 focus-visible:ring-[#ed1c24]" value={formData.title} onChange={(e) => {
                    const val = e.target.value;
                    setFormData({...formData, title: val, slug: isSlugLocked ? generateSlug(val) : formData.slug})
                 }} />
               </div>
               <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Category)</Label>
-                <Input className="h-14 font-bold rounded-2xl border-slate-200" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
+                <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Tag size={12}/> Tag Name (Lĩnh vực)</Label>
+                <Input className="h-12 font-bold text-xs rounded-none border-slate-200" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2"><Search size={12}/> URL SEO (Slug)</Label>
-                  <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold" onClick={() => setIsSlugLocked(!isSlugLocked)}>
+                  <Button variant="ghost" size="sm" className="h-7 text-[10px] font-bold rounded-none" onClick={() => setIsSlugLocked(!isSlugLocked)}>
                     {isSlugLocked ? <Lock size={12}/> : <Unlock size={12} className="text-amber-500"/>}
                   </Button>
                 </div>
-                <Input className={`h-12 font-mono text-xs font-bold rounded-xl ${isSlugLocked ? 'bg-slate-50' : 'bg-amber-50'}`} value={formData.slug} readOnly={isSlugLocked} onChange={(e) => setFormData({...formData, slug: generateSlug(e.target.value)})} />
+                <Input className={`h-11 font-mono text-xs font-bold rounded-none ${isSlugLocked ? 'bg-slate-50 border-slate-200' : 'bg-amber-50 border-amber-200'}`} value={formData.slug} readOnly={isSlugLocked} onChange={(e) => setFormData({...formData, slug: generateSlug(e.target.value)})} />
               </div>
               <div className="space-y-3">
                 <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><ListOrdered size={12}/> Vị trí sắp xếp</Label>
-                <Input type="number" className="h-12 text-xs font-bold rounded-xl bg-slate-50/50" value={formData.order_index} onChange={(e) => setFormData({...formData, order_index: e.target.value})} />
+                <Input type="number" className="h-11 text-xs font-bold rounded-none bg-slate-50 border-slate-200" value={formData.order_index} onChange={(e) => setFormData({...formData, order_index: e.target.value})} />
               </div>
             </div>
 
@@ -162,10 +162,10 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           </div>
 
           {/* CỘT PHẢI: MEDIA CENTER */}
-          <div className="lg:col-span-4 bg-slate-50/50 p-10 space-y-10">
-            <div className="space-y-4">
+          <div className="lg:col-span-4 bg-slate-50/50 p-8 space-y-8">
+            <div className="space-y-3">
               <Label className="text-[11px] font-black uppercase tracking-widest text-slate-500">Thumbnail Hiện tại</Label>
-              <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-[2rem] bg-white flex flex-col items-center justify-center overflow-hidden">
+              <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-none bg-white flex flex-col items-center justify-center overflow-hidden shadow-xs">
                 {formData.image ? (
                   <div className="relative w-full h-full group">
                     <img src={formData.image} className="w-full h-full object-cover" />
@@ -178,24 +178,24 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
                     </div>
                   </div>
                 ) : (
-                  <label className="cursor-pointer flex flex-col items-center p-8"><Upload size={24}/><input type="file" className="hidden" onChange={(e) => handleMediaUpload(e, 'image')} /></label>
+                  <label className="cursor-pointer flex flex-col items-center p-6"><Upload size={24}/><input type="file" className="hidden" onChange={(e) => handleMediaUpload(e, 'image')} /></label>
                 )}
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <Label className="text-[11px] font-black uppercase text-slate-500 flex items-center gap-2"><Film size={12}/> Video Dự án</Label>
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                <Input placeholder="Youtube Link..." className="text-xs h-10 rounded-xl bg-slate-50" value={formData.video_url} onChange={(e) => setFormData({...formData, video_url: e.target.value})} />
+              <div className="bg-white p-5 rounded-none border border-slate-200 shadow-xs space-y-3">
+                <Input placeholder="Youtube Link..." className="text-xs h-10 rounded-none bg-slate-50 border-slate-200" value={formData.video_url} onChange={(e) => setFormData({...formData, video_url: e.target.value})} />
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="text-[11px] font-black uppercase text-slate-500">Mentoring & Coaching</Label>
-                <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-md">{formData.author_ids?.length || 0} Đã chọn</Badge>
+                <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-none rounded-none">{formData.author_ids?.length || 0} Đã chọn</Badge>
               </div>
-              <div className="grid gap-2 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar bg-white p-3 rounded-[1.5rem] border border-slate-200 shadow-inner">
+              <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1 bg-white p-3 rounded-none border border-slate-200">
                 {authors.map(a => {
                   const isSelected = formData.author_ids?.includes(a.id);
                   return (
@@ -205,14 +205,14 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
                         const nextIds = isSelected ? formData.author_ids.filter((id:any)=>id!==a.id) : [...formData.author_ids, a.id]
                         setFormData({...formData, author_ids: nextIds})
                       }}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-pointer ${isSelected ? 'border-[#ed1c24] bg-red-50/50' : 'border-transparent bg-slate-50/30'}`}
+                      className={`flex items-center gap-3 p-2.5 rounded-none border transition-all cursor-pointer ${isSelected ? 'border-[#ed1c24] bg-red-50/50 shadow-xs' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100'}`}
                     >
-                      <Avatar className="h-9 w-9 shadow-sm shrink-0">
+                      <Avatar className="h-8 w-8 border border-white rounded-none shrink-0">
                         <AvatarImage src={a.avatar_url} className="object-cover" />
-                        <AvatarFallback className="font-black text-[10px] bg-slate-200 uppercase">{a.full_name?.substring(0,2)}</AvatarFallback>
+                        <AvatarFallback className="font-black text-[10px] bg-slate-200 uppercase rounded-none">{a.full_name?.substring(0,2)}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col min-w-0">
-                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-[#c91218]' : 'text-slate-600'}`}>{a.full_name}</span>
+                        <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-[#c91218]' : 'text-slate-700'}`}>{a.full_name}</span>
                         <span className="text-[9px] text-slate-400 font-bold italic truncate">{a.title}</span>
                       </div>
                     </div>
@@ -223,9 +223,9 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           </div>
         </div>
 
-        <DialogFooter className="p-10 bg-slate-50 border-t flex justify-between items-center rounded-b-[3rem]">
-          <Button variant="ghost" onClick={onClose} className="font-black uppercase text-[11px] text-slate-400 px-8 h-14">Hủy bỏ</Button>
-          <Button disabled={loading || uploading} className="h-16 px-20 bg-[#c91218] hover:bg-red-900 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all" onClick={handleUpdate}>
+        <DialogFooter className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-none">
+          <Button variant="ghost" onClick={onClose} className="font-black uppercase text-xs text-slate-500 rounded-none">Hủy bỏ</Button>
+          <Button disabled={loading || uploading} className="h-11 px-8 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase tracking-wider text-xs shadow-xs" onClick={handleUpdate}>
             {loading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} Cập nhật bài viết
           </Button>
         </DialogFooter>

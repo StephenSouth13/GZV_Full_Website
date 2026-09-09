@@ -102,7 +102,7 @@ export default function RegisterPage() {
         <TextInput icon={<Mail className="h-5 w-5" />} label="Email" type="email" value={formData.email} error={errors.email} onChange={(value) => handleInputChange("email", value)} disabled={isLoading} />
         <TextInput icon={<Phone className="h-5 w-5" />} label="Số điện thoại" type="tel" value={formData.phone || ""} error={errors.phone} onChange={(value) => handleInputChange("phone", value)} disabled={isLoading} />
 
-        <PasswordInput label="Mật khẩu" value={formData.password} error={errors.password} show={showPassword} onToggle={() => setShowPassword((value) => !value)} onChange={(value) => handleInputChange("password", value)} disabled={isLoading} />
+        <PasswordInput label="Mật khẩu" value={formData.password || ""} error={errors.password} show={showPassword} onToggle={() => setShowPassword((value) => !value)} onChange={(value) => handleInputChange("password", value)} disabled={isLoading} />
         <PasswordInput label="Xác nhận mật khẩu" value={formData.confirmPassword || ""} error={errors.confirmPassword} show={showConfirmPassword} onToggle={() => setShowConfirmPassword((value) => !value)} onChange={(value) => handleInputChange("confirmPassword", value)} disabled={isLoading} />
 
         <Button type="submit" disabled={isLoading} className="h-12 w-full rounded-none bg-[#ed1c24] font-black uppercase text-white hover:bg-[#c91218]">

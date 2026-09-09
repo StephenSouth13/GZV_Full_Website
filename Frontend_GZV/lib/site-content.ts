@@ -2,6 +2,20 @@
 
 import { supabase } from '@/lib/api-supabase'
 
+// ⚡ Clear any leftover stale caches from localStorage on client load
+if (typeof window !== 'undefined') {
+  try {
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && (key.startsWith('gzv_cache_') || key.startsWith('gzv_api_'))) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k))
+  } catch (e) {}
+}
+
 export type SiteNavItem = {
   id?: string
   href: string
@@ -24,6 +38,9 @@ export type SitePageContent = {
   banner_subtitle?: string | null
   banner_description?: string | null
   banner_image_url?: string | null
+  show_badge?: boolean | null
+  show_title?: boolean | null
+  show_subtitle?: boolean | null
   content_html?: string | null
   is_visible: boolean
   seo_title?: string | null
@@ -95,6 +112,21 @@ export type BrandingSettings = {
   default_description?: string | null
   default_keywords?: string | null
   og_image_url?: string | null
+  author?: string | null
+  canonical_url?: string | null
+  og_title?: string | null
+  og_description?: string | null
+  og_url?: string | null
+  header_site_name?: string
+  show_logo?: boolean
+  show_topbar?: boolean
+  show_topbar_email?: boolean
+  show_topbar_phone?: boolean
+  show_topbar_badge?: boolean
+  topbar_bg_color?: string
+  topbar_text_color?: string
+  header_bg_color?: string
+  header_text_color?: string
   topbar_email_label?: string | null
   topbar_phone_label?: string | null
   topbar_badge_label?: string | null
@@ -106,20 +138,17 @@ export type PageBlock = {
   block_key: string
   component_type: string
   title?: string | null
-  props: Record<string, any>
-  content_html?: string | null
+  subtitle?: string | null
   sort_order: number
   is_visible: boolean
-  responsive?: Record<string, any>
-  seo?: Record<string, any>
+  props: Record<string, any>
 }
 
 export type SectionTemplate = {
   id?: string
-  template_key: string
   name: string
-  category: string
   component_type: string
+  description?: string | null
   preview_image_url?: string | null
   default_props: Record<string, any>
   sort_order: number
@@ -127,23 +156,25 @@ export type SectionTemplate = {
 }
 
 export const defaultNavigation: SiteNavItem[] = [
-  { href: '/gioi-thieu', label_vi: 'GIỚI THIỆU', label_en: 'ABOUT', sort_order: 10, is_visible: true, is_page_enabled: true },
-  { href: '/dich-vu', label_vi: 'DỊCH VỤ', label_en: 'SERVICES', sort_order: 20, is_visible: true, is_page_enabled: true },
-  { href: '/du-an', label_vi: 'DỰ ÁN', label_en: 'PROJECTS', sort_order: 30, is_visible: true, is_page_enabled: true },
-  { href: '/gzver', label_vi: 'GZVers', label_en: 'GZVers', sort_order: 40, is_visible: true, is_page_enabled: true },
-  { href: '/tin-tuc', label_vi: 'TIN TỨC', label_en: 'NEWS', sort_order: 50, is_visible: true, is_page_enabled: true },
-  { href: '/lien-he', label_vi: 'LIÊN HỆ', label_en: 'CONTACT', sort_order: 60, is_visible: true, is_page_enabled: true },
+  { href: '/', label_vi: 'Trang chủ', label_en: 'Home', sort_order: 10, is_visible: true, is_page_enabled: true },
+  { href: '/gioi-thieu', label_vi: 'Giới thiệu', label_en: 'About Us', sort_order: 20, is_visible: true, is_page_enabled: true },
+  { href: '/dich-vu', label_vi: 'Dịch vụ', label_en: 'Services', sort_order: 30, is_visible: true, is_page_enabled: true },
+  { href: '/du-an', label_vi: 'Dự án', label_en: 'Projects', sort_order: 40, is_visible: true, is_page_enabled: true },
+  { href: '/gzver', label_vi: 'GZVers', label_en: 'GZVers', sort_order: 50, is_visible: true, is_page_enabled: true },
+  { href: '/doi-tac', label_vi: 'Đối tác', label_en: 'Partners', sort_order: 60, is_visible: true, is_page_enabled: true },
+  { href: '/tin-tuc', label_vi: 'Tin tức', label_en: 'News', sort_order: 70, is_visible: true, is_page_enabled: true },
+  { href: '/lien-he', label_vi: 'Liên hệ', label_en: 'Contact', sort_order: 80, is_visible: true, is_page_enabled: true },
 ]
 
 export const defaultLoadingSettings: SiteLoadingSettings = {
   logo_url: '/logo.webp',
   title: 'GZV',
-  subtitle: 'Đang tải dữ liệu...',
+  subtitle: 'Hệ sinh thái số & Đào tạo thực chiến',
   effect: 'orbit',
   background_from: '#050505',
-  background_to: '#161616',
+  background_to: '#111111',
   accent_color: '#ed1c24',
-  enabled: true,
+  enabled: false,
   minimum_duration_ms: 900,
 }
 
@@ -282,7 +313,6 @@ export async function getFooterSettings() {
     if (error) throw error
     return { ...defaultFooterSettings, ...(data || {}) } as FooterSettings
   } catch (error) {
-    console.warn('Using default footer settings because site_footer_settings is unavailable.', error)
     return defaultFooterSettings
   }
 }

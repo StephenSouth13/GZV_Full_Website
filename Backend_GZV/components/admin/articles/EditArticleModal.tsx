@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,19 +44,26 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
   }
 
   const handleSave = async () => {
-    if (!formData.title) return toast({ title: "Thiếu tiêu đề bài viết" })
+    if (!formData.title?.trim() || !formData.content?.trim()) {
+      return toast({ title: "Thiếu thông tin", description: "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết." })
+    }
     setLoading(true)
     try {
+      const authorIds = formData.author_ids?.length > 0
+        ? formData.author_ids
+        : (formData.author_id ? [formData.author_id] : (members.length > 0 ? [members[0].id] : []))
+
       const { data, error } = await supabase
         .from('articles')
         .update({
-          title: formData.title,
+          title: formData.title.trim(),
           content: formData.content,
-          excerpt: formData.excerpt,
-          image: formData.image,
-          author_ids: formData.author_ids,
-          category: formData.category,
-          status: 'published', // Ép về published khi nhấn Save
+          excerpt: formData.excerpt || "",
+          image: formData.image || "",
+          author_ids: authorIds,
+          author_id: authorIds[0] || null,
+          category: formData.category || "Tin tức",
+          status: 'published',
           updated_at: new Date().toISOString(),
           published_at: article.published_at || new Date().toISOString()
         })
@@ -66,7 +73,9 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
       onUpdateArticle(data?.[0] || formData)
       toast({ title: "Đã xuất bản bài viết thành công!" })
       onClose()
-    } catch (err: any) { toast({ title: "Lỗi", description: err.message, variant: "destructive" }) }
+    } catch (err: any) { 
+      toast({ title: "Lỗi xuất bản", description: err.message || "Không thể lưu bài viết.", variant: "destructive" }) 
+    }
     finally { setLoading(false) }
   }
 
@@ -74,28 +83,30 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[96vh] overflow-y-auto p-0 bg-white border-none shadow-2xl rounded-[2rem]">
+      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[96vh] overflow-y-auto p-0 bg-white border border-slate-200 shadow-2xl rounded-none">
+        <DialogTitle className="sr-only">Chỉnh sửa bài viết</DialogTitle>
+        <DialogDescription className="sr-only">Biểu mẫu chỉnh sửa và xuất bản bài viết</DialogDescription>
         {/* TOP BAR NHƯ MỘT EDITOR CHUYÊN NGHIỆP */}
         <div className="bg-slate-900 p-5 text-white flex justify-between items-center sticky top-0 z-50">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/20"><Edit3 size={22} /></div>
+            <div className="p-2.5 bg-[#ed1c24] rounded-none shadow-xs"><Edit3 size={20} /></div>
             <div>
-              <h2 className="font-black text-lg leading-none uppercase tracking-tighter">gzv Publisher Pro</h2>
+              <h2 className="font-black text-base leading-none uppercase tracking-wider">GZV Publisher Pro</h2>
               <p className="text-[10px] text-slate-400 font-bold flex items-center gap-1 mt-1"><Globe size={10}/> ĐANG CHỈNH SỬA CÔNG KHAI</p>
             </div>
           </div>
           <div className="flex gap-3">
-            <Button variant="ghost" className="text-slate-400 hover:text-white font-bold" onClick={onClose}>Hủy bỏ</Button>
-            <Button disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-10 rounded-full h-12 shadow-xl shadow-red-500/30" onClick={handleSave}>
+            <Button variant="ghost" className="text-slate-400 hover:text-white font-bold rounded-none text-xs uppercase" onClick={onClose}>Hủy bỏ</Button>
+            <Button disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-8 rounded-none h-10 text-xs uppercase shadow-xs" onClick={handleSave}>
               {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />} XÁC NHẬN XUẤT BẢN
             </Button>
           </div>
         </div>
 
-        <div className="p-10 grid grid-cols-1 lg:grid-cols-4 gap-12">
+        <div className="p-8 md:p-10 grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* EDITOR SECTION */}
           <div className="lg:col-span-3 space-y-8">
-            <Input className="text-5xl font-black py-16 border-none bg-transparent focus-visible:ring-0 placeholder:text-slate-100" placeholder="Tiêu đề bài viết..." value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+            <Input className="text-3xl md:text-4xl font-black py-8 border-none bg-transparent focus-visible:ring-0 placeholder:text-slate-200 text-slate-900" placeholder="Tiêu đề bài viết..." value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
             
             <div className="space-y-4">
               <GZVRichEditor
@@ -110,41 +121,41 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
 
           {/* SETTINGS SECTION */}
           <aside className="space-y-8">
-            <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-8 sticky top-32">
-              <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ảnh đại diện bài viết</Label>
-                <div className="relative aspect-[4/3] bg-white rounded-[2rem] flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-200 group shadow-sm">
+            <div className="bg-slate-50 p-6 rounded-none border border-slate-200 space-y-6 sticky top-28">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Ảnh đại diện bài viết</Label>
+                <div className="relative aspect-[4/3] bg-white rounded-none flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-200 group shadow-xs">
                   {formData.image ? (
                     <>
-                      <img src={formData.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="Thumb" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><label className="bg-white text-[#ed1c24] px-6 py-2 rounded-full text-[10px] font-black cursor-pointer shadow-2xl hover:scale-110 transition-all">ĐỔI ẢNH<input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label></div>
+                      <img src={formData.image} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" alt="Thumb" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"><label className="bg-white text-[#ed1c24] px-4 py-1.5 rounded-none text-[10px] font-black cursor-pointer shadow-md uppercase">ĐỔI ẢNH<input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label></div>
                     </>
                   ) : (
-                    <label className="cursor-pointer flex flex-col items-center gap-3">{uploading === 'thumbnails' ? <Loader2 className="animate-spin text-[#ed1c24]" /> : <Upload size={32} className="text-slate-300" />}<span className="text-[10px] font-black text-slate-400 tracking-tighter">TẢI LÊN THUMBNAIL</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label>
+                    <label className="cursor-pointer flex flex-col items-center gap-2">{uploading === 'thumbnails' ? <Loader2 className="animate-spin text-[#ed1c24]" /> : <Upload size={28} className="text-slate-400" />}<span className="text-[10px] font-black text-slate-400 tracking-wider">TẢI LÊN THUMBNAIL</span><input type="file" className="hidden" accept="image/*" onChange={(e) => handleUpload(e, 'thumbnails')} /></label>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Nhóm tác giả (Đa người viết)</Label>
-                <div className="grid gap-2 max-h-60 overflow-y-auto pr-2">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Nhóm tác giả (Đa người viết)</Label>
+                <div className="grid gap-2 max-h-60 overflow-y-auto pr-1">
                   {members.map(m => (
-                    <div key={m.id} onClick={() => { const current = formData.author_ids || []; const next = current.includes(m.id) ? current.filter((id:any) => id !== m.id) : [...current, m.id]; setFormData({...formData, author_ids: next})}} className={`flex items-center gap-3 p-3 rounded-2xl border-2 cursor-pointer transition-all ${formData.author_ids?.includes(m.id) ? 'border-[#ed1c24] bg-red-50/50 shadow-md scale-[1.02]' : 'border-transparent bg-white hover:bg-slate-100'}`}>
-                      <Avatar className="h-8 w-8 shadow-sm"><AvatarImage src={m.avatar_url} className="object-cover" /><AvatarFallback>{m.full_name?.charAt(0)}</AvatarFallback></Avatar>
-                      <span className="text-xs font-black text-slate-700 leading-none">{m.full_name}</span>
+                    <div key={m.id} onClick={() => { const current = formData.author_ids || []; const next = current.includes(m.id) ? current.filter((id:any) => id !== m.id) : [...current, m.id]; setFormData({...formData, author_ids: next})}} className={`flex items-center gap-3 p-2.5 rounded-none border cursor-pointer transition-all ${formData.author_ids?.includes(m.id) ? 'border-[#ed1c24] bg-[#ed1c24] text-white shadow-xs' : 'border-slate-200 bg-white hover:bg-slate-100'}`}>
+                      <Avatar className="h-7 w-7 rounded-none border border-white/20"><AvatarImage src={m.avatar_url} className="object-cover" /><AvatarFallback className="rounded-none text-[9px]">{m.full_name?.charAt(0)}</AvatarFallback></Avatar>
+                      <span className="text-xs font-bold leading-none">{m.full_name}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mô tả ngắn thu hút</Label>
-                <Textarea className="bg-white border-slate-200 rounded-2xl text-xs font-medium leading-relaxed h-24 shadow-sm" placeholder="Hiển thị ngoài trang chủ..." value={formData.excerpt} onChange={(e) => setFormData({...formData, excerpt: e.target.value})} />
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Mô tả ngắn thu hút</Label>
+                <Textarea className="bg-white border-slate-200 rounded-none text-xs font-medium leading-relaxed h-24 resize-none shadow-xs" placeholder="Hiển thị ngoài trang chủ..." value={formData.excerpt} onChange={(e) => setFormData({...formData, excerpt: e.target.value})} />
               </div>
 
-              <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Danh mục</Label>
-                <Input className="bg-white border-slate-200 h-12 rounded-2xl font-bold shadow-sm" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Danh mục</Label>
+                <Input className="bg-white border-slate-200 h-10 rounded-none font-semibold text-xs shadow-xs" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
               </div>
             </div>
           </aside>

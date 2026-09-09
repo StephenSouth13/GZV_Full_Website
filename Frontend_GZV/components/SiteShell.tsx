@@ -15,7 +15,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [navigation, setNavigation] = useState<SiteNavItem[]>([])
   const [loadingSettings, setLoadingSettings] = useState<SiteLoadingSettings>(defaultLoadingSettings)
-  const [booting, setBooting] = useState(true)
+  const [booting, setBooting] = useState(false)
   const [routeLoading, setRouteLoading] = useState(false)
 
   useEffect(() => {
@@ -25,6 +25,11 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
       if (!active) return
       setNavigation(nav)
       setLoadingSettings(loading)
+      if (!loading.enabled) {
+        setBooting(false)
+        return
+      }
+      setBooting(true)
       const wait = Math.max(0, loading.minimum_duration_ms - (Date.now() - started))
       window.setTimeout(() => active && setBooting(false), wait)
     })
@@ -32,11 +37,11 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (booting) return
+    if (booting || !loadingSettings.enabled) return
     setRouteLoading(true)
     const timer = window.setTimeout(() => setRouteLoading(false), Math.min(loadingSettings.minimum_duration_ms, 900))
     return () => window.clearTimeout(timer)
-  }, [pathname, booting, loadingSettings.minimum_duration_ms])
+  }, [pathname, booting, loadingSettings.enabled, loadingSettings.minimum_duration_ms])
 
   const disabledPage = useMemo(() => {
     const slug = getPageSlugFromPath(pathname)

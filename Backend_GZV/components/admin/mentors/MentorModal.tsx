@@ -104,29 +104,29 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl bg-[#0a0a0a] border-white/10 text-white p-0 overflow-hidden rounded-[2.5rem] shadow-2xl">
-        <div className="hidden"><DialogDescription>Quản lý thông tin chi tiết Ban Giảng Huấn</DialogDescription></div>
-        <DialogHeader className="p-8 pb-4 flex flex-row items-center justify-between border-b border-white/5 bg-white/[0.02]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#ed1c24] rounded-2xl shadow-lg shadow-red-500/20"><Award className="text-white" size={24}/></div>
+      <DialogContent className="max-w-6xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white p-0 overflow-hidden rounded-none shadow-2xl">
+        <div className="hidden"><DialogDescription>Quản lý thông tin chi tiết Ban Cố Vấn</DialogDescription></div>
+        <DialogHeader className="p-6 pb-4 flex flex-row items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#ed1c24] rounded-none text-white shadow-md"><GraduationCap className="text-white" size={22}/></div>
             <div>
-              <DialogTitle className="text-2xl font-black uppercase tracking-tight">Hồ sơ Mentor Chuyên sâu</DialogTitle>
-              <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">Hệ thống quản trị gzv Center</p>
+              <DialogTitle className="text-xl font-black uppercase tracking-tight text-slate-900 dark:text-white">Hồ Sơ Cố Vấn (Mentor Profile)</DialogTitle>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5">Ban Cố Vấn — GZV Center</p>
             </div>
           </div>
-          <div className="flex items-center gap-4 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/10">
-            <Label className="text-[10px] font-black uppercase tracking-widest cursor-pointer">Trạng thái Web</Label>
+          <div className="flex items-center gap-3 bg-white dark:bg-white/5 px-4 py-2 border border-slate-200 dark:border-white/10">
+            <Label className="text-[10px] font-black uppercase tracking-widest cursor-pointer text-slate-700 dark:text-slate-300">Trạng thái Web</Label>
             <Switch checked={formData.is_active} onCheckedChange={(v) => setFormData({...formData, is_active: v})} />
           </div>
         </DialogHeader>
 
         <Tabs defaultValue="identity" className="w-full">
-          <TabsList className="bg-transparent border-b border-white/5 w-full justify-start rounded-none px-8 h-14 gap-6 overflow-x-auto custom-scrollbar">
-            <TabsTrigger value="identity" className="uppercase text-[10px] font-black tracking-widest">1. Định danh & Bìa</TabsTrigger>
-            <TabsTrigger value="academic" className="uppercase text-[10px] font-black tracking-widest">2. Học vị & Quá trình</TabsTrigger>
-            <TabsTrigger value="expertise" className="uppercase text-[10px] font-black tracking-widest">3. Giảng dạy</TabsTrigger>
-            <TabsTrigger value="projects" className="uppercase text-[10px] font-black tracking-widest">4. Dự án</TabsTrigger>
-            <TabsTrigger value="achievements" className="uppercase text-[10px] font-black tracking-widest">5. Thành tựu</TabsTrigger>
+          <TabsList className="bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-white/10 w-full justify-start rounded-none px-6 h-12 gap-4 overflow-x-auto custom-scrollbar">
+            <TabsTrigger value="identity" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">1. Định danh & Bìa</TabsTrigger>
+            <TabsTrigger value="academic" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">2. Học vị & Quá trình</TabsTrigger>
+            <TabsTrigger value="expertise" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">3. Giảng dạy & Chuyên môn</TabsTrigger>
+            <TabsTrigger value="projects" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">4. Dự án thực chiến</TabsTrigger>
+            <TabsTrigger value="achievements" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">5. Thành tựu & Giải thưởng</TabsTrigger>
           </TabsList>
 
           <div className="p-8 max-h-[65vh] overflow-y-auto custom-scrollbar space-y-8">

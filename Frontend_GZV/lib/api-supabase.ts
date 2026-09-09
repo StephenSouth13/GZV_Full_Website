@@ -411,13 +411,32 @@
      */
     getGzvers: async (): Promise<gzver[]> => {
       try {
-        const { data, error } = await supabase
-          .from('gzvers')
-          .select('*, gzver_departments(*)')
-          .eq('is_active', true)
-          .order('order', { ascending: true });
-        if (error) throw error;
-        return (data || []).map(m => ({ ...m, avatar_url: getPublicUrl(m.avatar_url || m.image) }));
+        const [gzversRes, mentorsRes] = await Promise.all([
+          supabase.from('gzvers').select('*').eq('is_active', true).order('order', { ascending: true }),
+          supabase.from('mentors').select('*').eq('is_active', true).order('order', { ascending: true }),
+        ]);
+
+        const gzversList = (gzversRes.data || []).map((m: any) => ({ ...m, avatar_url: getPublicUrl(m.avatar_url || m.image) }));
+        const existingSlugs = new Set(gzversList.map((g: any) => g.slug));
+
+        const mentorsList = (mentorsRes.data || [])
+          .filter((m: any) => !existingSlugs.has(m.slug))
+          .map((m: any) => ({
+            id: m.id,
+            full_name: m.full_name,
+            slug: m.slug,
+            position: m.title || 'Cố vấn chuyên môn',
+            company: (m.organizations && m.organizations[0]) || 'GZV Center',
+            avatar_url: getPublicUrl(m.avatar_url),
+            department_name: 'BAN CỐ VẤN',
+            is_active: true,
+            is_advisor: true,
+            order: m.order || 0,
+            testimonial: m.description || '',
+          }));
+
+        const combined = [...gzversList, ...mentorsList];
+        return combined;
       } catch (error) {
         console.error("❌ Error fetching gzvers:", error);
         return [];
@@ -552,9 +571,9 @@
       try {
         const { data, error } = await supabase
           .from('gzvers')
-          .select('*, gzver_departments(*)')
+          .select('*')
           .eq('slug', slug)
-          .single();
+          .maybeSingle();
 
         if (error || !data) return null;
 

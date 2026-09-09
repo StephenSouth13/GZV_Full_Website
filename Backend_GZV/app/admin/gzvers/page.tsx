@@ -1,20 +1,60 @@
 "use client"
 
-import type React from "react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { GZVersTable } from "@/components/admin/gzvers/GZVersTable"
 import { GZVerModal } from "@/components/admin/gzvers/GZVerModal"
+import { GZVerQuickAddModal } from "@/components/admin/gzvers/GZVerQuickAddModal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowDown, ArrowUp, Plus, RefreshCcw, Save, Search, Trash2, Users2 } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  ArrowDown,
+  ArrowUp,
+  Building2,
+  CheckCircle2,
+  FileCheck2,
+  Layers,
+  Plus,
+  RefreshCcw,
+  Save,
+  Search,
+  Trash2,
+  UserCheck,
+  Users2,
+  Sparkles,
+  GripVertical,
+} from "lucide-react"
+import { toast } from "sonner"
+
+// Drag and Drop imports
+import {
+  DndContext,
+  closestCenter,
+  type DragEndEvent,
+  type DragStartEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 type Department = {
   id?: string
+  temp_id?: string
   name: string
   slug: string
   description?: string | null
@@ -23,15 +63,16 @@ type Department = {
   is_active: boolean
 }
 
-const slugify = (text: string) => text
-  .toLowerCase()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .replace(/[đĐ]/g, "d")
-  .trim()
-  .replace(/[^\w\s-]/g, "")
-  .replace(/[\s_-]+/g, "-")
-  .replace(/^-+|-+$/g, "")
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
 
 export default function AdminGzversPage() {
   const [gzvers, setGzvers] = useState<any[]>([])
@@ -40,222 +81,716 @@ export default function AdminGzversPage() {
   const [savingDepartments, setSavingDepartments] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeDepartment, setActiveDepartment] = useState("all")
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<"members" | "departments">("members")
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedGzver, setSelectedGzver] = useState<any>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [gzversResult, departmentsResult] = await Promise.all([
-        supabase.from("gzvers").select("*, gzver_departments(*)").order("order", { ascending: true }),
+      const [gzversResult, departmentsResult, mentorsResult] = await Promise.all([
+        supabase.from("gzvers").select("*").order("order", { ascending: true }),
         supabase.from("gzver_departments").select("*").order("sort_order", { ascending: true }),
+        supabase.from("mentors").select("*").order("order", { ascending: true }),
       ])
       if (gzversResult.error) throw gzversResult.error
       if (departmentsResult.error) throw departmentsResult.error
-      setGzvers(gzversResult.data || [])
-      setDepartments(departmentsResult.data || [])
+
+      const depts = departmentsResult.data || []
+      const banCoVan = depts.find((d: any) => d.slug === "ban-co-van" || d.name?.toLowerCase().includes("cố vấn"))
+
+      let rawGzvers = gzversResult.data || []
+      const existingSlugs = new Set(rawGzvers.map((g: any) => g.slug))
+
+      // Check if any mentors from mentors table are missing in gzvers
+      const missingMentors = (mentorsResult.data || []).filter((m: any) => !existingSlugs.has(m.slug))
+      if (missingMentors.length > 0 && banCoVan) {
+        const rowsToInsert = missingMentors.map((m: any) => ({
+          full_name: m.full_name,
+          slug: m.slug,
+          position: m.title || "Cố vấn chuyên môn",
+          company: (m.organizations && m.organizations[0]) || "GZV Center",
+          avatar_url: m.avatar_url,
+          department_id: banCoVan.id,
+          department_name: banCoVan.name,
+          is_active: m.is_active !== false,
+          order: m.order || 0,
+          testimonial: m.description || "",
+          background: m.background || { education: "", experience: "" },
+        }))
+
+        // Auto insert into gzvers DB with user session
+        const { data: insertedData, error: insertErr } = await supabase.from("gzvers").insert(rowsToInsert).select()
+        if (!insertErr && insertedData) {
+          rawGzvers = [...rawGzvers, ...insertedData]
+        } else {
+          // If insert fails, synthesize in memory for seamless display & filtering
+          const synthesized = missingMentors.map((m: any) => ({
+            ...m,
+            position: m.title || "Cố vấn chuyên môn",
+            company: (m.organizations && m.organizations[0]) || "GZV Center",
+            department_id: banCoVan.id,
+            department_name: banCoVan.name,
+          }))
+          rawGzvers = [...rawGzvers, ...synthesized]
+        }
+      }
+
+      const members = rawGzvers.map((item: any) => {
+        const dept = depts.find((d: any) => d.id === item.department_id || d.slug === item.department_id)
+        return {
+          ...item,
+          gzver_departments: dept || null,
+        }
+      })
+
+      setGzvers(members)
+      setDepartments(depts)
     } catch (error: any) {
-      toast({ title: "Không tải được dữ liệu GZVers", description: error.message, variant: "destructive" })
+      toast.error(error.message || "Không tải được dữ liệu GZVers")
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
-  const orderedDepartments = useMemo(() => [...departments].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)), [departments])
+  const orderedDepartments = useMemo(
+    () => [...departments].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)),
+    [departments]
+  )
+
   const filteredGzvers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     return gzvers.filter((item) => {
       const departmentId = item.department_id || item.gzver_departments?.id || ""
       const matchesDepartment = activeDepartment === "all" || departmentId === activeDepartment
-      const haystack = `${item.full_name || ""} ${item.position || ""} ${item.company || ""} ${item.department_name || ""} ${item.gzver_departments?.name || ""}`.toLowerCase()
+      const haystack = `${item.full_name || ""} ${item.position || ""} ${item.company || ""} ${item.department_name || ""
+        } ${item.gzver_departments?.name || ""}`.toLowerCase()
       return matchesDepartment && (!query || haystack.includes(query))
     })
   }, [activeDepartment, gzvers, searchQuery])
 
-  const handleOpenModal = (gzver: any = null) => {
+  // Stats KPI
+  const stats = useMemo(() => {
+    const total = gzvers.length
+    const active = gzvers.filter((g) => g.is_active).length
+    const withCv = gzvers.filter((g) => Boolean(g.cv_url)).length
+    const totalDepts = departments.filter((d) => d.is_active).length
+    return { total, active, withCv, totalDepts }
+  }, [gzvers, departments])
+
+  const handleOpenAdd = () => {
+    setIsQuickAddOpen(true)
+  }
+
+  const handleOpenEdit = (gzver: any) => {
     setSelectedGzver(gzver)
-    setIsModalOpen(true)
+    setIsEditModalOpen(true)
   }
 
   const handleDelete = async (gzver: any) => {
-    if (!window.confirm(`Xóa hồ sơ của ${gzver.full_name}?`)) return
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa hồ sơ của ${gzver.full_name}?`)) return
     const { error } = await supabase.from("gzvers").delete().eq("id", gzver.id)
-    if (error) toast({ title: "Không xóa được", description: error.message, variant: "destructive" })
-    else {
-      toast({ title: "Đã xóa GZVer" })
+    if (error) {
+      toast.error(error.message || "Không xóa được")
+    } else {
+      toast.success("Đã xóa GZVer thành công")
       fetchData()
+    }
+  }
+
+  const handleToggleStatus = async (gzver: any, nextStatus: boolean) => {
+    setGzvers((items) => items.map((g) => (g.id === gzver.id ? { ...g, is_active: nextStatus } : g)))
+    const { error } = await supabase.from("gzvers").update({ is_active: nextStatus }).eq("id", gzver.id)
+    if (error) {
+      toast.error("Lỗi khi cập nhật trạng thái")
+      fetchData()
+    } else {
+      toast.success(`Đã ${nextStatus ? "kích hoạt hiển thị" : "tạm ẩn"} ${gzver.full_name}`)
+    }
+  }
+
+  const [activeDepartmentDragId, setActiveDepartmentDragId] = useState<string | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDepartmentDragStart = (event: DragStartEvent) => {
+    setActiveDepartmentDragId(String(event.active.id))
+  }
+
+  const handleDepartmentDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveDepartmentDragId(null)
+    if (!over || active.id === over.id) return
+
+    const oldIndex = orderedDepartments.findIndex(
+      (d) => (d.id || d.temp_id || d.slug) === active.id
+    )
+    const newIndex = orderedDepartments.findIndex(
+      (d) => (d.id || d.temp_id || d.slug) === over.id
+    )
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const reordered = arrayMove(orderedDepartments, oldIndex, newIndex).map((item, idx) => ({
+        ...item,
+        sort_order: (idx + 1) * 10,
+      }))
+      setDepartments(reordered)
+
+      // Auto update in database immediately
+      try {
+        const updatePayloads = reordered
+          .filter((d) => d.id)
+          .map((d) => ({
+            id: d.id,
+            name: d.name,
+            slug: d.slug,
+            description: d.description || "",
+            color: d.color || "#ed1c24",
+            sort_order: d.sort_order,
+            is_active: d.is_active !== false,
+          }))
+
+        if (updatePayloads.length > 0) {
+          const { error } = await supabase
+            .from("gzver_departments")
+            .upsert(updatePayloads, { onConflict: "id" })
+          if (error) throw error
+          toast.success("Đã cập nhật thứ tự các ban!")
+        }
+      } catch (err: any) {
+        toast.error("Lỗi khi lưu thứ tự ban: " + err.message)
+      }
     }
   }
 
   const addDepartment = () => {
     const name = "BAN MỚI"
-    setDepartments((items) => [...items, {
-      name,
-      slug: `ban-moi-${Date.now()}`,
-      description: "",
-      color: "#ed1c24",
-      sort_order: (items.length + 1) * 10,
-      is_active: true,
-    }])
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`
+    setDepartments((items) => [
+      ...items,
+      {
+        temp_id: tempId,
+        name,
+        slug: `ban-moi-${Date.now()}`,
+        description: "",
+        color: "#ed1c24",
+        sort_order: (items.length + 1) * 10,
+        is_active: true,
+      },
+    ])
   }
 
   const updateDepartment = (index: number, patch: Partial<Department>) => {
-    setDepartments((items) => items.map((item, idx) => {
-      if (idx !== index) return item
-      const next = { ...item, ...patch }
-      if (patch.name && (!item.id || next.slug.startsWith("ban-moi-"))) next.slug = slugify(patch.name)
-      return next
-    }))
+    setDepartments((items) =>
+      items.map((item, idx) => {
+        if (idx !== index) return item
+        const next = { ...item, ...patch }
+        return next
+      })
+    )
   }
 
-  const moveDepartment = (index: number, direction: -1 | 1) => {
-    setDepartments((items) => {
-      const ordered = [...items].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      const target = index + direction
-      if (target < 0 || target >= ordered.length) return items
-      const current = ordered[index]
-      ordered[index] = ordered[target]
-      ordered[target] = current
-      return ordered.map((item, itemIndex) => ({ ...item, sort_order: (itemIndex + 1) * 10 }))
-    })
-  }
+  const removeDepartment = async (index: number) => {
+    const dept = departments[index]
+    if (!dept) return
 
-  const deleteDepartment = async (department: Department, index: number) => {
-    if (!window.confirm(`Xóa ${department.name}? GZVers thuộc ban này sẽ chuyển sang chưa gán ban.`)) return
-    setDepartments((items) => items.filter((_, idx) => idx !== index))
-    if (!department.id) return
-    await supabase.from("gzvers").update({ department_id: null, department_name: null }).eq("department_id", department.id)
-    const { error } = await supabase.from("gzver_departments").delete().eq("id", department.id)
-    if (error) toast({ title: "Không xóa được ban", description: error.message, variant: "destructive" })
-    else {
-      toast({ title: "Đã xóa ban" })
-      fetchData()
+    if (dept.id) {
+      if (!window.confirm(`Bạn có chắc muốn xóa ban "${dept.name}"? Các thành viên thuộc ban này sẽ được chuyển về Chưa gán ban.`)) return
+      const { error } = await supabase.from("gzver_departments").delete().eq("id", dept.id)
+      if (error) {
+        toast.error("Không xóa được ban: " + error.message)
+        return
+      }
     }
+
+    setDepartments((items) => items.filter((_, idx) => idx !== index))
+    toast.success(`Đã xóa ban "${dept.name}"`)
+    fetchData()
   }
 
   const saveDepartments = async () => {
     setSavingDepartments(true)
     try {
-      const rows = orderedDepartments.map((department, index) => ({
-        ...department,
-        slug: department.slug || slugify(department.name),
-        sort_order: (index + 1) * 10,
-      }))
-      const { error } = await supabase.from("gzver_departments").upsert(rows, { onConflict: "slug" })
-      if (error) throw error
-      toast({ title: "Đã lưu danh sách ban" })
+      // Chuẩn hóa tất cả các object có đúng cùng tập keys để PostgREST không báo lỗi PGRST102
+      const rows = orderedDepartments.map((department, index) => {
+        const payload: any = {
+          name: department.name.trim(),
+          slug: department.slug?.trim() || slugify(department.name) || `ban-${index + 1}`,
+          description: department.description || "",
+          color: department.color || "#ed1c24",
+          sort_order: (index + 1) * 10,
+          is_active: department.is_active !== false,
+        }
+        if (department.id) {
+          payload.id = department.id
+        }
+        return payload
+      })
+
+      // Đối với items đã có id thì upsert theo id, items mới thì insert
+      const toUpdate = rows.filter((r) => r.id)
+      const toInsert = rows.filter((r) => !r.id)
+
+      if (toUpdate.length > 0) {
+        const { error: updErr } = await supabase
+          .from("gzver_departments")
+          .upsert(toUpdate, { onConflict: "id" })
+        if (updErr) throw updErr
+      }
+
+      if (toInsert.length > 0) {
+        const { error: insErr } = await supabase
+          .from("gzver_departments")
+          .upsert(toInsert, { onConflict: "slug" })
+        if (insErr) throw insErr
+      }
+
+      toast.success("Đã lưu danh sách ban thành công!")
       fetchData()
     } catch (error: any) {
-      toast({ title: "Không lưu được ban", description: error.message, variant: "destructive" })
+      console.error("Lỗi lưu ban:", error)
+      toast.error(error.message || "Không lưu được ban")
     } finally {
       setSavingDepartments(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] p-5 text-white md:p-8">
-      <div className="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="mb-3 border-l-4 border-[#ed1c24] pl-3 text-xs font-black uppercase tracking-[0.24em] text-[#ed1c24]">GZV Organization</p>
-          <h1 className="text-3xl font-black uppercase tracking-tight md:text-4xl">Quản lý GZVers theo ban</h1>
-          <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-gray-400">Tạo ban, đổi tên, sắp xếp vị trí, bật/tắt và gán từng GZVer vào đúng vị trí hiển thị trên website.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchData} className="h-11 rounded-none border-white/10 bg-white/5 text-white hover:bg-white/10">
-            <RefreshCcw size={18} className={loading ? "animate-spin" : ""} />
-          </Button>
-          <Button onClick={() => handleOpenModal()} className="h-11 rounded-none bg-[#ed1c24] px-5 text-xs font-black uppercase text-white hover:bg-[#c91218]">
-            <Plus size={18} className="mr-2" /> Thêm GZVer
-          </Button>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      {/* Top Header Card matching site-content */}
+      <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
 
-      <div className="grid gap-6 xl:grid-cols-[460px_1fr]">
-        <aside className="space-y-4">
-          <div className="border border-white/10 bg-[#0b0b0b] p-5">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-black uppercase">Danh sách ban</h2>
-                <p className="mt-1 text-xs text-gray-500">Tạo, sửa, xóa, kéo thứ tự bằng nút lên/xuống.</p>
-              </div>
-              <Button variant="outline" size="sm" onClick={addDepartment} className="rounded-none border-[#ed1c24] text-[#ed1c24]">
-                <Plus className="mr-1 h-4 w-4" /> Ban
-              </Button>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 shrink-0 bg-[#ed1c24] text-white flex items-center justify-center font-black shadow-xs">
+              <Users2 className="h-5 w-5" />
             </div>
-            <div className="space-y-3">
-              {orderedDepartments.map((department, index) => {
-                const realIndex = departments.findIndex((item) => (item.id || item.slug) === (department.id || department.slug))
-                return (
-                  <div key={department.id || department.slug} className="space-y-3 border border-white/10 bg-white/[0.03] p-4">
-                    <div className="grid grid-cols-[1fr_82px] gap-2">
-                      <Field label="Tên ban"><Input className="h-10 rounded-none border-white/10 bg-white/5 text-white" value={department.name} onChange={(e) => updateDepartment(realIndex, { name: e.target.value })} /></Field>
-                      <Field label="Thứ tự"><Input type="number" className="h-10 rounded-none border-white/10 bg-white/5 text-white" value={department.sort_order} onChange={(e) => updateDepartment(realIndex, { sort_order: Number(e.target.value) || 0 })} /></Field>
-                    </div>
-                    <Field label="Mô tả"><Textarea className="min-h-20 rounded-none border-white/10 bg-white/5 text-white" value={department.description || ""} onChange={(e) => updateDepartment(realIndex, { description: e.target.value })} /></Field>
-                    <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-end gap-2">
-                      <Field label="Màu"><Input type="color" className="h-10 rounded-none border-white/10 bg-white/5" value={department.color || "#ed1c24"} onChange={(e) => updateDepartment(realIndex, { color: e.target.value })} /></Field>
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-none border-white/10 bg-white/5 text-white" disabled={index === 0} onClick={() => moveDepartment(index, -1)}><ArrowUp className="h-4 w-4" /></Button>
-                      <Button variant="outline" size="icon" className="h-10 w-10 rounded-none border-white/10 bg-white/5 text-white" disabled={index === orderedDepartments.length - 1} onClick={() => moveDepartment(index, 1)}><ArrowDown className="h-4 w-4" /></Button>
-                      <div className="flex h-10 items-center gap-2 border border-white/10 px-3"><Switch checked={department.is_active} onCheckedChange={(is_active) => updateDepartment(realIndex, { is_active })} /><span className="text-[10px] font-black uppercase text-gray-400">Bật</span></div>
-                      <Button variant="destructive" size="icon" className="h-10 w-10 rounded-none" onClick={() => deleteDepartment(department, realIndex)}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </div>
-                )
-              })}
+            <div>
+              <span className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24] block leading-tight">
+                GZVERS MANAGEMENT
+              </span>
+              <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Đội Ngũ Nhân Sự GZVers
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+                Quản trị nhân sự toàn hệ thống, phân bổ ban bệ, hồ sơ CV & Magazine Profile.
+              </p>
             </div>
-            <Button onClick={saveDepartments} disabled={savingDepartments} className="mt-4 h-11 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]">
-              {savingDepartments ? "Đang lưu..." : <><Save className="mr-2 h-4 w-4" />Lưu danh sách ban</>}
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchData}
+              disabled={loading}
+              className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200"
+            >
+              <RefreshCcw className={`mr-1.5 h-3.5 w-3.5 text-[#ed1c24] ${loading ? "animate-spin" : ""}`} />
+              Làm mới
+            </Button>
+
+            <Button
+              size="sm"
+              onClick={handleOpenAdd}
+              className="h-9 px-4 rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+            >
+              <Plus className="mr-1.5 h-4 w-4" />
+              Thêm GZVer mới
             </Button>
           </div>
-        </aside>
+        </div>
 
-        <main className="space-y-4">
-          <div className="border border-white/10 bg-[#0b0b0b] p-4">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-                <Input className="h-12 rounded-none border-white/10 bg-white/5 pl-11 text-white placeholder:text-gray-600" placeholder="Tìm theo tên, chức danh, ban..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <FilterButton active={activeDepartment === "all"} onClick={() => setActiveDepartment("all")}>Tất cả</FilterButton>
-                {orderedDepartments.filter((department) => department.id).map((department) => (
-                  <FilterButton key={department.id} active={activeDepartment === department.id} onClick={() => setActiveDepartment(department.id || "")}>{department.name}</FilterButton>
-                ))}
-              </div>
-            </div>
+        {/* 4 Control Stats inside Top Header Card */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Tổng GZVers</p>
+            <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">{stats.total}</p>
           </div>
-
-          {loading ? (
-            <div className="flex h-80 flex-col items-center justify-center border border-white/10 bg-[#0b0b0b]">
-              <RefreshCcw className="mb-4 h-10 w-10 animate-spin text-[#ed1c24]" />
-              <p className="text-xs font-black uppercase tracking-widest text-gray-500">Đang đồng bộ dữ liệu...</p>
-            </div>
-          ) : (
-            <GZVersTable gzvers={filteredGzvers} onEdit={handleOpenModal} onDelete={handleDelete} />
-          )}
-
-          <div className="flex items-center justify-between border-t border-white/10 px-1 pt-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-            <span>Tổng hiển thị: {filteredGzvers.length}</span>
-            <span className="inline-flex items-center gap-2"><Users2 className="h-4 w-4 text-[#ed1c24]" /> {departments.length} ban</span>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Đang Hiển Thị</p>
+            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">{stats.active}</p>
           </div>
-        </main>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Đã Có Hồ Sơ CV</p>
+            <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">{stats.withCv}</p>
+          </div>
+          <div className="border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/5">
+            <p className="text-[10px] font-black uppercase tracking-wide text-slate-500">Cơ Cấu Phòng Ban</p>
+            <p className="mt-2 text-2xl font-black text-purple-600 dark:text-purple-400">{stats.totalDepts}</p>
+          </div>
+        </div>
       </div>
 
-      <GZVerModal open={isModalOpen} onClose={() => setIsModalOpen(false)} gzver={selectedGzver} departments={departments.filter((department) => department.is_active)} onSave={fetchData} />
+      {/* Main Tabs matching site-content */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
+          <TabsTrigger
+            value="members"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <Users2 className="h-3.5 w-3.5 shrink-0" /> Danh Sách Nhân Sự ({gzvers.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="departments"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <Layers className="h-3.5 w-3.5 shrink-0" /> Cơ Cấu Ban ({departments.length})
+          </TabsTrigger>
+        </TabsList>
+
+        {/* TAB 1: MEMBERS */}
+        <TabsContent value="members" className="space-y-4">
+          <div className="border border-slate-200 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-4">
+            {/* Top Toolbar: Search Input */}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Input
+                className="h-11 rounded-none border-slate-200 bg-slate-50 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                placeholder="Tìm kiếm nhân sự theo họ tên, chức vụ, đơn vị công tác..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                >
+                  Xóa
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Toolbar: Larger Department Filter Buttons */}
+            <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  Lọc Theo Phòng Ban:
+                </span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Đang hiển thị <strong className="text-[#ed1c24]">{filteredGzvers.length}</strong> / {gzvers.length} nhân sự
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setActiveDepartment("all")}
+                  className={`h-11 px-5 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2.5 border rounded-none ${activeDepartment === "all"
+                      ? "border-[#ed1c24] bg-[#ed1c24] text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+                    }`}
+                >
+                  <span>Tất Cả Ban</span>
+                  <span
+                    className={`px-2 py-0.5 text-xs font-bold rounded-none ${activeDepartment === "all" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                      }`}
+                  >
+                    {gzvers.length}
+                  </span>
+                </button>
+
+                {orderedDepartments
+                  .filter((d) => d.id)
+                  .map((dept) => {
+                    const count = gzvers.filter(
+                      (g) => (g.department_id || g.gzver_departments?.id) === dept.id
+                    ).length
+                    const isSelected = activeDepartment === dept.id
+                    return (
+                      <button
+                        type="button"
+                        key={dept.id}
+                        onClick={() => setActiveDepartment(dept.id || "")}
+                        className={`h-11 px-5 text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2.5 border rounded-none ${isSelected
+                            ? "border-[#ed1c24] bg-[#ed1c24] text-white shadow-sm"
+                            : "border-slate-200 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+                          }`}
+                      >
+                        <span>{dept.name}</span>
+                        <span
+                          className={`px-2 py-0.5 text-xs font-bold rounded-none ${isSelected ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                            }`}
+                        >
+                          {count}
+                        </span>
+                      </button>
+                    )
+                  })}
+              </div>
+            </div>
+          </div>
+
+          {/* Members Table */}
+          {loading ? (
+            <div className="flex h-64 flex-col items-center justify-center border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900">
+              <RefreshCcw className="mb-3 h-8 w-8 animate-spin text-[#ed1c24]" />
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Đang tải danh sách GZVers...</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <GZVersTable
+                gzvers={filteredGzvers}
+                onEdit={handleOpenEdit}
+                onDelete={handleDelete}
+                onToggleStatus={handleToggleStatus}
+              />
+              <div className="flex items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <span>Hiển thị: {filteredGzvers.length} / {gzvers.length} nhân sự</span>
+                <span>{departments.length} ban chuyên môn</span>
+              </div>
+            </div>
+          )}
+        </TabsContent>
+
+        {/* TAB 2: DEPARTMENTS */}
+        <TabsContent value="departments" className="space-y-4">
+          <Card className="rounded-none border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-slate-900">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-slate-200 pb-4 dark:border-white/10">
+              <div>
+                <CardTitle className="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-[#ed1c24]" /> Danh sách các Ban trực thuộc
+                </CardTitle>
+                <CardDescription className="text-xs font-semibold mt-1">
+                  Chỉnh sửa tên ban, mô tả tóm tắt và bật/tắt trạng thái hoạt động trên toàn hệ thống.
+                </CardDescription>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={addDepartment}
+                  className="rounded-none border-[#ed1c24] text-xs font-black uppercase text-[#ed1c24] hover:bg-red-50 dark:hover:bg-red-950/30"
+                >
+                  <Plus className="mr-1 h-3.5 w-3.5" /> Thêm Ban Mới
+                </Button>
+
+                <Button
+                  onClick={saveDepartments}
+                  disabled={savingDepartments}
+                  className="rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+                >
+                  <Save className="mr-1.5 h-3.5 w-3.5" />
+                  {savingDepartments ? "Đang lưu..." : "Lưu Danh Sách Ban"}
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-6">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDepartmentDragStart}
+                onDragEnd={handleDepartmentDragEnd}
+              >
+                <SortableContext
+                  items={orderedDepartments.map((d) => d.id || d.temp_id || d.slug)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {orderedDepartments.map((department, index) => {
+                      const realIndex = departments.findIndex(
+                        (item) => (item.id || item.temp_id || item.slug) === (department.id || department.temp_id || department.slug)
+                      )
+                      const memberCount = gzvers.filter(
+                        (g) => (g.department_id || g.gzver_departments?.id) === department.id
+                      ).length
+
+                      const stableKey = department.id || department.temp_id || department.slug
+
+                      return (
+                        <SortableDepartmentCard
+                          key={stableKey}
+                          id={stableKey}
+                          department={department}
+                          positionIndex={index + 1}
+                          memberCount={memberCount}
+                          onUpdate={(patch) => updateDepartment(realIndex, patch)}
+                          onRemove={() => removeDepartment(realIndex)}
+                        />
+                      )
+                    })}
+                  </div>
+                </SortableContext>
+
+                <DragOverlay dropAnimation={{ duration: 150, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
+                  {activeDepartmentDragId ? (() => {
+                    const dragDept = orderedDepartments.find(
+                      (d) => (d.id || d.temp_id || d.slug) === activeDepartmentDragId
+                    )
+                    if (!dragDept) return null
+                    const dragIndex = orderedDepartments.findIndex(
+                      (d) => (d.id || d.temp_id || d.slug) === activeDepartmentDragId
+                    )
+                    return (
+                      <div className="border-2 border-[#ed1c24] bg-white p-4 shadow-2xl space-y-2 dark:bg-slate-900 opacity-95 pointer-events-none rounded-none">
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center bg-[#ed1c24] text-white font-mono text-[10px] font-black">
+                            {dragIndex + 1}
+                          </span>
+                          <span className="text-xs font-black uppercase text-slate-900 dark:text-white">
+                            {dragDept.name}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 line-clamp-1">{dragDept.description || "Đang di chuyển..."}</p>
+                      </div>
+                    )
+                  })() : null}
+                </DragOverlay>
+              </DndContext>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Quick Add Modal */}
+      <GZVerQuickAddModal
+        open={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        departments={departments.filter((d) => d.is_active)}
+        onSuccess={fetchData}
+      />
+
+      {/* Full Profile Edit Modal */}
+      <GZVerModal
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        gzver={selectedGzver}
+        departments={departments.filter((d) => d.is_active)}
+        onSave={fetchData}
+      />
     </div>
   )
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="space-y-1.5"><Label className="text-[10px] font-black uppercase tracking-widest text-gray-500">{label}</Label>{children}</div>
-}
+function SortableDepartmentCard({
+  id,
+  department,
+  positionIndex,
+  memberCount,
+  onUpdate,
+  onRemove,
+}: {
+  id: string
+  department: Department
+  positionIndex: number
+  memberCount: number
+  onUpdate: (patch: Partial<Department>) => void
+  onRemove: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
-function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    opacity: isDragging ? 0.35 : 1,
+  }
+
   return (
-    <button onClick={onClick} className={`h-10 border px-3 text-[10px] font-black uppercase transition ${active ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-white/10 bg-white/5 text-gray-300 hover:border-[#ed1c24]"}`}>
-      {children}
-    </button>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative border p-4 transition-[border-color,background-color] space-y-3 ${
+        isDragging
+          ? "border-dashed border-[#ed1c24] bg-red-50/20 dark:bg-red-950/20"
+          : department.is_active
+          ? "border-slate-200 bg-slate-50/70 hover:border-slate-300 dark:border-white/10 dark:bg-slate-950/50"
+          : "border-slate-200/60 bg-slate-100/40 opacity-75 dark:border-white/5 dark:bg-slate-950/20"
+      }`}
+    >
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 dark:border-white/10">
+        <div className="flex items-center gap-2">
+          {/* Drag Handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            type="button"
+            className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-[#ed1c24] hover:bg-slate-200/80 dark:hover:bg-slate-800 transition-colors"
+            title="Kéo thả để thay đổi vị trí thứ tự hiển thị"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+
+          {/* Position Order Badge */}
+          <span className="flex h-5 w-5 items-center justify-center bg-[#ed1c24] text-white font-mono text-[10px] font-black rounded-none">
+            {positionIndex}
+          </span>
+
+          <span className="text-xs font-black uppercase text-slate-900 dark:text-white">
+            {department.name || "Ban chưa đặt tên"}
+          </span>
+
+          {!department.is_active && (
+            <span className="px-1.5 py-0.2 text-[9px] font-bold uppercase bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              Đang tắt
+            </span>
+          )}
+        </div>
+
+        <span className="text-[10px] font-bold text-slate-500 bg-slate-200 dark:bg-slate-800 px-2 py-0.5">
+          {memberCount} thành viên
+        </span>
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tên Ban</Label>
+        <Input
+          className="h-9 rounded-none border-slate-200 bg-white text-xs dark:border-white/10 dark:bg-slate-900"
+          value={department.name}
+          placeholder="Nhập tên phòng ban..."
+          onChange={(e) => onUpdate({ name: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Mô tả tóm tắt</Label>
+        <Textarea
+          className="min-h-16 rounded-none border-slate-200 bg-white text-xs dark:border-white/10 dark:bg-slate-900"
+          value={department.description || ""}
+          placeholder="Mô tả chức năng nhiệm vụ của ban..."
+          onChange={(e) => onUpdate({ description: e.target.value })}
+        />
+      </div>
+
+      <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-white/10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onRemove}
+          className="h-8 px-2 text-xs font-bold text-slate-400 hover:text-red-600 rounded-none"
+        >
+          <Trash2 className="h-3.5 w-3.5 mr-1" /> Xóa ban
+        </Button>
+
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={department.is_active}
+            onCheckedChange={(is_active) => onUpdate({ is_active })}
+          />
+          <span
+            className={`text-[11px] font-bold uppercase ${department.is_active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400"
+              }`}
+          >
+            {department.is_active ? "Bật" : "Tắt"}
+          </span>
+        </div>
+      </div>
+    </div>
   )
 }

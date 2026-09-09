@@ -281,10 +281,11 @@ export async function getMediaFiles(options?: {
       query = query.eq('file_type', options.file_type)
     }
 
+    const offset = options?.offset || 0
+    const limit = options?.limit || 50
     const { data, count, error } = await query
       .order('created_at', { ascending: false })
-      .limit(options?.limit || 50)
-      .offset(options?.offset || 0)
+      .range(offset, offset + limit - 1)
 
     if (error) {
       return {

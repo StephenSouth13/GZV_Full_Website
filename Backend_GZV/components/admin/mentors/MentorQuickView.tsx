@@ -1,43 +1,111 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { Linkedin, Facebook, Globe, GraduationCap, Briefcase } from 'lucide-react'
+import React from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
+import { Linkedin, Facebook, Globe, GraduationCap, Briefcase, Award } from "lucide-react"
 
 export function MentorQuickView({ isOpen, onClose, mentor }: any) {
-  if (!mentor) return null;
+  if (!mentor) return null
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl bg-gray-900 border-white/10 text-white rounded-[2.5rem] p-10 overflow-hidden shadow-2xl">
-        <div className="flex gap-10">
-          <div className="w-1/3 flex flex-col items-center text-center space-y-4">
-            <div className="w-40 h-40 rounded-full border-4 border-[#ed1c24]/20 overflow-hidden shadow-2xl">
-              <img src={mentor.avatar_url} className="w-full h-full object-cover" />
+      <DialogContent className="max-w-3xl rounded-none border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-white sm:p-8">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+          {/* Left Column: Avatar & Basic Info */}
+          <div className="flex flex-col items-center text-center md:w-1/3 shrink-0">
+            <div className="h-32 w-32 overflow-hidden rounded-none border-2 border-[#ed1c24] bg-slate-100 shadow-md dark:bg-slate-900">
+              <img
+                src={mentor.avatar_url || "/placeholder.svg"}
+                alt={mentor.full_name}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <h2 className="text-xl font-black uppercase leading-tight">{mentor.full_name}</h2>
-            <Badge className="bg-[#ed1c24] text-white border-none">{mentor.title}</Badge>
-            <div className="flex gap-3 pt-4">
-               {mentor.linkedin_url && <Linkedin className="text-gray-500" size={18}/>}
-               {mentor.facebook_url && <Facebook className="text-gray-500" size={18}/>}
-               {mentor.portfolio_url && <Globe className="text-gray-500" size={18}/>}
+            <h2 className="mt-3 text-base font-black uppercase tracking-tight">{mentor.full_name}</h2>
+            <p className="mt-0.5 text-[10px] font-mono text-slate-400">/{mentor.slug}</p>
+            <Badge className="mt-2 rounded-none bg-[#ed1c24] text-white hover:bg-[#ed1c24] border-none text-[10px] uppercase font-bold">
+              {mentor.title || "Chuyên gia"}
+            </Badge>
+
+            <div className="mt-4 flex items-center gap-3">
+              {mentor.linkedin_url && (
+                <a
+                  href={mentor.linkedin_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-400 transition hover:text-[#ed1c24]"
+                >
+                  <Linkedin size={16} />
+                </a>
+              )}
+              {mentor.facebook_url && (
+                <a
+                  href={mentor.facebook_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-400 transition hover:text-[#ed1c24]"
+                >
+                  <Facebook size={16} />
+                </a>
+              )}
+              {mentor.portfolio_url && (
+                <a
+                  href={mentor.portfolio_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-slate-400 transition hover:text-[#ed1c24]"
+                >
+                  <Globe size={16} />
+                </a>
+              )}
             </div>
           </div>
 
-          <div className="w-2/3 space-y-6">
-            <div className="p-6 bg-white/5 rounded-3xl border border-white/5 italic text-gray-300">
-               "{mentor.description}"
+          {/* Right Column: Bio & Details */}
+          <div className="space-y-4 md:w-2/3">
+            {mentor.description && (
+              <div className="border-l-2 border-[#ed1c24] bg-slate-50 p-3 italic text-xs text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                "{mentor.description}"
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5 border border-slate-200 p-3 dark:border-white/10">
+                <h4 className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-[#ed1c24]">
+                  <GraduationCap size={13} /> Học vấn & Đào tạo
+                </h4>
+                <div className="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed font-medium">
+                  {mentor.background?.education || "Chưa cập nhật"}
+                </div>
+              </div>
+
+              <div className="space-y-1.5 border border-slate-200 p-3 dark:border-white/10">
+                <h4 className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  <Briefcase size={13} /> Kinh nghiệm thực chiến
+                </h4>
+                <div className="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed font-medium">
+                  {mentor.background?.experience || "Chưa cập nhật"}
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
-               <div>
-                  <h4 className="text-[10px] font-black text-[#ed1c24] uppercase tracking-[0.2em] mb-3 flex items-center gap-2"><GraduationCap size={14}/> Học vấn</h4>
-                  <div className="text-xs text-gray-400 whitespace-pre-line leading-relaxed">{mentor.background?.education}</div>
-               </div>
-               <div>
-                  <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2"><Briefcase size={14}/> Kinh nghiệm</h4>
-                  <div className="text-xs text-gray-400 whitespace-pre-line leading-relaxed">{mentor.background?.experience}</div>
-               </div>
-            </div>
+
+            {mentor.specialties && mentor.specialties.length > 0 && (
+              <div className="space-y-1.5 border border-slate-200 p-3 dark:border-white/10">
+                <h4 className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                  <Award size={13} /> Lĩnh vực chuyên môn
+                </h4>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {mentor.specialties.map((item: string, idx: number) => (
+                    <span
+                      key={idx}
+                      className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-[10px] font-bold px-2 py-0.5"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>

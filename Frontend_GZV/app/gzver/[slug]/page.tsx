@@ -19,6 +19,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Share2,
   ShieldCheck,
   Star,
   TrendingUp,
@@ -33,10 +34,10 @@ type SocialLink = NonNullable<gzver["social_links"]>[number]
 
 const defaultSections: ProfileSectionData[] = [
   { key: "overview", label: "Tổng quan", type: "overview", source: "overview", sort_order: 10, visible: true },
-  { key: "journey", label: "Lộ trình phát triển", type: "text", source: "promotion_path", sort_order: 20, visible: true },
-  { key: "achievements", label: "Thành tựu nổi bật", type: "list", source: "achievements_list", sort_order: 30, visible: true },
-  { key: "experience", label: "Năng lực thực chiến", type: "background", source: "experience", sort_order: 40, visible: true },
-  { key: "impact", label: "Tác động xã hội", type: "text", source: "social_impact", sort_order: 50, visible: true },
+  { key: "journey", label: "Lộ trình", type: "text", source: "promotion_path", sort_order: 20, visible: true },
+  { key: "achievements", label: "Thành tựu", type: "list", source: "achievements_list", sort_order: 30, visible: true },
+  { key: "experience", label: "Kinh nghiệm", type: "background", source: "experience", sort_order: 40, visible: true },
+  { key: "impact", label: "Tác động", type: "text", source: "social_impact", sort_order: 50, visible: true },
 ]
 
 const socialIcons: Record<string, any> = {
@@ -101,7 +102,7 @@ function SocialButton({ link }: { link: SocialLink }) {
       target="_blank"
       rel="noreferrer"
       aria-label={link.label || platform}
-      className="inline-flex h-11 w-11 items-center justify-center border border-white/15 bg-white/10 text-white transition hover:border-[#ed1c24] hover:bg-[#ed1c24]"
+      className="inline-flex h-10 w-10 items-center justify-center border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-[#ed1c24] hover:bg-[#ed1c24] hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
     >
       <Icon className="h-4 w-4" />
     </a>
@@ -112,7 +113,7 @@ function BadgePill({ badge }: { badge: ProfileBadge }) {
   const Icon = badgeIcons[(badge.icon || "shield").toLowerCase()] || ShieldCheck
   return (
     <span
-      className="inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em]"
+      className="inline-flex items-center gap-1.5 border bg-slate-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] dark:bg-white/5"
       style={{ borderColor: badge.color || "#ed1c24", color: badge.color || "#ed1c24" }}
     >
       <Icon className="h-3.5 w-3.5" />
@@ -123,9 +124,11 @@ function BadgePill({ badge }: { badge: ProfileBadge }) {
 
 function ProfileInfoCard({ icon: Icon, title, text }: { icon: any; title: string; text?: string }) {
   return (
-    <div className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
-      <h3 className="mb-4 flex items-center gap-3 text-xl font-black uppercase text-slate-950 dark:text-white">
-        <Icon className="h-5 w-5 text-[#ed1c24]" />
+    <div className="border border-slate-200 bg-white p-6 shadow-xs transition duration-300 hover:border-[#ed1c24] hover:shadow-md dark:border-white/10 dark:bg-[#121212]">
+      <h3 className="mb-4 flex items-center gap-3 text-lg font-black uppercase text-slate-900 dark:text-white">
+        <div className="flex h-9 w-9 items-center justify-center bg-red-50 text-[#ed1c24] dark:bg-red-950/30">
+          <Icon className="h-4.5 w-4.5" />
+        </div>
         {title}
       </h3>
       <p className="whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{text || "Đang cập nhật."}</p>
@@ -140,17 +143,36 @@ function ProfileSection({ member, section, index }: { member: gzver; section: Pr
 
   if (section.type === "overview") {
     return (
-      <section className="grid gap-5 lg:grid-cols-3">
-        <div className="border border-slate-200 bg-white p-6 lg:col-span-2 dark:border-white/10 dark:bg-[#0f0f0f]">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
-          <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">{member.headline || member.achievement_summary || member.position}</h2>
-          {member.testimonial && <p className="mt-5 border-l-4 border-[#ed1c24] bg-red-50 p-5 text-base font-semibold leading-8 text-slate-700 dark:bg-red-950/20 dark:text-slate-200">{member.testimonial}</p>}
-          {member.mentoring_content && <p className="mt-5 whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
+      <section className="grid gap-6 lg:grid-cols-3">
+        <div className="border border-slate-200 bg-white p-7 shadow-xs lg:col-span-2 dark:border-white/10 dark:bg-[#121212]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tổng quan</span>
+          </div>
+          <h2 className="text-2xl font-black uppercase leading-snug text-slate-900 dark:text-white">{member.headline || member.achievement_summary || member.position}</h2>
+          {member.testimonial && (
+            <div className="relative mt-6 overflow-hidden border-l-4 border-[#ed1c24] bg-red-50/60 p-6 text-base font-semibold leading-8 text-slate-800 dark:bg-red-950/20 dark:text-slate-200">
+              <span className="absolute -right-4 -bottom-4 text-7xl font-serif font-black text-red-600/10 selection:bg-transparent">“</span>
+              <p className="relative z-10">{member.testimonial}</p>
+            </div>
+          )}
+          {member.mentoring_content && <p className="mt-6 whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
         </div>
-        <div className="border border-slate-200 bg-[#050505] p-6 text-white dark:border-white/10">
-          <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Kỹ năng</p>
-          <div className="flex flex-wrap gap-2">
-            {(member.skills || []).map((skill) => <span key={skill} className="border border-white/15 px-3 py-2 text-xs font-bold text-white/85">{skill}</span>)}
+
+        <div className="border border-slate-200 bg-white p-7 shadow-xs flex flex-col justify-between dark:border-white/10 dark:bg-[#121212]">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-2 w-2 bg-[#ed1c24]" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Kỹ năng chuyên môn</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(member.skills || []).map((skill) => (
+                <span key={skill} className="border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+                  {skill}
+                </span>
+              ))}
+              {!(member.skills || []).length && <p className="text-xs font-medium text-slate-400">Đang cập nhật kỹ năng.</p>}
+            </div>
           </div>
         </div>
       </section>
@@ -159,14 +181,26 @@ function ProfileSection({ member, section, index }: { member: gzver; section: Pr
 
   if (section.type === "list") {
     return (
-      <section className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
-        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
-        <h2 className="mb-6 flex items-center gap-3 text-2xl font-black uppercase text-slate-950 dark:text-white"><Award className="text-[#ed1c24]" />{title}</h2>
-        <div className="grid gap-3 md:grid-cols-2">
+      <section className="border border-slate-200 bg-white p-7 shadow-xs dark:border-white/10 dark:bg-[#121212]">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center bg-red-50 text-[#ed1c24] dark:bg-red-950/30">
+              <Award className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
+              <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white">{title}</h2>
+            </div>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
           {listSource.map((item, itemIndex) => (
-            <div key={`${item}-${itemIndex}`} className="border-l-4 border-[#ed1c24] bg-slate-50 p-5 dark:bg-white/5">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">{String(itemIndex + 1).padStart(2, "0")}</span>
-              <p className="mt-2 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">{item}</p>
+            <div key={`${item}-${itemIndex}`} className="group border border-slate-200 bg-slate-50/50 p-5 transition duration-300 hover:border-[#ed1c24] hover:bg-white dark:border-white/5 dark:bg-[#181818]">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">{String(itemIndex + 1).padStart(2, "0")}</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ed1c24] opacity-0 group-hover:opacity-100 transition" />
+              </div>
+              <p className="mt-3 text-sm font-bold leading-6 text-slate-800 dark:text-slate-200">{item}</p>
             </div>
           ))}
         </div>
@@ -185,11 +219,11 @@ function ProfileSection({ member, section, index }: { member: gzver; section: Pr
   }
 
   return (
-    <section className="border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0f0f0f]">
-      <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
-      <h2 className="mb-5 text-2xl font-black uppercase text-slate-950 dark:text-white">{title}</h2>
+    <section className="border border-slate-200 bg-white p-7 shadow-xs dark:border-white/10 dark:bg-[#121212]">
+      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
+      <h2 className="mb-5 text-2xl font-black uppercase text-slate-900 dark:text-white">{title}</h2>
       <div className="whitespace-pre-line text-base font-medium leading-8 text-slate-700 dark:text-slate-300">
-        {section.content || sourceText || "Admin có thể cập nhật nội dung section này trong hồ sơ GZVer."}
+        {section.content || sourceText || "Nội dung section này đang được cập nhật."}
       </div>
     </section>
   )
@@ -198,6 +232,7 @@ function ProfileSection({ member, section, index }: { member: gzver; section: Pr
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
   const [member, setMember] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<string>("")
 
   useEffect(() => {
     let active = true
@@ -225,12 +260,21 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
   const socials = useMemo(() => sortVisible<SocialLink>(member?.social_links), [member])
 
+  useEffect(() => {
+    if (sections.length && !activeTab) {
+      setActiveTab(sections[0].key || `section-0`)
+    }
+  }, [sections, activeTab])
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
-        <div className="border border-white/10 p-8 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin border-2 border-white/15 border-t-[#ed1c24]" />
-          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/50">Đang tải hồ sơ GZVer</p>
+      <div className="min-h-screen bg-slate-50 pt-24 text-slate-900 dark:bg-[#070707] dark:text-white flex items-center justify-center">
+        <div className="relative border border-slate-200 bg-white p-10 text-center shadow-xl dark:border-white/10 dark:bg-[#0d0d0d]">
+          <div className="absolute -top-1 -left-1 -right-1 h-1 bg-[#ed1c24] animate-pulse" />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-[#ed1c24] dark:bg-red-950/30">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-transparent border-t-[#ed1c24]" />
+          </div>
+          <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Đang tải hồ sơ GZVer...</p>
         </div>
       </div>
     )
@@ -248,82 +292,203 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
     transform: `scale(${(member.cover_scale || 100) / 100})`,
   }
 
+  const shareProfile = () => {
+    if (typeof window !== "undefined" && navigator.share) {
+      navigator.share({ title: member?.full_name, url: window.location.href }).catch(() => { })
+    } else if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href)
+      alert("Đã sao chép link hồ sơ GZVer!")
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-slate-50 pt-24 text-slate-950 dark:bg-[#050505] dark:text-white">
-      <section className="border-b border-slate-200 bg-white dark:border-white/10 dark:bg-[#080808]">
-        <div className="container py-8">
-          <Link href="/gzver" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500 transition hover:text-[#ed1c24]">
-            <ArrowLeft className="h-4 w-4" />
-            Quay lại cộng đồng GZVers
-          </Link>
-        </div>
-      </section>
+    <main className="min-h-screen bg-slate-100/60 text-slate-900 dark:bg-[#070707] dark:text-slate-100 selection:bg-[#ed1c24] selection:text-white">
+      {/* ══════════ HERO COVER ══════════ */}
+      <section className="relative w-full overflow-hidden">
+        <div className="relative w-full h-[45vh] md:h-[55vh] lg:h-[60vh] bg-slate-900">
+          {member.cover_image_url ? (
+            <>
+              <Image src={member.cover_image_url} alt={`${member.full_name} cover`} fill unoptimized className="object-cover opacity-85" style={coverStyle} priority />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-[#070707]/60 to-[#070707]/20 dark:from-[#070707] dark:via-[#070707]/60 dark:to-[#070707]/20" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-red-950" />
+          )}
 
-      <section className="container py-8 sm:py-12">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="overflow-hidden border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-[#0d0d0d]">
-          <div className="relative h-56 overflow-hidden bg-[#050505] sm:h-72 lg:h-80">
-            {member.cover_image_url ? (
-              <Image src={member.cover_image_url} alt={`${member.full_name} cover`} fill unoptimized className="object-cover opacity-80" style={coverStyle} />
-            ) : (
-              <div className="absolute inset-0 bg-[linear-gradient(135deg,#050505_0%,#220608_45%,#ed1c24_100%)]" />
+          {/* Floating Back Button */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-20">
+            <Link href="/gzver" className="inline-flex items-center gap-1.5 border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white shadow-md hover:bg-slate-100">
+              <ArrowLeft className="h-4 w-4" />
+              <span>Cộng đồng GZVers</span>
+            </Link>
+          </motion.div>
+
+          {/* Action Buttons Top Right: Share + CV */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 right-6 z-20 flex items-center gap-2">
+            <button
+              onClick={shareProfile}
+              aria-label="Chia sẻ hồ sơ"
+              className="inline-flex h-9 w-9 items-center justify-center border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 text-slate-900 dark:text-white shadow-md hover:bg-slate-100"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+            {member.cv_url && (
+              <a href={member.cv_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-[#ed1c24] bg-[#ed1c24] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c91218]">
+                <Download className="h-4 w-4" />
+                <span>Tải CV</span>
+              </a>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent" />
-            <div className="absolute bottom-6 left-5 right-5 flex flex-wrap items-end justify-between gap-4 sm:left-8 sm:right-8">
-              <div>
-                <p className="mb-3 inline-flex bg-[#ed1c24] px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white">{departmentName}</p>
-                <h1 className="max-w-4xl text-4xl font-black uppercase leading-none text-white sm:text-6xl">{member.full_name}</h1>
+          </motion.div>
+        </div>
+
+        {/* Overlapping Main Container */}
+        <div className="container max-w-5xl mx-auto px-4 -mt-32 md:-mt-40 relative z-10 pb-16">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
+            {/* Header Banner Inside Card */}
+            <div className="p-6 md:p-10 border-b border-slate-200 dark:border-white/10 border-t-4 border-t-[#ed1c24]">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="inline-flex items-center gap-1.5 bg-[#ed1c24] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                  {departmentName}
+                </span>
+                {member.role_level && (
+                  <span className="inline-flex items-center gap-1 border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:border-white/20 dark:bg-white/5 dark:text-white">
+                    {member.role_level}
+                  </span>
+                )}
               </div>
-              {member.cv_url && (
-                <a href={member.cv_url} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center gap-2 bg-white px-5 text-xs font-black uppercase text-[#050505] transition hover:bg-[#ed1c24] hover:text-white">
-                  <Download className="h-4 w-4" />
-                  Tải CV
-                </a>
-              )}
+
+              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-slate-950 dark:text-white leading-none">{member.full_name}</h1>
+              {member.headline && <p className="mt-3 text-base md:text-lg font-semibold text-slate-600 dark:text-slate-300">{member.headline}</p>}
             </div>
-          </div>
 
-          <div className="grid gap-0 lg:grid-cols-[360px_1fr]">
-            <aside className="border-b border-slate-200 bg-[#050505] p-6 text-white dark:border-white/10 lg:border-b-0 lg:border-r lg:border-white/10 sm:p-8">
-              <div className="-mt-24 mb-6 h-48 w-48 overflow-hidden border-8 border-[#050505] bg-slate-100 shadow-2xl">
-                <Image src={member.avatar_url || "/gzvers/default.webp"} alt={member.full_name} width={260} height={260} unoptimized className="h-full w-full object-cover" style={avatarStyle} />
-              </div>
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ed1c24]">{member.role_level || "GZVer profile"}</p>
-              <h2 className="mt-2 text-2xl font-black uppercase leading-tight">{member.position}</h2>
-              {member.company && <p className="mt-3 text-sm font-bold text-white/60">@{member.company}</p>}
-              {member.headline && <p className="mt-5 text-sm font-semibold leading-7 text-white/75">{member.headline}</p>}
+            {/* Layout Grid: Sidebar Left + Content Right */}
+            <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
+              {/* Sidebar Left */}
+              <aside className="border-b border-slate-200 bg-slate-50/70 p-6 text-slate-900 sm:p-8 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
+                {/* Avatar Box */}
+                <div className="relative mb-6 aspect-square w-44 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-48 dark:border-[#0d0d0d] dark:bg-[#141414]">
+                  {member.avatar_url ? (
+                    <Image
+                      src={member.avatar_url}
+                      alt={member.full_name}
+                      width={260}
+                      height={260}
+                      unoptimized
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement
+                        target.style.display = "none"
+                      }}
+                      className="h-full w-full object-cover"
+                      style={avatarStyle}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-slate-800 text-3xl font-black uppercase text-white">
+                      {member.full_name?.charAt(0) || "G"}
+                    </div>
+                  )}
+                </div>
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
-                {!badges.length && <BadgePill badge={{ label: departmentName, icon: "shield", color: "#ed1c24" }} />}
-              </div>
+                <div className="space-y-1">
+                  <h2 className="text-xl font-black uppercase leading-tight text-slate-900 dark:text-white">{member.position}</h2>
+                  {member.company && <p className="text-xs font-bold text-[#ed1c24]">@{member.company}</p>}
+                </div>
 
-              <div className="mt-7 space-y-3 border-t border-white/10 pt-6 text-sm font-semibold text-white/70">
-                {member.location && <p className="flex items-center gap-3"><MapPin className="h-4 w-4 text-[#ed1c24]" />{member.location}</p>}
-                {member.email && <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-[#ed1c24]" />{member.email}</p>}
-                {member.phone && <p className="flex items-center gap-3"><Phone className="h-4 w-4 text-[#ed1c24]" />{member.phone}</p>}
-              </div>
+                {/* Badges List */}
+                {badges.length > 0 && (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
+                  </div>
+                )}
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
-                {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
-              </div>
-            </aside>
+                {/* Contact Info Items */}
+                <div className="mt-6 space-y-2.5 border-t border-slate-200 pt-5 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
+                  {member.location && (
+                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
+                      <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                      <span className="truncate">{member.location}</span>
+                    </div>
+                  )}
+                  {member.email && (
+                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
+                      <Mail className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                      <span className="truncate">{member.email}</span>
+                    </div>
+                  )}
+                  {member.phone && (
+                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
+                      <Phone className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                      <span className="truncate">{member.phone}</span>
+                    </div>
+                  )}
+                </div>
 
-            <div className="space-y-5 p-5 sm:p-8">
-              <div className="border-l-4 border-[#ed1c24] bg-slate-50 p-5 dark:bg-white/5">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Profile sections</p>
-                <h2 className="mt-2 text-2xl font-black uppercase text-slate-950 dark:text-white">Hồ sơ chi tiết</h2>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">
-                  Các section bên dưới được quản trị tự do trong admin và hiển thị theo đúng thứ tự xuất bản.
-                </p>
+                {/* Social Channels */}
+                <div className="mt-6 border-t border-slate-200 pt-5 dark:border-white/10">
+                  <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kênh kết nối</p>
+                  <div className="flex flex-wrap gap-2">
+                    {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
+                    {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
+                  </div>
+                </div>
+              </aside>
+
+              {/* Main Content Area */}
+              <div className="bg-white p-6 sm:p-8 dark:bg-[#0b0b0b]">
+                {/* Filter Tabs Navigation */}
+                {sections.length > 1 && (
+                  <div className="sticky top-20 z-20 mb-8 overflow-x-auto border border-slate-200 bg-white/90 p-1.5 backdrop-blur-md scrollbar-none dark:border-white/10 dark:bg-[#121212]/90">
+                    <div className="flex items-center gap-1">
+                      {sections.map((section, idx) => {
+                        const key = section.key || `section-${idx}`
+                        const isActive = activeTab === key
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => setActiveTab(key)}
+                            className={`whitespace-nowrap px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${isActive
+                              ? "bg-[#ed1c24] text-white shadow-xs"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+                              }`}
+                          >
+                            {section.label || `Section ${idx + 1}`}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Active Tab Content Only */}
+                <div>
+                  {(() => {
+                    const currentSectionIndex = sections.findIndex(
+                      (s, idx) => (s.key || `section-${idx}`) === activeTab
+                    )
+                    const activeSection = currentSectionIndex !== -1 ? sections[currentSectionIndex] : sections[0]
+                    const actualIndex = currentSectionIndex !== -1 ? currentSectionIndex : 0
+
+                    if (!activeSection) return null
+
+                    return (
+                      <motion.div
+                        key={activeSection.key || `section-${actualIndex}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <ProfileSection member={member} section={activeSection} index={actualIndex} />
+                      </motion.div>
+                    )
+                  })()}
+                </div>
               </div>
-              {sections.map((section, index) => (
-                <ProfileSection key={section.key || `${section.label}-${index}`} member={member} section={section} index={index} />
-              ))}
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
     </main>
   )
 }
+
+
+

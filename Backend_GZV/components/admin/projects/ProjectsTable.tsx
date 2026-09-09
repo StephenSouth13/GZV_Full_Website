@@ -29,77 +29,77 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
     <TableRow 
       ref={setNodeRef} 
       style={style} 
-      className={`group transition-all border-slate-50 ${isDragging ? 'bg-red-50/50 shadow-2xl ring-1 ring-red-200' : 'hover:bg-slate-50/80'}`}
+      className={`group transition-colors border-b border-slate-100 dark:border-white/5 ${
+        isDragging ? 'bg-red-50/50 shadow-md ring-1 ring-red-200' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/50'
+      }`}
     >
-      <TableCell className="w-[50px]">
+      <TableCell className="w-[50px] pl-6">
         <button 
           {...attributes} 
           {...listeners} 
-          className="cursor-grab active:cursor-grabbing p-2 text-slate-300 hover:text-[#ed1c24] transition-colors"
+          className="cursor-grab active:cursor-grabbing p-1.5 text-slate-300 hover:text-[#ed1c24] transition-colors rounded-none"
         >
-          <GripVertical size={20} />
+          <GripVertical size={18} />
         </button>
       </TableCell>
       
-      <TableCell className="text-center font-black text-slate-400 italic text-xs w-[60px]">
+      <TableCell className="text-center font-bold text-slate-400 text-xs w-[60px]">
         {stt < 10 ? `0${stt}` : stt}
       </TableCell>
 
-      <TableCell>
+      <TableCell className="py-4">
         <div className="flex items-center gap-4">
-          {/* Preview Ảnh nhỏ để admin dễ nhận diện dự án */}
-          <div className="relative w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0">
+          <div className="relative w-14 h-14 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 overflow-hidden shrink-0">
             {p.image ? (
-              <img src={p.image} className="w-full h-full object-cover" alt="" />
+              <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-300">
-                <ImageIcon size={16} />
+              <div className="w-full h-full flex items-center justify-center text-slate-400">
+                <ImageIcon size={18} />
               </div>
             )}
           </div>
 
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-black text-slate-800 uppercase text-[13px] tracking-tight truncate leading-tight">
+              <span className="font-bold text-slate-900 dark:text-white text-sm tracking-tight truncate leading-tight group-hover:text-[#ed1c24] transition-colors">
                 {p.title}
               </span>
               {p.featured && (
-                <div className="bg-amber-100 p-1 rounded-md">
+                <div className="bg-amber-50 dark:bg-amber-950/40 p-1 border border-amber-200 dark:border-amber-800 rounded-none">
                   <Star size={10} className="fill-amber-500 text-amber-500" />
                 </div>
               )}
             </div>
-            {/* TAG NAME / CATEGORY hiển thị cực đẹp */}
-            <span className="text-[10px] text-[#ed1c24] font-bold uppercase tracking-[0.15em] mt-1">
+            <span className="text-[10px] text-[#ed1c24] font-black uppercase tracking-wider mt-1">
               {p.category || "CHƯA PHÂN LOẠI"}
             </span>
           </div>
         </div>
       </TableCell>
 
-      <TableCell className="text-center">
-        <Badge variant="outline" className="border-slate-200 text-slate-500 font-black text-[10px] px-3 py-1 rounded-lg bg-white shadow-sm">
+      <TableCell className="text-center py-4">
+        <Badge variant="outline" className="border-slate-200 text-slate-700 dark:border-white/10 dark:text-slate-300 font-bold text-[10px] px-2.5 py-0.5 rounded-none bg-white dark:bg-slate-800 shadow-none">
           #{p.order_index}
         </Badge>
       </TableCell>
 
-      <TableCell className="text-right px-8">
+      <TableCell className="text-right pr-6 py-4">
         <div className="flex justify-end gap-1">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
             onClick={() => onEdit(p)} 
-            className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-[#ed1c24] transition-all shadow-none"
+            className="h-8 w-8 rounded-none border-slate-200 bg-white hover:bg-slate-100 hover:text-[#ed1c24] dark:border-white/10 dark:bg-slate-800 dark:text-white shadow-none transition-colors"
           >
-            <Edit3 size={16}/>
+            <Edit3 size={15}/>
           </Button>
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
             onClick={() => onDelete(p)} 
-            className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 transition-all shadow-none"
+            className="h-8 w-8 rounded-none border-slate-200 bg-white hover:bg-red-50 hover:text-red-600 dark:border-white/10 dark:bg-slate-800 dark:text-white shadow-none transition-colors"
           >
-            <Trash2 size={16}/>
+            <Trash2 size={15}/>
           </Button>
         </div>
       </TableCell>
@@ -109,7 +109,7 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
 
 export function ProjectsTable({ projects, onEdit, onDelete, currentPage, itemsPerPage, onReorder }: any) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), // Tránh click nhầm khi muốn kéo
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -128,7 +128,6 @@ export function ProjectsTable({ projects, onEdit, onDelete, currentPage, itemsPe
           order_index: (currentPage - 1) * itemsPerPage + idx + 1
         }));
 
-        // Sử dụng Promise.all để update đồng loạt nhanh hơn
         await Promise.all(
           updates.map(up => 
             supabase.from('projects').update({ order_index: up.order_index }).eq('id', up.id)
@@ -144,18 +143,18 @@ export function ProjectsTable({ projects, onEdit, onDelete, currentPage, itemsPe
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="bg-white rounded-[2rem] border-slate-100 shadow-xl overflow-hidden font-montserrat mx-4 mb-4">
+      <div className="bg-white dark:bg-slate-900 rounded-none border-none overflow-x-auto">
         <Table>
-          <TableHeader className="bg-slate-900 border-none hover:bg-slate-900">
+          <TableHeader className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-white/10">
             <TableRow className="border-none hover:bg-transparent">
-              <TableHead className="w-[50px]"></TableHead>
-              <TableHead className="w-[80px] text-center font-black uppercase text-[10px] text-slate-500 tracking-widest">STT</TableHead>
-              <TableHead className="font-black uppercase text-[10px] text-slate-500 tracking-widest">Dự án & Lĩnh vực đào tạo</TableHead>
-              <TableHead className="w-[120px] text-center font-black uppercase text-[10px] text-slate-500 tracking-widest">Ưu tiên</TableHead>
-              <TableHead className="text-right px-10 font-black uppercase text-[10px] text-slate-500 tracking-widest">Quản trị</TableHead>
+              <TableHead className="w-[50px] pl-6"></TableHead>
+              <TableHead className="w-[80px] text-center font-black uppercase text-[10px] text-slate-600 dark:text-slate-400 tracking-wider py-4">STT</TableHead>
+              <TableHead className="font-black uppercase text-[10px] text-slate-600 dark:text-slate-400 tracking-wider">Dự án & Lĩnh vực đào tạo</TableHead>
+              <TableHead className="w-[120px] text-center font-black uppercase text-[10px] text-slate-600 dark:text-slate-400 tracking-wider">Thứ tự</TableHead>
+              <TableHead className="text-right pr-6 font-black uppercase text-[10px] text-slate-600 dark:text-slate-400 tracking-wider">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-white/5">
             <SortableContext items={projects.map((p: any) => p.id)} strategy={verticalListSortingStrategy}>
               {projects.map((p: any, index: number) => (
                 <SortableRow 

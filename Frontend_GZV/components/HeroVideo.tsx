@@ -56,7 +56,7 @@ const HeroVideo = () => {
   const visible = hero?.is_visible ?? true
   if (!visible) return null
 
-  const settings = { ...DEFAULT_HERO.settings, ...(hero?.settings || {}) }
+  const settings: Record<string, any> = { ...DEFAULT_HERO.settings, ...(hero?.settings || {}) }
   const title = language === "en" ? (settings.title_en || hero?.title || DEFAULT_HERO.title) : (hero?.title || DEFAULT_HERO.title)
   const subtitle = language === "en" ? (settings.subtitle_en || hero?.subtitle || DEFAULT_HERO.subtitle) : (hero?.subtitle || DEFAULT_HERO.subtitle)
   const description = language === "en" ? (settings.description_en || hero?.description || DEFAULT_HERO.description) : (hero?.description || DEFAULT_HERO.description)

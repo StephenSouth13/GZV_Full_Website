@@ -7,7 +7,7 @@ const FacebookSDKLoader = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Only load if not already loaded
-      if (window.FB) {
+      if ((window as any).FB) {
         return;
       }
 
