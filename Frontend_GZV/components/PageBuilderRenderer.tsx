@@ -40,10 +40,12 @@ export default function PageBuilderRenderer({
   slug,
   fallback,
   initialBlocks,
+  initialPartners,
 }: {
   slug: string
   fallback?: React.ReactNode
   initialBlocks?: PageBlock[]
+  initialPartners?: any[]
 }) {
   const { language } = useLanguage()
   const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || [])
@@ -106,10 +108,10 @@ export default function PageBuilderRenderer({
   if (loading) return null
   if (blocks.length === 0) return <>{fallback || null}</>
 
-  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} />)}</>
+  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} initialPartners={initialPartners} />)}</>
 }
 
-function RenderBlock({ block, language }: { block: PageBlock; language: "vi" | "en" }) {
+function RenderBlock({ block, language, initialPartners }: { block: PageBlock; language: "vi" | "en"; initialPartners?: any[] }) {
   if (block.is_visible === false) return null
   const localizedProps = localizeRecord(block.props || {}, language)
   const blockTitle = language === "en"
@@ -156,7 +158,7 @@ function RenderBlock({ block, language }: { block: PageBlock; language: "vi" | "
       return <GzversGrid {...props} />
     case "partners_grid":
     case "partners_list":
-      return <PartnersListSection {...props} />
+      return <PartnersListSection {...props} initialPartners={initialPartners} />
     case "contact_form":
       return <ContactFormBlock {...props} />
     case "page_banner":

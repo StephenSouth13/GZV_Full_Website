@@ -51,6 +51,10 @@ const InfiniteMarqueeRow = ({
         src={partner.logo_url || partner.image || "/placeholder.jpg"}
         alt={partner.name || partner.title || "GZV Partner"}
         className={`object-contain ${logoClass}`}
+        style={{
+          objectPosition: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
+          transform: `scale(${(partner.logo_scale ?? 100) / 100})`,
+        }}
         loading="lazy"
       />
     )
@@ -141,23 +145,29 @@ export interface PartnersGridProps {
   limit?: number
   background?: string
   hp?: any
+  initialPartners?: any[]
+  initialSectionConfig?: any
 }
 
 export default function PartnersGrid({
   title: propTitle,
   subtitle: propSubtitle,
   hp,
+  initialPartners,
+  initialSectionConfig,
 }: PartnersGridProps) {
-  const [allPartners, setAllPartners] = useState<any[]>([])
-  const [sectionConfig, setSectionConfig] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [allPartners, setAllPartners] = useState<any[]>(initialPartners || [])
+  const [sectionConfig, setSectionConfig] = useState<any>(
+    initialSectionConfig ? { ...initialSectionConfig, ...(initialSectionConfig.settings || {}) } : null
+  )
+  const [loading, setLoading] = useState(!initialPartners)
 
   useEffect(() => {
     let active = true
 
     const fetchData = async () => {
       try {
-        setLoading(true)
+        if (!initialPartners) setLoading(true)
         const [homeRes, blockRes, partnersRes] = await Promise.all([
           supabase.from("site_home_sections").select("*").eq("section_key", "partners").maybeSingle(),
           supabase.from("site_page_blocks").select("props").eq("component_type", "partners_grid").limit(1).maybeSingle(),
@@ -185,12 +195,16 @@ export default function PartnersGrid({
       }
     }
 
-    fetchData()
+    if (!initialPartners || !initialSectionConfig) {
+      fetchData()
+    } else {
+      setLoading(false)
+    }
 
     return () => {
       active = false
     }
-  }, [])
+  }, [initialPartners, initialSectionConfig])
 
   if (sectionConfig?.is_visible === false && !propTitle) {
     return null
@@ -289,7 +303,7 @@ export default function PartnersGrid({
             items={row1Partners}
             direction={row1Dir}
             sizeClass="w-[197.33px] h-[210px]"
-            logoClass="max-w-[150px] max-h-[110px]"
+            logoClass="max-w-[82%] max-h-[70%]"
             maxVisible={6}
           />
         )}
@@ -299,7 +313,7 @@ export default function PartnersGrid({
             items={row2Partners}
             direction={row2Dir}
             sizeClass="w-[148px] h-[158px]"
-            logoClass="max-w-[110px] max-h-[80px]"
+            logoClass="max-w-[82%] max-h-[70%]"
             maxVisible={8}
           />
         )}
@@ -309,7 +323,7 @@ export default function PartnersGrid({
             items={row3Partners}
             direction={row3Dir}
             sizeClass="w-[148px] h-[158px]"
-            logoClass="max-w-[110px] max-h-[80px]"
+            logoClass="max-w-[82%] max-h-[70%]"
             maxVisible={8}
           />
         )}

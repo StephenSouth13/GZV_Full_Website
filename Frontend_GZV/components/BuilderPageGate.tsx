@@ -8,10 +8,12 @@ export default function BuilderPageGate({
   slug,
   children,
   initialBlocks,
+  initialPartners,
 }: {
   slug: string
-  children: React.ReactNode
+  children?: React.ReactNode
   initialBlocks?: PageBlock[]
+  initialPartners?: any[]
 }) {
-  return <PageBuilderRenderer slug={slug} fallback={children} initialBlocks={initialBlocks} />
+  return <PageBuilderRenderer slug={slug} fallback={children} initialBlocks={initialBlocks} initialPartners={initialPartners} />
 }

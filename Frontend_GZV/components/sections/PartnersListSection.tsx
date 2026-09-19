@@ -20,6 +20,7 @@ export interface PartnersListSectionProps {
   cta_desc?: string
   cta_btn_label?: string
   cta_btn_url?: string
+  initialPartners?: any[]
   [key: string]: any
 }
 
@@ -52,10 +53,11 @@ export default function PartnersListSection({
   cta_desc = "Kết nối nguồn nhân lực chất lượng cao, triển khai dự án thực chiến và mở rộng mạng lưới kinh doanh cùng GZV.",
   cta_btn_label = "LIÊN HỆ HỢP TÁC",
   cta_btn_url = "/lien-he",
+  initialPartners,
 }: PartnersListSectionProps) {
-  const [partners, setPartners] = useState<any[]>([])
+  const [partners, setPartners] = useState<any[]>(initialPartners || [])
   const [categories, setCategories] = useState<CategoryItem[]>(INITIAL_CATEGORIES)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialPartners)
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
   const [activeGroupIndex, setActiveGroupIndex] = useState<number>(0)
   const isScrollingRef = useRef(false)
@@ -69,7 +71,7 @@ export default function PartnersListSection({
 
     const loadData = async () => {
       try {
-        setLoading(true)
+        if (!initialPartners) setLoading(true)
         const { data, error } = await supabase
           .from("partners")
           .select("*")
@@ -108,12 +110,34 @@ export default function PartnersListSection({
       }
     }
 
-    loadData()
+    if (initialPartners) {
+      const existingKeys = new Set(INITIAL_CATEGORIES.map((c) => c.key))
+      const dynamicCats = [...INITIAL_CATEGORIES]
+
+      initialPartners.forEach((p) => {
+        const catKey = p.category
+        if (catKey && !existingKeys.has(catKey)) {
+          const isAliased = INITIAL_CATEGORIES.some((c) => c.aliases?.includes(catKey))
+          if (!isAliased) {
+            existingKeys.add(catKey)
+            dynamicCats.push({
+              key: catKey,
+              label: catKey.replace(/-/g, " ").toUpperCase(),
+            })
+          }
+        }
+      })
+
+      setCategories(dynamicCats)
+      setLoading(false)
+    } else {
+      loadData()
+    }
 
     return () => {
       active = false
     }
-  }, [])
+  }, [initialPartners])
 
   const matchCategory = (partner: any, catKey: string) => {
     const cat = categories.find((c) => c.key === catKey)
@@ -252,12 +276,12 @@ export default function PartnersListSection({
       >
         <Card className="group relative p-4 h-full bg-white border border-slate-200/90 rounded-none dark:border-white/10 dark:bg-slate-900 flex flex-col items-center justify-between transition-all duration-300 hover:border-[#ed1c24] hover:shadow-md overflow-hidden text-center">
           {/* Logo container */}
-          <div className="w-full h-24 flex items-center justify-center overflow-hidden p-2">
+          <div className="w-full h-32 flex items-center justify-center overflow-hidden p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={partner.logo_url || "/placeholder.jpg"}
               alt={partner.name}
-              className="max-h-full max-w-full object-contain transition-all duration-300 group-hover:scale-105"
+              className="max-h-full max-w-full object-contain transition-transform duration-300"
               style={{
                 objectPosition: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
                 transform: `scale(${(partner.logo_scale ?? 100) / 100})`,
