@@ -156,7 +156,7 @@ export default function AboutBoxes({
           {loading ? (
             <div className="h-36 animate-pulse bg-slate-100 dark:bg-white/5" />
           ) : activeMembers.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
               {activeMembers.map((member) => (
                 <div
                   key={member.id}
@@ -177,8 +177,8 @@ export default function AboutBoxes({
                   </div>
 
                   {/* Bottom Text Content */}
-                  <div className="flex flex-1 flex-col items-center justify-center p-5 text-center">
-                    <h4 className="text-base font-bold text-[#ed1c24] transition-colors group-hover:text-[#c91218] dark:text-[#ff4d4f]">
+                  <div className="flex min-h-20 flex-1 flex-col items-center justify-center px-3 py-4 text-center">
+                    <h4 className="text-sm font-bold leading-snug text-[#ed1c24] transition-colors group-hover:text-[#c91218] dark:text-[#ff4d4f] xl:text-base">
                       {member.full_name}
                     </h4>
                     <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
