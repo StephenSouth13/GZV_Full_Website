@@ -20,15 +20,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { api, BlogPost, supabase } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/common/PageBanner"
-import StatsBar from "@/components/sections/common/StatsBar"
 import { toast } from "@/hooks/use-toast"
 import { useLanguage } from "@/components/language-provider"
 
 const copyByLanguage = {
   vi: {
-    badge: "Knowledge Hub",
-    title: "Chia sẻ & Tri thức",
-    subtitle: "Nơi hội tụ kiến thức thực tiễn từ chuyên gia GZV Center, chia sẻ kinh nghiệm và phát triển chuyên môn.",
     searchEyebrow: "Tìm kiếm tin tức",
     searchPlaceholder: "Nhập từ khóa tìm kiếm bài viết...",
     categories: "Chuyên mục:",
@@ -54,9 +50,6 @@ const copyByLanguage = {
     categoryCount: "chuyên mục",
   },
   en: {
-    badge: "Knowledge Hub",
-    title: "Insights & Knowledge",
-    subtitle: "Practical insights from GZV experts, with field notes, experience sharing, and professional growth resources.",
     searchEyebrow: "Search News",
     searchPlaceholder: "Search articles by keyword...",
     categories: "Categories:",
@@ -244,15 +237,6 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
         initialPage={initialPage}
         initialGlobalBanner={initialGlobalBanner}
         initialSyncAllBanners={initialSyncAllBanners}
-      />
-
-      <StatsBar
-        stats={[
-          { value: "100+", label: "Bài viết chuyên sâu", description: "Cập nhật liên tục" },
-          { value: "10+", label: "Chuyên mục", description: "Marketing, Sales, Tech, v.v." },
-          { value: "50K+", label: "Lượt đọc", description: "Độc giả theo dõi hàng tháng" },
-          { value: "24/7", label: "Cập nhật", description: "Xu hướng thị trường mới nhất" },
-        ]}
       />
 
         <div className="bg-slate-50 dark:bg-slate-950 min-h-screen py-10 md:py-14 border-t border-slate-200 dark:border-white/10">

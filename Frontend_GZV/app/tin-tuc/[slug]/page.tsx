@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation"
 import NewsPostClient from "./NewsPostClient"
-import { getInitialBlogPost, getInitialBlogPosts } from "@/lib/site-content-server"
+import { getInitialBlogPosts } from "@/lib/site-content-server"
 
 export const dynamic = "force-dynamic"
 
 export default async function NewsPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [post, allPosts] = await Promise.all([getInitialBlogPost(slug), getInitialBlogPosts()])
+  const allPosts = await getInitialBlogPosts()
+  const post = allPosts.find((item: any) => item.slug === slug)
   if (!post) notFound()
 
   const others = allPosts.filter((item: any) => item.id !== post.id)

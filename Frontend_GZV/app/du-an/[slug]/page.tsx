@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation"
 import ProjectDetailClient from "./ProjectDetailClient"
-import { getInitialProject, getInitialProjects } from "@/lib/site-content-server"
+import { getInitialProjects } from "@/lib/site-content-server"
 
 export const dynamic = "force-dynamic"
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [project, allProjects] = await Promise.all([getInitialProject(slug), getInitialProjects()])
+  const allProjects = await getInitialProjects()
+  const project = allProjects.find((item: any) => item.slug === slug)
   if (!project) notFound()
 
   const relatedProjects = allProjects

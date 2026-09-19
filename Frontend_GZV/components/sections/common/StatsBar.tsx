@@ -16,12 +16,7 @@ export interface StatsBarProps {
 }
 
 export default function StatsBar({
-  stats = [
-    { value: "10+", label: "Năm kinh nghiệm", description: "Đồng hành và phát triển" },
-    { value: "5000+", label: "Học viên", description: "Tham gia đào tạo" },
-    { value: "50+", label: "Doanh nghiệp", description: "Đối tác chiến lược" },
-    { value: "98%", label: "Hài lòng", description: "Đánh giá chất lượng" },
-  ],
+  stats = [],
   columns = 4,
   className = "",
 }: StatsBarProps) {

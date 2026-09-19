@@ -139,6 +139,8 @@ export type PageBlock = {
   component_type: string
   title?: string | null
   subtitle?: string | null
+  content_html?: string | null
+  content_html_en?: string | null
   sort_order: number
   is_visible: boolean
   props: Record<string, any>
