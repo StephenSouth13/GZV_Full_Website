@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = await getInitialBlogPost(slug)
   if (!post) return { title: "Tin tức" }
   const description = post.excerpt || "Tin tức và hoạt động mới nhất từ GZV LTD."
-  const image = post.image || "/og-image.jpg"
+  const image = post.image || "/og-cover.jpg"
   return {
     title: post.title,
     description,

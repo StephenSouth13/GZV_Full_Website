@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://gzv.one"),
+  metadataBase: new URL("https://www.gzv.one"),
   openGraph: {
     title: "GZV LTD - The Voice of GenZ",
     description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
@@ -37,9 +37,9 @@ export const metadata: Metadata = {
     siteName: "GZV LTD",
     images: [
       {
-        url: "/og-image.jpg",
-        width: 2000,
-        height: 2000,
+        url: "/og-cover.jpg",
+        width: 1200,
+        height: 630,
         alt: "GZV LTD - The Voice of GenZ",
       },
     ],
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GZV LTD - The Voice of GenZ",
     description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
-    images: ["/og-image.jpg"],
+    images: ["/og-cover.jpg"],
     creator: "@gzvcenter",
   },
   robots: {

@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
   const title = `${member.full_name} - GZVer`
   const description = member.headline || member.achievement_summary || member.position || "Hồ sơ thành viên GZV LTD"
-  const image = member.cover_image_url || member.avatar_url || "/og-image.jpg"
+  const image = member.cover_image_url || member.avatar_url || "/og-cover.jpg"
   const url = `/gzver/${member.slug}`
 
   return {

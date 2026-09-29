@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!project) return { title: "Dự án" }
   const title = project.title || project.name || "Dự án GZV"
   const description = project.description || project.excerpt || "Dự án nổi bật của GZV LTD."
-  const image = project.image || "/og-image.jpg"
+  const image = project.image || "/og-cover.jpg"
   return {
     title,
     description,
