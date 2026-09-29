@@ -28,6 +28,7 @@ import {
   Youtube,
 } from "lucide-react"
 import { api, gzver } from "@/lib/api-supabase"
+import { MemberCardShowcase, getMemberCard } from "@/components/gzver/MemberCard"
 
 type ProfileSectionData = NonNullable<gzver["profile_tabs"]>[number]
 type ProfileBadge = NonNullable<gzver["profile_badges"]>[number]
@@ -375,6 +376,15 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
             >
               <Share2 className="h-4 w-4" />
             </button>
+            {getMemberCard(member).enabled !== false && (
+              <a
+                href="#card-visit"
+                className="inline-flex items-center gap-2 border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white shadow-md hover:bg-slate-100"
+              >
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Card visit</span>
+              </a>
+            )}
             {member.cv_url && (
               <a href={member.cv_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-[#ed1c24] bg-[#ed1c24] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c91218]">
                 <Download className="h-4 w-4" />
@@ -383,20 +393,6 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
             )}
           </motion.div>
 
-          {onlineCards.length > 0 && (
-            <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-10">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center bg-[#ed1c24] text-white"><CreditCard className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Digital credentials</p>
-                  <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">Thẻ online</h2>
-                </div>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2">
-                {onlineCards.map((card, index) => <OnlineCredentialCard key={`${card.title}-${index}`} card={card} />)}
-              </div>
-            </motion.section>
-          )}
         </div>
 
         {/* Overlapping Main Container */}
@@ -543,6 +539,23 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
           </motion.div>
         </div>
       </section>
+
+      <MemberCardShowcase member={member} />
+
+      {onlineCards.length > 0 && (
+        <section className="container max-w-5xl mx-auto px-4 py-16">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center bg-[#ed1c24] text-white"><Award className="h-5 w-5" /></div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Digital credentials</p>
+              <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">Thẻ & chứng nhận khác</h2>
+            </div>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {onlineCards.map((card, index) => <OnlineCredentialCard key={`${card.title}-${index}`} card={card} />)}
+          </div>
+        </section>
+      )}
     </main>
   )
 }

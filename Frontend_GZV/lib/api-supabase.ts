@@ -132,6 +132,14 @@
   // --- ĐỊNH NGHĨA TYPES (Data Models) ---
   // ==========================================
 
+  export interface GzverCardLink {
+    label?: string;
+    url?: string;
+    icon?: string;
+    visible?: boolean;
+    sort_order?: number;
+  }
+
   export interface GzverMemberCard {
     enabled?: boolean;
     status?: 'official' | 'demo';
@@ -141,9 +149,36 @@
     issued_at?: string;
     expires_at?: string;
     tagline?: string;
+    notice?: string;
+    email?: string;
+    hotline?: string;
+    website_label?: string;
     qr_url?: string;
+    qr_caption?: string;
     front_image_url?: string;
     back_image_url?: string;
+    links?: GzverCardLink[];
+    hide_default_links?: boolean;
+  }
+
+  export interface GzverCardSettings {
+    company_line: string;
+    top_tagline: string;
+    card_title: string;
+    card_subtitle: string;
+    tagline: string;
+    email: string;
+    hotline: string;
+    website_label: string;
+    website_url: string;
+    qr_caption: string;
+    template_front_image_url: string | null;
+    template_back_image_url: string | null;
+    template_overlay: boolean;
+    demo_notice: string;
+    official_notice: string;
+    links: GzverCardLink[];
+    show_vcard: boolean;
   }
 
   export interface gzver {
@@ -621,6 +656,15 @@
         return [];
       }
     },
+    getGzverCardSettings: async (): Promise<Partial<GzverCardSettings> | null> => {
+      const { data, error } = await supabase.from('gzver_card_settings').select('*').eq('id', 1).maybeSingle();
+      if (error) {
+        console.error("❌ Error fetching gzver card settings:", error);
+        return null;
+      }
+      return data;
+    },
+
     getgzverBySlug: async (slug: string): Promise<gzver | null> => {
       try {
         const { data, error } = await supabase

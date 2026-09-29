@@ -81,6 +81,72 @@ type OnlineCard = {
   sort_order: number
 }
 
+type MemberCard = {
+  enabled: boolean
+  status: "official" | "demo"
+  card_title: string
+  card_subtitle: string
+  card_number: string
+  issued_at: string
+  expires_at: string
+  tagline: string
+  qr_url: string
+  qr_caption: string
+  notice: string
+  email: string
+  hotline: string
+  website_label: string
+  front_image_url: string
+  back_image_url: string
+  links: CardLink[]
+  hide_default_links: boolean
+}
+
+type CardLink = {
+  label: string
+  url: string
+  icon: string
+  visible: boolean
+  sort_order: number
+}
+
+export const CARD_LINK_ICONS = [
+  { value: "website", label: "Website" },
+  { value: "facebook", label: "Facebook" },
+  { value: "zalo", label: "Zalo" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "instagram", label: "Instagram" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "youtube", label: "YouTube" },
+  { value: "email", label: "Email" },
+  { value: "phone", label: "Điện thoại" },
+  { value: "calendar", label: "Đặt lịch" },
+  { value: "link", label: "Link khác" },
+]
+
+const defaultMemberCard: MemberCard = {
+  enabled: true,
+  status: "demo",
+  card_title: "",
+  card_subtitle: "",
+  card_number: "",
+  issued_at: "",
+  expires_at: "",
+  tagline: "",
+  qr_url: "",
+  qr_caption: "",
+  notice: "",
+  email: "",
+  hotline: "",
+  website_label: "",
+  front_image_url: "",
+  back_image_url: "",
+  links: [],
+  hide_default_links: false,
+}
+
+const FRONTEND_URL = "https://www.gzv.one"
+
 const convertToSlug = (text: string) =>
   text
     .toLowerCase()
@@ -134,6 +200,7 @@ const defaultForm = {
   profile_tabs: defaultSections,
   profile_badges: [] as ProfileBadge[],
   online_cards: [] as OnlineCard[],
+  member_card: defaultMemberCard,
   avatar_position_x: 50,
   avatar_position_y: 32,
   avatar_scale: 100,
@@ -210,6 +277,10 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         profile_tabs: sortByOrder(gzver.profile_tabs).length ? sortByOrder(gzver.profile_tabs) : defaultSections,
         profile_badges: sortByOrder(gzver.profile_badges).length ? sortByOrder(gzver.profile_badges) : defaultForm.profile_badges,
         online_cards: sortByOrder(gzver.online_cards),
+        member_card: (() => {
+          const saved = gzver.member_card && typeof gzver.member_card === "object" ? gzver.member_card : {}
+          return { ...defaultMemberCard, ...saved, links: sortByOrder<CardLink>(saved.links) }
+        })(),
         avatar_position_x: gzver.avatar_position_x ?? 50,
         avatar_position_y: gzver.avatar_position_y ?? 32,
         avatar_scale: gzver.avatar_scale ?? 100,
@@ -299,6 +370,33 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
     }
   }
 
+  const updateMemberCard = (patch: Partial<MemberCard>) => {
+    setFormData((prev: any) => ({ ...prev, member_card: { ...defaultMemberCard, ...prev.member_card, ...patch } }))
+  }
+
+  const cardLinks: CardLink[] = formData.member_card?.links || []
+  const setCardLinks = (links: CardLink[]) => updateMemberCard({ links: links.map((link, index) => ({ ...link, sort_order: (index + 1) * 10 })) })
+
+  const handleMemberCardUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "front_image_url" | "back_image_url") => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLoading(true)
+    try {
+      const extension = file.name.split(".").pop()
+      const path = `gzvers/member-cards/${Date.now()}-${field}.${extension}`
+      const { error } = await supabase.storage.from("media").upload(path, file)
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path)
+      updateMemberCard({ [field]: publicUrl })
+      toast({ title: "Đã chèn ảnh vào khung thẻ" })
+    } catch (error: any) {
+      toast({ title: "Lỗi tải ảnh thẻ", description: error.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
+      e.target.value = ""
+    }
+  }
+
   const setDepartment = (departmentId: string) => {
     const department = departments.find((item: Department) => item.id === departmentId)
     setFormData({ ...formData, department_id: departmentId, department_name: department?.name || "" })
@@ -326,6 +424,14 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         profile_tabs: sortByOrder<ProfileSection>(payload.profile_tabs).filter((item: ProfileSection) => item.key && item.label),
         profile_badges: sortByOrder<ProfileBadge>(payload.profile_badges).filter((item: ProfileBadge) => item.label),
         online_cards: sortByOrder<OnlineCard>(payload.online_cards).filter((item: OnlineCard) => item.title || item.front_image_url),
+        member_card: {
+          ...Object.fromEntries(
+            Object.entries({ ...defaultMemberCard, ...payload.member_card }).map(([key, value]) => [key, typeof value === "string" ? value.trim() : value]),
+          ),
+          links: sortByOrder<CardLink>(payload.member_card?.links)
+            .filter((link) => link.url?.trim())
+            .map((link, index) => ({ ...link, label: link.label.trim(), url: link.url.trim(), sort_order: (index + 1) * 10 })),
+        },
       }
       const { error } = gzver?.id
         ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id)
@@ -844,8 +950,199 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
 
             {/* DIGITAL CREDENTIAL CARDS */}
             <TabsContent value="cards" className="mt-0 space-y-4">
+              {/* GZVER MEMBER CARD (CARD VISIT 2 MẶT) */}
+              <div className="space-y-4 border-2 border-[#124c96]/30 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-800 dark:text-white">
+                    <CreditCard className="h-4 w-4 text-[#ed1c24]" />
+                    Card visit GZVer (2 mặt)
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {formData.slug && (
+                      <a
+                        href={`${FRONTEND_URL}/gzver/${formData.slug}#card-visit`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#124c96] hover:text-[#ed1c24]"
+                      >
+                        <Link2 className="h-3.5 w-3.5" /> Xem thẻ trên web
+                      </a>
+                    )}
+                    <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500">
+                      Hiển thị
+                      <Switch checked={formData.member_card?.enabled !== false} onCheckedChange={(checked) => updateMemberCard({ enabled: checked })} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Trạng thái thẻ</Label>
+                    <Select value={formData.member_card?.status || "demo"} onValueChange={(value: "official" | "demo") => updateMemberCard({ status: value })}>
+                      <SelectTrigger className="h-10 rounded-none text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="demo">Demo / Tạm thời</SelectItem>
+                        <SelectItem value="official">Chính thức</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Mã số thẻ</Label>
+                    <Input value={formData.member_card?.card_number || ""} onChange={(e) => updateMemberCard({ card_number: e.target.value })} placeholder="VD: GZV-0001 (trống = tự sinh)" className="h-10 rounded-none font-mono text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Ngày cấp</Label>
+                    <Input type="date" value={formData.member_card?.issued_at || ""} onChange={(e) => updateMemberCard({ issued_at: e.target.value })} className="h-10 rounded-none text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Hiệu lực đến</Label>
+                    <Input type="date" value={formData.member_card?.expires_at || ""} onChange={(e) => updateMemberCard({ expires_at: e.target.value })} className="h-10 rounded-none text-xs" />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Tên thẻ (mặt trước)</Label>
+                    <Input value={formData.member_card?.card_title || ""} onChange={(e) => updateMemberCard({ card_title: e.target.value })} placeholder="THẺ THÀNH VIÊN" className="h-10 rounded-none text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Dòng phụ (mặt trước)</Label>
+                    <Input value={formData.member_card?.card_subtitle || ""} onChange={(e) => updateMemberCard({ card_subtitle: e.target.value })} placeholder="GZVER" className="h-10 rounded-none text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Slogan (mặt sau)</Label>
+                    <Input value={formData.member_card?.tagline || ""} onChange={(e) => updateMemberCard({ tagline: e.target.value })} placeholder="THE VOICE OF GENZ" className="h-10 rounded-none text-xs" />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Link mã QR (mặt sau)</Label>
+                    <Input
+                      value={formData.member_card?.qr_url || ""}
+                      onChange={(e) => updateMemberCard({ qr_url: e.target.value })}
+                      placeholder={`Trống = ${FRONTEND_URL}/gzver/${formData.slug || "slug"}`}
+                      className="h-10 rounded-none font-mono text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Chú thích dưới QR</Label>
+                    <Input value={formData.member_card?.qr_caption || ""} onChange={(e) => updateMemberCard({ qr_caption: e.target.value })} placeholder="Trống = theo mẫu chung" className="h-10 rounded-none text-xs" />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Email in trên thẻ</Label>
+                    <Input value={formData.member_card?.email || ""} onChange={(e) => updateMemberCard({ email: e.target.value })} placeholder="Trống = theo mẫu chung" className="h-10 rounded-none font-mono text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Hotline in trên thẻ</Label>
+                    <Input value={formData.member_card?.hotline || ""} onChange={(e) => updateMemberCard({ hotline: e.target.value })} placeholder="Trống = theo mẫu chung" className="h-10 rounded-none font-mono text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Website in trên thẻ</Label>
+                    <Input value={formData.member_card?.website_label || ""} onChange={(e) => updateMemberCard({ website_label: e.target.value })} placeholder="Trống = theo mẫu chung" className="h-10 rounded-none text-xs" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-black uppercase text-slate-500">Lời xác nhận khi thẻ chính thức</Label>
+                  <Input value={formData.member_card?.notice || ""} onChange={(e) => updateMemberCard({ notice: e.target.value })} placeholder="Trống = theo mẫu chung" className="h-10 rounded-none text-xs" />
+                </div>
+
+                <p className="text-[11px] font-medium leading-5 text-slate-500">
+                  <b>Ảnh thẻ riêng</b> (thường dùng cho thẻ chính thức): ảnh hoàn chỉnh, hiển thị nguyên vẹn, thay được bất cứ lúc nào. Khung CR80 đứng 54 × 85.6 mm, khuyến nghị <b>1080 × 1712 px</b>. Khung nào để trống thì dùng <b>mẫu chung</b> ở tab &quot;Mẫu card visit&quot; ngoài danh sách GZVer.
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {(["front_image_url", "back_image_url"] as const).map((field) => {
+                    const value = formData.member_card?.[field] || ""
+                    return (
+                      <div key={field} className="space-y-2 border border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950">
+                        <Label className="text-[10px] font-black uppercase text-slate-500">{field === "front_image_url" ? "Ảnh thẻ riêng – mặt trước" : "Ảnh thẻ riêng – mặt sau"}</Label>
+                        <div className="mx-auto w-40 overflow-hidden rounded-lg border-2 border-dashed border-slate-300 bg-white dark:border-white/20 dark:bg-slate-900" style={{ aspectRatio: "54 / 85.6" }}>
+                          {value ? (
+                            <img src={value} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full flex-col items-center justify-center gap-1 p-3 text-center text-[10px] font-bold uppercase text-slate-400">
+                              <CreditCard className="h-6 w-6" />
+                              Dùng mẫu chung
+                            </div>
+                          )}
+                        </div>
+                        <Input value={value} onChange={(e) => updateMemberCard({ [field]: e.target.value })} placeholder="URL ảnh thẻ" className="h-9 rounded-none font-mono text-xs" />
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" className="relative h-9 flex-1 rounded-none text-[10px] font-black uppercase">
+                            <Upload className="mr-1.5 h-3.5 w-3.5" /> Chèn ảnh
+                            <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={loading} onChange={(e) => handleMemberCardUpload(e, field)} />
+                          </Button>
+                          {value && (
+                            <Button type="button" variant="outline" onClick={() => updateMemberCard({ [field]: "" })} className="h-9 rounded-none text-[10px] font-black uppercase text-red-600">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Nút liên kết dưới thẻ (riêng người này)</Label>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase text-slate-500">
+                        Ẩn link chung
+                        <Switch checked={!!formData.member_card?.hide_default_links} onCheckedChange={(checked) => updateMemberCard({ hide_default_links: checked })} />
+                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCardLinks([...cardLinks, { label: "", url: "", icon: "website", visible: true, sort_order: 0 }])}
+                        className="h-8 rounded-none text-[10px] font-black uppercase"
+                      >
+                        <Plus className="mr-1 h-3.5 w-3.5" /> Thêm link
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500">Website cá nhân (tab Thông tin) tự hiện đầu danh sách. Link chung của GZV hiện sau link riêng.</p>
+                  {cardLinks.map((link, index) => (
+                    <div key={index} className="grid gap-2 md:grid-cols-[140px_1fr_2fr_auto]">
+                      <Select value={link.icon || "link"} onValueChange={(value) => setCardLinks(cardLinks.map((item, i) => (i === index ? { ...item, icon: value } : item)))}>
+                        <SelectTrigger className="h-9 rounded-none text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CARD_LINK_ICONS.map((icon) => (
+                            <SelectItem key={icon.value} value={icon.value}>
+                              {icon.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input value={link.label} onChange={(e) => setCardLinks(cardLinks.map((item, i) => (i === index ? { ...item, label: e.target.value } : item)))} placeholder="Tên nút" className="h-9 rounded-none text-xs" />
+                      <Input value={link.url} onChange={(e) => setCardLinks(cardLinks.map((item, i) => (i === index ? { ...item, url: e.target.value } : item)))} placeholder="https://... / mailto:... / tel:..." className="h-9 rounded-none font-mono text-xs" />
+                      <div className="flex gap-1">
+                        <Button type="button" variant="outline" size="icon" disabled={index === 0} onClick={() => setCardLinks(cardLinks.map((item, i) => (i === index - 1 ? cardLinks[index] : i === index ? cardLinks[index - 1] : item)))} className="h-9 w-9 rounded-none">
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button type="button" variant="outline" size="icon" disabled={index === cardLinks.length - 1} onClick={() => setCardLinks(cardLinks.map((item, i) => (i === index + 1 ? cardLinks[index] : i === index ? cardLinks[index + 1] : item)))} className="h-9 w-9 rounded-none">
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button type="button" variant="outline" size="icon" onClick={() => setCardLinks(cardLinks.filter((_, i) => i !== index))} className="h-9 w-9 rounded-none text-red-600">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <ArrayHeader
-                title="Thẻ Online & Chứng Nhận Số"
+                title="Thẻ & chứng nhận khác"
                 onAdd={() =>
                   setFormData({
                     ...formData,

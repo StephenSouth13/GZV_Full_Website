@@ -214,3 +214,21 @@ html {
   background: #ed1c24;
 }
 
+
+/* Kim tuyến rơi trên khu vực card visit GZVer */
+@keyframes gzv-confetti-fall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translate3d(40px, 110vh, 0) rotate(540deg); opacity: 0; }
+}
+
+.gzv-confetti {
+  animation-name: gzv-confetti-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gzv-confetti { display: none; }
+}
