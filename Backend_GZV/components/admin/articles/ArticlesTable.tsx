@@ -35,7 +35,7 @@ export function ArticlesTable({
   onEditArticle,
 }: {
   articles: any[]
-  onDeleteArticle: (articleId: number) => void
+  onDeleteArticle: (articleId: string) => void
   onEditArticle: (article: any) => void
   onUpdateArticle?: (article: any) => void
 }) {

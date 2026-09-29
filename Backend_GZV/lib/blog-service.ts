@@ -1,8 +1,44 @@
 import { supabase, BlogPost, BlogPostCreate } from './supabase'
 
+const ARTICLE_WRITE_COLUMNS = [
+  'title',
+  'slug',
+  'content',
+  'excerpt',
+  'image',
+  'thumbnail_url',
+  'author',
+  'author_id',
+  'author_ids',
+  'category',
+  'featured',
+  'status',
+  'published_at',
+  'updated_at',
+  'views',
+  'likes',
+  'image_position_x',
+  'image_position_y',
+  'image_scale',
+] as const
+
+const toArticlePayload = (postData: Partial<BlogPostCreate> & Record<string, any>) => {
+  const payload: Record<string, any> = {}
+
+  for (const column of ARTICLE_WRITE_COLUMNS) {
+    if (postData[column] !== undefined) payload[column] = postData[column]
+  }
+
+  if (postData.publish_date !== undefined && payload.published_at === undefined) {
+    payload.published_at = postData.publish_date
+  }
+
+  return payload
+}
+
 export class BlogService {
   static supabase: any
-  // Lấy tất cả bài viết
+
   static async getAllPosts(): Promise<BlogPost[]> {
     try {
       const { data, error } = await supabase
@@ -18,12 +54,11 @@ export class BlogService {
     }
   }
 
-  // Tạo bài viết mới
   static async createPost(postData: BlogPostCreate): Promise<BlogPost | null> {
     try {
       const { data, error } = await supabase
-        .from('allblogposts')
-        .insert([postData])
+        .from('articles')
+        .insert([toArticlePayload(postData)])
         .select('*')
         .single()
 
@@ -35,12 +70,11 @@ export class BlogService {
     }
   }
 
-  // Cập nhật bài viết
-  static async updatePost(id: number, postData: Partial<BlogPostCreate>): Promise<BlogPost | null> {
+  static async updatePost(id: string, postData: Partial<BlogPostCreate> & Record<string, any>): Promise<BlogPost | null> {
     try {
       const { data, error } = await supabase
-        .from('allblogposts')
-        .update(postData)
+        .from('articles')
+        .update(toArticlePayload(postData))
         .eq('id', id)
         .select('*')
         .single()
@@ -53,11 +87,10 @@ export class BlogService {
     }
   }
 
-  // Xóa bài viết
-  static async deletePost(id: number): Promise<boolean> {
+  static async deletePost(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('allblogposts')
+        .from('articles')
         .delete()
         .eq('id', id)
 
@@ -69,12 +102,10 @@ export class BlogService {
     }
   }
 
-  // Tăng lượt view
-  static async incrementViews(id: number): Promise<void> {
+  static async incrementViews(id: string): Promise<void> {
     try {
-      // First get current views count
       const { data: currentPost, error: fetchError } = await supabase
-        .from('allblogposts')
+        .from('articles')
         .select('views')
         .eq('id', id)
         .single()
@@ -83,7 +114,7 @@ export class BlogService {
 
       const currentViews = currentPost?.views || 0
       const { error } = await supabase
-        .from('allblogposts')
+        .from('articles')
         .update({ views: currentViews + 1 })
         .eq('id', id)
 
@@ -93,12 +124,10 @@ export class BlogService {
     }
   }
 
-  // Tăng lượt like
-  static async incrementLikes(id: number): Promise<void> {
+  static async incrementLikes(id: string): Promise<void> {
     try {
-      // First get current likes count
       const { data: currentPost, error: fetchError } = await supabase
-        .from('allblogposts')
+        .from('articles')
         .select('likes')
         .eq('id', id)
         .single()
@@ -107,7 +136,7 @@ export class BlogService {
 
       const currentLikes = currentPost?.likes || 0
       const { error } = await supabase
-        .from('allblogposts')
+        .from('articles')
         .update({ likes: currentLikes + 1 })
         .eq('id', id)
 
@@ -117,12 +146,11 @@ export class BlogService {
     }
   }
 
-  // Tạo slug từ title
   static generateSlug(title: string): string {
     return title
       .toLowerCase()
-      .replace(/[^\w\s-]/g, '') // Remove special characters
-      .replace(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-      .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
   }
 }

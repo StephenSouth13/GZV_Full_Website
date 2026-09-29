@@ -141,6 +141,8 @@ export function GZVRichEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4] },
+        link: false,
+        underline: false,
         codeBlock: { HTMLAttributes: { class: "bg-slate-950 p-4 font-mono text-sm text-slate-100 my-4" } },
         blockquote: { HTMLAttributes: { class: "border-l-4 border-[#ed1c24] pl-4 italic my-4 text-slate-600" } },
       }),

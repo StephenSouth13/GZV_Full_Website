@@ -69,19 +69,30 @@ export interface Gzver {
   updated_at?: string
 }
 export interface BlogPost {
-  id: number
+  id: string
   slug: string
   title: string
   excerpt?: string
   image?: string
+  thumbnail_url?: string
+  display_image?: string
   author?: string
+  author_id?: string
+  author_ids?: string[]
+  authors_details?: any[]
+  author_name?: string
   author_avatar?: string
   publish_date?: string
+  published_at?: string
   category?: string
   content?: string
+  status?: string
   read_time?: string
   views?: number
   likes?: number
+  image_position_x?: number
+  image_position_y?: number
+  image_scale?: number
   author_bio?: string
   tags?: string[]
   comments?: number
@@ -101,13 +112,21 @@ export interface BlogPostCreate {
   slug: string
   content: string
   excerpt?: string
-  author: string
+  author?: string
+  author_id?: string | null
+  author_ids?: string[]
   author_avatar?: string
   author_bio?: string
   category?: string
   image?: string
+  thumbnail_url?: string
+  image_position_x?: number
+  image_position_y?: number
+  image_scale?: number
   tags?: string[]
   featured?: boolean
+  status?: string
+  published_at?: string
   publish_date?: string
   read_time?: string
   views?: number
