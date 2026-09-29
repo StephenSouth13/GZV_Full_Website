@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase"
 import { GZVersTable } from "@/components/admin/gzvers/GZVersTable"
 import { GZVerModal } from "@/components/admin/gzvers/GZVerModal"
 import { GZVerQuickAddModal } from "@/components/admin/gzvers/GZVerQuickAddModal"
+import { GZVerCardSettingsPanel } from "@/components/admin/gzvers/GZVerCardSettingsPanel"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,6 +18,7 @@ import {
   ArrowUp,
   Building2,
   CheckCircle2,
+  CreditCard,
   FileCheck2,
   Layers,
   Plus,
@@ -81,7 +83,7 @@ export default function AdminGzversPage() {
   const [savingDepartments, setSavingDepartments] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeDepartment, setActiveDepartment] = useState("all")
-  const [activeTab, setActiveTab] = useState<"members" | "departments">("members")
+  const [activeTab, setActiveTab] = useState<"members" | "departments" | "card-template">("members")
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedGzver, setSelectedGzver] = useState<any>(null)
@@ -454,7 +456,7 @@ export default function AdminGzversPage() {
 
       {/* Main Tabs matching site-content */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
           <TabsTrigger
             value="members"
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
@@ -466,6 +468,12 @@ export default function AdminGzversPage() {
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
           >
             <Layers className="h-3.5 w-3.5 shrink-0" /> Cơ Cấu Ban ({departments.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="card-template"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <CreditCard className="h-3.5 w-3.5 shrink-0" /> Mẫu Card Visit
           </TabsTrigger>
         </TabsList>
 
@@ -671,6 +679,11 @@ export default function AdminGzversPage() {
               </DndContext>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* TAB 3: CARD VISIT TEMPLATE */}
+        <TabsContent value="card-template" className="space-y-4">
+          <GZVerCardSettingsPanel />
         </TabsContent>
       </Tabs>
 
