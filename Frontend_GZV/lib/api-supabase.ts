@@ -132,6 +132,20 @@
   // --- ĐỊNH NGHĨA TYPES (Data Models) ---
   // ==========================================
 
+  export interface GzverMemberCard {
+    enabled?: boolean;
+    status?: 'official' | 'demo';
+    card_title?: string;
+    card_subtitle?: string;
+    card_number?: string;
+    issued_at?: string;
+    expires_at?: string;
+    tagline?: string;
+    qr_url?: string;
+    front_image_url?: string;
+    back_image_url?: string;
+  }
+
   export interface gzver {
     id: string;
     full_name: string;
@@ -197,6 +211,7 @@
       visible?: boolean;
       sort_order?: number;
     }>;
+    member_card?: GzverMemberCard | null;
     course_taken: string;
     skills: string[];
     achievements_list: string[];
