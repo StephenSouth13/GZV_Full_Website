@@ -15,36 +15,32 @@ const montserrat = Montserrat({
 // Metadata này sẽ được tự động đưa vào thẻ <head>
 // Nó cũng sẽ được sử dụng để tạo các thẻ OpenGraph và Twitter Card
 export const metadata: Metadata = {
-  title: "GZV - The Voice of Genzers",
-  description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center - Học tập và nỗ lực suốt đời",
+  title: {
+    default: "GZV LTD - The Voice of GenZ",
+    template: "%s | GZV LTD",
+  },
+  description: "GZV LTD - The Voice of GenZ. Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
   keywords: "gzv Center, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân, life long learning, Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
   authors: [{ name: "gzv Center", url: "https://gzv.one" }],
-  creator: "gzv Center",
-  publisher: "gzv Center",
+  creator: "GZV LTD",
+  publisher: "GZV LTD",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   metadataBase: new URL("https://gzv.one"),
-  alternates: {
-    canonical: "/",
-    languages: {
-      "vi-VN": "/vi",
-      "en-US": "/en",
-    },
-  },
   openGraph: {
-    title: "gzv Center - Life Long Learning",
-    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center",
-    url: "https://gzv.one",
-    siteName: "gzv Center",
+    title: "GZV LTD - The Voice of GenZ",
+    description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
+    url: "https://www.gzv.one",
+    siteName: "GZV LTD",
     images: [
       {
-        url: "/gzv/assets/og-image.jpg", // Đổi đường dẫn ảnh phù hợp
-        width: 1200,
-        height: 630,
-        alt: "Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
+        url: "/og-image.jpg",
+        width: 2000,
+        height: 2000,
+        alt: "GZV LTD - The Voice of GenZ",
       },
     ],
     locale: "vi_VN",
@@ -52,9 +48,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "gzv Center - Life Long Learning",
-    description: "Trung tâm đào tạo và phát triển kỹ năng chuyên nghiệp gzv Center",
-    images: ["/gzv/assets/twitter-card.jpg"], // Đổi đường dẫn ảnh phù hợp
+    title: "GZV LTD - The Voice of GenZ",
+    description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
+    images: ["/og-image.jpg"],
     creator: "@gzvcenter",
   },
   robots: {

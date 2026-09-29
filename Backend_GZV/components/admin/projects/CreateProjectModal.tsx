@@ -11,16 +11,19 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from "@/components/ui/badge"
 import {
   Loader2, Save, FolderPlus, Upload, X,
-  Lock, Unlock, Search, Edit, Tag, Type, Video, Film, Globe
+  Lock, Unlock, Search, Edit, Tag, Type, Video, Film, Globe, FolderOpen
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
+import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
+import { ImageCropField } from '@/components/media/ImageCropField'
 
 export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [authors, setAuthors] = useState<any[]>([])
   const [isSlugLocked, setIsSlugLocked] = useState(true)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -30,10 +33,15 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
     detailproject: '',
     image: '',
     thumbnail_url: '',
+    image_position_x: 50,
+    image_position_y: 50,
+    image_scale: 100,
     video_url: '',
+    tech_stack: [] as string[],
     status: 'ongoing',
     author_ids: [] as string[],
     featured: false,
+    hashtags: '',
     seo_title: '',
     seo_keywords: ''
   })
@@ -111,6 +119,32 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
             <div className="p-3 bg-[#ed1c24] text-white rounded-none shadow-xs">
               <FolderPlus size={24} />
             </div>
+
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Mô tả ngắn</Label>
+              <Textarea
+                className="min-h-28 resize-none rounded-none border-slate-200 text-sm leading-relaxed"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Tóm tắt bài toán, giải pháp và giá trị nổi bật của dự án..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Hashtags</Label>
+                <Input className="h-11 rounded-none border-slate-200 text-xs" value={formData.hashtags} onChange={(e) => setFormData({ ...formData, hashtags: e.target.value })} placeholder="chuyển đổi số, đào tạo, AI" />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Công nghệ & nền tảng</Label>
+                <Input
+                  className="h-11 rounded-none border-slate-200 text-xs"
+                  value={formData.tech_stack.join(', ')}
+                  onChange={(e) => setFormData({ ...formData, tech_stack: e.target.value.split(',').map(item => item.trim()).filter(Boolean) })}
+                  placeholder="Next.js, Supabase, AI"
+                />
+              </div>
+            </div>
             <div>
               <DialogTitle className="text-xl font-black uppercase tracking-wider text-white">Khởi tạo Dự án & Portfolio mới</DialogTitle>
               <DialogDescription className="text-xs text-slate-400 font-bold mt-1">Đầy đủ tính năng Media, Đội ngũ thực thi & Tối ưu SEO chuẩn quốc tế</DialogDescription>
@@ -171,7 +205,15 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
               <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-none bg-white flex flex-col items-center justify-center overflow-hidden hover:border-[#ed1c24] transition-colors shadow-xs">
                 {formData.image ? (
                   <div className="relative w-full h-full group">
-                    <img src={formData.image} className="w-full h-full object-cover" alt="Preview" />
+                    <img
+                      src={formData.image}
+                      className="w-full h-full object-cover"
+                      alt="Preview"
+                      style={{
+                        objectPosition: `${formData.image_position_x}% ${formData.image_position_y}%`,
+                        transform: `scale(${formData.image_scale / 100})`,
+                      }}
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Button variant="destructive" size="icon" className="rounded-none h-8 w-8 shadow-md" onClick={() => setFormData({ ...formData, image: '', thumbnail_url: '' })}><X size={16} /></Button>
                     </div>
@@ -184,6 +226,32 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                   </label>
                 )}
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button type="button" variant="outline" className="h-9 rounded-none text-[10px] font-black uppercase" onClick={() => setMediaPickerOpen(true)}>
+                  <FolderOpen className="mr-1.5 h-3.5 w-3.5" /> Thư viện
+                </Button>
+                <label className="flex h-9 cursor-pointer items-center justify-center border border-slate-200 bg-white text-[10px] font-black uppercase">
+                  <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải ảnh
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleMediaUpload(e, 'image')} />
+                </label>
+              </div>
+              {formData.image && (
+                <ImageCropField
+                  imageUrl={formData.image}
+                  positionX={formData.image_position_x}
+                  positionY={formData.image_position_y}
+                  scale={formData.image_scale}
+                  minScale={100}
+                  aspect="16/10"
+                  label="Căn chỉnh ảnh dự án"
+                  onChange={(patch) => setFormData(prev => ({
+                    ...prev,
+                    image_position_x: patch.position_x ?? prev.image_position_x,
+                    image_position_y: patch.position_y ?? prev.image_position_y,
+                    image_scale: patch.scale ?? prev.image_scale,
+                  }))}
+                />
+              )}
             </div>
 
             <div className="space-y-3">
@@ -196,6 +264,25 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                   <input type="file" className="hidden" accept="video/*" onChange={(e) => handleMediaUpload(e, 'video')} />
                 </div>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500">Trạng thái</Label>
+                <select
+                  className="h-10 w-full rounded-none border border-slate-200 bg-white px-3 text-xs font-bold"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                >
+                  <option value="planning">Lên kế hoạch</option>
+                  <option value="ongoing">Đang thực hiện</option>
+                  <option value="completed">Đã hoàn thành</option>
+                </select>
+              </div>
+              <label className="mt-6 flex h-10 cursor-pointer items-center justify-between border border-slate-200 bg-white px-3">
+                <span className="text-[10px] font-black uppercase text-slate-600">Nổi bật</span>
+                <input type="checkbox" checked={formData.featured} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} className="h-4 w-4 accent-[#ed1c24]" />
+              </label>
             </div>
 
             <div className="space-y-3">
@@ -235,6 +322,16 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <MediaPickerDialog
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        defaultFolder="projects"
+        onSelect={(res) => {
+          if (res?.url) setFormData(prev => ({ ...prev, image: res.url, thumbnail_url: res.url }))
+          setMediaPickerOpen(false)
+        }}
+      />
     </Dialog>
   )
 }

@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   Award,
   Briefcase,
+  CreditCard,
   Download,
   ExternalLink,
   Facebook,
@@ -31,6 +32,7 @@ import { api, gzver } from "@/lib/api-supabase"
 type ProfileSectionData = NonNullable<gzver["profile_tabs"]>[number]
 type ProfileBadge = NonNullable<gzver["profile_badges"]>[number]
 type SocialLink = NonNullable<gzver["social_links"]>[number]
+type OnlineCard = NonNullable<gzver["online_cards"]>[number]
 
 const defaultSections: ProfileSectionData[] = [
   { key: "overview", label: "Tổng quan", type: "overview", source: "overview", sort_order: 10, visible: true },
@@ -119,6 +121,46 @@ function BadgePill({ badge }: { badge: ProfileBadge }) {
       <Icon className="h-3.5 w-3.5" />
       {badge.label}
     </span>
+  )
+}
+
+function OnlineCredentialCard({ card }: { card: OnlineCard }) {
+  const [side, setSide] = useState<"front" | "back">("front")
+  const hasBack = Boolean(card.back_image_url)
+  const imageUrl = side === "back" && card.back_image_url ? card.back_image_url : card.front_image_url
+
+  return (
+    <article className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#121212]">
+      <div className="flex min-h-[320px] items-center justify-center bg-slate-100 p-4 dark:bg-black/30">
+        {imageUrl ? (
+          <Image src={imageUrl} alt={`${card.title || "Thẻ online"} - ${side === "front" ? "mặt trước" : "mặt sau"}`} width={720} height={960} unoptimized className="max-h-[480px] h-auto w-auto max-w-full object-contain" />
+        ) : (
+          <CreditCard className="h-16 w-16 text-slate-300" />
+        )}
+      </div>
+      <div className="space-y-3 border-t border-slate-200 p-5 dark:border-white/10">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h3 className="text-base font-black uppercase text-slate-900 dark:text-white">{card.title || "Thẻ online"}</h3>
+            {card.issuer && <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">{card.issuer}</p>}
+          </div>
+          {card.issued_at && <span className="shrink-0 text-[10px] font-bold text-slate-400">{new Date(card.issued_at).toLocaleDateString("vi-VN")}</span>}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {hasBack && (
+            <div className="flex border border-slate-200 dark:border-white/10">
+              <button type="button" onClick={() => setSide("front")} className={`px-3 py-2 text-[10px] font-black uppercase ${side === "front" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}>Mặt trước</button>
+              <button type="button" onClick={() => setSide("back")} className={`px-3 py-2 text-[10px] font-black uppercase ${side === "back" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}>Mặt sau</button>
+            </div>
+          )}
+          {card.verification_url && (
+            <a href={card.verification_url} target="_blank" rel="noreferrer" className="ml-auto inline-flex items-center gap-1.5 border border-slate-200 px-3 py-2 text-[10px] font-black uppercase text-slate-700 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:text-slate-200">
+              Xác thực <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
   )
 }
 
@@ -259,6 +301,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   }, [member])
   const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
   const socials = useMemo(() => sortVisible<SocialLink>(member?.social_links), [member])
+  const onlineCards = useMemo(() => sortVisible<OnlineCard>(member?.online_cards), [member])
 
   useEffect(() => {
     if (sections.length && !activeTab) {
@@ -339,6 +382,21 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
               </a>
             )}
           </motion.div>
+
+          {onlineCards.length > 0 && (
+            <motion.section initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-10">
+              <div className="mb-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center bg-[#ed1c24] text-white"><CreditCard className="h-5 w-5" /></div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Digital credentials</p>
+                  <h2 className="text-2xl font-black uppercase text-slate-950 dark:text-white">Thẻ online</h2>
+                </div>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2">
+                {onlineCards.map((card, index) => <OnlineCredentialCard key={`${card.title}-${index}`} card={card} />)}
+              </div>
+            </motion.section>
+          )}
         </div>
 
         {/* Overlapping Main Container */}

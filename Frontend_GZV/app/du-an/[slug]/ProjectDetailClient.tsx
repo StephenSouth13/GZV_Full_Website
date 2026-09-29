@@ -1,12 +1,12 @@
 'use client'
 
-import { notFound } from "next/navigation"
+import { notFound, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Users, Loader2, PlayCircle, Hash, CheckCircle2, Clock, Calendar, ExternalLink, Sparkles, FolderGit2, Cpu, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { api, Project } from "@/lib/api-supabase"
+import { api, Project, supabase } from "@/lib/api-supabase"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import ReactMarkdown from 'react-markdown'
@@ -20,6 +20,7 @@ interface Props {
 }
 
 export default function ProjectDetailClient({ initialProject, initialRelatedProjects }: any) {
+  const router = useRouter()
   const [project, setProject] = useState<Project | null>(initialProject)
   const [relatedProjects, setRelatedProjects] = useState<Project[]>(initialRelatedProjects)
   const [loading, setLoading] = useState(false)
@@ -30,6 +31,10 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
       try {
         const currentProject = await api.getProjectBySlug(initialProject.slug)
         if (!active) return
+        if (!currentProject) {
+          router.replace('/du-an')
+          return
+        }
         setProject(currentProject)
 
         if (currentProject) {
@@ -46,11 +51,17 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
         if (active) setLoading(false)
       }
     }
-    if (!initialProject) fetchData()
+    const channel = supabase
+      .channel(`project-detail:${initialProject.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, fetchData)
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
-  }, [initialProject])
+  }, [initialProject.id, initialProject.slug, router])
 
   if (loading) {
     return (
@@ -122,6 +133,10 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                   className="object-cover transition-transform duration-700 hover:scale-105"
                   unoptimized={true}
                   priority
+                  style={{
+                    objectPosition: `${project.image_position_x ?? 50}% ${project.image_position_y ?? 50}%`,
+                    transform: `scale(${(project.image_scale ?? 100) / 100})`,
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
 
@@ -183,13 +198,17 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                 </div>
 
                 <div className="aspect-video w-full overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 shadow-inner">
-                  <iframe
-                    className="w-full h-full"
-                    src={getEmbedUrl(project.video_url)}
-                    title="Project Video"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  {/\.(mp4|webm|ogg)(\?.*)?$/i.test(project.video_url) ? (
+                    <video className="h-full w-full object-contain" src={project.video_url} controls playsInline />
+                  ) : (
+                    <iframe
+                      className="w-full h-full"
+                      src={getEmbedUrl(project.video_url)}
+                      title="Project Video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  )}
                 </div>
               </motion.section>
             )}
@@ -267,7 +286,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                   </div>
                 </div>
 
-                <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-[#ed1c24] prose-a:font-bold prose-img:border prose-img:border-slate-200 dark:prose-img:border-white/10 prose-img:rounded-none">
+                <div className="gzv-rich-content prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-[#ed1c24] prose-a:font-bold prose-img:border prose-img:border-slate-200 dark:prose-img:border-white/10 prose-img:rounded-none">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]}>
                     {project.detailproject}
                   </ReactMarkdown>
@@ -345,7 +364,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
         </div>
 
         {/* Related Projects Section */}
-        {relatedProjects.length >= 0 && (
+        {relatedProjects.length > 0 && (
           <section className="mt-16 pt-12 border-t border-slate-200 dark:border-white/10">
             <div className="flex items-center justify-between mb-8">
               <div>
@@ -376,6 +395,10 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         unoptimized={true}
+                        style={{
+                          objectPosition: `${rp.image_position_x ?? 50}% ${rp.image_position_y ?? 50}%`,
+                          transform: `scale(${(rp.image_scale ?? 100) / 100})`,
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
                       {rp.category && (

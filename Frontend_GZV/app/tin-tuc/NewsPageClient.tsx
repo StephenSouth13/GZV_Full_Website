@@ -154,9 +154,9 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
   // Determine featured article
   const featured = useMemo(() => {
     return (
-      filtered.find((a: any) => a.is_featured) ||
+      filtered.find((a: any) => a.featured || a.is_featured) ||
       filtered[0] ||
-      articles.find((a: any) => a.is_featured) ||
+      articles.find((a: any) => a.featured || a.is_featured) ||
       articles[0]
     )
   }, [articles, filtered])

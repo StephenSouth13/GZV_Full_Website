@@ -20,15 +20,6 @@ export interface ProjectsGridProps {
   show_filter?: boolean
 }
 
-const CATEGORIES = [
-  { id: "all", label: "Tất cả" },
-  { id: "marketing", label: "Marketing" },
-  { id: "sales", label: "Sales" },
-  { id: "digital-transformation", label: "Digital Transformation" },
-  { id: "events", label: "Events" },
-  { id: "education", label: "Education" },
-]
-
 export default function ProjectsGrid(rawProps: ProjectsGridProps) {
   const {
     title: propTitle,
@@ -48,9 +39,9 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
   useEffect(() => {
     let active = true
 
-    const fetchData = async () => {
+    const fetchData = async (showLoading = true) => {
       try {
-        setLoading(true)
+        if (showLoading) setLoading(true)
         const [homeRes, blockRes, projectsRes] = await Promise.all([
           supabase.from("site_home_sections").select("*").eq("section_key", "projects").maybeSingle(),
           supabase.from("site_page_blocks").select("props").eq("component_type", "projects_grid").limit(1).maybeSingle(),
@@ -70,26 +61,36 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
       } catch (err: any) {
         console.error("Lỗi tải dữ liệu dự án:", err?.message || err)
       } finally {
-        if (active) setLoading(false)
+        if (active && showLoading) setLoading(false)
       }
     }
 
     fetchData()
 
+    const channel = supabase
+      .channel('home-projects:sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => fetchData(false))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_home_sections' }, () => fetchData(false))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_page_blocks' }, () => fetchData(false))
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [limit, propTitle, propSubtitle])
-
-  if (dbProps?.is_visible === false && !propTitle) {
-    return null
-  }
 
   const title = propTitle || dbProps?.title || "DỰ ÁN ĐÃ TRIỂN KHAI"
   const subtitle = propSubtitle || dbProps?.subtitle || "Những chiến dịch và dự án tiêu biểu do GZV cùng đối tác triển khai"
 
   const showSearch = rawProps.showSearch ?? rawProps.show_search ?? dbProps?.show_search ?? dbProps?.showSearch ?? true
   const showCategories = rawProps.showCategories ?? rawProps.show_categories ?? rawProps.showFilter ?? rawProps.show_filter ?? dbProps?.show_categories ?? dbProps?.showCategories ?? true
+
+  const categories = useMemo(() => [
+    { id: 'all', label: 'Tất cả' },
+    ...Array.from(new Set(items.map(item => item.category).filter(Boolean)))
+      .map(label => ({ id: String(label).toLowerCase(), label: String(label) })),
+  ], [items])
 
   const filteredItems = useMemo(() => {
     let result = items
@@ -108,7 +109,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
         ].flatMap((val) => (Array.isArray(val) ? val : [val])).filter(Boolean).join(" ").toLowerCase()
 
         const searchCat = selectedCategory.toLowerCase().replace("-", " ")
-        const labelCat = CATEGORIES.find((c) => c.id === selectedCategory)?.label.toLowerCase() || ""
+        const labelCat = categories.find((c) => c.id === selectedCategory)?.label.toLowerCase() || ""
 
         return targetText.includes(searchCat) || targetText.includes(labelCat)
       })
@@ -130,7 +131,11 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
     }
 
     return result
-  }, [items, selectedCategory, searchQuery, showCategories, showSearch])
+  }, [items, selectedCategory, searchQuery, showCategories, showSearch, categories])
+
+  if (dbProps?.is_visible === false && !propTitle) {
+    return null
+  }
 
   return (
     <section className="bg-slate-50 py-16 dark:bg-slate-900 sm:py-20" style={background ? { background } : undefined}>
@@ -146,14 +151,14 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {showCategories ? (
               <div className="flex flex-wrap items-center justify-start gap-2">
-                {CATEGORIES.map((cat) => {
+                {categories.map((cat) => {
                   const isActive = selectedCategory === cat.id
                   return (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={`rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider transition ${
+                      className={`rounded-none px-5 py-2 text-xs font-black uppercase tracking-wider transition ${
                         isActive
                           ? "bg-[#ed1c24] text-white shadow-md"
                           : isDark
@@ -177,7 +182,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
                   placeholder="Tìm kiếm dự án..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 w-full rounded-full border border-slate-200 bg-white pl-4 pr-4 text-xs font-bold text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-[#ed1c24] focus:outline-none focus:ring-1 focus:ring-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                  className="h-10 w-full rounded-none border border-slate-200 bg-white pl-4 pr-4 text-xs font-bold text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-[#ed1c24] focus:outline-none focus:ring-1 focus:ring-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white"
                 />
               </div>
             )}
@@ -207,10 +212,18 @@ function ProjectCardItem({ item }: { item: any }) {
   const href = item.slug ? `/du-an/${item.slug}` : ""
 
   const card = (
-    <Card className="flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-gray-800">
+    <Card className="flex h-full flex-col justify-between overflow-hidden rounded-none border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-[#ed1c24] hover:shadow-xl dark:border-slate-800 dark:bg-gray-800">
       <div>
         <div className="relative h-52 bg-slate-100">
-          <img src={image} alt={title} className="h-full w-full object-cover" />
+          <img
+            src={image}
+            alt={title}
+            className="h-full w-full object-cover"
+            style={{
+              objectPosition: `${item.image_position_x ?? 50}% ${item.image_position_y ?? 50}%`,
+              transform: `scale(${(item.image_scale ?? 100) / 100})`,
+            }}
+          />
         </div>
         <CardHeader className="text-center">
           <CardTitle className="line-clamp-2 text-center text-xl font-black dark:text-white">{title}</CardTitle>
@@ -219,7 +232,7 @@ function ProjectCardItem({ item }: { item: any }) {
       <CardContent className="flex flex-1 flex-col justify-between pt-0">
         {description && <p className="mb-6 line-clamp-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{description}</p>}
         {href && (
-          <Button variant="outline" className="mt-auto w-full rounded-xl border-[#ed1c24] text-xs font-black uppercase text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white transition">
+          <Button variant="outline" className="mt-auto w-full rounded-none border-[#ed1c24] text-xs font-black uppercase text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white transition">
             Chi tiết <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}

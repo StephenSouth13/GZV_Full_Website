@@ -100,9 +100,13 @@ export function ArticlesTable({
                   <div className="flex items-start gap-4">
                     <div className="relative h-18 w-28 shrink-0 rounded-none overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-800">
                       <img
-                        src={article.image || "/placeholder.jpg"}
+                        src={article.display_image || article.thumbnail_url || article.image || "/placeholder.jpg"}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         alt={article.title}
+                        style={{
+                          objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
+                          transform: `scale(${(article.image_scale ?? 100) / 100})`,
+                        }}
                       />
                     </div>
                     <div className="flex flex-col justify-center min-w-0">
@@ -197,7 +201,7 @@ export function ArticlesTable({
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="rounded-none py-2 px-3 cursor-pointer gap-2 text-xs font-bold text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                        onClick={() => window.open(`/chia-se/${article.slug}`, "_blank")}
+                        onClick={() => window.open(`https://gzv.one/tin-tuc/${article.slug}`, "_blank", "noopener,noreferrer")}
                       >
                         <ExternalLink className="h-3.5 w-3.5 text-slate-400" /> Xem ngoài website
                       </DropdownMenuItem>

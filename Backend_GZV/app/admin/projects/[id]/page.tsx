@@ -38,12 +38,12 @@ export default function ProjectDetailPage() {
       if (projectError) throw projectError
       setProject(projectData)
 
-      // 2. Lấy thông tin Mentor từ mảng mentor_ids
-      if (projectData.mentor_ids && projectData.mentor_ids.length > 0) {
+      const authorIds = projectData.author_ids || projectData.mentor_ids || []
+      if (authorIds.length > 0) {
         const { data: mentorData } = await supabase
-          .from('profiles')
-          .select('id, full_name, avatar_url')
-          .in('id', projectData.mentor_ids)
+          .from('authors')
+          .select('id, full_name, avatar_url, title')
+          .in('id', authorIds)
         
         if (mentorData) setMentors(mentorData)
       }
@@ -70,7 +70,7 @@ export default function ProjectDetailPage() {
           </div>
           <div className="flex gap-2">
             <Badge className="bg-[#ed1c24] px-3 py-1">{project.status}</Badge>
-            <Button size="sm" variant="outline" className="gap-2" onClick={() => window.open(`/du-an/${project.slug}`, '_blank')}>
+            <Button size="sm" variant="outline" className="gap-2" onClick={() => window.open(`https://gzv.one/du-an/${project.slug}`, '_blank', 'noopener,noreferrer')}>
                 <Globe size={14}/> Xem thực tế
             </Button>
           </div>
@@ -81,7 +81,15 @@ export default function ProjectDetailPage() {
         {/* Banner Dự án */}
         <Card className="overflow-hidden border-none shadow-xl rounded-3xl bg-white">
           <div className="relative h-[450px] w-full bg-slate-200">
-            <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+            <img
+              src={project.image || project.thumbnail_url || '/placeholder.jpg'}
+              alt={project.title}
+              className="w-full h-full object-cover"
+              style={{
+                objectPosition: `${project.image_position_x ?? 50}% ${project.image_position_y ?? 50}%`,
+                transform: `scale(${(project.image_scale ?? 100) / 100})`,
+              }}
+            />
             <Badge className="absolute top-6 left-6 bg-[#ed1c24] text-white border-none px-4 py-1 text-md uppercase font-bold">
               {project.category}
             </Badge>
@@ -114,7 +122,11 @@ export default function ProjectDetailPage() {
         <Card className="border-none shadow-lg rounded-3xl p-10 bg-white">
            <h3 className="text-xl font-bold mb-6 text-slate-400 uppercase tracking-widest">Chi tiết dự án</h3>
            <article className="prose prose-slate lg:prose-xl max-w-none">
-              <ReactMarkdown>{project.detailproject}</ReactMarkdown>
+              {/<[a-z][\s\S]*>/i.test(project.detailproject || '') ? (
+                <div dangerouslySetInnerHTML={{ __html: project.detailproject }} />
+              ) : (
+                <ReactMarkdown>{project.detailproject}</ReactMarkdown>
+              )}
            </article>
         </Card>
       </div>

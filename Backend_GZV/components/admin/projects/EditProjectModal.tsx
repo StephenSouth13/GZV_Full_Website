@@ -11,10 +11,12 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from "@/components/ui/badge"
 import { 
   Loader2, Save, Edit, Upload, 
-  Lock, Unlock, Search, Tag, Type, Film, ListOrdered
+  Lock, Unlock, Search, Tag, Type, Film, ListOrdered, FolderOpen
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
+import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
+import { ImageCropField } from '@/components/media/ImageCropField'
 
 export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
   const [loading, setLoading] = useState(false)
@@ -22,6 +24,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
   const [authors, setAuthors] = useState<any[]>([])
   const [formData, setFormData] = useState<any>(null)
   const [isSlugLocked, setIsSlugLocked] = useState(true)
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
 
   useEffect(() => {
@@ -37,6 +40,10 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
         description: project.description || '',
         image: project.image || project.thumbnail_url || '',
         thumbnail_url: project.image || project.thumbnail_url || '',
+        image_position_x: project.image_position_x ?? 50,
+        image_position_y: project.image_position_y ?? 50,
+        image_scale: project.image_scale ?? 100,
+        tech_stack: project.tech_stack || project.technologies || [],
         order_index: project.order_index || 0
       });
 
@@ -79,10 +86,26 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
       const { data, error } = await supabase
         .from('projects')
         .update({
-          ...formData,
           title: formData.title.trim(),
           slug: formData.slug.trim(),
-          order_index: parseInt(formData.order_index) || 0
+          description: formData.description || '',
+          detailproject: formData.detailproject || '',
+          category: formData.category || '',
+          image: formData.image || '',
+          thumbnail_url: formData.thumbnail_url || formData.image || '',
+          image_position_x: Number(formData.image_position_x),
+          image_position_y: Number(formData.image_position_y),
+          image_scale: Number(formData.image_scale),
+          video_url: formData.video_url || '',
+          author_ids: formData.author_ids || [],
+          hashtags: formData.hashtags || '',
+          tech_stack: formData.tech_stack || [],
+          seo_title: formData.seo_title || formData.title.trim(),
+          seo_keywords: formData.seo_keywords || '',
+          featured: Boolean(formData.featured),
+          status: formData.status || 'ongoing',
+          order_index: parseInt(formData.order_index) || 0,
+          updated_at: new Date().toISOString()
         })
         .eq('id', project.id)
         .select();
@@ -149,6 +172,32 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
               </div>
             </div>
 
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Mô tả ngắn</Label>
+              <Textarea
+                className="min-h-28 resize-none rounded-none border-slate-200 text-sm leading-relaxed"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Tóm tắt bài toán, giải pháp và giá trị nổi bật của dự án..."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Hashtags</Label>
+                <Input className="h-11 rounded-none border-slate-200 text-xs" value={formData.hashtags || ''} onChange={(e) => setFormData({ ...formData, hashtags: e.target.value })} placeholder="chuyển đổi số, đào tạo, AI" />
+              </div>
+              <div className="space-y-3">
+                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Công nghệ & nền tảng</Label>
+                <Input
+                  className="h-11 rounded-none border-slate-200 text-xs"
+                  value={(formData.tech_stack || []).join(', ')}
+                  onChange={(e) => setFormData({ ...formData, tech_stack: e.target.value.split(',').map((item: string) => item.trim()).filter(Boolean) })}
+                  placeholder="Next.js, Supabase, AI"
+                />
+              </div>
+            </div>
+
             <div className="space-y-4">
               <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Type size={12}/> Nội dung soạn thảo chi tiết</Label>
               <GZVRichEditor
@@ -168,7 +217,15 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
               <div className="relative aspect-video border-2 border-dashed border-slate-300 rounded-none bg-white flex flex-col items-center justify-center overflow-hidden shadow-xs">
                 {formData.image ? (
                   <div className="relative w-full h-full group">
-                    <img src={formData.image} className="w-full h-full object-cover" />
+                    <img
+                      src={formData.image}
+                      className="w-full h-full object-cover"
+                      alt={formData.title || 'Project preview'}
+                      style={{
+                        objectPosition: `${formData.image_position_x}% ${formData.image_position_y}%`,
+                        transform: `scale(${formData.image_scale / 100})`,
+                      }}
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all">
                        <label className="cursor-pointer">
                           <Upload className="text-white mb-2 mx-auto" />
@@ -181,6 +238,32 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
                   <label className="cursor-pointer flex flex-col items-center p-6"><Upload size={24}/><input type="file" className="hidden" onChange={(e) => handleMediaUpload(e, 'image')} /></label>
                 )}
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button type="button" variant="outline" className="h-9 rounded-none text-[10px] font-black uppercase" onClick={() => setMediaPickerOpen(true)}>
+                  <FolderOpen className="mr-1.5 h-3.5 w-3.5" /> Thư viện
+                </Button>
+                <label className="flex h-9 cursor-pointer items-center justify-center border border-slate-200 bg-white text-[10px] font-black uppercase">
+                  <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải ảnh
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => handleMediaUpload(e, 'image')} />
+                </label>
+              </div>
+              {formData.image && (
+                <ImageCropField
+                  imageUrl={formData.image}
+                  positionX={formData.image_position_x}
+                  positionY={formData.image_position_y}
+                  scale={formData.image_scale}
+                  minScale={100}
+                  aspect="16/10"
+                  label="Căn chỉnh ảnh dự án"
+                  onChange={(patch) => setFormData((prev: any) => ({
+                    ...prev,
+                    image_position_x: patch.position_x ?? prev.image_position_x,
+                    image_position_y: patch.position_y ?? prev.image_position_y,
+                    image_scale: patch.scale ?? prev.image_scale,
+                  }))}
+                />
+              )}
             </div>
 
             <div className="space-y-3">
@@ -188,6 +271,25 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
               <div className="bg-white p-5 rounded-none border border-slate-200 shadow-xs space-y-3">
                 <Input placeholder="Youtube Link..." className="text-xs h-10 rounded-none bg-slate-50 border-slate-200" value={formData.video_url} onChange={(e) => setFormData({...formData, video_url: e.target.value})} />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500">Trạng thái</Label>
+                <select
+                  className="h-10 w-full rounded-none border border-slate-200 bg-white px-3 text-xs font-bold"
+                  value={formData.status || 'ongoing'}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                >
+                  <option value="planning">Lên kế hoạch</option>
+                  <option value="ongoing">Đang thực hiện</option>
+                  <option value="completed">Đã hoàn thành</option>
+                </select>
+              </div>
+              <label className="mt-6 flex h-10 cursor-pointer items-center justify-between border border-slate-200 bg-white px-3">
+                <span className="text-[10px] font-black uppercase text-slate-600">Nổi bật</span>
+                <input type="checkbox" checked={Boolean(formData.featured)} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} className="h-4 w-4 accent-[#ed1c24]" />
+              </label>
             </div>
 
             <div className="space-y-3">
@@ -230,6 +332,16 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <MediaPickerDialog
+        open={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        defaultFolder="projects"
+        onSelect={(res) => {
+          if (res?.url) setFormData((prev: any) => ({ ...prev, image: res.url, thumbnail_url: res.url }))
+          setMediaPickerOpen(false)
+        }}
+      />
     </Dialog>
   )
 }

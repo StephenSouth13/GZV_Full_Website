@@ -26,6 +26,11 @@
       "dom",
       "dom.iterable",
       "esnext"
+    ],
+    "types": [
+      "node",
+      "react",
+      "react-dom"
     ]
   },
   "include": [

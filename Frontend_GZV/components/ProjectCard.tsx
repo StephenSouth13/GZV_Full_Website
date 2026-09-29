@@ -28,6 +28,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             src={imageUrl}
             alt={project.title}
             className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            style={{
+              objectPosition: `${project.image_position_x ?? 50}% ${project.image_position_y ?? 50}%`,
+              transform: `scale(${(project.image_scale ?? 100) / 100})`,
+            }}
           />
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />

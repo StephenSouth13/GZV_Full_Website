@@ -68,6 +68,18 @@ function ProjectsManagementContent() {
     fetchProjects(currentPage);
   }, [currentPage, fetchProjects]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-projects:sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => fetchProjects(currentPage, true))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, () => fetchProjects(currentPage, true))
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [currentPage, fetchProjects])
+
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

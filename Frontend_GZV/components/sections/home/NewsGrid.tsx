@@ -42,9 +42,9 @@ export default function NewsGrid({
   useEffect(() => {
     let active = true
 
-    const fetchData = async () => {
+    const fetchData = async (showLoading = true) => {
       try {
-        setLoading(true)
+        if (showLoading) setLoading(true)
         const [homeRes, blockRes, blogPosts] = await Promise.all([
           supabase.from("site_home_sections").select("*").eq("section_key", "news").maybeSingle(),
           supabase.from("site_page_blocks").select("props").eq("component_type", "news_grid").limit(1).maybeSingle(),
@@ -73,6 +73,8 @@ export default function NewsGrid({
           const { data } = await supabase
             .from("allblogposts")
             .select("*")
+            .eq("status", "published")
+            .lte("published_at", new Date().toISOString())
             .order("publish_date", { ascending: false })
             .limit(4)
           if (active && data) {
@@ -82,14 +84,23 @@ export default function NewsGrid({
       } catch (err: any) {
         console.error("Lỗi tải tin tức:", err)
       } finally {
-        if (active) setLoading(false)
+        if (active && showLoading) setLoading(false)
       }
     }
 
     fetchData()
 
+    const channel = supabase
+      .channel("home-news:sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => fetchData(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "authors" }, () => fetchData(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => fetchData(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_page_blocks" }, () => fetchData(false))
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [])
 

@@ -196,7 +196,7 @@ export function GZVRichEditor({
       const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type })
       if (error) throw error
       const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path)
-      editor.chain().focus().setImage({ src: publicUrl, alt: file.name }).run()
+      editor.chain().focus().setImage({ src: publicUrl, alt: '' }).run()
       toast({ title: "Đã chèn ảnh" })
     } catch (error: any) {
       toast({ title: "Lỗi tải ảnh", description: error.message, variant: "destructive" })

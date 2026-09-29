@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowDown,
   ArrowUp,
+  CreditCard,
   FileCheck,
   FileText,
   Hash,
@@ -65,6 +66,17 @@ type ProfileBadge = {
   label: string
   icon: string
   color: string
+  visible: boolean
+  sort_order: number
+}
+
+type OnlineCard = {
+  title: string
+  issuer?: string
+  front_image_url: string
+  back_image_url?: string
+  verification_url?: string
+  issued_at?: string
   visible: boolean
   sort_order: number
 }
@@ -121,6 +133,7 @@ const defaultForm = {
   ] as SocialLink[],
   profile_tabs: defaultSections,
   profile_badges: [] as ProfileBadge[],
+  online_cards: [] as OnlineCard[],
   avatar_position_x: 50,
   avatar_position_y: 32,
   avatar_scale: 100,
@@ -196,6 +209,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         social_links: sortByOrder(gzver.social_links),
         profile_tabs: sortByOrder(gzver.profile_tabs).length ? sortByOrder(gzver.profile_tabs) : defaultSections,
         profile_badges: sortByOrder(gzver.profile_badges).length ? sortByOrder(gzver.profile_badges) : defaultForm.profile_badges,
+        online_cards: sortByOrder(gzver.online_cards),
         avatar_position_x: gzver.avatar_position_x ?? 50,
         avatar_position_y: gzver.avatar_position_y ?? 32,
         avatar_scale: gzver.avatar_scale ?? 100,
@@ -265,6 +279,26 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
     }
   }
 
+  const handleOnlineCardUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number, field: "front_image_url" | "back_image_url") => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLoading(true)
+    try {
+      const extension = file.name.split(".").pop()
+      const path = `gzvers/cards/${Date.now()}-${field}.${extension}`
+      const { error } = await supabase.storage.from("media").upload(path, file)
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path)
+      updateArrayItem("online_cards", index, { [field]: publicUrl })
+      toast({ title: "Đã tải ảnh thẻ lên" })
+    } catch (error: any) {
+      toast({ title: "Lỗi tải ảnh thẻ", description: error.message, variant: "destructive" })
+    } finally {
+      setLoading(false)
+      e.target.value = ""
+    }
+  }
+
   const setDepartment = (departmentId: string) => {
     const department = departments.find((item: Department) => item.id === departmentId)
     setFormData({ ...formData, department_id: departmentId, department_name: department?.name || "" })
@@ -291,6 +325,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         social_links: sortByOrder<SocialLink>(payload.social_links).filter((item: SocialLink) => item.label || item.href),
         profile_tabs: sortByOrder<ProfileSection>(payload.profile_tabs).filter((item: ProfileSection) => item.key && item.label),
         profile_badges: sortByOrder<ProfileBadge>(payload.profile_badges).filter((item: ProfileBadge) => item.label),
+        online_cards: sortByOrder<OnlineCard>(payload.online_cards).filter((item: OnlineCard) => item.title || item.front_image_url),
       }
       const { error } = gzver?.id
         ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id)
@@ -373,6 +408,12 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
               className="rounded-none text-xs font-black uppercase tracking-wider py-2 px-3 data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white"
             >
               Huy hiệu Badge
+            </TabsTrigger>
+            <TabsTrigger
+              value="cards"
+              className="rounded-none text-xs font-black uppercase tracking-wider py-2 px-3 data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white"
+            >
+              Thẻ online
             </TabsTrigger>
             <TabsTrigger
               value="docs"
@@ -797,6 +838,72 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                     removeArrayItem={removeArrayItem}
                     moveArrayItem={moveArrayItem}
                   />
+                </div>
+              ))}
+            </TabsContent>
+
+            {/* DIGITAL CREDENTIAL CARDS */}
+            <TabsContent value="cards" className="mt-0 space-y-4">
+              <ArrayHeader
+                title="Thẻ Online & Chứng Nhận Số"
+                onAdd={() =>
+                  setFormData({
+                    ...formData,
+                    online_cards: [
+                      ...(formData.online_cards || []),
+                      {
+                        title: "Thẻ mới",
+                        issuer: "",
+                        front_image_url: "",
+                        back_image_url: "",
+                        verification_url: "",
+                        issued_at: "",
+                        visible: true,
+                        sort_order: ((formData.online_cards || []).length + 1) * 10,
+                      },
+                    ],
+                  })
+                }
+              />
+
+              {(formData.online_cards || []).map((item: OnlineCard, index: number) => (
+                <div key={index} className="space-y-4 border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-black uppercase text-slate-800 dark:text-white">
+                      <CreditCard className="h-4 w-4 text-[#ed1c24]" />
+                      Thẻ {String(index + 1).padStart(2, "0")}
+                    </div>
+                    <RowActions
+                      field="online_cards"
+                      index={index}
+                      visible={item.visible}
+                      updateArrayItem={updateArrayItem}
+                      removeArrayItem={removeArrayItem}
+                      moveArrayItem={moveArrayItem}
+                    />
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    <Input value={item.title || ""} onChange={(e) => updateArrayItem("online_cards", index, { title: e.target.value })} placeholder="Tên thẻ / chứng nhận" className="h-10 rounded-none bg-white text-xs dark:bg-slate-950" />
+                    <Input value={item.issuer || ""} onChange={(e) => updateArrayItem("online_cards", index, { issuer: e.target.value })} placeholder="Đơn vị cấp" className="h-10 rounded-none bg-white text-xs dark:bg-slate-950" />
+                    <Input type="date" value={item.issued_at || ""} onChange={(e) => updateArrayItem("online_cards", index, { issued_at: e.target.value })} className="h-10 rounded-none bg-white text-xs dark:bg-slate-950" />
+                  </div>
+
+                  <Input value={item.verification_url || ""} onChange={(e) => updateArrayItem("online_cards", index, { verification_url: e.target.value })} placeholder="Link xác thực hoặc trang chi tiết thẻ (https://...)" className="h-10 rounded-none bg-white font-mono text-xs dark:bg-slate-950" />
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {(["front_image_url", "back_image_url"] as const).map((field) => (
+                      <div key={field} className="space-y-2 border border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-slate-950">
+                        <Label className="text-[10px] font-black uppercase text-slate-500">{field === "front_image_url" ? "Mặt trước" : "Mặt sau (tùy chọn)"}</Label>
+                        {item[field] && <img src={item[field]} alt="" className="mx-auto max-h-52 w-full object-contain" />}
+                        <Input value={item[field] || ""} onChange={(e) => updateArrayItem("online_cards", index, { [field]: e.target.value })} placeholder="URL ảnh" className="h-9 rounded-none font-mono text-xs" />
+                        <Button type="button" variant="outline" className="relative h-9 w-full rounded-none text-[10px] font-black uppercase">
+                          <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải ảnh
+                          <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={loading} onChange={(e) => handleOnlineCardUpload(e, index, field)} />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </TabsContent>

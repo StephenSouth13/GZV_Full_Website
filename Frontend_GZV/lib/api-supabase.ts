@@ -187,6 +187,16 @@
       visible?: boolean;
       sort_order?: number;
     }>;
+    online_cards?: Array<{
+      title?: string;
+      issuer?: string;
+      front_image_url?: string;
+      back_image_url?: string;
+      verification_url?: string;
+      issued_at?: string;
+      visible?: boolean;
+      sort_order?: number;
+    }>;
     course_taken: string;
     skills: string[];
     achievements_list: string[];
@@ -271,11 +281,15 @@
     detailproject?: string; 
     thumbnail_url?: string;
     image?: string;
+    image_position_x?: number;
+    image_position_y?: number;
+    image_scale?: number;
     video_url?: string;
     hashtags?: string;
     order_index?: number;
     seo_title?: string;
     technologies?: string[];
+    tech_stack?: string[];
     featured?: boolean;
     author_ids?: string[];
     project_authors?: {
@@ -288,6 +302,7 @@
     slug: string;
     category?: string;
     created_at?: string;
+    updated_at?: string;
   }
 
   export interface UserData {
@@ -309,12 +324,16 @@
     content: string;
     excerpt?: string;
     image?: string;
+    thumbnail_url?: string;
     image_position_x?: number;
     image_position_y?: number;
     image_scale?: number;
     category?: string;
     slug: string;
     publish_date: string;
+    published_at?: string;
+    status?: 'draft' | 'published';
+    featured?: boolean;
     read_time?: string;
     authors: {
       full_name: string;
@@ -325,6 +344,15 @@
     tags?: string[];
     views?: number;
   }
+
+  const normalizeBlogPost = (post: any): BlogPost => ({
+    ...post,
+    id: String(post.id),
+    authors: post.authors_details || [],
+    publish_date: post.publish_date || post.created_at,
+    read_time: post.read_time || '5 phút đọc',
+    image: getPublicUrl(post.thumbnail_url || post.image),
+  }) as BlogPost;
 
   export interface RegisterData {
     name: string;
@@ -502,12 +530,15 @@
 
         // ... (các dòng trên giữ nguyên)
         const mappedProjects = (projects || []).map((p: any) => {
-          const matched = authorsData?.filter(a => p.author_ids?.includes(a.id)) || [];
+          const matched = (p.author_ids || [])
+            .map((id: string) => authorsData?.find(a => a.id === id))
+            .filter(Boolean);
           return {
             ...p,
             image: getPublicUrl(p.image || p.thumbnail_url),
+            technologies: p.tech_stack || p.technologies || [],
             
-            project_authors: matched.map(a => ({
+            project_authors: matched.map((a: any) => ({
               name: a.full_name,
               avatar: getPublicUrl(a.avatar_url),
               profile_link: `/mentors/${a.slug}`,
@@ -538,14 +569,21 @@
             .select('id, full_name, avatar_url, slug, title, position')
             .in('id', project.author_ids);
           
-          project.project_authors = authorsData?.map(a => ({
-            name: a.full_name,
-            avatar: getPublicUrl(a.avatar_url),
-            profile_link: `/mentors/${a.slug}`,
-            title: a.title || a.position
-          })) || [];
+          project.project_authors = project.author_ids
+            .map((id: string) => authorsData?.find(a => a.id === id))
+            .filter(Boolean)
+            .map((a: any) => ({
+              name: a.full_name,
+              avatar: getPublicUrl(a.avatar_url),
+              profile_link: `/mentors/${a.slug}`,
+              title: a.title || a.position
+            }));
         }
-        return { ...project, image: getPublicUrl(project.image || project.thumbnail_url) } as Project;
+        return {
+          ...project,
+          image: getPublicUrl(project.image || project.thumbnail_url),
+          technologies: project.tech_stack || project.technologies || [],
+        } as Project;
       } catch (error) {
         return null;
       }
@@ -556,16 +594,14 @@
      */
     getBlogPosts: async (): Promise<BlogPost[]> => {
       try {
-        const { data, error } = await supabase.from('allblogposts').select('*').order('publish_date', { ascending: false });
+        const { data, error } = await supabase
+          .from('allblogposts')
+          .select('*')
+          .eq('status', 'published')
+          .lte('published_at', new Date().toISOString())
+          .order('publish_date', { ascending: false });
         if (error) throw error;
-        return (data || []).map((post: any) => ({
-          ...post,
-          id: post.id.toString(),
-          authors: post.authors_details || [],
-          publish_date: post.publish_date || post.created_at,
-          read_time: post.read_time || '5 phút đọc',
-          image: getPublicUrl(post.thumbnail_url || post.image)
-        }));
+        return (data || []).map(normalizeBlogPost);
       } catch (error) {
         return [];
       }
@@ -600,19 +636,14 @@
         const { data, error } = await supabase
           .from('allblogposts')
           .select('*')
+          .eq('status', 'published')
+          .lte('published_at', new Date().toISOString())
           .eq('category', category)
           .order('publish_date', { ascending: false });
 
         if (error) throw error;
         
-        return (data || []).map((post: any) => ({
-          ...post,
-          id: post.id.toString(),
-          authors: post.authors_details || [],
-          publish_date: post.publish_date || post.created_at,
-          read_time: post.read_time || '5 phút đọc',
-          image: getPublicUrl(post.thumbnail_url || post.image)
-        }));
+        return (data || []).map(normalizeBlogPost);
       } catch (error) {
         console.error("❌ Error fetching posts by category:", error);
         return [];
@@ -620,16 +651,15 @@
     },
     getBlogPostBySlug: async (slug: string): Promise<BlogPost | null> => {
       try {
-        const { data, error } = await supabase.from('allblogposts').select('*').eq('slug', slug).single();
+        const { data, error } = await supabase
+          .from('allblogposts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('status', 'published')
+          .lte('published_at', new Date().toISOString())
+          .maybeSingle();
         if (error) return null;
-        return {
-          ...data,
-          id: data.id.toString(),
-          authors: data.authors_details || [],
-          publish_date: data.publish_date || data.created_at,
-          read_time: data.read_time || '5 phút đọc',
-          image: getPublicUrl(data.thumbnail_url || data.image)
-        } as BlogPost;
+        return data ? normalizeBlogPost(data) : null;
       } catch (error) {
         return null;
       }

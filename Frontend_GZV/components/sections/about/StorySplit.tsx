@@ -48,7 +48,7 @@ export default function StorySplit({
           <SectionIntro title={title} subtitle={subtitle} align="left" />
           {body && looksLikeHtml(body) ? (
             <div
-              className="prose prose-slate max-w-3xl text-slate-600 dark:prose-invert dark:text-slate-300"
+              className="gzv-rich-content prose prose-slate max-w-3xl text-slate-600 dark:prose-invert dark:text-slate-300"
               dangerouslySetInnerHTML={{ __html: body }}
             />
           ) : body ? (

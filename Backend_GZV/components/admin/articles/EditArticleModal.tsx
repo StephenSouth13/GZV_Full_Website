@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Loader2, Edit3, Upload, CheckCircle2, Globe, FolderOpen, Link as LinkIcon, Trash2 } from 'lucide-react'
+import { Loader2, Edit3, Upload, CheckCircle2, Globe, FolderOpen, Link as LinkIcon, Trash2, Save } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
@@ -20,6 +20,16 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
   const [members, setMembers] = useState<any[]>([])
   const [formData, setFormData] = useState<any>(null)
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
+
+  const generateSlug = (text: string) => text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 
   useEffect(() => {
     if (article && open) {
@@ -46,12 +56,28 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
     finally { setUploading(null) }
   }
 
-  const handleSave = async () => {
+  const handleSave = async (status: 'draft' | 'published' = 'published') => {
     if (!formData.title?.trim() || !formData.content?.trim()) {
       return toast({ title: "Thiếu thông tin", description: "Vui lòng nhập đầy đủ tiêu đề và nội dung bài viết." })
     }
     setLoading(true)
     try {
+      const nextSlug = generateSlug(formData.slug || formData.title)
+      if (!nextSlug) {
+        throw new Error('Đường dẫn bài viết không hợp lệ.')
+      }
+
+      const { data: duplicateSlug, error: slugCheckError } = await supabase
+        .from('articles')
+        .select('id')
+        .eq('slug', nextSlug)
+        .neq('id', article.id)
+        .maybeSingle()
+      if (slugCheckError) throw slugCheckError
+      if (duplicateSlug) {
+        throw new Error('Đường dẫn này đã được một bài viết khác sử dụng.')
+      }
+
       const validMemberIds = new Set(members.map((m) => m.id))
       const requestedIds: string[] = formData.author_ids?.length > 0
         ? formData.author_ids
@@ -63,24 +89,26 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
         .from('articles')
         .update({
           title: formData.title.trim(),
+          slug: nextSlug,
           content: formData.content,
           excerpt: formData.excerpt || "",
           image: formData.image || "",
           author_ids: authorIds,
           author_id: authorIds[0] || null,
           category: formData.category || "Tin tức",
-          image_position_x: Number(formData.image_position_x) || 50,
-          image_position_y: Number(formData.image_position_y) || 50,
-          image_scale: Number(formData.image_scale) || 100,
-          status: 'published',
+          image_position_x: Number.isFinite(Number(formData.image_position_x)) ? Number(formData.image_position_x) : 50,
+          image_position_y: Number.isFinite(Number(formData.image_position_y)) ? Number(formData.image_position_y) : 50,
+          image_scale: Number.isFinite(Number(formData.image_scale)) ? Number(formData.image_scale) : 100,
+          featured: Boolean(formData.featured),
+          status,
           updated_at: new Date().toISOString(),
-          published_at: article.published_at || new Date().toISOString()
+          published_at: status === 'published' ? (article.published_at || new Date().toISOString()) : null
         })
         .eq('id', article.id).select()
 
       if (error) throw error
       onUpdateArticle(data?.[0] || formData)
-      toast({ title: "Đã xuất bản bài viết thành công!" })
+      toast({ title: status === 'published' ? "Đã xuất bản bài viết thành công!" : "Đã lưu bản nháp!" })
       onClose()
     } catch (err: any) { 
       toast({ title: "Lỗi xuất bản", description: err.message || "Không thể lưu bài viết.", variant: "destructive" }) 
@@ -106,7 +134,15 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           </div>
           <div className="flex gap-3">
             <Button variant="ghost" className="text-slate-400 hover:text-white font-bold rounded-none text-xs uppercase" onClick={onClose}>Hủy bỏ</Button>
-            <Button disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-8 rounded-none h-10 text-xs uppercase shadow-xs" onClick={handleSave}>
+            <Button
+              variant="outline"
+              disabled={loading}
+              className="h-10 rounded-none border-white/20 bg-transparent px-4 text-xs font-black uppercase text-white hover:bg-white/10 hover:text-white"
+              onClick={() => handleSave('draft')}
+            >
+              <Save className="mr-2 h-4 w-4" /> LƯU NHÁP
+            </Button>
+            <Button disabled={loading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-8 rounded-none h-10 text-xs uppercase shadow-xs" onClick={() => handleSave('published')}>
               {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />} XÁC NHẬN XUẤT BẢN
             </Button>
           </div>
@@ -116,6 +152,21 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           {/* EDITOR SECTION */}
           <div className="lg:col-span-3 space-y-8">
             <Input className="text-3xl md:text-4xl font-black py-8 border-none bg-transparent focus-visible:ring-0 placeholder:text-slate-200 text-slate-900" placeholder="Tiêu đề bài viết..." value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+            <div className="space-y-2">
+              <Label htmlFor="edit-article-slug" className="text-[10px] font-black uppercase tracking-wider text-slate-500">Đường dẫn bài viết</Label>
+              <div className="flex min-w-0 items-center border border-slate-200 bg-slate-50">
+                <span className="hidden shrink-0 pl-3 text-xs font-semibold text-slate-500 sm:block">gzv.one/tin-tuc/</span>
+                <Input
+                  id="edit-article-slug"
+                  value={formData.slug || ''}
+                  onChange={(e) => setFormData({ ...formData, slug: generateSlug(e.target.value) })}
+                  onBlur={() => setFormData((current: any) => ({ ...current, slug: generateSlug(current.slug || current.title) }))}
+                  placeholder="anh-team-gzv-trong-su-kien-gab"
+                  className="min-w-0 flex-1 rounded-none border-0 bg-transparent font-mono text-xs text-[#ed1c24] shadow-none focus-visible:ring-0"
+                />
+              </div>
+              <p className="text-[11px] text-slate-500">Có thể đặt tên ngắn, dễ đọc. Link cũ sẽ tự chuyển sang link mới.</p>
+            </div>
             
             <div className="space-y-4">
               <GZVRichEditor
@@ -249,6 +300,16 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
                 <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Danh mục</Label>
                 <Input className="bg-white border-slate-200 h-10 rounded-none font-semibold text-xs shadow-xs" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
               </div>
+
+              <label className="flex cursor-pointer items-center justify-between border border-slate-200 bg-white p-3">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Bài viết nổi bật</span>
+                <input
+                  type="checkbox"
+                  checked={Boolean(formData.featured)}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                  className="h-4 w-4 accent-[#ed1c24]"
+                />
+              </label>
             </div>
           </aside>
         </div>

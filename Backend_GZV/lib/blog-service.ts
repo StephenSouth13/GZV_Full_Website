@@ -40,18 +40,13 @@ export class BlogService {
   static supabase: any
 
   static async getAllPosts(): Promise<BlogPost[]> {
-    try {
-      const { data, error } = await supabase
-        .from('allblogposts')
-        .select('*')
-        .order('created_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('allblogposts')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-      if (error) throw error
-      return data || []
-    } catch (error) {
-      console.error('Error fetching blog posts:', error)
-      return []
-    }
+    if (error) throw error
+    return data || []
   }
 
   static async createPost(postData: BlogPostCreate): Promise<BlogPost | null> {

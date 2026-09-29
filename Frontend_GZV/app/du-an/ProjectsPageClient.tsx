@@ -10,18 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useEffect, useMemo, useState } from "react"
-import { api, Project } from "@/lib/api-supabase"
+import { api, Project, supabase } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/common/PageBanner"
 import BuilderPageGate from "@/components/BuilderPageGate"
-
-const CATEGORIES = [
-  { id: "all", label: "Tất cả" },
-  { id: "marketing", label: "Marketing" },
-  { id: "sales", label: "Sales" },
-  { id: "digital-transformation", label: "Digital Transformation" },
-  { id: "events", label: "Events" },
-  { id: "education", label: "Education" },
-]
 
 export default function ProjectsPageClient({ initialProjects, initialBlocks, initialPage, initialGlobalBanner, initialSyncAllBanners }: any) {
   const [projects, setProjects] = useState<Project[]>(initialProjects)
@@ -31,10 +22,12 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
+    let active = true
+
     const fetchProjects = async () => {
       try {
         const data = await api.getProjects()
-        setProjects(data || [])
+        if (active) setProjects(data || [])
       } catch (err) {
         setError('Đã có lỗi xảy ra khi tải dữ liệu dự án.')
         console.error('Error fetching projects:', err)
@@ -43,7 +36,24 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
       }
     }
     if (!initialProjects?.length) fetchProjects()
+
+    const channel = supabase
+      .channel('projects-page:sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, fetchProjects)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, fetchProjects)
+      .subscribe()
+
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
   }, [])
+
+  const categories = useMemo(() => [
+    { id: 'all', label: 'Tất cả' },
+    ...Array.from(new Set(projects.map(project => project.category).filter(Boolean)))
+      .map(label => ({ id: String(label).toLowerCase(), label: String(label) })),
+  ], [projects])
 
   const filteredProjects = useMemo(() => {
     let result = projects
@@ -62,7 +72,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
         ].flatMap((val) => (Array.isArray(val) ? val : [val])).filter(Boolean).join(" ").toLowerCase()
 
         const searchCat = selectedCategory.toLowerCase().replace("-", " ")
-        const labelCat = CATEGORIES.find((c) => c.id === selectedCategory)?.label.toLowerCase() || ""
+        const labelCat = categories.find((c) => c.id === selectedCategory)?.label.toLowerCase() || ""
 
         return targetText.includes(searchCat) || targetText.includes(labelCat)
       })
@@ -84,7 +94,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
     }
 
     return result
-  }, [projects, selectedCategory, searchQuery])
+  }, [projects, selectedCategory, searchQuery, categories])
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -117,14 +127,14 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
               {/* SEARCH BAR & CATEGORY FILTER BUTTONS */}
               <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
-                  {CATEGORIES.map((cat) => {
+                  {categories.map((cat) => {
                     const isActive = selectedCategory === cat.id
                     return (
                       <button
                         key={cat.id}
                         type="button"
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`rounded-full px-5 py-2 text-xs font-black uppercase tracking-wider transition ${
+                        className={`rounded-none px-5 py-2 text-xs font-black uppercase tracking-wider transition ${
                           isActive
                             ? "bg-[#ed1c24] text-white shadow-md"
                             : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
@@ -144,7 +154,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                     placeholder="Tìm kiếm dự án..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10 w-full rounded-full border border-slate-200 bg-white pl-10 pr-9 text-xs font-bold text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-[#ed1c24] focus:outline-none focus:ring-1 focus:ring-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                    className="h-10 w-full rounded-none border border-slate-200 bg-white pl-10 pr-9 text-xs font-bold text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-[#ed1c24] focus:outline-none focus:ring-1 focus:ring-[#ed1c24] dark:border-white/10 dark:bg-slate-900 dark:text-white"
                   />
                   {searchQuery && (
                     <button
@@ -174,7 +184,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
 
                     return (
                       <motion.div key={project.id} variants={itemVariants}>
-                        <Card className="h-full flex flex-col group overflow-hidden border-2 border-transparent hover:border-[#ed1c24] hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white dark:bg-gray-800 dark:hover:border-[#ed1c24]">
+                        <Card className="h-full flex flex-col group overflow-hidden border border-slate-200 hover:border-[#ed1c24] hover:shadow-xl transition-all duration-300 rounded-none bg-white dark:border-white/10 dark:bg-gray-800 dark:hover:border-[#ed1c24]">
                           <CardHeader className="p-0">
                             <div className="relative aspect-[16/10] overflow-hidden">
                               <Image
@@ -183,6 +193,10 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                                 fill
                                 unoptimized={true}
                                 className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                style={{
+                                  objectPosition: `${project.image_position_x ?? 50}% ${project.image_position_y ?? 50}%`,
+                                  transform: `scale(${(project.image_scale ?? 100) / 100})`,
+                                }}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t to-transparent"></div>
                               <Badge className="absolute top-4 left-4 bg-white/95 text-black font-bold border-none">
@@ -238,7 +252,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
 
                             {/* NÚT XEM CHI TIẾT */}
                             <Link href={`/du-an/${project.slug}`}>
-                              <Button className="w-full h-14 bg-[#ed1c24] hover:bg-[#ed1c24] text-white rounded-2xl font-bold shadow-lg shadow-red-500/20 group">
+                              <Button className="w-full h-12 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase text-xs shadow-sm group">
                                 Xem chi tiết dự án
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                               </Button>

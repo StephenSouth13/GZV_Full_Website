@@ -50,8 +50,16 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
       <TableCell className="py-4">
         <div className="flex items-center gap-4">
           <div className="relative w-14 h-14 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/10 overflow-hidden shrink-0">
-            {p.image ? (
-              <img src={p.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="" />
+            {p.image || p.thumbnail_url ? (
+              <img
+                src={p.image || p.thumbnail_url}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                alt={p.title || ''}
+                style={{
+                  objectPosition: `${p.image_position_x ?? 50}% ${p.image_position_y ?? 50}%`,
+                  transform: `scale(${(p.image_scale ?? 100) / 100})`,
+                }}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-slate-400">
                 <ImageIcon size={18} />

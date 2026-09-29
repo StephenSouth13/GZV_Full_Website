@@ -1,7 +1,7 @@
 //D:\gzv\Backend_gzv\app\admin\articles\page.tsx
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { BlogPost } from '@/lib/supabase'
 import { BlogService } from '@/lib/blog-service'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,8 @@ import { Badge } from '@/components/ui/badge'
 import { ArticlesTable } from '@/components/admin/articles/ArticlesTable'
 import { CreateArticleModal } from '@/components/admin/articles/CreateArticleModal'
 import { EditArticleModal } from '@/components/admin/articles/EditArticleModal'
+import { DeleteArticleModal } from '@/components/admin/articles/DeleteArticleModal'
+import { supabase } from '@/lib/supabase'
 import { Search, Plus, Filter, FileText, Eye, ThumbsUp, Clock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
@@ -31,18 +33,13 @@ export default function ArticlesPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<BlogPost | null>(null)
+  const [articleToDelete, setArticleToDelete] = useState<BlogPost | null>(null)
 
-  // Fetch articles from Supabase
-  useEffect(() => {
-    loadArticles()
-  }, [])
-
-  const loadArticles = async () => {
+  const loadArticles = useCallback(async (showLoading = true) => {
     try {
-      setIsLoading(true)
+      if (showLoading) setIsLoading(true)
       const data = await BlogService.getAllPosts()
       setArticles(data)
-      setFilteredArticles(data)
     } catch (error) {
       console.error('Error loading articles:', error)
       toast({
@@ -51,9 +48,23 @@ export default function ArticlesPage() {
         variant: "destructive"
       })
     } finally {
-      setIsLoading(false)
+      if (showLoading) setIsLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    loadArticles()
+
+    const channel = supabase
+      .channel('admin-articles:sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, () => loadArticles(false))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, () => loadArticles(false))
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [loadArticles])
 
   // Filter articles based on search term, status, and category
   useEffect(() => {
@@ -71,7 +82,8 @@ export default function ArticlesPage() {
     // Status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(article => {
-        const isPublished = article.publish_date && new Date(article.publish_date) <= new Date()
+        const isPublished = article.status === 'published' &&
+          (!article.publish_date || new Date(article.publish_date) <= new Date())
         if (statusFilter === 'published') return isPublished
         if (statusFilter === 'draft') return !isPublished
         return true
@@ -88,40 +100,30 @@ export default function ArticlesPage() {
 
   const handleCreateArticle = (newArticle: BlogPost) => {
     setArticles(prev => [newArticle, ...prev])
-    toast({
-      title: "Thành công",
-      description: "Bài viết đã được tạo thành công",
-    })
+    loadArticles(false)
   }
 
-  const handleUpdateArticle = async (updatedArticle: BlogPost) => {
-    try {
-      const success = true
-      if (success) {
-        setArticles(prev => prev.map(article => 
-          article.id === updatedArticle.id ? { ...article, ...updatedArticle } : article
-        ))
-        toast({
-          title: "Thành công",
-          description: "Bài viết đã được cập nhật",
-        })
-      }
-    } catch (error) {
-      console.error('Error updating article:', error)
-      toast({
-        title: "Lỗi",
-        description: "Không thể cập nhật bài viết",
-        variant: "destructive"
-      })
-    }
+  const handleUpdateArticle = (updatedArticle: BlogPost) => {
+    setArticles(prev => prev.map(article =>
+      article.id === updatedArticle.id ? { ...article, ...updatedArticle } : article
+    ))
+    loadArticles(false)
   }
 
   const handleDeleteArticle = (articleId: string) => {
+    setArticleToDelete(articles.find(article => article.id === articleId) || null)
+  }
+
+  const confirmDeleteArticle = async (articleId: string) => {
+    const success = await BlogService.deletePost(articleId)
+    if (!success) {
+      toast({ title: "Lỗi", description: "Không thể xóa bài viết", variant: "destructive" })
+      throw new Error('Delete article failed')
+    }
+
     setArticles(prev => prev.filter(article => article.id !== articleId))
-    toast({
-      title: "Thành công",
-      description: "Bài viết đã được xóa",
-    })
+    setArticleToDelete(null)
+    toast({ title: "Thành công", description: "Bài viết đã được xóa" })
   }
 
   const handleEditArticle = (article: BlogPost) => {
@@ -131,8 +133,9 @@ export default function ArticlesPage() {
 
   const getStats = () => {
     const totalArticles = articles.length
-    const publishedArticles = articles.filter(article => 
-      article.publish_date && new Date(article.publish_date) <= new Date()
+    const publishedArticles = articles.filter(article =>
+      article.status === 'published' &&
+      (!article.publish_date || new Date(article.publish_date) <= new Date())
     ).length
     const draftArticles = totalArticles - publishedArticles
     const totalViews = articles.reduce((sum, article) => sum + (article.views || 0), 0)
@@ -186,7 +189,7 @@ export default function ArticlesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={loadArticles}
+              onClick={() => loadArticles()}
               disabled={isLoading}
               className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200"
             >
@@ -315,6 +318,13 @@ export default function ArticlesPage() {
           setSelectedArticle(null)
         }}
         onUpdateArticle={handleUpdateArticle}
+      />
+
+      <DeleteArticleModal
+        article={articleToDelete}
+        isOpen={Boolean(articleToDelete)}
+        onClose={() => setArticleToDelete(null)}
+        onDeleteArticle={confirmDeleteArticle}
       />
     </div>
   )

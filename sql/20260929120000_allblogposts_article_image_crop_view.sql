@@ -25,9 +25,6 @@ select
   a.views,
   a.likes,
   a.author_ids,
-  a.image_position_x,
-  a.image_position_y,
-  a.image_scale,
   coalesce(
     jsonb_agg(
       distinct jsonb_build_object(
@@ -39,7 +36,10 @@ select
       )
     ) filter (where au.id is not null),
     '[]'::jsonb
-  ) as authors_details
+  ) as authors_details,
+  a.image_position_x,
+  a.image_position_y,
+  a.image_scale
 from public.articles a
 left join lateral (
   select

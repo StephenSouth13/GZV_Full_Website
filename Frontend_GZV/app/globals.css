@@ -25,11 +25,82 @@
     scroll-behavior: smooth;
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 42%, #ffffff 100%);
     color: var(--ink);
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  html {
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-x: clip;
+  }
+
+  img,
+  video,
+  svg,
+  iframe {
+    max-width: 100%;
   }
 
   ::selection {
     background: var(--accent-red);
     color: white;
+  }
+}
+
+@layer components {
+  .gzv-rich-content {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .gzv-rich-content > *,
+  .gzv-rich-content figure,
+  .gzv-rich-content img,
+  .gzv-rich-content video,
+  .gzv-rich-content iframe,
+  .gzv-rich-content pre {
+    max-width: 100% !important;
+  }
+
+  .gzv-rich-content figure {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: hidden;
+  }
+
+  .gzv-rich-content img,
+  .gzv-rich-content video {
+    display: block;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .gzv-rich-content iframe {
+    display: block;
+    width: 100% !important;
+    aspect-ratio: 16 / 9;
+  }
+
+  .gzv-rich-content table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gzv-rich-content pre {
+    overflow-x: auto;
+  }
+
+  .gzv-rich-content a,
+  .gzv-rich-content figcaption {
+    overflow-wrap: anywhere;
   }
 }
 

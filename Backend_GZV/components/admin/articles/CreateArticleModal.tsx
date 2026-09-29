@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
-  X, Plus, Loader2, Send,
+  X, Plus, Loader2, Send, Save,
   Wand2, Globe,
   Sparkles, Layout, UserCheck, Type,
   FolderOpen, Link as LinkIcon
@@ -51,9 +51,11 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const generateSlug = (text: string) => {
     return text.toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .trim();
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +82,7 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
     }
   }
 
-const handleSubmit = async () => {
+const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
   if (!formData.title?.trim() || !formData.content?.trim()) {
     return toast({ 
       title: "Thiếu thông tin", 
@@ -94,25 +96,33 @@ const handleSubmit = async () => {
     ? formData.author_ids 
     : (members.length > 0 ? [members[0].id] : []);
 
-  const safeSlug = (formData.slug?.trim() || generateSlug(formData.title) || `article-${Date.now()}`);
+  const safeSlug = generateSlug(formData.slug || formData.title) || `article-${Date.now()}`;
 
   setLoading(true);
   try {
+    const { data: duplicateSlug, error: slugCheckError } = await supabase
+      .from('articles')
+      .select('id')
+      .eq('slug', safeSlug)
+      .maybeSingle();
+    if (slugCheckError) throw slugCheckError;
+    if (duplicateSlug) throw new Error('Đường dẫn này đã được một bài viết khác sử dụng.');
+
     const payload: any = {
       title: formData.title.trim(),
       slug: safeSlug,
       content: formData.content,
       excerpt: formData.excerpt || "",
       image: formData.image || "",
-      image_position_x: Number(formData.image_position_x) || 50,
-      image_position_y: Number(formData.image_position_y) || 50,
-      image_scale: Number(formData.image_scale) || 100,
+      image_position_x: Number.isFinite(Number(formData.image_position_x)) ? Number(formData.image_position_x) : 50,
+      image_position_y: Number.isFinite(Number(formData.image_position_y)) ? Number(formData.image_position_y) : 50,
+      image_scale: Number.isFinite(Number(formData.image_scale)) ? Number(formData.image_scale) : 100,
       category: formData.category || "Tin tức",
       author_ids: authorIds,
       author_id: authorIds[0] || null,
-      status: 'published',
+      status,
       featured: !!formData.featured,
-      published_at: new Date().toISOString()
+      published_at: status === 'published' ? new Date().toISOString() : null
     };
 
     const { data, error } = await supabase
@@ -122,7 +132,10 @@ const handleSubmit = async () => {
 
     if (error) throw error;
 
-    toast({ title: "Thành công!", description: "Bài viết đã được xuất bản." });
+    toast({
+      title: "Thành công!",
+      description: status === 'published' ? "Bài viết đã được xuất bản." : "Bản nháp đã được lưu."
+    });
     if (data && data[0]) {
       onCreateArticle(data[0]);
     }
@@ -157,10 +170,19 @@ const handleSubmit = async () => {
 
           <div className="flex items-center gap-3">
             <Button variant="ghost" className="text-slate-500 font-bold rounded-none text-xs uppercase" onClick={onClose}>Hủy bỏ</Button>
+            <Button
+              variant="outline"
+              disabled={loading}
+              className="h-10 rounded-none border-slate-300 px-4 text-xs font-black uppercase text-slate-700"
+              onClick={() => handleSubmit('draft')}
+            >
+              <Save className="mr-2 h-4 w-4" />
+              Lưu nháp
+            </Button>
             <Button 
               disabled={loading} 
               className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black px-6 rounded-none text-xs uppercase shadow-sm h-10"
-              onClick={handleSubmit}
+              onClick={() => handleSubmit('published')}
             >
               {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Send className="mr-2 h-4 w-4" />}
               Xuất bản ngay
@@ -181,10 +203,17 @@ const handleSubmit = async () => {
                   value={formData.title}
                   onChange={handleTitleChange}
                 />
-                <div className="flex items-center gap-2 text-slate-400 font-mono text-xs">
+                <div className="flex min-w-0 items-center gap-2 text-slate-400 font-mono text-xs">
                   <Globe className="h-3 w-3" />
-                  <span>gzv.one/tin-tuc/</span>
-                  <span className="text-[#ed1c24] bg-red-50 px-2 py-0.5 rounded-none font-bold">{formData.slug || 'your-slug-here'}</span>
+                  <span className="hidden shrink-0 sm:inline">gzv.one/tin-tuc/</span>
+                  <Input
+                    aria-label="Đường dẫn bài viết"
+                    value={formData.slug}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: generateSlug(e.target.value) }))}
+                    onBlur={() => setFormData((prev) => ({ ...prev, slug: generateSlug(prev.slug || prev.title) }))}
+                    placeholder="ten-duong-dan-tu-chon"
+                    className="h-8 min-w-0 flex-1 rounded-none border-red-100 bg-red-50 px-2 font-mono text-xs font-bold text-[#ed1c24] shadow-none focus-visible:ring-[#ed1c24]"
+                  />
                 </div>
               </div>
 

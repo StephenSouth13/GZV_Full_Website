@@ -82,6 +82,8 @@ export async function getInitialBlogPosts() {
   const { data } = await getSupabaseServer()
     .from("allblogposts")
     .select("*")
+    .eq("status", "published")
+    .lte("published_at", new Date().toISOString())
     .order("publish_date", { ascending: false })
   return (data || []).map(normalizePost)
 }
@@ -91,8 +93,30 @@ export async function getInitialBlogPost(slug: string) {
     .from("allblogposts")
     .select("*")
     .eq("slug", slug)
+    .eq("status", "published")
+    .lte("published_at", new Date().toISOString())
     .maybeSingle()
   return data ? normalizePost(data) : null
+}
+
+export async function getArticleSlugRedirect(slug: string) {
+  const supabase = getSupabaseServer()
+  const { data: redirectRow } = await supabase
+    .from("article_slug_redirects")
+    .select("article_id")
+    .eq("old_slug", slug)
+    .maybeSingle()
+
+  if (!redirectRow?.article_id) return null
+
+  const { data: article } = await supabase
+    .from("allblogposts")
+    .select("slug")
+    .eq("id", redirectRow.article_id)
+    .eq("status", "published")
+    .maybeSingle()
+
+  return article?.slug || null
 }
 
 async function getProjectAuthors(authorIds: string[] = []) {
@@ -101,18 +125,22 @@ async function getProjectAuthors(authorIds: string[] = []) {
     .from("authors")
     .select("id, full_name, avatar_url, slug, title, position")
     .in("id", authorIds)
-  return (data || []).map((author: any) => ({
-    name: author.full_name,
-    avatar: publicMediaUrl(author.avatar_url),
-    profile_link: `/mentors/${author.slug}`,
-    title: author.title || author.position,
-  }))
+  return authorIds
+    .map(id => (data || []).find((author: any) => author.id === id))
+    .filter(Boolean)
+    .map((author: any) => ({
+      name: author.full_name,
+      avatar: publicMediaUrl(author.avatar_url),
+      profile_link: `/mentors/${author.slug}`,
+      title: author.title || author.position,
+    }))
 }
 
 async function normalizeProject(project: any) {
   return {
     ...project,
     image: publicMediaUrl(project.image || project.thumbnail_url),
+    technologies: project.tech_stack || project.technologies || [],
     project_authors: await getProjectAuthors(project.author_ids || []),
   }
 }
