@@ -13,6 +13,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import rehypeRaw from 'rehype-raw'
+import { RichIframe, RichVideo, richMediaComponents } from "@/components/RichMediaEmbed"
+import { prepareRichContent } from "@/lib/media-url"
 import 'highlight.js/styles/github-dark.css'
 
 interface Props {
@@ -87,17 +89,6 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
       default:
         return { text: 'Đang triển khai', bg: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 border-slate-500/20' }
     }
-  }
-
-  const getEmbedUrl = (url: string) => {
-    if (!url) return ''
-    if (url.includes('youtube.com/watch?v=')) {
-      return url.replace('watch?v=', 'embed/')
-    }
-    if (url.includes('youtu.be/')) {
-      return url.replace('youtu.be/', 'youtube.com/embed/')
-    }
-    return url
   }
 
   const statusInfo = getStatusBadge(project.status)
@@ -197,19 +188,11 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                   </div>
                 </div>
 
-                <div className="aspect-video w-full overflow-hidden bg-slate-950 border border-slate-200 dark:border-white/10 shadow-inner">
-                  {/\.(mp4|webm|ogg)(\?.*)?$/i.test(project.video_url) ? (
-                    <video className="h-full w-full object-contain" src={project.video_url} controls playsInline />
-                  ) : (
-                    <iframe
-                      className="w-full h-full"
-                      src={getEmbedUrl(project.video_url)}
-                      title="Project Video"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  )}
-                </div>
+                {/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i.test(project.video_url) ? (
+                  <RichVideo src={project.video_url} flush />
+                ) : (
+                  <RichIframe src={project.video_url} title={project.title || "Video dự án"} flush />
+                )}
               </motion.section>
             )}
 
@@ -287,8 +270,8 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                 </div>
 
                 <div className="gzv-rich-content prose prose-slate dark:prose-invert max-w-none prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-a:text-[#ed1c24] prose-a:font-bold prose-img:border prose-img:border-slate-200 dark:prose-img:border-white/10 prose-img:rounded-none">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]}>
-                    {project.detailproject}
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight, rehypeRaw]} components={richMediaComponents}>
+                    {prepareRichContent(project.detailproject)}
                   </ReactMarkdown>
                 </div>
               </motion.section>

@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from "react"
 import { api, Project, supabase } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/common/PageBanner"
 import BuilderPageGate from "@/components/BuilderPageGate"
+import { summarize } from "@/lib/utils"
 
 export default function ProjectsPageClient({ initialProjects, initialBlocks, initialPage, initialGlobalBanner, initialSyncAllBanners }: any) {
   const [projects, setProjects] = useState<Project[]>(initialProjects)
@@ -210,7 +211,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                               {project.title}
                             </CardTitle>
                             <p className="text-gray-600 dark:text-gray-300 mb-6 flex-grow line-clamp-3">
-                              {project.description}
+                              {summarize([project.description, project.excerpt, project.detailproject], 200)}
                             </p>
 
                             {/* --- PHẦN MENTORING & COACHING (AVATAR STACK) --- */}

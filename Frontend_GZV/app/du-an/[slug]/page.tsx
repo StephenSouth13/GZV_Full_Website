@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import ProjectDetailClient from "./ProjectDetailClient"
 import { getInitialProject, getInitialProjects } from "@/lib/site-content-server"
+import { summarize } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -10,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const project = await getInitialProject(slug)
   if (!project) return { title: "Dự án" }
   const title = project.title || project.name || "Dự án GZV"
-  const description = project.description || project.excerpt || "Dự án nổi bật của GZV LTD."
+  const description = summarize([project.description, project.excerpt, project.detailproject], 160) || "Dự án nổi bật của GZV LTD."
   const image = project.image || "/og-cover.jpg"
   return {
     title,

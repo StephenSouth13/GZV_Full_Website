@@ -14,6 +14,9 @@ import { motion } from "framer-motion"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
+import { richMediaComponents } from "@/components/RichMediaEmbed"
+import { prepareRichContent } from "@/lib/media-url"
+import { summarize } from "@/lib/utils"
 
 const hasReadableCaption = (alt?: string) => {
   const value = alt?.trim()
@@ -23,6 +26,7 @@ const hasReadableCaption = (alt?: string) => {
 
 // Custom styling for markdown content
 const customMarkdownComponents = {
+  ...richMediaComponents,
   h1: (props: any) => <h1 className="text-3xl font-black uppercase tracking-tight mt-10 mb-5 text-slate-950 dark:text-white sm:text-4xl" {...props} />,
   h2: (props: any) => <h2 className="text-2xl font-black uppercase tracking-tight mt-10 mb-4 text-slate-950 dark:text-white sm:text-3xl border-b border-slate-200 dark:border-white/10 pb-2" {...props} />,
   h3: (props: any) => <h3 className="text-xl font-bold uppercase tracking-tight mt-8 mb-3 text-slate-900 dark:text-slate-100" {...props} />,
@@ -276,7 +280,7 @@ export default function NewsPostClient({ initialPost, initialRelatedPosts, initi
               rehypePlugins={[rehypeRaw]}
               components={customMarkdownComponents}
             >
-              {post.content || post.excerpt || ''}
+              {prepareRichContent(post.content || post.excerpt || '')}
             </ReactMarkdown>
           </motion.article>
 
@@ -344,7 +348,7 @@ export default function NewsPostClient({ initialPost, initialRelatedPosts, initi
                       </div>
                       <CardContent className="p-5">
                         <h3 className="font-black uppercase text-slate-950 dark:text-white leading-snug line-clamp-2 mb-2 group-hover:text-[#ed1c24] transition-colors text-sm">{a.title}</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed font-semibold">{a.excerpt || a.content?.replace(/<[^>]*>/g, "").slice(0, 120)}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed font-semibold">{summarize([a.excerpt, a.content], 120)}</p>
                         <div className="flex items-center gap-3 mt-4 text-[10px] font-bold text-slate-400 uppercase">
                           <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-[#ed1c24]" />{a.read_time || `${readingTime(a.content || '')} phút`}</span>
                           {a.publish_date && <span>{formatDate(a.publish_date)}</span>}
@@ -399,7 +403,7 @@ export default function NewsPostClient({ initialPost, initialRelatedPosts, initi
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-black uppercase text-slate-950 dark:text-white text-sm line-clamp-2 group-hover:text-[#ed1c24] transition-colors leading-snug">{a.title}</h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 font-semibold">{a.excerpt || a.content?.replace(/<[^>]*>/g, "").slice(0, 80)}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-1 font-semibold">{summarize([a.excerpt, a.content], 80)}</p>
                       <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-slate-400 uppercase">
                         {a.publish_date && <span>{formatDate(a.publish_date)}</span>}
                         <span className="flex items-center gap-1"><Clock className="h-3 w-3 text-[#ed1c24]" />{a.read_time || `${readingTime(a.content || '')} phút`}</span>

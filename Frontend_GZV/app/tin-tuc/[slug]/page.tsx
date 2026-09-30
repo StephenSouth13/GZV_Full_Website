@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import NewsPostClient from "./NewsPostClient"
 import { getArticleSlugRedirect, getInitialBlogPost, getInitialBlogPosts } from "@/lib/site-content-server"
+import { summarize } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
@@ -9,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const post = await getInitialBlogPost(slug)
   if (!post) return { title: "Tin tức" }
-  const description = post.excerpt || "Tin tức và hoạt động mới nhất từ GZV LTD."
+  const description = summarize([post.excerpt, post.content], 160) || "Tin tức và hoạt động mới nhất từ GZV LTD."
   const image = post.image || "/og-cover.jpg"
   return {
     title: post.title,

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Project } from "@/lib/api-supabase"
+import { summarize } from "@/lib/utils"
 
 interface ProjectCardProps {
   project: Project
@@ -48,7 +49,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </CardTitle>
 
         <p className="mb-6 line-clamp-3 flex-1 text-sm font-medium leading-7 text-slate-500 dark:text-neutral-400">
-          {project.description}
+          {summarize([project.description, (project as any).excerpt, (project as any).detailproject], 200)}
         </p>
 
         <div className="rounded-none border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/70">

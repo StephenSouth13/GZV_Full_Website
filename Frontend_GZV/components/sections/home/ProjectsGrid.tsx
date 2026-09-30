@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { supabase } from "@/lib/api-supabase"
+import { summarize } from "@/lib/utils"
 
 export interface ProjectsGridProps {
   title?: string
@@ -208,7 +209,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
 function ProjectCardItem({ item }: { item: any }) {
   const title = item.title || item.name || "Dự án"
   const image = item.thumbnail_url || item.image || item.avatar_url || "/placeholder.jpg"
-  const description = item.description || item.excerpt || ""
+  const description = summarize([item.description, item.excerpt, item.detailproject], 200)
   const href = item.slug ? `/du-an/${item.slug}` : ""
 
   const card = (

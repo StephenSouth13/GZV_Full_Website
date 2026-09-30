@@ -7,7 +7,6 @@ import StarterKit from "@tiptap/starter-kit"
 import Underline from "@tiptap/extension-underline"
 import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
-import Youtube from "@tiptap/extension-youtube"
 import Highlight from "@tiptap/extension-highlight"
 import { TextStyle } from "@tiptap/extension-text-style"
 import { Color } from "@tiptap/extension-color"
@@ -41,6 +40,7 @@ import { supabase } from "@/lib/supabase"
 import { isVideoUrl, normalizeMediaUrl } from "@/lib/media-url"
 import { toast } from "@/hooks/use-toast"
 import { MediaPickerDialog, type MediaPickResult } from "@/components/media/MediaPickerDialog"
+import { MediaEmbed, toMediaEmbedAttrs } from "./MediaEmbed"
 
 type Props = {
   value: string
@@ -116,14 +116,6 @@ const editorSelectClass = "h-9 border border-slate-200 bg-white px-2 text-xs fon
 
 const sanitizeUrl = (url: string) => url.trim().replace(/"/g, "&quot;")
 
-const embedHtml = (url: string) => {
-  const cleanUrl = sanitizeUrl(normalizeMediaUrl(url, "embed"))
-  if (isVideoUrl(cleanUrl) && !/drive\.google\.com/i.test(cleanUrl)) {
-    return `<figure class="gzv-embed"><video src="${cleanUrl}" controls playsinline style="width:100%;aspect-ratio:16/9;background:#050505;"></video></figure>`
-  }
-  return `<figure class="gzv-embed"><iframe src="${cleanUrl}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;"></iframe></figure>`
-}
-
 export function GZVRichEditor({
   value,
   onChange,
@@ -159,11 +151,7 @@ export function GZVRichEditor({
         HTMLAttributes: { class: "my-6 w-full shadow-lg" },
         allowBase64: false,
       }),
-      Youtube.configure({
-        width: 960,
-        height: 540,
-        HTMLAttributes: { class: "my-6 w-full aspect-video" },
-      }),
+      MediaEmbed,
     ],
     content: value || "<p></p>",
     immediatelyRender: false,
@@ -176,6 +164,16 @@ export function GZVRichEditor({
           "prose-img:rounded-none prose-img:shadow-lg prose-li:marker:text-[#ed1c24]",
         style: `min-height: ${minHeight}px; padding: 56px 72px;`,
         spellcheck: "true",
+      },
+      // Dán link video (hoặc mã <iframe>) -> tự thành khối video
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData("text/plain")?.trim() || ""
+        if (!text || /\s/.test(text.replace(/^<iframe[\s\S]*<\/iframe>$/i, "x"))) return false
+        const attrs = toMediaEmbedAttrs(text)
+        const type = view.state.schema.nodes.mediaEmbed
+        if (!attrs || !type) return false
+        view.dispatch(view.state.tr.replaceSelectionWith(type.create(attrs)).scrollIntoView())
+        return true
       },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -214,10 +212,10 @@ export function GZVRichEditor({
       const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type })
       if (error) throw error
       const { data: { publicUrl } } = supabase.storage.from("media").getPublicUrl(path)
-      editor.chain().focus().insertContent(embedHtml(publicUrl)).run()
-      toast({ title: "Da chen video" })
+      editor.chain().focus().setMediaEmbed({ src: publicUrl, kind: "video", provider: "file" }).run()
+      toast({ title: "Đã chèn video" })
     } catch (error: any) {
-      toast({ title: "Loi tai video", description: error.message, variant: "destructive" })
+      toast({ title: "Lỗi tải video", description: error.message, variant: "destructive" })
     } finally {
       setUploading(false)
     }
@@ -240,18 +238,16 @@ export function GZVRichEditor({
     editor.chain().focus().setImage({ src: normalizeMediaUrl(url, "image"), alt }).run()
   }, [editor])
 
-  const insertYoutube = useCallback(() => {
+  const insertVideo = useCallback(() => {
     if (!editor) return
-    const url = window.prompt("Dán link YouTube:")
-    if (!url) return
-    editor.commands.setYoutubeVideo({ src: url })
-  }, [editor])
-
-  const insertVideoUrl = useCallback(() => {
-    if (!editor) return
-    const url = window.prompt("Dán URL video mp4/webm/ogg hoặc embed URL:")
-    if (!url) return
-    editor.chain().focus().insertContent(embedHtml(url)).run()
+    const input = window.prompt("Dán link video (YouTube, Vimeo, TikTok, Facebook, Google Drive, file mp4) hoặc mã nhúng <iframe>:")
+    if (!input) return
+    const attrs = toMediaEmbedAttrs(input)
+    if (!attrs) {
+      toast({ title: "Chưa nhận diện được video", description: "Hãy dán link YouTube/Vimeo/TikTok/Facebook/Drive, link file .mp4 hoặc mã <iframe>.", variant: "destructive" })
+      return
+    }
+    editor.chain().focus().setMediaEmbed(attrs).run()
   }, [editor])
 
   if (!editor) {
@@ -383,9 +379,8 @@ export function GZVRichEditor({
           <ToolButton title="Upload ảnh" onClick={() => fileRef.current?.click()}>{uploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}</ToolButton>
           <ToolButton title="Ảnh từ thư viện" onClick={() => setPickerOpen(true)}><FolderOpen size={16} /></ToolButton>
           <ToolButton title="Ảnh bằng URL" onClick={insertImageUrl}><ImageIcon size={16} />URL</ToolButton>
-          <ToolButton title="YouTube" onClick={insertYoutube}><YoutubeIcon size={16} /></ToolButton>
+          <ToolButton title="Chèn video (YouTube, Vimeo, TikTok, Facebook, Drive, mp4) — hoặc dán link video vào dòng trống" onClick={insertVideo}><YoutubeIcon size={16} /></ToolButton>
           <ToolButton title="Upload video" onClick={() => videoFileRef.current?.click()}>{uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}<Video size={16} /></ToolButton>
-          <ToolButton title="Video URL/embed" onClick={insertVideoUrl}><Video size={16} /></ToolButton>
 
           <input
             ref={fileRef}
@@ -438,7 +433,23 @@ export function GZVRichEditor({
           background: #050505;
         }
         .gzv-doc-editor .gzv-embed {
-          margin: 24px 0;
+          margin: 28px 0;
+          overflow: hidden;
+          border-radius: 16px;
+          background: #050505;
+          box-shadow: 0 20px 50px -20px rgba(15, 23, 42, 0.5);
+        }
+        .gzv-doc-editor .gzv-embed[data-provider="tiktok"] {
+          max-width: 360px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .gzv-doc-editor .gzv-embed[data-provider="tiktok"] iframe {
+          aspect-ratio: 9 / 16;
+        }
+        .gzv-doc-editor .gzv-embed.ProseMirror-selectednode {
+          outline: 3px solid #ed1c24;
+          outline-offset: 3px;
         }
         .gzv-doc-editor img {
           max-width: 100%;
@@ -453,7 +464,8 @@ export function GZVRichEditor({
         onSelect={(result: MediaPickResult) => {
           if (!editor) return
           if (isVideoUrl(result.url)) {
-            editor.chain().focus().insertContent(embedHtml(result.url)).run()
+            const attrs = toMediaEmbedAttrs(result.url) || { src: result.url, kind: "video" as const, provider: "file" }
+            editor.chain().focus().setMediaEmbed(attrs).run()
           } else {
             editor.chain().focus().insertContent(`<p><img src="${sanitizeUrl(normalizeMediaUrl(result.url, "image"))}" alt="${sanitizeUrl(result.alt)}" style="width:${result.width};height:auto;" /></p>`).run()
           }

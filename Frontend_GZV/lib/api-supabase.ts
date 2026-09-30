@@ -329,6 +329,7 @@
     title: string;
     description: string;
     detailproject?: string; 
+    excerpt?: string;
     thumbnail_url?: string;
     image?: string;
     image_position_x?: number;

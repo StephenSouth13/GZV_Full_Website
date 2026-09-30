@@ -22,6 +22,7 @@ import { api, BlogPost, supabase } from "@/lib/api-supabase"
 import PageBanner from "@/components/sections/common/PageBanner"
 import { toast } from "@/hooks/use-toast"
 import { useLanguage } from "@/components/language-provider"
+import { summarize } from "@/lib/utils"
 
 const copyByLanguage = {
   vi: {
@@ -342,10 +343,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
                       </Link>
 
                       <p className="text-left leading-relaxed text-slate-600 dark:text-slate-400 text-xs line-clamp-3 font-semibold">
-                        {featured.excerpt ||
-                          (featured.content
-                            ? featured.content.replace(/<[^>]*>/g, "").slice(0, 220)
-                            : "")}
+                        {summarize([featured.excerpt, featured.content], 220)}
                       </p>
                     </div>
 
@@ -431,9 +429,9 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
                             <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-tight leading-snug group-hover:text-[#ed1c24] transition-colors line-clamp-2">
                               {article.title}
                             </h3>
-                            {article.excerpt && (
+                            {summarize([article.excerpt, article.content], 160) && (
                               <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed font-semibold">
-                                {article.excerpt}
+                                {summarize([article.excerpt, article.content], 160)}
                               </p>
                             )}
                           </div>
