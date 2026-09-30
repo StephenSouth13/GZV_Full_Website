@@ -379,8 +379,12 @@ export function GZVRichEditor({
           <ToolButton title="Upload ảnh" onClick={() => fileRef.current?.click()}>{uploading ? <Loader2 size={16} className="animate-spin" /> : <ImageIcon size={16} />}</ToolButton>
           <ToolButton title="Ảnh từ thư viện" onClick={() => setPickerOpen(true)}><FolderOpen size={16} /></ToolButton>
           <ToolButton title="Ảnh bằng URL" onClick={insertImageUrl}><ImageIcon size={16} />URL</ToolButton>
-          <ToolButton title="Chèn video (YouTube, Vimeo, TikTok, Facebook, Drive, mp4) — hoặc dán link video vào dòng trống" onClick={insertVideo}><YoutubeIcon size={16} /></ToolButton>
-          <ToolButton title="Upload video" onClick={() => videoFileRef.current?.click()}>{uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}<Video size={16} /></ToolButton>
+          <ToolButton title="Chèn video bằng link hoặc mã nhúng" onClick={insertVideo}>
+            <YoutubeIcon size={16} /><span className="hidden lg:inline">Chèn video</span>
+          </ToolButton>
+          <ToolButton title="Tải tệp video từ máy tính" onClick={() => videoFileRef.current?.click()}>
+            {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}<Video size={16} /><span className="hidden lg:inline">Tải video</span>
+          </ToolButton>
 
           <input
             ref={fileRef}

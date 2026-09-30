@@ -44,10 +44,12 @@ const EMBED_STYLE = "display:block;width:100%;aspect-ratio:16/9;border:0;border-
 // Khối video trong trình soạn thảo, lưu ra HTML dạng <figure class="gzv-embed"><iframe|video/></figure>
 export const MediaEmbed = Node.create({
   name: "mediaEmbed",
+  priority: 1000,
   group: "block",
   atom: true,
   draggable: true,
   selectable: true,
+  isolating: true,
 
   addAttributes() {
     return {
@@ -59,7 +61,8 @@ export const MediaEmbed = Node.create({
 
   parseHTML() {
     return [
-      { tag: "figure.gzv-embed", getAttrs: (element) => attrsFromElement(element as HTMLElement) },
+      // Give persisted video figures precedence over generic HTML parsing.
+      { tag: "figure.gzv-embed", priority: 1000, getAttrs: (element) => attrsFromElement(element as HTMLElement) },
       { tag: "div[data-youtube-video]", getAttrs: (element) => attrsFromElement(element as HTMLElement) },
       { tag: "iframe[src]", getAttrs: (element) => attrsFromElement(element as HTMLElement) },
       { tag: "video", getAttrs: (element) => attrsFromElement(element as HTMLElement) },

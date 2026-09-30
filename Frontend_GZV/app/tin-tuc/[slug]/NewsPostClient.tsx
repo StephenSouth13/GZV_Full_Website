@@ -57,6 +57,20 @@ const customMarkdownComponents = {
       )}
     </figure>
   ),
+  figure: ({ className, ...props }: any) => <figure className={`my-8 max-w-full overflow-hidden ${className || ""}`} {...props} />,
+  iframe: ({ src, title, ...props }: any) => (
+    <span className="my-8 block aspect-video max-w-full overflow-hidden bg-black">
+      <iframe
+        src={src}
+        title={title || "Video"}
+        className="h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        {...props}
+      />
+    </span>
+  ),
+  video: ({ src, ...props }: any) => <video src={src} controls playsInline className="my-8 h-auto w-full max-w-full bg-black" {...props} />,
   a: (props: any) => <a className="text-[#ed1c24] hover:underline font-bold" target="_blank" rel="noopener noreferrer" {...props} />,
 };
 
