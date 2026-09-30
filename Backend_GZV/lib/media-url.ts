@@ -104,9 +104,10 @@ const escapeAttr = (value: string) => value.replace(/&(?!amp;)/g, "&amp;").repla
 
 export function videoEmbedHtml(embed: VideoEmbed, title = "Video") {
   const src = escapeAttr(embed.src)
+  const style = `display:block;width:100%;aspect-ratio:${embed.provider === "tiktok" ? "9/16" : "16/9"};border:0;border-radius:16px;background:#050505;`
   const media =
     embed.kind === "video"
-      ? `<video src="${src}" controls playsinline preload="metadata"></video>`
-      : `<iframe src="${src}" title="${escapeAttr(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+      ? `<video src="${src}" style="${style}" controls playsinline preload="metadata"></video>`
+      : `<iframe src="${src}" width="100%" style="${style}" title="${escapeAttr(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
   return `<figure class="gzv-embed" data-provider="${embed.provider}">${media}</figure>`
 }

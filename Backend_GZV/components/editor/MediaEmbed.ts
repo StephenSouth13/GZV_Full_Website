@@ -38,6 +38,9 @@ function attrsFromElement(element: HTMLElement) {
   }
 }
 
+// Kích thước ghi thẳng vào HTML để video luôn rộng hết khung bài, kể cả nơi không có CSS riêng cho .gzv-embed
+const EMBED_STYLE = "display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:16px;background:#050505;"
+
 // Khối video trong trình soạn thảo, lưu ra HTML dạng <figure class="gzv-embed"><iframe|video/></figure>
 export const MediaEmbed = Node.create({
   name: "mediaEmbed",
@@ -67,11 +70,13 @@ export const MediaEmbed = Node.create({
     const { src, kind, provider } = node.attrs
     const media =
       kind === "video"
-        ? ["video", { src, controls: "true", playsinline: "true", preload: "metadata" }]
+        ? ["video", { src, controls: "true", playsinline: "true", preload: "metadata", style: EMBED_STYLE }]
         : [
             "iframe",
             {
               src,
+              width: "100%",
+              style: provider === "tiktok" ? EMBED_STYLE.replace("16/9", "9/16") : EMBED_STYLE,
               title: "Video",
               loading: "lazy",
               allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
