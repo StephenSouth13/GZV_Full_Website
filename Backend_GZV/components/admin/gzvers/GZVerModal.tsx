@@ -84,6 +84,7 @@ type OnlineCard = {
 type MemberCard = {
   enabled: boolean
   status: "official" | "demo"
+  design: "obsidian" | "crimson" | "graphite" | "executive"
   card_title: string
   card_subtitle: string
   card_number: string
@@ -127,6 +128,7 @@ export const CARD_LINK_ICONS = [
 const defaultMemberCard: MemberCard = {
   enabled: true,
   status: "demo",
+  design: "obsidian",
   card_title: "",
   card_subtitle: "",
   card_number: "",
@@ -975,7 +977,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                   </div>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-black uppercase text-slate-500">Trạng thái thẻ</Label>
                     <Select value={formData.member_card?.status || "demo"} onValueChange={(value: "official" | "demo") => updateMemberCard({ status: value })}>
@@ -993,6 +995,18 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                     <Input value={formData.member_card?.card_number || ""} onChange={(e) => updateMemberCard({ card_number: e.target.value })} placeholder="VD: GZV-0001 (trống = tự sinh)" className="h-10 rounded-none font-mono text-xs" />
                   </div>
                   <div className="space-y-1">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Mẫu thiết kế</Label>
+                    <Select value={formData.member_card?.design || "obsidian"} onValueChange={(value: MemberCard["design"]) => updateMemberCard({ design: value })}>
+                      <SelectTrigger className="h-10 rounded-none text-xs font-bold"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="obsidian">Obsidian - Đỏ đen</SelectItem>
+                        <SelectItem value="crimson">Crimson - Đỏ nổi bật</SelectItem>
+                        <SelectItem value="graphite">Graphite - Than chì</SelectItem>
+                        <SelectItem value="executive">Executive - Đen cao cấp</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
                     <Label className="text-[10px] font-black uppercase text-slate-500">Ngày cấp</Label>
                     <Input type="date" value={formData.member_card?.issued_at || ""} onChange={(e) => updateMemberCard({ issued_at: e.target.value })} className="h-10 rounded-none text-xs" />
                   </div>
@@ -1000,6 +1014,25 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                     <Label className="text-[10px] font-black uppercase text-slate-500">Hiệu lực đến</Label>
                     <Input type="date" value={formData.member_card?.expires_at || ""} onChange={(e) => updateMemberCard({ expires_at: e.target.value })} className="h-10 rounded-none text-xs" />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Xem trước mẫu thiết kế thẻ">
+                  {([
+                    ["obsidian", "Obsidian", "from-[#111722] via-[#07080b] to-black"],
+                    ["crimson", "Crimson", "from-[#5d080d] via-[#ed1c24] to-[#210205]"],
+                    ["graphite", "Graphite", "from-[#303947] via-[#101217] to-[#050505]"],
+                    ["executive", "Executive", "from-black via-[#151920] to-[#4a070b]"],
+                  ] as const).map(([design, label, gradient]) => (
+                    <button
+                      key={design}
+                      type="button"
+                      onClick={() => updateMemberCard({ design })}
+                      className={`min-w-0 border p-2 text-left transition ${formData.member_card?.design === design || (!formData.member_card?.design && design === "obsidian") ? "border-[#ed1c24] ring-1 ring-[#ed1c24]" : "border-slate-200 dark:border-white/10"}`}
+                    >
+                      <span className={`block h-12 bg-gradient-to-br ${gradient}`}><span className="block h-1 w-2/3 bg-[#ed1c24]" /></span>
+                      <span className="mt-2 block truncate text-[10px] font-black uppercase text-slate-600 dark:text-slate-300">{label}</span>
+                    </button>
+                  ))}
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">

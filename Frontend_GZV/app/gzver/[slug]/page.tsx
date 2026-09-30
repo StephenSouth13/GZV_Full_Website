@@ -342,7 +342,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
     <main className="min-h-screen min-w-0 overflow-x-clip bg-slate-100/60 text-slate-900 dark:bg-[#070707] dark:text-slate-100 selection:bg-[#ed1c24] selection:text-white">
       {/* ══════════ HERO COVER ══════════ */}
       <section className="relative w-full overflow-hidden">
-        <div className="relative w-full h-[45vh] md:h-[55vh] lg:h-[60vh] bg-slate-900">
+        <div className="relative h-[34vh] min-h-[250px] w-full md:h-[40vh] md:min-h-[320px] bg-slate-900">
           {member.cover_image_url ? (
             <>
               <Image src={member.cover_image_url} alt={`${member.full_name} cover`} fill unoptimized className="object-cover opacity-85" style={coverStyle} priority />
@@ -353,15 +353,15 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
           )}
 
           {/* Floating Back Button */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 left-6 z-20">
-            <Link href="/gzver" className="inline-flex items-center gap-1.5 border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-black/90 px-4 py-2 text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white shadow-md hover:bg-slate-100">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="absolute left-4 top-4 z-20 sm:left-6 sm:top-6">
+            <Link href="/gzver" className="inline-flex items-center gap-1.5 border border-slate-200 dark:border-white/10 bg-white/90 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-900 shadow-md hover:bg-slate-100 dark:bg-black/90 dark:text-white sm:px-4 sm:text-xs">
               <ArrowLeft className="h-4 w-4" />
               <span>Cộng đồng GZVers</span>
             </Link>
           </motion.div>
 
           {/* Action Buttons Top Right: Share + CV */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute top-6 right-6 z-20 flex items-center gap-2">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="absolute right-4 top-4 z-20 flex items-center gap-2 sm:right-6 sm:top-6">
             <button
               onClick={shareProfile}
               aria-label="Chia sẻ hồ sơ"
@@ -389,11 +389,11 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
         </div>
 
         {/* Overlapping Main Container */}
-        <div className="container min-w-0 max-w-5xl mx-auto px-4 -mt-32 md:-mt-40 relative z-10 pb-16">
+        <div className="container relative z-10 mx-auto min-w-0 max-w-5xl -mt-20 px-4 pb-10 md:-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
             {/* Header Banner Inside Card */}
-            <div className="p-6 md:p-10 border-b border-slate-200 dark:border-white/10 border-t-4 border-t-[#ed1c24]">
-              <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="border-b border-t-4 border-slate-200 border-t-[#ed1c24] p-5 dark:border-white/10 md:p-7">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 bg-[#ed1c24] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
                   {departmentName}
                 </span>
@@ -404,16 +404,16 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 )}
               </div>
 
-              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-slate-950 dark:text-white leading-none">{member.full_name}</h1>
-              {member.headline && <p className="mt-3 text-base md:text-lg font-semibold text-slate-600 dark:text-slate-300">{member.headline}</p>}
+              <h1 className="text-3xl font-black uppercase leading-none tracking-tight text-slate-950 dark:text-white md:text-4xl">{member.full_name}</h1>
+              {member.headline && <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300 md:text-base">{member.headline}</p>}
             </div>
 
             {/* Layout Grid: Sidebar Left + Content Right */}
             <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
               {/* Sidebar Left */}
-              <aside className="border-b border-slate-200 bg-slate-50/70 p-6 text-slate-900 sm:p-8 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
+              <aside className="border-b border-slate-200 bg-slate-50/70 p-5 text-slate-900 sm:p-6 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
                 {/* Avatar Box — cùng tỉ lệ khung ảnh 4/4.5 và bo góc như thẻ ở trang danh sách GZVers để đồng bộ hình ảnh */}
-                <div className="relative mb-6 aspect-[4/4.5] w-44 overflow-hidden rounded-2xl border-4 border-white bg-slate-200 shadow-xl sm:w-52 dark:border-[#0d0d0d] dark:bg-[#141414]">
+                <div className="relative mb-5 aspect-[4/4.5] w-36 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-44 dark:border-[#0d0d0d] dark:bg-[#141414]">
                   {member.avatar_url ? (
                     <Image
                       src={member.avatar_url}
@@ -447,7 +447,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 )}
 
                 {/* Contact Info Items */}
-                <div className="mt-6 space-y-2.5 border-t border-slate-200 pt-5 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
+                <div className="mt-5 space-y-2 border-t border-slate-200 pt-4 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
                   {member.location && (
                     <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
                       <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
@@ -469,7 +469,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 </div>
 
                 {/* Social Channels */}
-                <div className="mt-6 border-t border-slate-200 pt-5 dark:border-white/10">
+                <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
                   <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kênh kết nối</p>
                   <div className="flex flex-wrap gap-2">
                     {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
@@ -478,7 +478,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 </div>
 
                 {getMemberCard(member).enabled !== false && (
-                  <a href="#card-visit" className="mt-6 flex items-center justify-between border border-[#ed1c24] bg-red-50 px-3 py-3 text-xs font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
+                  <a href="#card-visit" className="mt-5 flex items-center justify-between border border-[#ed1c24] bg-red-50 px-3 py-3 text-xs font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
                     <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Thẻ GZVer</span>
                     <span>Xem 2 mặt</span>
                   </a>
@@ -486,8 +486,8 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
               </aside>
 
               {/* Main Content Area */}
-              <div className="bg-white p-6 sm:p-8 dark:bg-[#0b0b0b]">
-                <div className="space-y-6">
+              <div className="bg-white p-5 sm:p-6 dark:bg-[#0b0b0b]">
+                <div className="space-y-5">
                   <div className="border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-3 dark:bg-white/[0.04]">
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
                     <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">Hành trình, năng lực và những đóng góp nổi bật.</p>

@@ -143,6 +143,7 @@
   export interface GzverMemberCard {
     enabled?: boolean;
     status?: 'official' | 'demo';
+    design?: 'obsidian' | 'crimson' | 'graphite' | 'executive';
     card_title?: string;
     card_subtitle?: string;
     card_number?: string;

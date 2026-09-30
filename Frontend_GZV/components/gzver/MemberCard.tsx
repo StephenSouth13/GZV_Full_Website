@@ -29,6 +29,16 @@ const NAVY = "#124c96"
 const RED = "#ed1c24"
 const CARD_RATIO = "54 / 85.6" // Chuẩn thẻ CR80 dựng đứng — dùng làm khung khi chèn ảnh thẻ thiết kế sẵn
 
+const CARD_THEMES = {
+  obsidian: { name: "Obsidian", surface: "radial-gradient(circle at 78% 12%, rgba(237,28,36,.32), transparent 28%), linear-gradient(155deg, #171a22 0%, #08090d 48%, #000 100%)", primary: "#ed1c24", accent: "#ffffff", text: "#f8fafc", muted: "#b8c0cc" },
+  crimson: { name: "Crimson", surface: "radial-gradient(circle at 12% 8%, rgba(255,255,255,.14), transparent 24%), linear-gradient(145deg, #4a060b 0%, #ed1c24 44%, #170204 100%)", primary: "#ff5058", accent: "#ffffff", text: "#ffffff", muted: "#ffd4d6" },
+  graphite: { name: "Graphite", surface: "linear-gradient(145deg, #242a34 0%, #08090d 52%, #151515 100%)", primary: "#ed1c24", accent: "#ffffff", text: "#f8fafc", muted: "#c2c9d3" },
+  executive: { name: "Executive", surface: "radial-gradient(circle at 88% 18%, rgba(237,28,36,.24), transparent 22%), linear-gradient(145deg, #050505 0%, #101318 62%, #310509 100%)", primary: "#ed1c24", accent: "#ffffff", text: "#ffffff", muted: "#bac1c8" },
+} as const
+
+type CardThemeKey = keyof typeof CARD_THEMES
+const getCardTheme = (design?: string) => CARD_THEMES[(design || "obsidian") as CardThemeKey] || CARD_THEMES.obsidian
+
 type Side = "front" | "back"
 
 const DEFAULT_SETTINGS: GzverCardSettings = {
@@ -69,7 +79,7 @@ const linkIcons: Record<string, any> = {
 
 // Họa tiết chìm chữ "GZV" chéo trên nền thẻ (data URI để html-to-image xuất ảnh được)
 const watermark = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='10' y='55' transform='rotate(-24 85 45)' font-family='Arial Black,Arial' font-weight='900' font-size='18' fill='${NAVY}' fill-opacity='0.055'>GZV · GENZ</text></svg>`,
+  `<svg xmlns='http://www.w3.org/2000/svg' width='170' height='90'><text x='10' y='55' transform='rotate(-24 85 45)' font-family='Arial Black,Arial' font-weight='900' font-size='18' fill='#ffffff' fill-opacity='0.055'>GZV · GENZ</text></svg>`,
 )}")`
 
 const parseObject = <T,>(raw: unknown): T => {
@@ -121,6 +131,7 @@ type ResolvedCard = {
   back: FaceSource
   links: GzverCardLink[]
   showVcard: boolean
+  design: CardThemeKey
 }
 
 // Gộp cấu hình: riêng từng GZVer > mẫu chung (gzver_card_settings) > mặc định trong code
@@ -160,13 +171,15 @@ function resolveCard(member: gzver, card: GzverMemberCard, settings: GzverCardSe
     back: faceSource(card.back_image_url, settings.template_back_image_url),
     links: [...personalLinks, ...(card.hide_default_links ? [] : sortLinks(settings.links))],
     showVcard: settings.show_vcard !== false,
+    design: (card.design && card.design in CARD_THEMES ? card.design : "obsidian") as CardThemeKey,
   }
 }
 
 // Kích thước chữ tính theo % bề rộng thẻ (cqw) để thẻ luôn đúng tỉ lệ ở mọi cỡ màn hình
 const cq = (value: number) => `${value}cqw`
 
-function CardShell({ children, background }: { children: ReactNode; background?: string }) {
+function CardShell({ children, background, design }: { children: ReactNode; background?: string; design: CardThemeKey }) {
+  const theme = getCardTheme(design)
   return (
     <div
       className="relative h-full w-full overflow-hidden"
@@ -174,8 +187,8 @@ function CardShell({ children, background }: { children: ReactNode; background?:
         borderRadius: cq(4.5),
         background: background
           ? `center / cover no-repeat url("${background}")`
-          : `${watermark}, linear-gradient(160deg, #fffdf7 0%, #fbf6e9 55%, #f4ecd6 100%)`,
-        boxShadow: "inset 0 0 0 1px rgba(18,76,150,.18)",
+          : `${watermark}, ${theme.surface}`,
+        boxShadow: `inset 0 0 0 1px ${theme.primary}70`,
       }}
     >
       {children}
@@ -183,12 +196,12 @@ function CardShell({ children, background }: { children: ReactNode; background?:
   )
 }
 
-function Divider() {
+function Divider({ color = RED }: { color?: string }) {
   return (
     <div className="flex items-center justify-center" style={{ gap: cq(2) }}>
-      <span style={{ height: cq(0.5), width: cq(30), background: `linear-gradient(90deg, transparent, ${RED})` }} />
-      <span style={{ color: RED, fontSize: cq(3.4), lineHeight: 1 }}>★</span>
-      <span style={{ height: cq(0.5), width: cq(30), background: `linear-gradient(90deg, ${RED}, transparent)` }} />
+      <span style={{ height: cq(0.5), width: cq(30), background: `linear-gradient(90deg, transparent, ${color})` }} />
+      <span style={{ color, fontSize: cq(3.4), lineHeight: 1 }}>◆</span>
+      <span style={{ height: cq(0.5), width: cq(30), background: `linear-gradient(90deg, ${color}, transparent)` }} />
     </div>
   )
 }
@@ -205,16 +218,17 @@ function DemoStamp() {
 
 function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
   const department = member.gzver_departments?.name || member.department_name
+  const theme = getCardTheme(c.design)
   return (
-    <CardShell background={c.front.image}>
+    <CardShell background={c.front.image} design={c.design}>
       {!c.front.image && (
-        <div className="absolute inset-x-0 top-0" style={{ height: cq(1.6), background: `linear-gradient(90deg, ${NAVY} 0 60%, ${RED} 60% 100%)` }} />
+        <><div className="absolute inset-x-0 top-0" style={{ height: cq(1.8), background: `linear-gradient(90deg, ${theme.primary} 0 58%, #fff 58% 61%, ${theme.primary} 61% 100%)` }} /><div className="absolute -right-[20%] top-[11%] h-[38%] w-[72%] rotate-[-22deg] border border-white/10" /></>
       )}
       <div className="relative flex h-full flex-col items-center text-center" style={{ padding: `${cq(8)} ${cq(7)} ${cq(6)}` }}>
-        <p style={{ color: NAVY, fontSize: cq(3.6), fontWeight: 900, letterSpacing: cq(0.3), lineHeight: 1.35 }}>
+        <p style={{ color: theme.text, fontSize: cq(3.6), fontWeight: 900, letterSpacing: cq(0.3), lineHeight: 1.35 }}>
           {c.companyLine.toUpperCase()}
           <br />
-          <span style={{ color: RED }}>{c.topTagline.toUpperCase()}</span>
+          <span style={{ color: theme.primary }}>{c.topTagline.toUpperCase()}</span>
         </p>
 
         <div
@@ -223,18 +237,18 @@ function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
             marginTop: cq(7),
             width: cq(40),
             height: cq(40),
-            border: `${cq(0.9)} solid ${NAVY}`,
-            boxShadow: `0 0 0 ${cq(1.4)} #fffdf7, 0 0 0 ${cq(1.9)} ${RED}`,
+            border: `${cq(0.9)} solid ${theme.primary}`,
+            boxShadow: `0 0 0 ${cq(1.4)} rgba(255,255,255,.95), 0 0 0 ${cq(1.9)} ${theme.primary}`,
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/card/gzv-mark.png" alt="GZV" style={{ width: cq(24), height: cq(24), objectFit: "contain" }} />
         </div>
 
-        <p style={{ marginTop: cq(8), color: RED, fontSize: cq(7.6), fontWeight: 900, lineHeight: 1.1, whiteSpace: "nowrap" }}>
+        <p style={{ marginTop: cq(8), color: theme.text, fontSize: cq(7.6), fontWeight: 900, lineHeight: 1.1, whiteSpace: "nowrap" }}>
           {c.cardTitle.toUpperCase()}
         </p>
-        <p style={{ marginTop: cq(1.5), color: NAVY, fontSize: cq(14), fontWeight: 900, letterSpacing: cq(1.2), lineHeight: 1 }}>
+        <p style={{ marginTop: cq(1.5), color: theme.primary, fontSize: cq(14), fontWeight: 900, letterSpacing: cq(1.2), lineHeight: 1 }}>
           {c.cardSubtitle.toUpperCase()}
         </p>
 
@@ -242,8 +256,8 @@ function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
           <span
             style={{
               marginTop: cq(5),
-              background: NAVY,
-              color: "#fff",
+              background: theme.primary,
+              color: theme.accent,
               fontSize: cq(3.2),
               fontWeight: 800,
               letterSpacing: cq(0.4),
@@ -256,7 +270,7 @@ function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
           </span>
         )}
 
-        <p style={{ marginTop: "auto", color: "#334155", fontSize: cq(2.9), fontStyle: "italic", fontWeight: 600, lineHeight: 1.5 }}>
+        <p style={{ marginTop: "auto", color: theme.muted, fontSize: cq(2.9), fontStyle: "italic", fontWeight: 600, lineHeight: 1.5 }}>
           {c.hotline && (
             <>
               Hotline: {c.hotline}
@@ -266,9 +280,9 @@ function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
           {c.email && <>Email: {c.email}</>}
         </p>
         <div style={{ marginTop: cq(2.5), width: "100%" }}>
-          <Divider />
+          <Divider color={theme.primary} />
         </div>
-        <p style={{ marginTop: cq(2.5), color: NAVY, fontSize: cq(2.8), fontWeight: 900, letterSpacing: cq(0.6) }}>
+        <p style={{ marginTop: cq(2.5), color: theme.text, fontSize: cq(2.8), fontWeight: 900, letterSpacing: cq(0.6) }}>
           {c.websiteLabel.toUpperCase()} &nbsp;|&nbsp; NO. {c.cardNumber}
         </p>
       </div>
@@ -278,15 +292,16 @@ function TemplateFront({ member, c }: { member: gzver; c: ResolvedCard }) {
 }
 
 function TemplateBack({ member, c }: { member: gzver; c: ResolvedCard }) {
+  const theme = getCardTheme(c.design)
   const avatarStyle: CSSProperties = {
     objectPosition: `${member.avatar_position_x ?? 50}% ${member.avatar_position_y ?? 32}%`,
     transform: `scale(${(member.avatar_scale || 100) / 100})`,
   }
   const nameSize = member.full_name && member.full_name.length > 18 ? 7 : 8.6
   return (
-    <CardShell background={c.back.image}>
+    <CardShell background={c.back.image} design={c.design}>
       {!c.back.image && (
-        <div className="absolute inset-x-0 top-0" style={{ height: cq(1.6), background: `linear-gradient(90deg, ${RED} 0 40%, ${NAVY} 40% 100%)` }} />
+        <><div className="absolute inset-x-0 top-0" style={{ height: cq(1.8), background: `linear-gradient(90deg, ${theme.primary} 0 42%, #fff 42% 45%, ${theme.primary} 45% 100%)` }} /><div className="absolute -left-[42%] bottom-[9%] h-[32%] w-[100%] rotate-[24deg] border border-white/10" /></>
       )}
       <div className="relative flex h-full flex-col items-center text-center" style={{ padding: `${cq(8)} ${cq(7)} ${cq(6)}` }}>
         <div
@@ -296,23 +311,23 @@ function TemplateBack({ member, c }: { member: gzver; c: ResolvedCard }) {
             height: cq(52),
             borderRadius: cq(6),
             border: `${cq(1.2)} solid #fff`,
-            boxShadow: `0 0 0 ${cq(0.6)} ${NAVY}, 0 ${cq(2)} ${cq(5)} rgba(15,23,42,.25)`,
+            boxShadow: `0 0 0 ${cq(0.6)} ${theme.primary}, 0 ${cq(2)} ${cq(5)} rgba(0,0,0,.5)`,
           }}
         >
           {member.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={member.avatar_url} alt={member.full_name} crossOrigin="anonymous" className="h-full w-full object-cover" style={avatarStyle} />
           ) : (
-            <div className="flex h-full w-full items-center justify-center" style={{ background: NAVY, color: "#fff", fontSize: cq(16), fontWeight: 900 }}>
+            <div className="flex h-full w-full items-center justify-center" style={{ background: theme.primary, color: "#fff", fontSize: cq(16), fontWeight: 900 }}>
               {member.full_name?.charAt(0) || "G"}
             </div>
           )}
         </div>
 
-        <p style={{ marginTop: cq(6), color: RED, fontSize: cq(3.4), fontWeight: 900, letterSpacing: cq(0.3), lineHeight: 1.3 }}>
+        <p style={{ marginTop: cq(6), color: theme.primary, fontSize: cq(3.4), fontWeight: 900, letterSpacing: cq(0.3), lineHeight: 1.3 }}>
           {(member.position || "GZVer").toUpperCase()}
         </p>
-        <p style={{ marginTop: cq(1.5), color: NAVY, fontSize: cq(nameSize), fontWeight: 900, lineHeight: 1.1 }}>
+        <p style={{ marginTop: cq(1.5), color: theme.text, fontSize: cq(nameSize), fontWeight: 900, lineHeight: 1.1 }}>
           {member.full_name?.toUpperCase()}
         </p>
 
@@ -322,20 +337,20 @@ function TemplateBack({ member, c }: { member: gzver; c: ResolvedCard }) {
             marginTop: "auto",
             padding: cq(2),
             borderRadius: cq(2.5),
-            border: `${cq(0.4)} solid rgba(18,76,150,.25)`,
+            border: `${cq(0.4)} solid ${theme.primary}70`,
             boxShadow: `0 ${cq(1)} ${cq(3)} rgba(15,23,42,.12)`,
           }}
         >
           <QRCodeSVG value={c.qrValue} level="M" fgColor="#0f172a" bgColor="#ffffff" style={{ width: cq(22), height: cq(22), display: "block" }} />
         </div>
-        <p style={{ marginTop: cq(2), color: "#475569", fontSize: cq(2.5), fontWeight: 800, letterSpacing: cq(0.4) }}>{c.qrCaption.toUpperCase()}</p>
+        <p style={{ marginTop: cq(2), color: theme.muted, fontSize: cq(2.5), fontWeight: 800, letterSpacing: cq(0.4) }}>{c.qrCaption.toUpperCase()}</p>
 
         <div style={{ marginTop: cq(3.5), width: "100%" }}>
-          <Divider />
+          <Divider color={theme.primary} />
         </div>
-        <p style={{ marginTop: cq(2.5), color: RED, fontSize: cq(3.3), fontWeight: 900, letterSpacing: cq(0.4) }}>{c.tagline.toUpperCase()}</p>
+        <p style={{ marginTop: cq(2.5), color: theme.primary, fontSize: cq(3.3), fontWeight: 900, letterSpacing: cq(0.4) }}>{c.tagline.toUpperCase()}</p>
         {(c.issuedAt || c.expiresAt) && (
-          <p style={{ marginTop: cq(1.2), color: "#64748b", fontSize: cq(2.4), fontWeight: 700 }}>
+          <p style={{ marginTop: cq(1.2), color: theme.muted, fontSize: cq(2.4), fontWeight: 700 }}>
             {c.issuedAt && `Cấp ngày ${formatDate(c.issuedAt)}`}
             {c.issuedAt && c.expiresAt && " · "}
             {c.expiresAt && `Hiệu lực đến ${formatDate(c.expiresAt)}`}
@@ -408,18 +423,11 @@ function buildVcard(member: gzver, c: ResolvedCard) {
   return lines.filter(Boolean).join("\r\n")
 }
 
-const particles = Array.from({ length: 18 }, (_, index) => ({
-  left: `${(index * 53) % 100}%`,
-  delay: `${(index * 0.7) % 9}s`,
-  duration: `${9 + (index % 5) * 2}s`,
-  rotate: `${(index * 37) % 180}deg`,
-  gold: index % 3 !== 0,
-}))
-
 export function MemberCardShowcase({ member }: { member: gzver }) {
   const card = getMemberCard(member)
   const [settings, setSettings] = useState<GzverCardSettings>(DEFAULT_SETTINGS)
   const [flipped, setFlipped] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [downloading, setDownloading] = useState<Side | "both" | null>(null)
   const frontExportRef = useRef<HTMLDivElement>(null)
   const backExportRef = useRef<HTMLDivElement>(null)
@@ -433,6 +441,13 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
     return () => {
       active = false
     }
+  }, [])
+
+  useEffect(() => {
+    const syncHash = () => setExpanded(window.location.hash === "#card-visit")
+    syncHash()
+    window.addEventListener("hashchange", syncHash)
+    return () => window.removeEventListener("hashchange", syncHash)
   }, [])
 
   if (card.enabled === false) return null
@@ -484,36 +499,30 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
     "inline-flex items-center gap-2 border border-white/15 bg-white/5 px-4 py-2.5 text-[11px] font-black uppercase tracking-wider text-white transition hover:border-[#ed1c24] hover:bg-[#ed1c24] disabled:opacity-60"
 
   return (
-    <section id="card-visit" className="relative scroll-mt-24 overflow-hidden bg-[#07090f] py-16 text-white md:py-20">
-      {/* Nền: quầng sáng thương hiệu + kim tuyến rơi */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#124c96]/30 blur-3xl" />
-        <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-[#ed1c24]/20 blur-3xl" />
-        {particles.map((p, index) => (
-          <span
-            key={index}
-            className="gzv-confetti absolute top-0 block h-3 w-1.5 rounded-[1px]"
-            style={{
-              left: p.left,
-              animationDelay: p.delay,
-              animationDuration: p.duration,
-              background: p.gold ? "linear-gradient(180deg,#f7d774,#b8862b)" : RED,
-              transform: `rotate(${p.rotate})`,
-            }}
-          />
-        ))}
-      </div>
+    <section id="card-visit" className="relative scroll-mt-24 overflow-hidden bg-[#07090f] py-5 text-white md:py-7">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[#ed1c24]" />
 
       <div className="container relative max-w-5xl">
-        <div className="mb-8 text-center">
-          <p className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.3em] text-[#ff5a60]">
-            <CreditCard className="h-4 w-4" /> GZVer Digital Card
-          </p>
-          <h2 className="mt-2 text-3xl font-black uppercase tracking-tight md:text-4xl">Card visit</h2>
+        <div className="flex items-center justify-between gap-4 border border-white/10 bg-black/20 px-4 py-3 md:px-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="w-10 shrink-0 overflow-hidden border border-[#ed1c24]/70 shadow-[0_8px_20px_rgba(0,0,0,.45)]" style={{ aspectRatio: CARD_RATIO }}>
+              <CardFace member={member} c={c} side="front" />
+            </div>
+            <div className="min-w-0">
+              <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#ff5a60]"><CreditCard className="h-3.5 w-3.5" /> GZVer digital card</p>
+              <h2 className="truncate text-base font-black uppercase md:text-lg">Thẻ thành viên</h2>
+              <p className="hidden text-[11px] font-medium text-slate-400 sm:block">{getCardTheme(c.design).name} · Mã {c.cardNumber}</p>
+            </div>
+          </div>
+          <button type="button" onClick={() => setExpanded((value) => !value)} className="shrink-0 border border-[#ed1c24] bg-[#ed1c24] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-[#c91218]">
+            {expanded ? "Thu gọn" : "Xem thẻ"}
+          </button>
         </div>
 
+        {expanded && <>
+
         <div
-          className={`mx-auto mb-10 max-w-3xl rounded-xl border border-dashed px-5 py-4 text-center ${
+          className={`mx-auto mb-10 mt-6 max-w-3xl rounded-xl border border-dashed px-5 py-4 text-center ${
             c.isDemo ? "border-[#ed1c24]/50 bg-[#ed1c24]/10" : "border-emerald-400/40 bg-emerald-500/10"
           }`}
         >
@@ -618,6 +627,7 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
             </div>
           </div>
         )}
+        </>}
       </div>
 
       {/* Bản dựng ngoài màn hình, cỡ cố định, chỉ dùng để xuất ảnh PNG sắc nét */}
