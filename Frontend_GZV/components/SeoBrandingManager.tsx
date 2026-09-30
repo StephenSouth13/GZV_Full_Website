@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { getBrandingSettings, getPageSlugFromPath, getSitePageContent } from "@/lib/site-content"
+import { supabase } from "@/lib/api-supabase"
 
 const upsertMeta = (name: string, content?: string | null) => {
   if (!content) return
@@ -37,7 +38,7 @@ export default function SeoBrandingManager() {
 
   useEffect(() => {
     let active = true
-    Promise.all([getBrandingSettings(), getSitePageContent(getPageSlugFromPath(pathname))]).then(([branding, page]) => {
+    const loadSeo = () => Promise.all([getBrandingSettings(), getSitePageContent(getPageSlugFromPath(pathname))]).then(([branding, page]) => {
       if (!active) return
       const isHome = getPageSlugFromPath(pathname) === "home" || !getPageSlugFromPath(pathname)
       const defaultSiteTitle = branding.default_title || branding.site_name || "GZV - The Voice of Genzers"
@@ -65,8 +66,15 @@ export default function SeoBrandingManager() {
       upsertMeta("keywords", branding.default_keywords)
       updateFavicons(branding.favicon_url)
     })
+    loadSeo()
+    const channel = supabase
+      .channel(`site-seo:${getPageSlugFromPath(pathname)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, loadSeo)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_pages" }, loadSeo)
+      .subscribe()
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [pathname])
 

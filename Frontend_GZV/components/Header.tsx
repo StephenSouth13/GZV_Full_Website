@@ -9,6 +9,7 @@ import { ChevronDown, ChevronRight, LogIn, Mail, Menu, Moon, Phone, Search, Sun,
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { defaultNavigation, getBrandingSettings, getSiteNavigation, type SiteNavItem } from "@/lib/site-content"
+import { supabase } from "@/lib/api-supabase"
 import { useLanguage } from "@/components/language-provider"
 
 const Header = () => {
@@ -61,7 +62,7 @@ const Header = () => {
 
   useEffect(() => {
     let active = true
-    Promise.all([getBrandingSettings(), getSiteNavigation()]).then(([branding, navigation]) => {
+    const loadHeader = () => Promise.all([getBrandingSettings(), getSiteNavigation()]).then(([branding, navigation]) => {
       if (!active) return
       let meta: any = {}
       try {
@@ -88,8 +89,17 @@ const Header = () => {
         badge: branding.topbar_badge_label || "GZV",
       })
     })
+
+    loadHeader()
+    const channel = supabase
+      .channel("site-shell-header")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_navigation" }, loadHeader)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, loadHeader)
+      .subscribe()
+
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [])
 

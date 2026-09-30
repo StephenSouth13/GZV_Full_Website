@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { getPageSlugFromPath, getSitePageContent, type SitePageContent } from '@/lib/site-content'
 import { useLanguage } from '@/components/language-provider'
+import { supabase } from '@/lib/api-supabase'
 
 export default function ManagedPageContent() {
   const pathname = usePathname()
@@ -12,10 +13,18 @@ export default function ManagedPageContent() {
 
   useEffect(() => {
     let active = true
-    getSitePageContent(getPageSlugFromPath(pathname)).then((data) => {
+    const loadPage = () => getSitePageContent(getPageSlugFromPath(pathname)).then((data) => {
       if (active) setPage(data)
     })
-    return () => { active = false }
+    loadPage()
+    const channel = supabase
+      .channel(`managed-page-content:${getPageSlugFromPath(pathname)}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_pages' }, loadPage)
+      .subscribe()
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
   }, [pathname])
 
   const html = language === "en" ? ((page as any)?.content_html_en || page?.content_html) : page?.content_html

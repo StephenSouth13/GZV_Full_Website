@@ -10,6 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop'
 import ManagedPageContent from '@/components/ManagedPageContent'
 import SeoBrandingManager from '@/components/SeoBrandingManager'
 import { defaultLoadingSettings, getPageSlugFromPath, getSiteLoadingSettings, getSiteNavigation, type SiteLoadingSettings, type SiteNavItem } from '@/lib/site-content'
+import { supabase } from '@/lib/api-supabase'
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -22,7 +23,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     const started = Date.now()
     const hasShownBootLoader = sessionStorage.getItem('gzv_boot_loader_shown') === '1'
 
-    Promise.all([getSiteNavigation(), getSiteLoadingSettings()]).then(([nav, loading]) => {
+    const loadShellSettings = () => Promise.all([getSiteNavigation(), getSiteLoadingSettings()]).then(([nav, loading]) => {
       if (!active) return
       setNavigation(nav)
       setLoadingSettings(loading)
@@ -35,7 +36,16 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
       const wait = Math.max(0, Math.min(loading.minimum_duration_ms, 900) - (Date.now() - started))
       window.setTimeout(() => active && setBooting(false), wait)
     })
-    return () => { active = false }
+    loadShellSettings()
+    const channel = supabase
+      .channel('site-shell-settings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_navigation' }, loadShellSettings)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_loading_settings' }, loadShellSettings)
+      .subscribe()
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const disabledPage = useMemo(() => {

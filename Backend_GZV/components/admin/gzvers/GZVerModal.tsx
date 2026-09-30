@@ -449,11 +449,11 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[96vh] overflow-hidden rounded-none border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-white">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-[1440px] max-h-[calc(100dvh-1rem)] overflow-hidden rounded-none border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-white sm:w-[calc(100vw-2rem)]">
         <DialogDescription className="sr-only">Quản lý hồ sơ GZVer</DialogDescription>
 
         {/* Header Modal */}
-        <DialogHeader className="bg-white text-slate-900 p-6 border-b border-slate-200 dark:border-white/10 dark:bg-slate-900 dark:text-white rounded-none">
+        <DialogHeader className="bg-white p-4 text-slate-900 border-b border-slate-200 dark:border-white/10 dark:bg-slate-900 dark:text-white rounded-none sm:p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3.5">
               <div className="bg-[#ed1c24] p-3 text-white shadow-xs rounded-none">
@@ -469,7 +469,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-800 px-4 py-2.5 rounded-none">
+            <div className="flex w-full items-center justify-between gap-3 border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-800 px-4 py-2.5 rounded-none md:w-auto">
               <Label className="text-[10px] font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">Hiển thị Public</Label>
               <Switch checked={formData.is_active} onCheckedChange={(val) => setFormData({ ...formData, is_active: val })} />
             </div>
@@ -478,7 +478,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
 
         {/* Tab Navigation */}
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="h-12 w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-900 px-6">
+          <TabsList className="h-auto min-h-12 w-full justify-start gap-1 overflow-x-auto rounded-none border-b border-slate-200 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-slate-900 sm:flex-wrap sm:overflow-visible sm:px-5">
             <TabsTrigger
               value="basic"
               className="rounded-none text-xs font-black uppercase tracking-wider py-2 px-3 data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white"
@@ -535,7 +535,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             </TabsTrigger>
           </TabsList>
 
-          <div className="max-h-[64vh] overflow-y-auto p-6 bg-white dark:bg-slate-950">
+          <div className="max-h-[calc(100dvh-13rem)] overflow-y-auto overscroll-contain bg-white p-3 dark:bg-slate-950 sm:max-h-[64vh] sm:p-6">
             {/* TAB 1: BASIC */}
             <TabsContent value="basic" className="mt-0 space-y-5">
               <div className="flex flex-col gap-3 border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-900 sm:flex-row sm:items-center">
@@ -1282,7 +1282,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         </Tabs>
 
         {/* Footer Actions */}
-        <div className="flex justify-between items-center border-t border-slate-200 bg-slate-50 p-5 dark:border-white/10 dark:bg-slate-950 rounded-none">
+        <div className="flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950 rounded-none sm:flex-row sm:items-center sm:p-5">
           <Button variant="ghost" onClick={onClose} className="rounded-none px-6 text-xs font-black uppercase text-slate-500 hover:bg-slate-200/60">
             Hủy Bỏ
           </Button>

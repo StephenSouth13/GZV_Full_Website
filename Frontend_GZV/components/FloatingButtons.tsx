@@ -8,6 +8,7 @@ import { ArrowUp, Bot, Facebook, MessageCircle, MessageSquare, Phone, Plus, Send
 import Chatbot from "./Chatbot"
 import { getFloatingActions, type FloatingAction } from "@/lib/site-content"
 import { useLanguage } from "@/components/language-provider"
+import { supabase } from "@/lib/api-supabase"
 
 const fallbackActions: FloatingAction[] = [
   { action_key: "chatbot", label: "Chat với GZV", action_type: "chatbot", sort_order: 10, is_visible: true },
@@ -32,11 +33,17 @@ export default function FloatingButtons() {
 
   useEffect(() => {
     let active = true
-    getFloatingActions().then((data) => {
+    const loadActions = () => getFloatingActions().then((data) => {
       if (active) setActions(data.length ? data : fallbackActions)
     })
+    loadActions()
+    const channel = supabase
+      .channel("site-floating-actions")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_floating_actions" }, loadActions)
+      .subscribe()
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [])
 

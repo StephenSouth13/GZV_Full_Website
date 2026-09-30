@@ -16,6 +16,7 @@ import {
   Loader2,
   Menu,
   RotateCcw,
+  Radio,
   Save,
   Settings2,
   Sparkles,
@@ -67,6 +68,8 @@ function SiteContentManager() {
   const [activeTab, setActiveTab] = useState("menu")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [realtimeState, setRealtimeState] = useState<"connecting" | "live" | "offline">("connecting")
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null)
 
   // Navigation & Pages State
   const [navItems, setNavItems] = useState<NavItem[]>(defaultNav)
@@ -134,9 +137,11 @@ function SiteContentManager() {
 
   // Fetch Data from Supabase
   useEffect(() => {
-    async function load() {
+    let syncTimer: ReturnType<typeof setTimeout> | null = null
+
+    async function load(background = false) {
       try {
-        setLoading(true)
+        if (!background) setLoading(true)
         const [
           navResult,
           pagesResult,
@@ -197,7 +202,7 @@ function SiteContentManager() {
           }
         })
         setPages(nextPages)
-        setSelectedSlug(nextPages[0]?.slug || "gioi-thieu")
+        setSelectedSlug((current) => nextPages.some((page) => page.slug === current) ? current : (nextPages[0]?.slug || "gioi-thieu"))
         const validHomeKeys = ["hero", "about_gzv", "projects", "services_three", "about_boxes", "partners", "news"]
         const rawFetchedSections = (sectionsResult.data || []).filter((s: any) => validHomeKeys.includes(s.section_key)) as HomeSection[]
         const mergedHomeSections = defaultHomeSections.map((defSec) => {
@@ -291,13 +296,39 @@ function SiteContentManager() {
         if (typeof headerMeta.sync_all_banners === "boolean") {
           setSyncAllBanners(headerMeta.sync_all_banners)
         }
+        if (background) setLastSyncedAt(new Date())
       } catch (error: any) {
-        toast.error(error.message || "Không tải được cấu hình website.")
+        if (!background) toast.error(error.message || "Không tải được cấu hình website.")
       } finally {
-        setLoading(false)
+        if (!background) setLoading(false)
       }
     }
+
+    const scheduleSync = () => {
+      if (syncTimer) clearTimeout(syncTimer)
+      syncTimer = setTimeout(() => load(true), 350)
+    }
+
     load()
+    const channel = supabase
+      .channel("admin-site-content-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_navigation" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_pages" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_loading_settings" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_footer_settings" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_floating_actions" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_section_templates" }, scheduleSync)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_page_blocks" }, scheduleSync)
+      .subscribe((status) => {
+        setRealtimeState(status === "SUBSCRIBED" ? "live" : status === "CHANNEL_ERROR" || status === "TIMED_OUT" ? "offline" : "connecting")
+      })
+
+    return () => {
+      if (syncTimer) clearTimeout(syncTimer)
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   // DB Save Functions
@@ -917,7 +948,7 @@ function SiteContentManager() {
 
   return (
     <ProtectedRoute allowedRoles={["admin", "collab"]}>
-      <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+      <div className="mx-auto max-w-6xl space-y-6 p-1.5 md:p-0">
 
         {/* Header Bar */}
         <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
@@ -941,6 +972,16 @@ function SiteContentManager() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              <div className={`flex h-9 items-center gap-2 border px-3 text-[10px] font-black uppercase tracking-wider ${
+                realtimeState === "live"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
+                  : realtimeState === "offline"
+                    ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300"
+                    : "border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+              }`} title={lastSyncedAt ? `Đồng bộ lúc ${lastSyncedAt.toLocaleTimeString("vi-VN")}` : "Đang kết nối đồng bộ"}>
+                <Radio className={`h-3.5 w-3.5 ${realtimeState === "connecting" ? "animate-pulse" : ""}`} />
+                {realtimeState === "live" ? "Realtime đang bật" : realtimeState === "offline" ? "Realtime đang kết nối lại" : "Đang kết nối"}
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -976,9 +1017,15 @@ function SiteContentManager() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 border border-slate-200 bg-slate-100 p-1.5 sm:grid-cols-3 lg:grid-cols-7 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
             <TabsTrigger value="menu" className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5">
               <LayoutTemplate className="h-3.5 w-3.5 shrink-0" /> Menu
+            </TabsTrigger>
+            <TabsTrigger value="home" className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 shrink-0" /> Trang chủ
+            </TabsTrigger>
+            <TabsTrigger value="builder" className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5">
+              <LayoutTemplate className="h-3.5 w-3.5 shrink-0" /> Page builder
             </TabsTrigger>
             <TabsTrigger value="banner" className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5">
               <ImageIcon className="h-3.5 w-3.5 shrink-0" /> Banner (Hero)

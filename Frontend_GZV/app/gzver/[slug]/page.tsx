@@ -275,7 +275,6 @@ function ProfileSection({ member, section, index }: { member: gzver; section: Pr
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
   const [member, setMember] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<string>("")
 
   useEffect(() => {
     let active = true
@@ -303,12 +302,6 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
   const socials = useMemo(() => sortVisible<SocialLink>(member?.social_links), [member])
   const onlineCards = useMemo(() => sortVisible<OnlineCard>(member?.online_cards), [member])
-
-  useEffect(() => {
-    if (sections.length && !activeTab) {
-      setActiveTab(sections[0].key || `section-0`)
-    }
-  }, [sections, activeTab])
 
   if (loading) {
     return (
@@ -346,7 +339,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   }
 
   return (
-    <main className="min-h-screen bg-slate-100/60 text-slate-900 dark:bg-[#070707] dark:text-slate-100 selection:bg-[#ed1c24] selection:text-white">
+    <main className="min-h-screen min-w-0 overflow-x-clip bg-slate-100/60 text-slate-900 dark:bg-[#070707] dark:text-slate-100 selection:bg-[#ed1c24] selection:text-white">
       {/* ══════════ HERO COVER ══════════ */}
       <section className="relative w-full overflow-hidden">
         <div className="relative w-full h-[45vh] md:h-[55vh] lg:h-[60vh] bg-slate-900">
@@ -396,7 +389,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
         </div>
 
         {/* Overlapping Main Container */}
-        <div className="container max-w-5xl mx-auto px-4 -mt-32 md:-mt-40 relative z-10 pb-16">
+        <div className="container min-w-0 max-w-5xl mx-auto px-4 -mt-32 md:-mt-40 relative z-10 pb-16">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
             {/* Header Banner Inside Card */}
             <div className="p-6 md:p-10 border-b border-slate-200 dark:border-white/10 border-t-4 border-t-[#ed1c24]">
@@ -483,56 +476,27 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                     {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
                   </div>
                 </div>
+
+                {getMemberCard(member).enabled !== false && (
+                  <a href="#card-visit" className="mt-6 flex items-center justify-between border border-[#ed1c24] bg-red-50 px-3 py-3 text-xs font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
+                    <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Thẻ GZVer</span>
+                    <span>Xem 2 mặt</span>
+                  </a>
+                )}
               </aside>
 
               {/* Main Content Area */}
               <div className="bg-white p-6 sm:p-8 dark:bg-[#0b0b0b]">
-                {/* Filter Tabs Navigation */}
-                {sections.length > 1 && (
-                  <div className="sticky top-20 z-20 mb-8 overflow-x-auto border border-slate-200 bg-white/90 p-1.5 backdrop-blur-md scrollbar-none dark:border-white/10 dark:bg-[#121212]/90">
-                    <div className="flex items-center gap-1">
-                      {sections.map((section, idx) => {
-                        const key = section.key || `section-${idx}`
-                        const isActive = activeTab === key
-                        return (
-                          <button
-                            key={key}
-                            onClick={() => setActiveTab(key)}
-                            className={`whitespace-nowrap px-4 py-2.5 text-xs font-black uppercase tracking-wider transition ${isActive
-                              ? "bg-[#ed1c24] text-white shadow-xs"
-                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                              }`}
-                          >
-                            {section.label || `Section ${idx + 1}`}
-                          </button>
-                        )
-                      })}
-                    </div>
+                <div className="space-y-6">
+                  <div className="border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-3 dark:bg-white/[0.04]">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
+                    <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">Hành trình, năng lực và những đóng góp nổi bật.</p>
                   </div>
-                )}
-
-                {/* Active Tab Content Only */}
-                <div>
-                  {(() => {
-                    const currentSectionIndex = sections.findIndex(
-                      (s, idx) => (s.key || `section-${idx}`) === activeTab
-                    )
-                    const activeSection = currentSectionIndex !== -1 ? sections[currentSectionIndex] : sections[0]
-                    const actualIndex = currentSectionIndex !== -1 ? currentSectionIndex : 0
-
-                    if (!activeSection) return null
-
-                    return (
-                      <motion.div
-                        key={activeSection.key || `section-${actualIndex}`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <ProfileSection member={member} section={activeSection} index={actualIndex} />
-                      </motion.div>
-                    )
-                  })()}
+                  {sections.map((section, index) => (
+                    <motion.div key={section.key || `section-${index}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: index * 0.04 }}>
+                      <ProfileSection member={member} section={section} index={index} />
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </div>

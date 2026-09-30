@@ -85,14 +85,21 @@ export default function Footer({ overrideConfig, activeColumn, onSelectColumn }:
   useEffect(() => {
     if (overrideConfig) return
     let active = true
-    Promise.all([getFooterSettings(), getBrandingSettings()]).then(([f, b]) => {
+    const loadFooter = () => Promise.all([getFooterSettings(), getBrandingSettings()]).then(([f, b]) => {
       if (active) {
         setDbFooter(f)
         setDbBranding(b)
       }
     })
+    loadFooter()
+    const channel = supabase
+      .channel("site-shell-footer")
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_footer_settings" }, loadFooter)
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, loadFooter)
+      .subscribe()
     return () => {
       active = false
+      supabase.removeChannel(channel)
     }
   }, [overrideConfig])
 
