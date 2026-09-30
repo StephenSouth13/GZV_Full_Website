@@ -245,7 +245,25 @@ function ProfileSection({ member, section }: { member: gzver; section: ProfileSe
     const lead = member.achievement_summary
     return (
       <div className="space-y-6">
-        {lead && <p className="text-xl font-black leading-snug text-slate-900 dark:text-white md:text-2xl">{lead}</p>}
+        {lead && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+            <p className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">
+              <Award className="h-4 w-4" /> Thành tích nổi bật
+            </p>
+            <ul className="space-y-2">
+              {lead
+                .split("\n")
+                .map((line) => line.replace(/^[\s\-•*–]+/, "").trim())
+                .filter(Boolean)
+                .map((line, index) => (
+                  <li key={index} className="flex gap-2.5 text-[15px] font-semibold leading-7 text-slate-800 dark:text-slate-200">
+                    <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#ed1c24]" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        )}
         {member.testimonial && (
           <blockquote className="border-l-4 border-[#ed1c24] bg-red-50/60 px-5 py-4 text-[15px] font-semibold leading-7 text-slate-800 dark:bg-red-950/20 dark:text-slate-200">
             {member.testimonial}
