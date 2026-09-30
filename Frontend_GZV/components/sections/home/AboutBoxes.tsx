@@ -79,10 +79,6 @@ export default function AboutBoxes({
     }
   }, [propTitle, propSubtitle])
 
-  if (dbProps?.is_visible === false && !propTitle) {
-    return null
-  }
-
   const title = propTitle || dbProps?.title || "VỀ CHÚNG TÔI"
   const subtitle = propSubtitle || dbProps?.subtitle || "Đội ngũ nhân sự, chuyên gia và phòng ban nòng cốt tạo nên giá trị cho GZV."
 
@@ -120,6 +116,10 @@ export default function AboutBoxes({
     })
     return rows.slice(0, Number(limitPerDepartment) || 6)
   }, [active, members, limitPerDepartment])
+
+  if (dbProps?.is_visible === false && !propTitle) {
+    return null
+  }
 
   return (
     <section className="bg-slate-50 py-16 dark:bg-slate-900 lg:py-24">

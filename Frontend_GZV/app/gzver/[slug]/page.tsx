@@ -15,6 +15,10 @@ import {
   Facebook,
   Github,
   Globe2,
+  Instagram,
+  MessageCircle,
+  Music2,
+  Twitter,
   GraduationCap,
   Linkedin,
   Mail,
@@ -52,7 +56,12 @@ const socialIcons: Record<string, any> = {
   email: Mail,
   mail: Mail,
   phone: Phone,
-  zalo: Phone,
+  zalo: MessageCircle,
+  messenger: MessageCircle,
+  instagram: Instagram,
+  tiktok: Music2,
+  x: Twitter,
+  twitter: Twitter,
   youtube: Youtube,
 }
 
@@ -105,7 +114,8 @@ function SocialButton({ link }: { link: SocialLink }) {
       target="_blank"
       rel="noreferrer"
       aria-label={link.label || platform}
-      className="inline-flex h-10 w-10 items-center justify-center border border-slate-200 bg-slate-50 text-slate-700 transition hover:border-[#ed1c24] hover:bg-[#ed1c24] hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
+      title={link.label || platform}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-[#ed1c24] hover:bg-[#ed1c24] hover:text-white dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
     >
       <Icon className="h-4 w-4" />
     </a>
@@ -165,116 +175,139 @@ function OnlineCredentialCard({ card }: { card: OnlineCard }) {
   )
 }
 
-function ProfileInfoCard({ icon: Icon, title, text }: { icon: any; title: string; text?: string }) {
+const isPeriodLine = (line: string) => /^(\d{1,2}\/)?\d{4}\b|^(nay|hiện tại|present)\b/i.test(line)
+
+// Tách khối văn bản thành các mốc timeline: mỗi đoạn cách nhau bởi dòng trống, dòng đầu là tiêu đề.
+// Đoạn bắt đầu bằng mốc thời gian (vd "2025 – Present") được gộp vào chức danh phía trên.
+const toTimeline = (text?: string | null) =>
+  String(text || "")
+    .split(/\n\s*\n/)
+    .map((block) => block.split("\n").map((line) => line.trim()).filter(Boolean))
+    .filter((lines) => lines.length)
+    .reduce<Array<{ heading: string; details: string[] }>>((items, lines) => {
+      const previous = items[items.length - 1]
+      if (previous && isPeriodLine(lines[0])) previous.details.push(...lines)
+      else items.push({ heading: lines[0], details: lines.slice(1) })
+      return items
+    }, [])
+
+const getListItems = (member: gzver, section: ProfileSectionData) =>
+  section.source === "skills" ? toList(member.skills) : section.source === "achievements_list" ? toList(member.achievements_list) : toList(section.items)
+
+// Mục có nội dung thật mới được hiện thành tab — người ít thông tin sẽ có ít tab, không còn ô "đang cập nhật"
+const sectionHasContent = (member: gzver, section: ProfileSectionData) => {
+  if (section.type === "overview") {
+    // headline đã hiện ngay dưới tên nên không tính vào tab Tổng quan
+    return Boolean(member.achievement_summary || member.testimonial || member.mentoring_content || toList(member.skills).length)
+  }
+  if (section.type === "list") return getListItems(member, section).length > 0
+  if (section.type === "background") {
+    return Boolean(member.background?.experience?.trim() || member.background?.education?.trim() || member.background?.previous_role?.trim())
+  }
+  return Boolean(section.content?.trim() || getTextBySource(member, section.source).trim())
+}
+
+function Timeline({ icon: Icon, title, text }: { icon: any; title: string; text?: string | null }) {
+  const items = toTimeline(text)
+  if (!items.length) return null
   return (
-    <div className="border border-slate-200 bg-white p-6 shadow-xs transition duration-300 hover:border-[#ed1c24] hover:shadow-md dark:border-white/10 dark:bg-[#121212]">
-      <h3 className="mb-4 flex items-center gap-3 text-lg font-black uppercase text-slate-900 dark:text-white">
-        <div className="flex h-9 w-9 items-center justify-center bg-red-50 text-[#ed1c24] dark:bg-red-950/30">
-          <Icon className="h-4.5 w-4.5" />
-        </div>
-        {title}
+    <div className="min-w-0">
+      <h3 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+        <Icon className="h-4 w-4 text-[#ed1c24]" /> {title}
       </h3>
-      <p className="whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{text || "Đang cập nhật."}</p>
+      <ol className="relative space-y-5 border-l-2 border-slate-200 pl-5 dark:border-white/10">
+        {items.map((item, index) => (
+          <li key={`${item.heading}-${index}`} className="relative">
+            <span className="absolute -left-[27px] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-[#ed1c24] shadow dark:border-[#0b0b0b]" />
+            <p className="text-sm font-black leading-snug text-slate-900 dark:text-white">{item.heading}</p>
+            {item.details.map((line, lineIndex) => (
+              <p
+                key={lineIndex}
+                className={
+                  isPeriodLine(line) && line.length < 40
+                    ? "mt-1 text-[11px] font-black uppercase tracking-wider text-[#ed1c24]"
+                    : "mt-1 text-sm font-medium leading-6 text-slate-600 dark:text-slate-300"
+                }
+              >
+                {line}
+              </p>
+            ))}
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }
 
-function ProfileSection({ member, section, index }: { member: gzver; section: ProfileSectionData; index: number }) {
-  const title = section.label || "Nội dung"
-  const sourceText = getTextBySource(member, section.source)
-  const listSource = section.source === "skills" ? member.skills : section.source === "achievements_list" ? member.achievements_list : toList(section.items)
-
+function ProfileSection({ member, section }: { member: gzver; section: ProfileSectionData }) {
   if (section.type === "overview") {
+    const skills = toList(member.skills)
+    const lead = member.achievement_summary
     return (
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="border border-slate-200 bg-white p-7 shadow-xs lg:col-span-2 dark:border-white/10 dark:bg-[#121212]">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tổng quan</span>
-          </div>
-          <h2 className="text-2xl font-black uppercase leading-snug text-slate-900 dark:text-white">{member.headline || member.achievement_summary || member.position}</h2>
-          {member.testimonial && (
-            <div className="relative mt-6 overflow-hidden border-l-4 border-[#ed1c24] bg-red-50/60 p-6 text-base font-semibold leading-8 text-slate-800 dark:bg-red-950/20 dark:text-slate-200">
-              <span className="absolute -right-4 -bottom-4 text-7xl font-serif font-black text-red-600/10 selection:bg-transparent">“</span>
-              <p className="relative z-10">{member.testimonial}</p>
-            </div>
-          )}
-          {member.mentoring_content && <p className="mt-6 whitespace-pre-line text-sm font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
-        </div>
-
-        <div className="border border-slate-200 bg-white p-7 shadow-xs flex flex-col justify-between dark:border-white/10 dark:bg-[#121212]">
+      <div className="space-y-6">
+        {lead && <p className="text-xl font-black leading-snug text-slate-900 dark:text-white md:text-2xl">{lead}</p>}
+        {member.testimonial && (
+          <blockquote className="border-l-4 border-[#ed1c24] bg-red-50/60 px-5 py-4 text-[15px] font-semibold leading-7 text-slate-800 dark:bg-red-950/20 dark:text-slate-200">
+            {member.testimonial}
+          </blockquote>
+        )}
+        {member.mentoring_content && <p className="whitespace-pre-line text-[15px] font-medium leading-7 text-slate-600 dark:text-slate-300">{member.mentoring_content}</p>}
+        {skills.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-2 w-2 bg-[#ed1c24]" />
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Kỹ năng chuyên môn</p>
-            </div>
+            <p className="mb-3 text-xs font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kỹ năng</p>
             <div className="flex flex-wrap gap-2">
-              {(member.skills || []).map((skill) => (
-                <span key={skill} className="border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+              {skills.map((skill) => (
+                <span key={skill} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
                   {skill}
                 </span>
               ))}
-              {!(member.skills || []).length && <p className="text-xs font-medium text-slate-400">Đang cập nhật kỹ năng.</p>}
             </div>
           </div>
-        </div>
-      </section>
+        )}
+      </div>
     )
   }
 
   if (section.type === "list") {
+    const items = getListItems(member, section)
     return (
-      <section className="border border-slate-200 bg-white p-7 shadow-xs dark:border-white/10 dark:bg-[#121212]">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center bg-red-50 text-[#ed1c24] dark:bg-red-950/30">
-              <Award className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
-              <h2 className="text-2xl font-black uppercase text-slate-900 dark:text-white">{title}</h2>
-            </div>
-          </div>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {listSource.map((item, itemIndex) => (
-            <div key={`${item}-${itemIndex}`} className="group border border-slate-200 bg-slate-50/50 p-5 transition duration-300 hover:border-[#ed1c24] hover:bg-white dark:border-white/5 dark:bg-[#181818]">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">{String(itemIndex + 1).padStart(2, "0")}</span>
-                <span className="h-1.5 w-1.5 rounded-full bg-[#ed1c24] opacity-0 group-hover:opacity-100 transition" />
-              </div>
-              <p className="mt-3 text-sm font-bold leading-6 text-slate-800 dark:text-slate-200">{item}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ol className="grid gap-3 md:grid-cols-2">
+        {items.map((item, index) => (
+          <li key={`${item}-${index}`} className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#ed1c24] text-[11px] font-black text-white">{index + 1}</span>
+            <p className="text-sm font-semibold leading-6 text-slate-800 dark:text-slate-200">{item}</p>
+          </li>
+        ))}
+      </ol>
     )
   }
 
   if (section.type === "background") {
+    const blocks = [
+      { icon: Briefcase, title: "Kinh nghiệm", text: member.background?.experience },
+      { icon: GraduationCap, title: "Học vấn", text: member.background?.education },
+      { icon: TrendingUp, title: "Vai trò trước đây", text: member.background?.previous_role },
+    ].filter((block) => block.text?.trim())
     return (
-      <section className="grid gap-5 md:grid-cols-2">
-        <ProfileInfoCard icon={Briefcase} title="Kinh nghiệm" text={member.background?.experience} />
-        <ProfileInfoCard icon={GraduationCap} title="Học vấn" text={member.background?.education} />
-        {member.background?.previous_role && <ProfileInfoCard icon={TrendingUp} title="Vai trò trước đây" text={member.background.previous_role} />}
-      </section>
+      <div className={`grid gap-8 ${blocks.length > 1 ? "md:grid-cols-2" : ""}`}>
+        {blocks.map((block) => (
+          <Timeline key={block.title} icon={block.icon} title={block.title} text={block.text} />
+        ))}
+      </div>
     )
   }
 
   return (
-    <section className="border border-slate-200 bg-white p-7 shadow-xs dark:border-white/10 dark:bg-[#121212]">
-      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")}</p>
-      <h2 className="mb-5 text-2xl font-black uppercase text-slate-900 dark:text-white">{title}</h2>
-      <div className="whitespace-pre-line text-base font-medium leading-8 text-slate-700 dark:text-slate-300">
-        {section.content || sourceText || "Nội dung section này đang được cập nhật."}
-      </div>
-    </section>
+    <div className="whitespace-pre-line text-[15px] font-medium leading-8 text-slate-700 dark:text-slate-300">
+      {section.content || getTextBySource(member, section.source)}
+    </div>
   )
 }
 
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
   const [member, setMember] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("")
 
   useEffect(() => {
     let active = true
@@ -296,9 +329,11 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   }, [params.slug])
 
   const sections = useMemo(() => {
-    const customSections = sortVisible<ProfileSectionData>(member?.profile_tabs)
-    return customSections.length ? customSections : defaultSections
+    if (!member) return []
+    const customSections = sortVisible<ProfileSectionData>(member.profile_tabs)
+    return (customSections.length ? customSections : defaultSections).filter((section) => sectionHasContent(member, section))
   }, [member])
+  const currentSection = sections.find((section, index) => (section.key || `section-${index}`) === activeTab) || sections[0]
   const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
   const socials = useMemo(() => sortVisible<SocialLink>(member?.social_links), [member])
   const onlineCards = useMemo(() => sortVisible<OnlineCard>(member?.online_cards), [member])
@@ -390,7 +425,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
 
         {/* Overlapping Main Container */}
         <div className="container relative z-10 mx-auto min-w-0 max-w-5xl -mt-20 px-4 pb-10 md:-mt-24">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-hidden border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-clip border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
             {/* Header Banner Inside Card */}
             <div className="border-b border-t-4 border-slate-200 border-t-[#ed1c24] p-5 dark:border-white/10 md:p-7">
               <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -412,8 +447,10 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
             <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
               {/* Sidebar Left */}
               <aside className="border-b border-slate-200 bg-slate-50/70 p-5 text-slate-900 sm:p-6 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
+                {/* Điện thoại: avatar nhỏ bên trái, thông tin bên phải — máy tính: xếp dọc */}
+                <div className="flex items-start gap-4 lg:block">
                 {/* Avatar Box — cùng tỉ lệ khung ảnh 4/4.5 và bo góc như thẻ ở trang danh sách GZVers để đồng bộ hình ảnh */}
-                <div className="relative mb-5 aspect-[4/4.5] w-36 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-44 dark:border-[#0d0d0d] dark:bg-[#141414]">
+                <div className="relative aspect-[4/4.5] w-28 shrink-0 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-36 lg:mb-5 lg:w-44 dark:border-[#0d0d0d] dark:bg-[#141414]">
                   {member.avatar_url ? (
                     <Image
                       src={member.avatar_url}
@@ -434,48 +471,54 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <h2 className="text-xl font-black uppercase leading-tight text-slate-900 dark:text-white">{member.position}</h2>
-                  {member.company && <p className="text-xs font-bold text-[#ed1c24]">@{member.company}</p>}
-                </div>
-
-                {/* Badges List */}
-                {badges.length > 0 && (
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
-                  </div>
-                )}
-
-                {/* Contact Info Items */}
-                <div className="mt-5 space-y-2 border-t border-slate-200 pt-4 text-xs font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
-                  {member.location && (
-                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
-                      <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                      <span className="truncate">{member.location}</span>
-                    </div>
-                  )}
-                  {member.email && (
-                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
-                      <Mail className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                      <span className="truncate">{member.email}</span>
-                    </div>
-                  )}
-                  {member.phone && (
-                    <div className="flex items-center gap-2.5 rounded-none bg-white p-2.5 border border-slate-200/80 dark:bg-white/[0.03] dark:border-white/5">
-                      <Phone className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                      <span className="truncate">{member.phone}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Social Channels */}
-                <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
-                  <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Kênh kết nối</p>
-                  <div className="flex flex-wrap gap-2">
+                <div className="min-w-0 flex-1">
+                {/* Kênh kết nối ngay dưới avatar */}
+                {(socials.length > 0 || member.website_url) && (
+                  <div className="mb-4 flex flex-wrap gap-2 lg:mb-5">
                     {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
                     {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
                   </div>
+                )}
+
+                <div className="space-y-1">
+                  <h2 className="text-base font-black uppercase leading-tight text-slate-900 sm:text-lg dark:text-white">{member.position}</h2>
+                  {member.company && <p className="text-xs font-bold text-[#ed1c24]">@{member.company}</p>}
                 </div>
+
+                {badges.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
+                  </div>
+                )}
+                </div>
+                </div>
+
+                {(member.location || member.email || member.phone) && (
+                  <ul className="mt-5 space-y-2.5 border-t border-slate-200 pt-4 text-[13px] font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
+                    {member.location && (
+                      <li className="flex items-center gap-2.5">
+                        <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                        <span className="truncate">{member.location}</span>
+                      </li>
+                    )}
+                    {member.email && (
+                      <li>
+                        <a href={`mailto:${member.email}`} className="flex items-center gap-2.5 hover:text-[#ed1c24]">
+                          <Mail className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                          <span className="truncate">{member.email}</span>
+                        </a>
+                      </li>
+                    )}
+                    {member.phone && (
+                      <li>
+                        <a href={`tel:${member.phone.replace(/\s+/g, "")}`} className="flex items-center gap-2.5 hover:text-[#ed1c24]">
+                          <Phone className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                          <span className="truncate">{member.phone}</span>
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                )}
 
                 {getMemberCard(member).enabled !== false && (
                   <a href="#card-visit" className="mt-5 flex items-center justify-between border border-[#ed1c24] bg-red-50 px-3 py-3 text-xs font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
@@ -485,19 +528,52 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 )}
               </aside>
 
-              {/* Main Content Area */}
-              <div className="bg-white p-5 sm:p-6 dark:bg-[#0b0b0b]">
-                <div className="space-y-5">
-                  <div className="border-l-4 border-[#ed1c24] bg-slate-50 px-4 py-3 dark:bg-white/[0.04]">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
-                    <p className="mt-1 text-sm font-medium text-slate-600 dark:text-slate-300">Hành trình, năng lực và những đóng góp nổi bật.</p>
+              {/* Main Content Area: tab gọn, chỉ hiện mục có nội dung */}
+              <div className="min-w-0 bg-white p-5 sm:p-6 dark:bg-[#0b0b0b]">
+                {sections.length > 1 && (
+                  <div className="sticky top-20 z-20 -mx-5 mb-6 border-b border-slate-200 bg-white/95 px-5 pb-3 pt-1 backdrop-blur sm:-mx-6 sm:px-6 dark:border-white/10 dark:bg-[#0b0b0b]/95">
+                    <div role="tablist" className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                      {sections.map((section, index) => {
+                        const key = section.key || `section-${index}`
+                        const selected = currentSection === section
+                        const count = section.type === "list" ? getListItems(member, section).length : 0
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            role="tab"
+                            aria-selected={selected}
+                            onClick={() => setActiveTab(key)}
+                            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider transition ${
+                              selected
+                                ? "bg-[#ed1c24] text-white shadow-sm"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
+                            }`}
+                          >
+                            {section.label || `Mục ${index + 1}`}
+                            {count > 0 && (
+                              <span className={`rounded-full px-1.5 text-[10px] ${selected ? "bg-white/25" : "bg-white text-slate-500 dark:bg-white/10"}`}>{count}</span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
-                  {sections.map((section, index) => (
-                    <motion.div key={section.key || `section-${index}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: index * 0.04 }}>
-                      <ProfileSection member={member} section={section} index={index} />
-                    </motion.div>
-                  ))}
-                </div>
+                )}
+
+                {currentSection ? (
+                  <motion.div key={currentSection.key || currentSection.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+                    {sections.length === 1 && (
+                      <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">{currentSection.label}</p>
+                    )}
+                    <ProfileSection member={member} section={currentSection} />
+                  </motion.div>
+                ) : (
+                  <div className="flex min-h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 p-8 text-center dark:border-white/10">
+                    <UserRound className="mb-3 h-8 w-8 text-slate-300" />
+                    <p className="text-sm font-bold text-slate-500">Hồ sơ đang được cập nhật.</p>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
