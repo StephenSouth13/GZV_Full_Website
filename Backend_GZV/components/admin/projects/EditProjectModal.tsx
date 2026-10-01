@@ -127,10 +127,10 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[96vh] overflow-y-auto p-0 bg-white border border-slate-200 shadow-2xl rounded-none">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-7xl h-[calc(100dvh-1.5rem)] flex flex-col p-0 bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden">
         
         {/* HEADER */}
-        <DialogHeader className="p-8 bg-slate-900 text-white rounded-none sticky top-0 z-50">
+        <DialogHeader className="shrink-0 p-5 md:p-6 bg-slate-900 text-white rounded-none border-b border-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-[#ed1c24] rounded-none shadow-xs text-white"><Edit size={22} /></div>
@@ -143,7 +143,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
+        <div className="flex-1 overflow-y-auto min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-0">
           {/* CỘT TRÁI: CONTENT */}
           <div className="lg:col-span-8 p-8 md:p-10 space-y-8 bg-white border-r border-slate-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -342,7 +342,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           </div>
         </div>
 
-        <DialogFooter className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-none">
+        <DialogFooter className="shrink-0 sticky bottom-0 z-50 p-4 md:p-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-none shadow-md">
           <Button variant="ghost" onClick={onClose} className="font-black uppercase text-xs text-slate-500 rounded-none">Hủy bỏ</Button>
           <Button disabled={loading || uploading} className="h-11 px-8 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase tracking-wider text-xs shadow-xs" onClick={handleUpdate}>
             {loading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} Cập nhật bài viết

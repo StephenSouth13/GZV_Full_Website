@@ -113,39 +113,13 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] lg:max-w-7xl max-h-[96vh] overflow-y-auto p-0 bg-white border border-slate-200 shadow-2xl rounded-none">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-7xl h-[calc(100dvh-1.5rem)] flex flex-col p-0 bg-white border border-slate-200 shadow-2xl rounded-none overflow-hidden">
 
         {/* HEADER MODAL */}
-        <DialogHeader className="p-8 bg-slate-900 text-white flex flex-row items-center justify-between sticky top-0 z-50 rounded-none">
+        <DialogHeader className="shrink-0 p-5 md:p-6 bg-slate-900 text-white flex flex-row items-center justify-between rounded-none border-b border-slate-800">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#ed1c24] text-white rounded-none shadow-xs">
               <FolderPlus size={24} />
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Mô tả ngắn</Label>
-              <Textarea
-                className="min-h-28 resize-none rounded-none border-slate-200 text-sm leading-relaxed"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Tóm tắt bài toán, giải pháp và giá trị nổi bật của dự án..."
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Hashtags</Label>
-                <Input className="h-11 rounded-none border-slate-200 text-xs" value={formData.hashtags} onChange={(e) => setFormData({ ...formData, hashtags: e.target.value })} placeholder="chuyển đổi số, đào tạo, AI" />
-              </div>
-              <div className="space-y-3">
-                <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest">Công nghệ & nền tảng</Label>
-                <Input
-                  className="h-11 rounded-none border-slate-200 text-xs"
-                  value={formData.tech_stack.join(', ')}
-                  onChange={(e) => setFormData({ ...formData, tech_stack: e.target.value.split(',').map(item => item.trim()).filter(Boolean) })}
-                  placeholder="Next.js, Supabase, AI"
-                />
-              </div>
             </div>
             <div>
               <DialogTitle className="text-xl font-black uppercase tracking-wider text-white">Khởi tạo Dự án & Portfolio mới</DialogTitle>
@@ -154,7 +128,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
           </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
+        <div className="flex-1 overflow-y-auto min-h-0 grid grid-cols-1 md:grid-cols-12 gap-0">
           {/* CỘT TRÁI: FORM NỘI DUNG CHÍNH */}
           <div className="md:col-span-8 p-8 md:p-10 space-y-8 bg-white border-r border-slate-200">
 
@@ -330,7 +304,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
           </div>
         </div>
 
-        <DialogFooter className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-none">
+        <DialogFooter className="shrink-0 sticky bottom-0 z-50 p-4 md:p-5 bg-slate-50 border-t border-slate-200 flex justify-between items-center rounded-none shadow-md">
           <Button variant="ghost" onClick={onClose} disabled={loading} className="font-black uppercase text-xs text-slate-500 rounded-none">Huỷ bỏ</Button>
           <Button disabled={loading || uploading} className="h-11 px-8 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase tracking-wider text-xs shadow-xs" onClick={handleSave}>
             {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />} Xuất bản ngay

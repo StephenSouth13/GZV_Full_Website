@@ -206,12 +206,12 @@ export function PartnerModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 overflow-hidden select-none">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-3xl h-[calc(100dvh-1.5rem)] flex flex-col rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 overflow-hidden">
         {/* Brand Accent Top Line */}
-        <div className="h-1 w-full bg-[#ed1c24]" />
+        <div className="h-1 w-full bg-[#ed1c24] shrink-0" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-white/10">
+        <div className="shrink-0 flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-white/10">
           <div className="flex items-center gap-3.5">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-[#ed1c24] text-white shadow-xs">
               <Handshake className="h-5 w-5" />
@@ -231,7 +231,7 @@ export function PartnerModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-6">
+        <div className="flex-1 overflow-y-auto min-h-0 p-6">
           <div className="grid gap-6 md:grid-cols-[280px_1fr]">
             {/* Left Column: Logo preview & upload */}
             <div className="space-y-3">
@@ -497,7 +497,7 @@ export function PartnerModal({
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-white/10 dark:bg-slate-950/50">
+        <div className="shrink-0 sticky bottom-0 z-50 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-white/10 dark:bg-slate-950">
           <Button
             type="button"
             variant="outline"
