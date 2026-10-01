@@ -144,6 +144,8 @@ function resolveCard(member: gzver, card: GzverMemberCard, settings: GzverCardSe
   }
 
   const personalLinks = sortLinks(card.links)
+  const leadershipText = `${member.department_name || ""} ${member.gzver_departments?.name || ""} ${member.role_level || ""}`.toLowerCase()
+  const isExecutive = Boolean(member.is_director) || /ban điều hành|điều hành|executive|director|ceo/.test(leadershipText)
   if (member.website_url && !personalLinks.some((link) => link.url === member.website_url)) {
     personalLinks.unshift({ label: "Website cá nhân", url: member.website_url, icon: "website" })
   }
@@ -153,8 +155,8 @@ function resolveCard(member: gzver, card: GzverMemberCard, settings: GzverCardSe
     isDemo,
     companyLine: pick(settings.company_line, DEFAULT_SETTINGS.company_line),
     topTagline: pick(settings.top_tagline, DEFAULT_SETTINGS.top_tagline),
-    cardTitle: pick(card.card_title, settings.card_title, DEFAULT_SETTINGS.card_title),
-    cardSubtitle: pick(card.card_subtitle, settings.card_subtitle, DEFAULT_SETTINGS.card_subtitle),
+    cardTitle: pick(card.card_title, isExecutive ? "THẺ CHỨC DANH" : settings.card_title, DEFAULT_SETTINGS.card_title),
+    cardSubtitle: pick(card.card_subtitle, isExecutive ? "BAN ĐIỀU HÀNH" : settings.card_subtitle, DEFAULT_SETTINGS.card_subtitle),
     tagline: pick(card.tagline, settings.tagline, DEFAULT_SETTINGS.tagline),
     email: pick(card.email, settings.email, DEFAULT_SETTINGS.email),
     hotline: pick(card.hotline, settings.hotline, DEFAULT_SETTINGS.hotline),
