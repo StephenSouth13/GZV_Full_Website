@@ -6,10 +6,29 @@ import { motion } from "framer-motion"
 import { Clock, ArrowUpRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { api, supabase } from "@/lib/api-supabase"
 import { summarize } from "@/lib/utils"
 
 const summaryOf = (article: any, max = 180) => summarize([article?.excerpt, article?.content], max)
+
+function AuthorStack({ authors }: { authors?: any[] }) {
+  const list = Array.isArray(authors) ? authors : []
+  if (!list.length) return null
+  const visible = list.slice(0, 2)
+  const extra = Math.max(0, list.length - visible.length)
+  return <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
+    <div className="flex -space-x-2">
+      {visible.map((author: any, index: number) => <Avatar key={`${author.id || author.full_name}-${index}`} className="h-7 w-7 border-2 border-white dark:border-slate-900"><AvatarImage src={author.avatar_url || author.avatar} /><AvatarFallback className="text-[9px]">{(author.full_name || author.name || "G").slice(0, 1)}</AvatarFallback></Avatar>)}
+      <Popover>
+        <PopoverTrigger asChild><button type="button" className="h-7 w-7 rounded-full border-2 border-white bg-slate-950 text-[9px] font-black text-white dark:border-slate-900">{extra ? `+${extra}` : "..."}</button></PopoverTrigger>
+        <PopoverContent className="w-64 rounded-none p-3"><p className="mb-2 text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Tác giả / đội ngũ</p>{list.map((author: any, index: number) => <div key={`${author.id || author.full_name}-full-${index}`} className="flex items-center gap-2 py-1"><Avatar className="h-6 w-6"><AvatarImage src={author.avatar_url || author.avatar} /></Avatar><span className="text-xs font-bold">{author.full_name || author.name}</span></div>)}</PopoverContent>
+      </Popover>
+    </div>
+    <div><p className="max-w-[150px] truncate text-[10px] font-black uppercase text-slate-700 dark:text-slate-200">{list[0].full_name || list[0].name}</p>{list.length > 1 && <p className="text-[9px] font-bold uppercase text-slate-400">& {list.length - 1} tác giả khác</p>}</div>
+  </div>
+}
 
 export interface NewsGridProps {
   title?: string
@@ -66,13 +85,17 @@ export default function NewsGrid({
         const selectedIds: string[] = combined?.selected_article_ids || []
 
         if (selectedIds.length > 0 && blogPosts && blogPosts.length > 0) {
-          const sorted = selectedIds
+          const pinned = selectedIds
             .map((id) => blogPosts.find((a: any) => String(a.id) === String(id) || a.slug === id))
             .filter(Boolean)
-          setArticles(sorted.length > 0 ? sorted : blogPosts.slice(0, combined?.item_limit || 4))
+          const rest = blogPosts.filter((article: any) => !pinned.some((item: any) => item.id === article.id))
+          const limit = Number(combined?.item_limit || 4)
+          setArticles(pinned.length > 0 ? [...pinned, ...rest].slice(0, limit) : blogPosts.slice(0, limit))
         } else if (blogPosts && blogPosts.length > 0) {
           const limit = combined?.item_limit || 4
-          setArticles(blogPosts.slice(0, Number(limit) || 4))
+          const featuredPosts = blogPosts.filter((article: any) => article.featured)
+          const ordered = featuredPosts.length ? [...featuredPosts, ...blogPosts.filter((article: any) => !featuredPosts.includes(article))] : blogPosts
+          setArticles(ordered.slice(0, Number(limit) || 4))
         } else {
           // Fallback direct query on allblogposts
           const { data } = await supabase
@@ -240,6 +263,8 @@ export default function NewsGrid({
                       <p className="line-clamp-3 text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">{summaryOf(featured, 220)}</p>
                     )}
 
+                    <AuthorStack authors={featured.authors_details || featured.authors} />
+
                     <div className="pt-2 flex items-center text-xs font-black uppercase text-[#ed1c24] tracking-wider">
                       <span>ĐỌC BÀI</span>
                       <ArrowUpRight className="ml-1 h-4 w-4" />
@@ -297,6 +322,8 @@ export default function NewsGrid({
                       {summaryOf(article, 120) && (
                         <p className="mt-1.5 hidden text-xs font-medium leading-relaxed text-slate-500 line-clamp-2 dark:text-slate-400 sm:block">{summaryOf(article, 120)}</p>
                       )}
+
+                      <AuthorStack authors={article.authors_details || article.authors} />
 
                       {(article.published_at || article.created_at || article.publish_date) && (
                         <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1.5 pt-2">

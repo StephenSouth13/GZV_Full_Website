@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { supabase } from "@/lib/api-supabase"
 import { summarize } from "@/lib/utils"
+import ProjectCard from "@/components/ProjectCard"
 
 export interface ProjectsGridProps {
   title?: string
@@ -43,10 +44,11 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConf
     const fetchData = async (showLoading = true) => {
       try {
         if (showLoading) setLoading(true)
-        const [homeRes, blockRes, projectsRes] = await Promise.all([
+        const [homeRes, blockRes, projectsRes, authorsRes] = await Promise.all([
           supabase.from("site_home_sections").select("*").eq("section_key", "projects").maybeSingle(),
           supabase.from("site_page_blocks").select("props").eq("component_type", "projects_grid").limit(1).maybeSingle(),
           supabase.from("projects").select("*").order("order_index", { ascending: true }).order("created_at", { ascending: false }).limit(Number(limit) || 12),
+          supabase.from("authors").select("id, full_name, avatar_url, slug, title, position"),
         ])
 
         if (!active) return
@@ -57,7 +59,25 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConf
         setDbProps(combined)
 
         if (projectsRes.data) {
-          setItems(projectsRes.data)
+          const authors = authorsRes.data || []
+          const mapped = projectsRes.data.map((project: any) => ({
+            ...project,
+            project_authors: (project.author_ids || [])
+              .map((id: string) => authors.find((author: any) => author.id === id))
+              .filter(Boolean)
+              .map((author: any) => ({
+                name: author.full_name,
+                avatar: author.avatar_url,
+                profile_link: `/mentors/${author.slug}`,
+                title: author.title || author.position,
+              })),
+          }))
+          const selectedIds: string[] = combined?.selected_project_ids || []
+          const pinned = selectedIds.length
+            ? selectedIds.map((id) => mapped.find((project: any) => String(project.id) === String(id) || project.slug === id)).filter(Boolean)
+            : mapped.filter((project: any) => project.featured)
+          const rest = mapped.filter((project: any) => !pinned.some((item: any) => item.id === project.id))
+          setItems([...(pinned.length ? [...pinned, ...rest] : rest)].slice(0, Number(limit) || 12))
         }
       } catch (err: any) {
         console.error("Lỗi tải dữ liệu dự án:", err?.message || err)
@@ -152,7 +172,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConf
         {(showCategories || showSearch) && (
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {showCategories ? (
-              <div className="flex flex-wrap items-center justify-start gap-2">
+              <div className={`flex items-center justify-start gap-2 ${dbProps?.category_layout === "normal" ? "flex-wrap" : "flex-nowrap overflow-x-auto pb-1"}`}>
                 {categories.map((cat) => {
                   const isActive = selectedCategory === cat.id
                   return (
@@ -196,7 +216,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConf
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-[#ed1c24]" />
         ) : filteredItems.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredItems.map((item, index) => <ProjectCardItem key={item.id || item.slug || index} item={item} />)}
+            {filteredItems.map((item, index) => <ProjectCard key={item.id || item.slug || index} project={item} />)}
           </div>
         ) : (
           <div className="py-12 text-center text-sm font-semibold text-slate-500 dark:text-slate-400">

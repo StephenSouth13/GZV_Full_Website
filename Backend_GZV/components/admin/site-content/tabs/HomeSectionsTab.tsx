@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { DndContext, closestCenter, type SensorDescriptor, type SensorOptions } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { RotateCcw, Save, Plus, Trash2, Video, Image as ImageIcon, Move, ZoomIn, Filter, Link2, Palette, Code2 } from "lucide-react"
@@ -12,6 +12,7 @@ import { SortableHomeSectionRow } from "../helpers/SortableRows"
 import { Field, SwitchLine } from "../helpers/BasicHelpers"
 import { RawJsonEditor } from "../helpers/RawJsonEditor"
 import { HomePartnersEditor } from "../helpers/HomePartnersEditor"
+import { supabase } from "@/lib/supabase"
 
 export function HomeSectionsTab({
   homeSections,
@@ -47,6 +48,22 @@ export function HomeSectionsTab({
   saving: boolean
 }) {
   const [showAdvancedJson, setShowAdvancedJson] = useState(false)
+  const [pinOptions, setPinOptions] = useState<Array<{ id: string; title: string; image?: string; slug?: string }>>([])
+
+  useEffect(() => {
+    let active = true
+    const table = selectedSectionKey === "projects" ? "projects" : selectedSectionKey === "news" ? "articles" : null
+    if (!table) {
+      setPinOptions([])
+      return () => { active = false }
+    }
+    const load = async () => {
+      const { data } = await supabase.from(table).select("id, title, slug, image, thumbnail_url").order("created_at", { ascending: false }).limit(100)
+      if (active) setPinOptions((data || []).map((item: any) => ({ ...item, image: item.thumbnail_url || item.image })))
+    }
+    load()
+    return () => { active = false }
+  }, [selectedSectionKey])
 
   const updateSection = (patch: Partial<HomeSection>) => {
     setHomeSections((items) => items.map((item) => item.section_key === selectedSectionKey ? { ...item, ...patch } : item))
@@ -54,6 +71,12 @@ export function HomeSectionsTab({
 
   const updateSectionSettings = (patch: Record<string, any>) => {
     setHomeSections((items) => items.map((item) => item.section_key === selectedSectionKey ? { ...item, settings: { ...(item.settings || {}), ...patch } } : item))
+  }
+
+  const togglePinned = (id: string) => {
+    const key = selectedSectionKey === "projects" ? "selected_project_ids" : "selected_article_ids"
+    const current = Array.isArray(selectedSection?.settings?.[key]) ? selectedSection.settings[key] : []
+    updateSectionSettings({ [key]: current.includes(id) ? current.filter((value: string) => value !== id) : [...current, id] })
   }
 
   return (
@@ -470,6 +493,67 @@ export function HomeSectionsTab({
                       className="rounded-none text-xs w-full sm:w-48"
                     />
                   </Field>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Bố cục danh mục">
+                      <select
+                        value={selectedSection.settings?.category_layout || "compact"}
+                        onChange={(e) => updateSectionSettings({ category_layout: e.target.value })}
+                        className="h-9 w-full border border-slate-200 bg-white px-3 text-xs font-bold dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                      >
+                        <option value="compact">Gọn một hàng, có thể kéo ngang</option>
+                        <option value="normal">Hiện đầy đủ nhiều hàng</option>
+                      </select>
+                    </Field>
+                  </div>
+
+                  <div className="border-t border-slate-200 pt-4 dark:border-white/10">
+                    <p className="mb-2 text-xs font-black uppercase text-slate-900 dark:text-white">Ghim dự án lên trang chủ</p>
+                    <p className="mb-3 text-[11px] text-slate-500">Thứ tự ghim quyết định thứ tự xuất hiện đầu tiên. Bỏ chọn toàn bộ để dùng dự án nổi bật.</p>
+                    <div className="grid max-h-64 gap-2 overflow-y-auto sm:grid-cols-2">
+                      {pinOptions.map((item) => {
+                        const selected = (selectedSection.settings?.selected_project_ids || []).includes(item.id)
+                        return <button type="button" key={item.id} onClick={() => togglePinned(item.id)} className={`flex items-center gap-2 border p-2 text-left transition-colors ${selected ? "border-[#ed1c24] bg-[#ed1c24]/5" : "border-slate-200 dark:border-white/10"}`}>
+                          <span className={`h-3 w-3 shrink-0 border ${selected ? "border-[#ed1c24] bg-[#ed1c24]" : "border-slate-300"}`} />
+                          <span className="truncate text-[11px] font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
+                        </button>
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedSection.section_key === "news" && (
+                <div className="space-y-4 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+                  <div className="flex items-center gap-2 border-b border-slate-200 pb-2 dark:border-white/10">
+                    <Filter className="h-4 w-4 text-[#ed1c24]" />
+                    <div>
+                      <p className="text-xs font-black uppercase text-slate-950 dark:text-white">Ghim tin tức & bố cục danh mục</p>
+                      <p className="text-[11px] text-slate-500">Ghim bài viết lên khu vực Tin tức trang chủ và giữ danh mục trên một hàng gọn.</p>
+                    </div>
+                  </div>
+                  <Field label="Bố cục danh mục">
+                    <select
+                      value={selectedSection.settings?.category_layout || "compact"}
+                      onChange={(e) => updateSectionSettings({ category_layout: e.target.value })}
+                      className="h-9 w-full max-w-sm border border-slate-200 bg-white px-3 text-xs font-bold dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                    >
+                      <option value="compact">Gọn một hàng, có thể kéo ngang</option>
+                      <option value="normal">Hiện đầy đủ nhiều hàng</option>
+                    </select>
+                  </Field>
+                  <div>
+                    <p className="mb-2 text-xs font-black uppercase text-slate-900 dark:text-white">Ghim bài viết lên trang chủ</p>
+                    <div className="grid max-h-64 gap-2 overflow-y-auto sm:grid-cols-2">
+                      {pinOptions.map((item) => {
+                        const selected = (selectedSection.settings?.selected_article_ids || []).includes(item.id)
+                        return <button type="button" key={item.id} onClick={() => togglePinned(item.id)} className={`flex items-center gap-2 border p-2 text-left transition-colors ${selected ? "border-[#ed1c24] bg-[#ed1c24]/5" : "border-slate-200 dark:border-white/10"}`}>
+                          <span className={`h-3 w-3 shrink-0 border ${selected ? "border-[#ed1c24] bg-[#ed1c24]" : "border-slate-300"}`} />
+                          <span className="truncate text-[11px] font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
+                        </button>
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -69,10 +69,14 @@ function publicMediaUrl(path?: string | null) {
 }
 
 function normalizePost(post: any) {
+  const authorOrder = new Map<string, number>((post.author_ids || []).map((id: string, index: number) => [id, index]))
+  const authors = [...(post.authors_details || [])]
+    .sort((a: any, b: any) => (authorOrder.get(a.id) ?? 9999) - (authorOrder.get(b.id) ?? 9999))
+    .map((author: any) => ({ ...author, avatar_url: publicMediaUrl(author.avatar_url) }))
   return {
     ...post,
     id: String(post.id),
-    authors: post.authors_details || [],
+    authors,
     publish_date: post.publish_date || post.created_at,
     read_time: post.read_time || "5 phút đọc",
     image: publicMediaUrl(post.thumbnail_url || post.image),

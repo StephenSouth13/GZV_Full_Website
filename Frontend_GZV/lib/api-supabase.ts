@@ -402,7 +402,9 @@
 
   const normalizeBlogPost = (post: any): BlogPost => {
     const authorOrder = new Map<string, number>((post.author_ids || []).map((id: string, index: number) => [id, index]))
-    const authors = [...(post.authors_details || [])].sort((a: any, b: any) => (authorOrder.get(a.id) ?? 9999) - (authorOrder.get(b.id) ?? 9999))
+    const authors = [...(post.authors_details || [])]
+      .sort((a: any, b: any) => (authorOrder.get(a.id) ?? 9999) - (authorOrder.get(b.id) ?? 9999))
+      .map((author: any) => ({ ...author, avatar_url: getPublicUrl(author.avatar_url) }))
     return ({
     ...post,
     id: String(post.id),

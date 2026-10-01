@@ -23,6 +23,49 @@ import PageBanner from "@/components/sections/common/PageBanner"
 import { toast } from "@/hooks/use-toast"
 import { useLanguage } from "@/components/language-provider"
 import { summarize } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+
+function AuthorStack({ authors }: { authors?: any[] }) {
+  const list = Array.isArray(authors) ? authors : []
+  if (!list.length) return null
+  const visible = list.slice(0, 2)
+  const extra = Math.max(0, list.length - visible.length)
+  return (
+    <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
+      <div className="flex -space-x-2">
+        {visible.map((author: any, index: number) => (
+          <Avatar key={`${author.id || author.full_name}-${index}`} className="h-7 w-7 border-2 border-white dark:border-slate-900 shadow-sm">
+            <AvatarImage src={author.avatar_url || author.avatar} alt={author.full_name || author.name} className="object-cover" />
+            <AvatarFallback className="text-[9px] font-black">{(author.full_name || author.name || "G").slice(0, 1)}</AvatarFallback>
+          </Avatar>
+        ))}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button type="button" className="h-7 w-7 rounded-full border-2 border-white bg-slate-950 text-[9px] font-black text-white shadow-sm dark:border-slate-900">
+              {extra ? `+${extra}` : "..."}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 rounded-none border-slate-200 bg-white p-3 dark:border-white/10 dark:bg-slate-900">
+            <p className="mb-2 border-b border-slate-100 pb-2 text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Tác giả / đội ngũ</p>
+            <div className="space-y-2">
+              {list.map((author: any, index: number) => (
+                <div key={`${author.id || author.full_name}-full-${index}`} className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6"><AvatarImage src={author.avatar_url || author.avatar} /><AvatarFallback className="text-[8px]">{(author.full_name || author.name || "G").slice(0, 1)}</AvatarFallback></Avatar>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{author.full_name || author.name}</span>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-[10px] font-black uppercase text-slate-700 dark:text-slate-200">{list[0].full_name || list[0].name}</p>
+        {list.length > 1 && <p className="text-[9px] font-bold uppercase tracking-wide text-slate-400">& {list.length - 1} tác giả khác</p>}
+      </div>
+    </div>
+  )
+}
 
 const copyByLanguage = {
   vi: {
@@ -88,6 +131,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [categoryLayout, setCategoryLayout] = useState<"compact" | "normal">("compact")
 
   const pageSize = 6
 
@@ -97,9 +141,13 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
     const fetchPosts = async (showLoading = true) => {
       try {
         if (showLoading) setIsLoading(true)
-        const data = await api.getBlogPosts()
+        const [data, section] = await Promise.all([
+          api.getBlogPosts(),
+          supabase.from("site_home_sections").select("settings").eq("section_key", "news").maybeSingle(),
+        ])
         if (active) {
           setArticles(data || [])
+          setCategoryLayout(section.data?.settings?.category_layout === "normal" ? "normal" : "compact")
         }
       } catch (err) {
         console.error("Error fetching blog posts:", err)
@@ -112,6 +160,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
       .channel("news-page:articles")
       .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => fetchPosts(false))
       .on("postgres_changes", { event: "*", schema: "public", table: "authors" }, () => fetchPosts(false))
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => fetchPosts(false))
       .subscribe()
 
     return () => {
@@ -260,7 +309,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
               </div>
 
               <div className="border-t border-slate-100 dark:border-white/10 pt-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className={`flex items-center gap-2 ${categoryLayout === "normal" ? "flex-wrap" : "flex-nowrap overflow-x-auto pb-1"}`}>
                   <span className="text-[10px] tracking-widest text-slate-500 font-black uppercase mr-1 flex items-center gap-1">
                     {copy.categories}
                   </span>
@@ -345,6 +394,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
                       <p className="text-left leading-relaxed text-slate-600 dark:text-slate-400 text-xs line-clamp-3 font-semibold">
                         {summarize([featured.excerpt, featured.content], 220)}
                       </p>
+                      <AuthorStack authors={(featured as any).authors_details || (featured as any).authors} />
                     </div>
 
                     <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
@@ -435,6 +485,8 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
                               </p>
                             )}
                           </div>
+
+                          <AuthorStack authors={(article as any).authors_details || (article as any).authors} />
 
                           <div className="flex items-center justify-between text-[9px] font-black tracking-widest text-slate-500 pt-3 border-t border-slate-200 dark:border-white/10 mt-3">
                             {article.publish_date ? (

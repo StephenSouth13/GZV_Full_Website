@@ -20,6 +20,7 @@ import {
   PenTool,
   Settings,
   Share2,
+  Workflow,
   UserCircle2,
   Users,
 } from "lucide-react"
@@ -42,6 +43,7 @@ const adminMenuItems = [
   { title: "Dự án", href: "/admin/projects", icon: FolderOpen, roles: ["admin", "collab"] },
   { title: "Tin tức", href: "/admin/articles", icon: Share2, roles: ["admin", "collab"] },
   { title: "Media", href: "/admin/images", icon: Image, roles: ["admin", "collab"] },
+  { title: "Tự động hóa", href: "/admin/automation", icon: Workflow, roles: ["admin"] },
   { title: "Người dùng", href: "/admin/users", icon: Users, roles: ["admin"] },
   { title: "Tài chính", href: "/admin/finance", icon: DollarSign, roles: ["admin"] },
 ]

@@ -21,14 +21,21 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [categoryLayout, setCategoryLayout] = useState<"compact" | "normal">("compact")
 
   useEffect(() => {
     let active = true
 
     const fetchProjects = async () => {
       try {
-        const data = await api.getProjects()
-        if (active) setProjects(data || [])
+        const [data, section] = await Promise.all([
+          api.getProjects(),
+          supabase.from("site_home_sections").select("settings").eq("section_key", "projects").maybeSingle(),
+        ])
+        if (active) {
+          setProjects(data || [])
+          setCategoryLayout(section.data?.settings?.category_layout === "normal" ? "normal" : "compact")
+        }
       } catch (err) {
         setError('Đã có lỗi xảy ra khi tải dữ liệu dự án.')
         console.error('Error fetching projects:', err)
@@ -36,12 +43,15 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
         setLoading(false)
       }
     }
-    if (!initialProjects?.length) fetchProjects()
+    // Refresh once on the client as well so newly saved author order and partner URL
+    // are visible immediately even when the SSR payload came from a warm cache.
+    fetchProjects()
 
     const channel = supabase
       .channel('projects-page:sync')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, fetchProjects)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, fetchProjects)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_home_sections' }, fetchProjects)
       .subscribe()
 
     return () => {
@@ -127,7 +137,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
 
               {/* SEARCH BAR & CATEGORY FILTER BUTTONS */}
               <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className={`flex items-center gap-2 ${categoryLayout === "normal" ? "flex-wrap" : "flex-nowrap overflow-x-auto pb-1"}`}>
                   {categories.map((cat) => {
                     const isActive = selectedCategory === cat.id
                     return (
