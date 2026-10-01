@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { LayoutTemplate, X, GripVertical, Plus, ArrowRight, ArrowLeft, Pause, Sparkles, Handshake } from "lucide-react"
 
 import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core"
@@ -257,17 +258,93 @@ export function HomePartnersEditor({
   const row1Groups: string[] = settings.row1_groups || (settings.row1_group ? [settings.row1_group] : [])
   const row2Groups: string[] = settings.row2_groups || (settings.row2_group ? [settings.row2_group] : [])
   const row3Groups: string[] = settings.row3_groups || (settings.row3_group ? [settings.row3_group] : [])
+  // Dữ liệu cũ chưa có display_mode: có hàng đang trượt thì coi là băng chuyền, còn lại là lưới
+  const displayMode: string =
+    settings.display_mode ||
+    ([settings.row1_dir, settings.row2_dir, settings.row3_dir].some((dir) => dir && dir !== "still") ? "marquee" : "grid")
 
   return (
     <div className="space-y-6 select-none">
       <Card className="border-slate-200 dark:border-white/10 rounded-none shadow-2xs bg-white dark:bg-slate-900">
         <CardHeader className="p-4 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-950/40">
           <CardTitle className="text-xs font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
-            <Handshake className="h-4 w-4 text-[#ed1c24]" />
-            Cấu hình Marquee Đối Tác & Nhà Tài Trợ Trang Chủ
+            <LayoutTemplate className="h-4 w-4 text-[#ed1c24]" />
+            Kiểu hiển thị logo đối tác
           </CardTitle>
           <CardDescription className="text-xs font-medium text-slate-500">
-            Thiết lập tiêu đề, danh mục và hướng trượt cho từng hàng marquee
+            Áp dụng cho mọi hàng logo. Chưa gán danh mục vào hàng nào thì website hiện toàn bộ đối tác đang bật.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-5 space-y-5">
+          <div className="grid gap-3 md:grid-cols-3">
+            {[
+              { value: "grid", title: "Lưới căn giữa", note: "Logo đứng yên, cách đều, tự căn giữa khi ít logo." },
+              { value: "marquee", title: "Băng chuyền", note: "Chạy liên tục theo hướng từng hàng, dừng khi rê chuột." },
+              { value: "carousel", title: "Carousel", note: "Có nút trước/sau, chấm trang, tự chạy theo thời gian." },
+            ].map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => updateSectionSettings({ display_mode: option.value })}
+                className={`border p-4 text-left transition ${
+                  displayMode === option.value
+                    ? "border-[#ed1c24] bg-red-50 dark:bg-red-950/20"
+                    : "border-slate-200 bg-white hover:border-[#ed1c24]/50 dark:border-white/10 dark:bg-slate-950"
+                }`}
+              >
+                <p className={`text-xs font-black uppercase ${displayMode === option.value ? "text-[#ed1c24]" : "text-slate-900 dark:text-white"}`}>{option.title}</p>
+                <p className="mt-1 text-[11px] leading-5 text-slate-500">{option.note}</p>
+              </button>
+            ))}
+          </div>
+
+          {displayMode === "carousel" && (
+            <div className="grid gap-4 border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950 md:grid-cols-2">
+              <label className="flex items-center justify-between gap-3 text-xs font-bold text-slate-700 dark:text-slate-200">
+                Tự chạy carousel
+                <Switch checked={settings.carousel_autoplay !== false} onCheckedChange={(checked) => updateSectionSettings({ carousel_autoplay: checked })} />
+              </label>
+              <label className="flex items-center justify-between gap-3 text-xs font-bold text-slate-700 dark:text-slate-200">
+                Chuyển trang sau (giây)
+                <Input
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={settings.carousel_interval ?? 4}
+                  onChange={(event) => updateSectionSettings({ carousel_interval: Number(event.target.value) || 4 })}
+                  className="h-9 w-24 rounded-none text-xs"
+                />
+              </label>
+            </div>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="flex items-center justify-between gap-3 border border-slate-200 p-3 text-xs font-bold text-slate-700 dark:border-white/10 dark:text-slate-200">
+              <span>
+                Logo trắng đen
+                <span className="block text-[11px] font-medium text-slate-500">Rê chuột vào mới hiện màu, nhìn đồng bộ hơn</span>
+              </span>
+              <Switch checked={settings.logo_grayscale === true} onCheckedChange={(checked) => updateSectionSettings({ logo_grayscale: checked })} />
+            </label>
+            <label className="flex items-center justify-between gap-3 border border-slate-200 p-3 text-xs font-bold text-slate-700 dark:border-white/10 dark:text-slate-200">
+              <span>
+                Hiện tên đối tác
+                <span className="block text-[11px] font-medium text-slate-500">Tên nhỏ bên dưới mỗi logo</span>
+              </span>
+              <Switch checked={settings.show_partner_names === true} onCheckedChange={(checked) => updateSectionSettings({ show_partner_names: checked })} />
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200 dark:border-white/10 rounded-none shadow-2xs bg-white dark:bg-slate-900">
+        <CardHeader className="p-4 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-slate-950/40">
+          <CardTitle className="text-xs font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
+            <Handshake className="h-4 w-4 text-[#ed1c24]" />
+            Các hàng logo đối tác
+          </CardTitle>
+          <CardDescription className="text-xs font-medium text-slate-500">
+            Gán danh mục đối tác cho từng hàng (hàng 1 logo lớn, hàng 2–3 logo vừa). Hướng trượt chỉ dùng ở kiểu Băng chuyền; chọn "đứng yên" để hàng đó hiển thị dạng lưới.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-5 space-y-5">    
@@ -275,7 +352,7 @@ export function HomePartnersEditor({
           <div className="space-y-4">
             <RowConfigBlock
               label="Hàng 1 (Logo To)"
-              subtitleNote="Kích thước ô: 197 × 210px"
+              subtitleNote="Logo lớn"
               selectedGroups={row1Groups}
               allGroups={allGroups}
               disabledGroups={[...row2Groups, ...row3Groups]}
@@ -286,7 +363,7 @@ export function HomePartnersEditor({
 
             <RowConfigBlock
               label="Hàng 2 (Logo Vừa)"
-              subtitleNote="Kích thước ô: 148 × 158px"
+              subtitleNote="Logo vừa"
               selectedGroups={row2Groups}
               allGroups={allGroups}
               disabledGroups={[...row1Groups, ...row3Groups]}
@@ -297,7 +374,7 @@ export function HomePartnersEditor({
 
             <RowConfigBlock
               label="Hàng 3 (Logo Nhỏ)"
-              subtitleNote="Kích thước ô: 148 × 158px"
+              subtitleNote="Logo vừa"
               selectedGroups={row3Groups}
               allGroups={allGroups}
               disabledGroups={[...row1Groups, ...row2Groups]}

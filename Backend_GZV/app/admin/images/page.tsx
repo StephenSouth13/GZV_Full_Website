@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
+import { MediaLinksLibrary } from "@/components/admin/images/MediaLinksLibrary"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -36,7 +37,6 @@ import {
 } from "lucide-react"
 
 const BUCKET = "media"
-const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/1PEDTMRkPQeLNXh6qE-7SKM4woQup6-Ka"
 const INITIAL_FOLDERS = [
   "all",
   "site",
@@ -62,7 +62,6 @@ type MediaItem = {
   source?: "storage" | "external"
 }
 
-type DriveFolder = { name: string; url: string }
 
 function formatBytes(bytes: number) {
   if (!bytes) return "0 B"
@@ -99,11 +98,6 @@ export default function AdminImagesPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const [mediaSource, setMediaSource] = useState<"storage" | "drive">("storage")
-  const [driveUrl, setDriveUrl] = useState(DEFAULT_DRIVE_URL)
-  const [driveFolders, setDriveFolders] = useState<DriveFolder[]>([])
-  const [activeDriveUrl, setActiveDriveUrl] = useState(DEFAULT_DRIVE_URL)
-  const [newDriveFolderName, setNewDriveFolderName] = useState("")
-  const [newDriveFolderUrl, setNewDriveFolderUrl] = useState("")
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => ({
@@ -248,18 +242,6 @@ export default function AdminImagesPage() {
 
   useEffect(() => {
     loadFolders()
-    try {
-      const savedDriveUrl = localStorage.getItem("gzv_drive_media_url")
-      if (savedDriveUrl) {
-        setDriveUrl(savedDriveUrl)
-        setActiveDriveUrl(savedDriveUrl)
-      }
-      const savedFolders = localStorage.getItem("gzv_drive_media_folders")
-      if (savedFolders) {
-        const parsed = JSON.parse(savedFolders)
-        if (Array.isArray(parsed)) setDriveFolders(parsed.filter((folder) => folder?.name && folder?.url))
-      }
-    } catch {}
   }, [loadFolders])
 
   useEffect(() => {
@@ -470,8 +452,6 @@ export default function AdminImagesPage() {
     }
   }
 
-  const driveId = activeDriveUrl.match(/folders\/([a-zA-Z0-9_-]+)/)?.[1] || "1PEDTMRkPQeLNXh6qE-7SKM4woQup6-Ka"
-
   return (
     <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
       {/* Top Header Card */}
@@ -569,7 +549,7 @@ export default function AdminImagesPage() {
             mediaSource === "drive" ? "bg-[#ed1c24] text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           }`}
         >
-          <Cloud className="h-4 w-4" /> Google Drive GZV
+          <Cloud className="h-4 w-4" /> Kho liên kết (Drive, Canva, Social)
         </button>
       </div>
 
@@ -1044,120 +1024,7 @@ export default function AdminImagesPage() {
 
         </>
       ) : (
-        <section className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900">
-          <div className="border-b border-slate-200 bg-slate-50 p-5 dark:border-white/10 dark:bg-slate-950">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">GZV DIGITAL ARCHIVE</p>
-                <h3 className="mt-1 text-xl font-black uppercase text-slate-900 dark:text-white">Kho Drive trung tâm</h3>
-                <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-                  Mở và quản lý ảnh, video, hồ sơ và tài liệu gốc trên Google Drive của GZV. File được chọn trong Drive vẫn có thể lấy link để dùng trong CMS.
-                </p>
-              </div>
-              <Button
-                type="button"
-                onClick={() => window.open(activeDriveUrl, "_blank", "noopener,noreferrer")}
-                className="rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" /> Mở Drive đầy đủ
-              </Button>
-            </div>
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-              <Input
-                value={driveUrl}
-                onChange={(event) => setDriveUrl(event.target.value)}
-                placeholder="Dán URL thư mục Google Drive..."
-                className="h-10 rounded-none bg-white font-mono text-xs dark:border-white/10 dark:bg-slate-900 dark:text-white"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  localStorage.setItem("gzv_drive_media_url", driveUrl.trim() || DEFAULT_DRIVE_URL)
-                  setActiveDriveUrl(driveUrl.trim() || DEFAULT_DRIVE_URL)
-                  toast({ title: "Đã lưu thư mục Drive mặc định" })
-                }}
-                className="h-10 shrink-0 rounded-none text-xs font-black uppercase"
-              >
-                Lưu URL Drive
-              </Button>
-            </div>
-            <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveDriveUrl(driveUrl || DEFAULT_DRIVE_URL)}
-                  className={`inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase ${activeDriveUrl === driveUrl ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"}`}
-                >
-                  <HardDrive className="h-3.5 w-3.5" /> Kho chính
-                </button>
-                {driveFolders.map((folder) => (
-                  <div key={`${folder.name}-${folder.url}`} className="flex items-center">
-                    <button
-                      type="button"
-                      onClick={() => setActiveDriveUrl(folder.url)}
-                      className={`inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase ${activeDriveUrl === folder.url ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"}`}
-                    >
-                      <Folder className="h-3.5 w-3.5" /> {folder.name}
-                    </button>
-                    <button
-                      type="button"
-                      title="Xóa folder shortcut"
-                      onClick={() => {
-                        const next = driveFolders.filter((item) => item.url !== folder.url)
-                        setDriveFolders(next)
-                        localStorage.setItem("gzv_drive_media_folders", JSON.stringify(next))
-                        if (activeDriveUrl === folder.url) setActiveDriveUrl(driveUrl || DEFAULT_DRIVE_URL)
-                      }}
-                      className="border-y border-r border-slate-200 px-2 py-2 text-slate-400 hover:text-[#ed1c24] dark:border-white/10"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="grid gap-2 md:grid-cols-[180px_1fr_auto]">
-                <Input value={newDriveFolderName} onChange={(event) => setNewDriveFolderName(event.target.value)} placeholder="Tên folder" className="h-9 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
-                <Input value={newDriveFolderUrl} onChange={(event) => setNewDriveFolderUrl(event.target.value)} placeholder="Dán URL folder Drive con..." className="h-9 rounded-none font-mono text-xs dark:border-white/10 dark:bg-slate-900" />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    const name = newDriveFolderName.trim()
-                    const url = newDriveFolderUrl.trim()
-                    if (!name || !/^https:\/\/drive\.google\.com\//i.test(url)) {
-                      toast({ title: "URL Drive chưa hợp lệ", variant: "destructive" })
-                      return
-                    }
-                    const next = [...driveFolders.filter((item) => item.url !== url), { name, url }]
-                    setDriveFolders(next)
-                    setActiveDriveUrl(url)
-                    localStorage.setItem("gzv_drive_media_folders", JSON.stringify(next))
-                    setNewDriveFolderName("")
-                    setNewDriveFolderUrl("")
-                    toast({ title: `Đã thêm folder Drive: ${name}` })
-                  }}
-                  className="h-9 rounded-none text-xs font-black uppercase"
-                >
-                  <FolderPlus className="mr-1.5 h-3.5 w-3.5" /> Thêm folder
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div className="bg-slate-100 p-3 dark:bg-black/30 sm:p-5">
-            <div className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
-              <iframe
-                title="Google Drive GZV"
-                src={`https://drive.google.com/embeddedfolderview?id=${driveId}#list`}
-                className="h-[68vh] min-h-[560px] w-full"
-                loading="lazy"
-              />
-            </div>
-            <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
-              Nếu trình duyệt không cho nhúng, hãy dùng nút “Mở Drive đầy đủ” để xem toàn bộ thư mục.
-            </p>
-          </div>
-        </section>
+        <MediaLinksLibrary />
       )}
 
       {/* Lightbox / Preview Dialog */}

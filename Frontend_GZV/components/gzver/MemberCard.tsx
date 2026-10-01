@@ -429,7 +429,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
   const card = getMemberCard(member)
   const [settings, setSettings] = useState<GzverCardSettings>(DEFAULT_SETTINGS)
   const [flipped, setFlipped] = useState(false)
-  const [expanded, setExpanded] = useState(false)
   const [downloading, setDownloading] = useState<Side | "both" | null>(null)
   const frontExportRef = useRef<HTMLDivElement>(null)
   const backExportRef = useRef<HTMLDivElement>(null)
@@ -443,13 +442,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
     return () => {
       active = false
     }
-  }, [])
-
-  useEffect(() => {
-    const syncHash = () => setExpanded(window.location.hash === "#card-visit")
-    syncHash()
-    window.addEventListener("hashchange", syncHash)
-    return () => window.removeEventListener("hashchange", syncHash)
   }, [])
 
   if (card.enabled === false) return null
@@ -516,13 +508,14 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
               <p className="hidden text-[11px] font-medium text-slate-400 sm:block">{getCardTheme(c.design).name} · Mã {c.cardNumber}</p>
             </div>
           </div>
-          <button type="button" onClick={() => setExpanded((value) => !value)} className="shrink-0 border border-[#ed1c24] bg-[#ed1c24] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-[#c91218]">
-            {expanded ? "Thu gọn" : "Xem thẻ"}
-          </button>
+          <span
+            className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white ${c.isDemo ? "bg-[#ed1c24]" : "bg-emerald-600"}`}
+          >
+            {c.isDemo ? "Demo" : "Chính thức"}
+          </span>
         </div>
 
-        {expanded && <>
-
+        {/* Thẻ luôn hiển thị đầy đủ, không cần bấm mở */}
         <div
           className={`mx-auto mb-10 mt-6 max-w-3xl rounded-xl border border-dashed px-5 py-4 text-center ${
             c.isDemo ? "border-[#ed1c24]/50 bg-[#ed1c24]/10" : "border-emerald-400/40 bg-emerald-500/10"
@@ -629,7 +622,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
             </div>
           </div>
         )}
-        </>}
       </div>
 
       {/* Bản dựng ngoài màn hình, cỡ cố định, chỉ dùng để xuất ảnh PNG sắc nét */}
