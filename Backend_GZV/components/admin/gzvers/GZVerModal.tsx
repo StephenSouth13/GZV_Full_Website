@@ -186,6 +186,7 @@ const defaultForm = {
   avatar_url: "",
   cover_image_url: "",
   cv_url: "",
+  cv_settings: { template: "executive", accent: "#ed1c24", show_contact: true, show_projects: true },
   achievement_summary: "",
   testimonial: "",
   promotion_path: "",
@@ -241,6 +242,9 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
   const [formData, setFormData] = useState<any>(defaultForm)
   const [authors, setAuthors] = useState<any[]>([])
   const [selectedAuthorId, setSelectedAuthorId] = useState("")
+  const [projectOptions, setProjectOptions] = useState<any[]>([])
+  const [projectHighlights, setProjectHighlights] = useState<Record<string, any>>({})
+  const [projectLoadError, setProjectLoadError] = useState("")
 
   useEffect(() => {
     if (!open) return
@@ -250,6 +254,42 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
       .order("full_name", { ascending: true })
       .then(({ data }) => data && setAuthors(data))
   }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    let active = true
+    const loadProjects = async () => {
+      setProjectLoadError("")
+      try {
+        const projects: any[] = []
+        for (let from = 0; ; from += 1000) {
+          const { data, error } = await supabase.from("projects").select("*").order("order_index", { ascending: true }).range(from, from + 999)
+          if (error) throw error
+          projects.push(...(data || []))
+          if (!data || data.length < 1000) break
+        }
+        if (!active) return
+        setProjectOptions(projects)
+        let highlights: any[] = []
+        if (gzver?.id) {
+          const result = await supabase.from("gzver_project_highlights").select("*").eq("gzver_id", gzver.id)
+          if (result.error) {
+            setProjectLoadError(`Dự án đã tải, nhưng phần vai trò/đóng góp riêng chưa khả dụng: ${result.error.message}`)
+          } else {
+            highlights = result.data || []
+          }
+        }
+        if (!active) return
+        setProjectHighlights(Object.fromEntries(highlights.map((item: any) => [item.project_id, item])))
+      } catch (error: any) {
+        if (!active) return
+        setProjectOptions([])
+        setProjectLoadError(`Không tải được danh sách dự án: ${error.message || "Lỗi không xác định."}`)
+      }
+    }
+    loadProjects()
+    return () => { active = false }
+  }, [open, gzver?.id])
 
   const handlePullFromAuthor = () => {
     const source = authors.find((a) => a.id === selectedAuthorId)
@@ -275,6 +315,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         ...gzver,
         department_id: gzver.department_id || gzver.gzver_departments?.id || "",
         department_name: gzver.department_name || gzver.gzver_departments?.name || "",
+        cv_settings: { ...defaultForm.cv_settings, ...(gzver.cv_settings || {}) },
         skills: gzver.skills || [],
         achievements_list: gzver.achievements_list || [],
         background: gzver.background || defaultForm.background,
@@ -438,10 +479,24 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             .map((link, index) => ({ ...link, label: link.label.trim(), url: link.url.trim(), sort_order: (index + 1) * 10 })),
         },
       }
-      const { error } = gzver?.id
-        ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id)
-        : await supabase.from("gzvers").insert([cleanPayload])
-      if (error) throw error
+      const saveResult = gzver?.id
+        ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id).select("id").single()
+        : await supabase.from("gzvers").insert([cleanPayload]).select("id").single()
+      if (saveResult.error) throw saveResult.error
+      const gzverId = saveResult.data.id
+      const highlights = Object.entries(projectHighlights)
+      if (highlights.length) {
+        const { error: highlightError } = await supabase.from("gzver_project_highlights").upsert(highlights.map(([projectId, item], index) => ({
+          gzver_id: gzverId,
+          project_id: projectId,
+          contribution: item.contribution || "",
+          image_urls: Array.isArray(item.image_urls) ? item.image_urls : [],
+          is_visible: item.is_visible !== false,
+          sort_order: (index + 1) * 10,
+          updated_at: new Date().toISOString(),
+        })), { onConflict: "gzver_id,project_id" })
+        if (highlightError) throw highlightError
+      }
       toast({ title: "Đã lưu thông tin GZVer thành công!" })
       onSave()
       onClose()
@@ -532,6 +587,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             >
               Hồ sơ CV (PDF)
             </TabsTrigger>
+            <TabsTrigger value="projects" className="rounded-none text-xs font-black uppercase tracking-wider py-2 px-3 data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white">Dự án tham gia</TabsTrigger>
             <TabsTrigger
               value="preview"
               className="rounded-none text-xs font-black uppercase tracking-wider py-2 px-3 data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white"
@@ -1258,6 +1314,14 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
 
             {/* TAB 7: CV DOCS */}
             <TabsContent value="docs" className="mt-0">
+              <div className="mb-4 grid gap-4 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900 sm:grid-cols-2">
+                <div className="sm:col-span-2"><p className="text-xs font-black uppercase text-slate-900 dark:text-white">CV tự động từ hồ sơ GZVer</p><p className="mt-1 text-[11px] text-slate-500">Dùng thông tin, ảnh, kỹ năng, kinh nghiệm và thành tựu đã nhập. Trang CV hỗ trợ In / Lưu thành PDF.</p></div>
+                <div><Label className="text-[10px] font-black uppercase">Mẫu CV</Label><Select value={formData.cv_settings?.template || "executive"} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, template: value } }))}><SelectTrigger className="mt-1 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="executive">Executive / Đỏ GZV</SelectItem><SelectItem value="minimal">Minimal / Trắng</SelectItem><SelectItem value="midnight">Midnight / Đen</SelectItem></SelectContent></Select></div>
+                <div><Label className="text-[10px] font-black uppercase">Màu nhấn</Label><div className="mt-1 flex gap-2"><Input type="color" value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="h-9 w-14 rounded-none p-1" /><Input value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="rounded-none font-mono" /></div></div>
+                <div className="flex items-center justify-between border p-3"><Label>Hiện thông tin liên hệ trong CV</Label><Switch checked={formData.cv_settings?.show_contact !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_contact: value } }))} /></div>
+                <div className="flex items-center justify-between border p-3"><Label>Đưa dự án vào CV</Label><Switch checked={formData.cv_settings?.show_projects !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_projects: value } }))} /></div>
+                {formData.slug && <a href={`${FRONTEND_URL}/gzver/${formData.slug}/cv`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center justify-center border border-[#ed1c24] px-4 text-xs font-black uppercase text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white sm:col-span-2"><FileText className="mr-2 h-4 w-4" />Xem / in CV tự động</a>}
+              </div>
               <div className="flex min-h-[260px] flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-slate-900/50 p-8 text-center rounded-none">
                 <div className="mb-4 bg-red-50 dark:bg-red-950/40 p-4 border border-red-200 dark:border-red-900 rounded-none">
                   <FileText size={36} className="text-[#ed1c24]" />
@@ -1306,6 +1370,19 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                   </div>
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="projects" className="mt-0 space-y-3">
+              <div className="border-l-4 border-[#ed1c24] bg-slate-50 p-4 dark:bg-slate-900"><p className="text-xs font-black uppercase">Dự án hiển thị trên hồ sơ</p><p className="mt-1 text-[11px] text-slate-500">Chọn dự án GZVer đã tham gia, thêm vai trò hoặc nội dung đóng góp riêng. Ảnh và nội dung dự án mặc định lấy từ trang dự án.</p></div>
+              {projectLoadError && <p role="alert" className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">Không tải được dự án: {projectLoadError}</p>}
+              {projectOptions.map((project) => {
+                const selected = projectHighlights[project.id]?.is_visible !== false && Boolean(projectHighlights[project.id])
+                return <div key={project.id} className={`border p-4 ${selected ? "border-[#ed1c24]" : "border-slate-200 dark:border-white/10"}`}>
+                  <div className="flex items-start gap-3"><input type="checkbox" checked={selected} onChange={(event) => setProjectHighlights((current) => ({ ...current, [project.id]: { ...(current[project.id] || {}), project_id: project.id, is_visible: event.target.checked } }))} className="mt-1 accent-[#ed1c24]" /><div className="min-w-0 flex-1"><p className="text-sm font-black uppercase">{project.title}</p><p className="mt-1 text-[10px] text-slate-500">{project.slug}</p></div>{project.image && <img src={project.image} alt="" className="h-12 w-20 object-cover" />}</div>
+                  {selected && <div className="mt-3"><Label className="text-[10px] font-black uppercase">Vai trò / đóng góp của GZVer trong dự án</Label><Textarea value={projectHighlights[project.id]?.contribution || ""} onChange={(event) => setProjectHighlights((current) => ({ ...current, [project.id]: { ...current[project.id], project_id: project.id, is_visible: true, contribution: event.target.value } }))} className="mt-1 min-h-20 rounded-none" placeholder="Ví dụ: Tham gia chuyển đổi số hồ sơ Kỷ lục gia, chuẩn hóa dữ liệu và xây dựng trải nghiệm tra cứu..." /></div>}
+                </div>
+              })}
+              {!projectLoadError && projectOptions.length === 0 && <p className="border border-dashed p-8 text-center text-sm text-slate-500">Chưa có dự án trong hệ thống.</p>}
             </TabsContent>
 
             {/* TAB 8: PREVIEW */}

@@ -8,6 +8,7 @@ import { ProjectsTable } from '@/components/admin/projects/ProjectsTable'
 import { CreateProjectModal } from '@/components/admin/projects/CreateProjectModal'
 import { EditProjectModal } from '@/components/admin/projects/EditProjectModal'
 import { DeleteProjectModal } from '@/components/admin/projects/DeleteProjectModal'
+import { ProjectGzverAssignmentsDialog } from '@/components/admin/projects/ProjectGzverAssignmentsDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,6 +32,7 @@ function ProjectsManagementContent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingProject, setEditingProject] = useState<any>(null)
   const [deletingProject, setDeletingProject] = useState<any>(null)
+  const [assigningProject, setAssigningProject] = useState<any>(null)
 
   const handleReorder = (newOrder: any[]) => {
     setProjects(newOrder);
@@ -228,6 +230,7 @@ function ProjectsManagementContent() {
               projects={filteredProjects}
               onEdit={setEditingProject}
               onDelete={setDeletingProject}
+              onAssignGzvers={setAssigningProject}
               currentPage={currentPage}
               itemsPerPage={ITEMS_PER_PAGE}
               onReorder={handleReorder}
@@ -302,6 +305,15 @@ function ProjectsManagementContent() {
           project={deletingProject} 
           onClose={() => setDeletingProject(null)} 
           onDelete={handleDeleteConfirm} 
+        />
+      )}
+
+      {assigningProject && (
+        <ProjectGzverAssignmentsDialog
+          open={!!assigningProject}
+          project={assigningProject}
+          onClose={() => setAssigningProject(null)}
+          onSaved={() => fetchProjects(currentPage, true)}
         />
       )}
     </div>

@@ -181,7 +181,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
 
               {filteredProjects.length > 0 ? (
                 <motion.div
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                  className="grid auto-rows-fr grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
                   variants={containerVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -194,7 +194,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                     const remaining = authors.length - maxDisplay;
 
                     return (
-                      <motion.div key={project.id} variants={itemVariants}>
+                      <motion.div key={project.id} variants={itemVariants} className="h-full">
                         <Card className="h-full flex flex-col group overflow-hidden border border-slate-200 hover:border-[#ed1c24] hover:shadow-xl transition-all duration-300 rounded-none bg-white dark:border-white/10 dark:bg-gray-800 dark:hover:border-[#ed1c24]">
                           <CardHeader className="p-0">
                             <div className="relative aspect-[16/10] overflow-hidden">
@@ -217,18 +217,18 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                             </div>
                           </CardHeader>
 
-                          <CardContent className="p-8 flex flex-col flex-grow">
-                            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-[#ed1c24] transition-colors">
+                          <CardContent className="flex flex-grow flex-col p-6 sm:p-8">
+                            <CardTitle className="mb-3 min-h-16 text-2xl font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-[#ed1c24] transition-colors">
                               {project.title}
                             </CardTitle>
-                            <p className="text-gray-600 dark:text-gray-300 mb-6 flex-grow line-clamp-3">
+                            <p className="mb-6 min-h-[4.5rem] text-gray-600 dark:text-gray-300 line-clamp-3">
                               {summarize([project.description, project.excerpt, project.detailproject], 200)}
                             </p>
 
                             {/* --- PHẦN MENTORING & COACHING (AVATAR STACK) --- */}
-                            <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-700">
+                            <div className="mt-auto min-h-[7.5rem] border-t border-gray-100 pt-5 dark:border-gray-700">
                               <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24] dark:text-[#ed1c24] mb-3">Mentoring & Coaching</p>
-                              <div className="flex -space-x-3 items-center mb-8">
+                              <div className="mb-5 flex min-h-10 items-center -space-x-3">
                                 {displayAuthors.map((author: any, idx: number) => (
                                   <Avatar key={idx} className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-md">
                                     <AvatarImage src={author.avatar} className="object-cover" />
@@ -263,8 +263,8 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                             </div>
 
                             {/* NÚT XEM CHI TIẾT */}
-                            <Link href={`/du-an/${project.slug}`}>
-                              <Button className="w-full h-12 bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase text-xs shadow-sm group">
+                            <Link href={`/du-an/${project.slug}`} className="mt-auto block">
+                              <Button className="h-12 w-full bg-[#ed1c24] hover:bg-[#c91218] text-white rounded-none font-black uppercase text-xs shadow-sm group">
                                 Xem chi tiết dự án
                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                               </Button>

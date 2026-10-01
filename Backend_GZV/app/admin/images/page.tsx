@@ -106,6 +106,9 @@ export default function AdminImagesPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const [mediaSource, setMediaSource] = useState<"storage" | "embedded" | "drive">("storage")
+  const [reviewFilter, setReviewFilter] = useState<"all" | "unused" | "duplicates">("all")
+  const [usageRows, setUsageRows] = useState<Array<{ table: string; label: string; content: string }>>([])
+  const [usageReady, setUsageReady] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => ({
@@ -114,6 +117,30 @@ export default function AdminImagesPage() {
     images: items.filter((item) => isImage(item.mimetype, item.name)).length,
     videos: items.filter((item) => isVideo(item.mimetype, item.name)).length,
   }), [items])
+
+  useEffect(() => {
+    let active = true
+    const sources = [
+      ["articles", "Tin tức"], ["projects", "Dự án"], ["partners", "Đối tác"], ["authors", "Tác giả"],
+      ["gzvers", "GZVer"], ["site_page_blocks", "Page Builder"], ["site_home_sections", "Trang chủ"],
+      ["site_pages", "Trang nội dung"], ["site_branding_settings", "SEO / Branding"], ["site_footer_settings", "Footer"],
+      ["site_floating_actions", "Floating contact"],
+    ] as const
+    Promise.all(sources.map(async ([table, label]) => {
+      const { data } = await supabase.from(table).select("*").limit(1500)
+      return (data || []).map((row: any) => ({ table, label: `${label}: ${row.title || row.name || row.full_name || row.slug || row.page_slug || row.section_key || row.id || "Nội dung"}`, content: JSON.stringify(row) }))
+    })).then((groups) => {
+      if (active) setUsageRows(groups.flat())
+    }).finally(() => { if (active) setUsageReady(true) })
+    return () => { active = false }
+  }, [])
+
+  const getUsage = (item: MediaItem) => {
+    const candidates = [item.url, item.path].filter((value) => value && !value.startsWith("external:"))
+    return usageRows.filter((row) => candidates.some((candidate) => row.content.includes(candidate))).map((row) => row.label)
+  }
+
+  const likelyDuplicate = (item: MediaItem) => item.size > 0 && items.some((other) => other.path !== item.path && other.size === item.size && other.name.toLowerCase() === item.name.toLowerCase())
 
   // 1. Tải danh sách thư mục (giống MediaPickerDialog)
   const loadFolders = useCallback(async () => {
@@ -207,16 +234,18 @@ export default function AdminImagesPage() {
       // Include media URLs referenced directly by GZVer profiles, even when
       // the original file lives in another CDN or was pasted as an URL.
       if (f === "all" || f === "gzvers") {
-        const [gzverResult, projectResult, articleResult, partnerResult] = await Promise.all([
+        const [gzverResult, projectResult, articleResult, partnerResult, authorResult] = await Promise.all([
           supabase.from("gzvers").select("id, full_name, avatar_url, cover_image_url, cv_url, member_card, online_cards"),
           supabase.from("projects").select("id, title, image, thumbnail_url, video_url"),
           supabase.from("articles").select("id, title, image, thumbnail_url"),
           supabase.from("partners").select("id, name, logo_url"),
+          supabase.from("authors").select("id, full_name, avatar_url"),
         ])
         const gzverRows = gzverResult.data || []
         const projectRows = projectResult.data || []
         const articleRows = articleResult.data || []
         const partnerRows = partnerResult.data || []
+        const authorRows = authorResult.data || []
         const externalItems: MediaItem[] = []
         const addExternal = (url: unknown, name: string, folder = "embedded-urls") => {
           if (typeof url !== "string" || !/^https?:\/\//i.test(url.trim())) return
@@ -260,6 +289,10 @@ export default function AdminImagesPage() {
           const safeName = String(row.name || "partner").trim().replace(/\s+/g, "-").toLowerCase()
           addExternal(row.logo_url, `${safeName}-logo`, "partners")
         }
+        for (const row of authorRows || []) {
+          const safeName = String(row.full_name || "author").trim().replace(/\s+/g, "-").toLowerCase()
+          addExternal(row.avatar_url, `${safeName}-avatar`, "authors")
+        }
         fileItems = [...fileItems, ...externalItems]
       }
 
@@ -285,6 +318,8 @@ export default function AdminImagesPage() {
     return items.filter((item) => {
       if (mediaSource === "embedded" && item.source !== "external") return false
       if (mediaSource === "storage" && item.source === "external") return false
+      if (reviewFilter === "unused" && (item.source === "external" || !usageReady || getUsage(item).length > 0)) return false
+      if (reviewFilter === "duplicates" && !likelyDuplicate(item)) return false
       const matchSearch = !q || item.name.toLowerCase().includes(q) || item.path.toLowerCase().includes(q)
       const matchType =
         typeFilter === "all" ||
@@ -293,7 +328,7 @@ export default function AdminImagesPage() {
         (typeFilter === "file" && !isImage(item.mimetype, item.name) && !isVideo(item.mimetype, item.name))
       return matchSearch && matchType
     })
-  }, [items, search, typeFilter, mediaSource])
+  }, [items, search, typeFilter, mediaSource, reviewFilter, usageReady, usageRows])
 
   const clearSelection = () => setSelected(new Set())
 
@@ -460,7 +495,9 @@ export default function AdminImagesPage() {
       toast({ title: "Ảnh này đang được dùng trong hồ sơ GZVer", description: "Đổi hoặc xóa ảnh trong hồ sơ GZVer đó thì nó sẽ tự biến mất khỏi thư viện." })
       return
     }
-    if (!confirm(`Xóa vĩnh viễn "${item.name}"?`)) return
+    const usedBy = getUsage(item)
+    const warning = usedBy.length ? `\n\nĐang được tham chiếu tại:\n${usedBy.slice(0, 8).join("\n")}${usedBy.length > 8 ? `\n+ ${usedBy.length - 8} vị trí khác` : ""}\n\nXóa có thể làm mất ảnh trên website.` : "\n\nẢnh chưa tìm thấy tham chiếu trong nội dung hiện có."
+    if (!confirm(`Xóa vĩnh viễn "${item.name}"?${warning}`)) return
     try {
       const { missing } = await deleteStoragePaths([item.path])
       if (missing.length) {
@@ -482,7 +519,8 @@ export default function AdminImagesPage() {
       toast({ title: "Các mục đã chọn đang được dùng trong hồ sơ GZVer", description: "Đổi ảnh trong hồ sơ tương ứng để gỡ chúng khỏi thư viện." })
       return
     }
-    if (!confirm(`Xóa vĩnh viễn ${paths.length} file đã chọn?`)) return
+    const usedSelected = items.filter((item) => paths.includes(item.path) && getUsage(item).length > 0)
+    if (!confirm(`Xóa vĩnh viễn ${paths.length} file đã chọn?${usedSelected.length ? `\n\n${usedSelected.length} file đang được tham chiếu trên website.` : "\n\nCác file chưa có tham chiếu đã biết."}`)) return
     try {
       const { removed, missing } = await deleteStoragePaths(paths)
       toast({
@@ -605,6 +643,12 @@ export default function AdminImagesPage() {
           <Cloud className="h-4 w-4" /> Kho liên kết (Drive, Canva, Social)
         </button>
       </div>
+
+      {mediaSource === "storage" && <div className="flex flex-wrap items-center gap-2 border border-slate-200 bg-white p-2 dark:border-white/10 dark:bg-slate-900">
+        <span className="px-2 text-[10px] font-black uppercase tracking-widest text-slate-500">Rà soát kho ảnh</span>
+        {([{ id: "all", label: `Tất cả (${items.filter((item) => item.source !== "external").length})` }, { id: "unused", label: `Chưa thấy dùng (${usageReady ? items.filter((item) => item.source !== "external" && getUsage(item).length === 0).length : "…"})` }, { id: "duplicates", label: `Có thể trùng (${items.filter(likelyDuplicate).length})` }] as const).map((option) => <button key={option.id} type="button" onClick={() => setReviewFilter(option.id)} className={`h-8 border px-3 text-[10px] font-black uppercase ${reviewFilter === option.id ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"}`}>{option.label}</button>)}
+        <span className="ml-auto text-[10px] text-slate-400">Gợi ý trùng dựa trên cùng tên và dung lượng</span>
+      </div>}
 
       {mediaSource !== "drive" ? (
         <>
@@ -875,6 +919,13 @@ export default function AdminImagesPage() {
                       </span>
                     )}
 
+                    {mediaSource === "storage" && (
+                      <span className={`absolute right-2 ${item.source === "external" ? "top-8" : "top-2"} z-10 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wide ${getUsage(item).length ? "bg-emerald-700 text-white" : "bg-amber-500 text-slate-950"}`}>
+                        {getUsage(item).length ? `Đang dùng · ${getUsage(item).length}` : usageReady ? "Chưa thấy dùng" : "Đang dò"}
+                      </span>
+                    )}
+                    {likelyDuplicate(item) && <span className="absolute left-2 top-2 z-10 bg-orange-500 px-1.5 py-0.5 text-[8px] font-black uppercase text-white">Có thể trùng</span>}
+
                     {/* Hover Quick Overlay */}
                     <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2">
                       <Button
@@ -1028,6 +1079,11 @@ export default function AdminImagesPage() {
                 <div>
                   <span className="text-[10px] font-black uppercase text-slate-400 block">Đường dẫn Storage:</span>
                   <p className="font-mono text-[10px] text-slate-600 dark:text-slate-400 break-words">{selectedItem.path}</p>
+                </div>
+                <div className="border-t border-slate-100 pt-3 dark:border-white/10">
+                  <div className="flex items-center justify-between gap-2"><span className="text-[10px] font-black uppercase text-slate-400">Đang được dùng tại</span><Badge className={`rounded-none text-[9px] ${getUsage(selectedItem).length ? "bg-emerald-700" : "bg-amber-500 text-slate-950"}`}>{usageReady ? getUsage(selectedItem).length ? `${getUsage(selectedItem).length} vị trí` : "Chưa phát hiện" : "Đang quét"}</Badge></div>
+                  {getUsage(selectedItem).length > 0 ? <ul className="mt-2 max-h-28 space-y-1 overflow-y-auto">{getUsage(selectedItem).map((label, index) => <li key={`${label}-${index}`} className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">• {label}</li>)}</ul> : <p className="mt-2 text-[10px] leading-4 text-slate-500">{usageReady ? "Không thấy URL hoặc đường dẫn ảnh trong các nội dung đã quét." : "Đang rà nội dung website…"}</p>}
+                  {likelyDuplicate(selectedItem) && <p className="mt-2 text-[10px] font-bold text-orange-600">Có file cùng tên và dung lượng. Đây là gợi ý để kiểm tra, chưa khẳng định nội dung giống hệt.</p>}
                 </div>
               </div>
 

@@ -12,10 +12,10 @@ import { CSS } from '@dnd-kit/utilities'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { GripVertical, Edit3, Trash2, Star, Image as ImageIcon } from "lucide-react"
+import { GripVertical, Edit3, Trash2, Star, Image as ImageIcon, Users } from "lucide-react"
 import { toast } from '@/hooks/use-toast'
 
-function SortableRow({ p, stt, onEdit, onDelete }: any) {
+function SortableRow({ p, stt, onEdit, onDelete, onAssignGzvers }: any) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id });
 
   const style = {
@@ -93,6 +93,16 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
 
       <TableCell className="text-right pr-6 py-4">
         <div className="flex justify-end gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            title="Gán GZVer tham gia dự án"
+            aria-label={`Gán GZVer tham gia ${p.title}`}
+            onClick={() => onAssignGzvers(p)}
+            className="h-8 w-8 rounded-none border-slate-200 bg-white hover:bg-red-50 hover:text-[#ed1c24] dark:border-white/10 dark:bg-slate-800 dark:text-white shadow-none transition-colors"
+          >
+            <Users size={15}/>
+          </Button>
           <Button 
             variant="outline" 
             size="icon" 
@@ -115,7 +125,7 @@ function SortableRow({ p, stt, onEdit, onDelete }: any) {
   );
 }
 
-export function ProjectsTable({ projects, onEdit, onDelete, currentPage, itemsPerPage, onReorder }: any) {
+export function ProjectsTable({ projects, onEdit, onDelete, onAssignGzvers, currentPage, itemsPerPage, onReorder }: any) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -171,6 +181,7 @@ export function ProjectsTable({ projects, onEdit, onDelete, currentPage, itemsPe
                   stt={(currentPage - 1) * itemsPerPage + index + 1} 
                   onEdit={onEdit} 
                   onDelete={onDelete} 
+                  onAssignGzvers={onAssignGzvers}
                 />
               ))}
             </SortableContext>

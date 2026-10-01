@@ -45,15 +45,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col px-6 pb-6 pt-3 sm:px-7 sm:pb-7">
-        <CardTitle className="mb-3 line-clamp-2 text-[19px] font-black uppercase leading-tight text-slate-950 transition-colors group-hover:text-[#ed1c24] dark:text-white">
+        <CardTitle className="mb-3 min-h-[3rem] line-clamp-2 text-[19px] font-black uppercase leading-tight text-slate-950 transition-colors group-hover:text-[#ed1c24] dark:text-white">
           {project.title}
         </CardTitle>
 
-        <p className="mb-6 line-clamp-3 flex-1 text-sm font-medium leading-7 text-slate-500 dark:text-neutral-400">
+        <p className="mb-6 min-h-[5.25rem] line-clamp-3 text-sm font-medium leading-7 text-slate-500 dark:text-neutral-400">
           {summarize([project.description, (project as any).excerpt, (project as any).detailproject], 200)}
         </p>
 
-        <div className="rounded-none border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/70">
+        <div className="mt-auto min-h-[7rem] rounded-none border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/70">
           <div className="mb-3 flex items-center justify-between gap-3">
             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ed1c24]">
               {(project as any).authors_section_title || "MENTORING & COACHING"}
@@ -126,7 +126,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
 
-        <Link href={`/du-an/${project.slug || project.id}`} className="mt-5">
+        <Link href={`/du-an/${project.slug || project.id}`} className="mt-5 block">
           <Button className="h-12 w-full rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white shadow-lg shadow-red-950/20 transition-all hover:bg-[#ed1c24]">
             Xem chi tiết dự án
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

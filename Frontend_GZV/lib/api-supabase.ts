@@ -205,6 +205,8 @@
     cover_position_y?: number;
     cover_scale?: number;
     cv_url?: string;
+    cv_settings?: { template?: "executive" | "minimal" | "midnight"; accent?: string; show_contact?: boolean; show_projects?: boolean };
+    linked_author_id?: string | null;
     achievement_summary: string;
     testimonial: string;
     graduation_year: string;

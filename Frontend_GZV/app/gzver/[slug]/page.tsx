@@ -12,6 +12,7 @@ import {
   CreditCard,
   Download,
   ExternalLink,
+  FileText,
   Facebook,
   Github,
   Globe2,
@@ -33,7 +34,7 @@ import {
   LayoutGrid,
   Rows3,
 } from "lucide-react"
-import { api, gzver } from "@/lib/api-supabase"
+import { api, gzver, supabase } from "@/lib/api-supabase"
 import { MemberCardShowcase, getMemberCard } from "@/components/gzver/MemberCard"
 
 type ProfileSectionData = NonNullable<gzver["profile_tabs"]>[number]
@@ -326,6 +327,7 @@ function ProfileSection({ member, section }: { member: gzver; section: ProfileSe
 
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
   const [member, setMember] = useState<gzver | null>(null)
+  const [memberProjects, setMemberProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("")
   const [profileViewMode, setProfileViewMode] = useState<"one_view" | "tabs">("one_view")
@@ -336,7 +338,29 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
       try {
         setLoading(true)
         const data = await api.getgzverBySlug(params.slug)
-        if (active) setMember(data)
+        if (active) {
+          setMember(data)
+          if (data?.id) {
+            const [matches, highlightResult] = await Promise.all([
+              Promise.all([data.id, data.linked_author_id].filter((id): id is string => Boolean(id)).map((id) => supabase
+                .from("projects")
+                .select("*")
+                .contains("author_ids", [id])
+                .order("order_index", { ascending: true })
+                .limit(12))),
+              supabase.from("gzver_project_highlights").select("project_id,contribution,image_urls,is_visible,sort_order").eq("gzver_id", data.id).order("sort_order", { ascending: true }),
+            ])
+            const explicit = highlightResult.data || []
+            const excluded = new Set(explicit.filter((item: any) => item.is_visible === false).map((item: any) => item.project_id))
+            const includeIds = explicit.filter((item: any) => item.is_visible !== false).map((item: any) => item.project_id)
+            const extraResult = includeIds.length ? await supabase.from("projects").select("*").in("id", includeIds) : { data: [] as any[] }
+            const allProjects = [...matches.flatMap((result) => result.data || []), ...(extraResult.data || [])]
+            const unique = Array.from(new Map(allProjects.filter((project: any) => !excluded.has(project.id)).map((project: any) => [project.id, project])).values())
+            const highlightMap = new Map(explicit.filter((item: any) => item.is_visible !== false).map((item: any) => [item.project_id, item]))
+            const projects = unique.map((project: any) => ({ ...project, profile_contribution: (highlightMap.get(project.id) as any)?.contribution })).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
+            if (active) setMemberProjects(projects)
+          }
+        }
       } catch (error) {
         console.error("Error fetching GZVer detail:", error)
       } finally {
@@ -344,8 +368,14 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
       }
     }
     fetchDetail()
+    const projectChannel = supabase
+      .channel(`gzver-projects:${params.slug}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => { void fetchDetail() })
+      .on("postgres_changes", { event: "*", schema: "public", table: "gzver_project_highlights" }, () => { void fetchDetail() })
+      .subscribe()
     return () => {
       active = false
+      supabase.removeChannel(projectChannel)
     }
   }, [params.slug])
 
@@ -437,11 +467,15 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 <span className="hidden sm:inline">Card visit</span>
               </a>
             )}
-            {member.cv_url && (
-              <a href={member.cv_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-[#ed1c24] bg-[#ed1c24] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c91218]">
-                <Download className="h-4 w-4" />
-                <span>Tải CV</span>
-              </a>
+            {member.cv_url ? (
+              <div className="flex flex-wrap gap-2">
+                <a href={member.cv_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-[#ed1c24] bg-[#ed1c24] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c91218]"><Download className="h-4 w-4" /><span>Tải CV</span></a>
+                <Link href={`/gzver/${member.slug}/cv`} className="inline-flex items-center gap-2 border border-white/30 bg-slate-950/80 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-white hover:bg-[#ed1c24]"><FileText className="h-4 w-4" /><span>CV trực tuyến</span></Link>
+              </div>
+            ) : (
+              <Link href={`/gzver/${member.slug}/cv`} className="inline-flex items-center gap-2 border border-[#ed1c24] bg-[#ed1c24] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c91218]">
+                <Download className="h-4 w-4" /><span>Tạo CV</span>
+              </Link>
             )}
           </motion.div>
 
@@ -468,9 +502,9 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
             </div>
 
             {/* Layout Grid: Sidebar Left + Content Right */}
-            <div className="grid gap-0 lg:grid-cols-[320px_1fr]">
+            <div className="grid items-start gap-0 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
               {/* Sidebar Left */}
-              <aside className="border-b border-slate-200 bg-slate-50/70 p-5 text-slate-900 sm:p-6 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
+              <aside className="h-fit self-start border-b border-slate-200 bg-slate-50/70 p-5 text-slate-900 sm:p-6 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
                 {/* Điện thoại: avatar nhỏ bên trái, thông tin bên phải — máy tính: xếp dọc */}
                 <div className="flex items-start gap-4 lg:block">
                 {/* Avatar Box — cùng tỉ lệ khung ảnh 4/4.5 và bo góc như thẻ ở trang danh sách GZVers để đồng bộ hình ảnh */}
@@ -553,8 +587,8 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
               </aside>
 
               {/* Main Content Area: one-view ưu tiên, visitor vẫn có thể chuyển sang tabs */}
-              <div className="min-w-0 bg-white p-5 sm:p-6 dark:bg-[#0b0b0b]">
-                <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 dark:border-white/10">
+              <div className="min-w-0 bg-white p-4 sm:p-5 lg:p-6 dark:bg-[#0b0b0b]">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-white/10">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{profileViewMode === "one_view" ? "Tất cả nội dung đang hiển thị" : "Đang xem theo từng mục"}</p>
@@ -597,10 +631,10 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 )}
 
                 {profileViewMode === "one_view" ? (
-                  <div className="space-y-5">
+                  <div className="space-y-4">
                     {sections.map((section, index) => (
-                      <motion.section key={section.key || `section-${index}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.2) }} className="border border-slate-200 bg-slate-50/50 p-4 sm:p-5 dark:border-white/10 dark:bg-white/[0.025]">
-                        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")} · {section.label}</p>
+                      <motion.section key={section.key || `section-${index}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.2) }} className="border border-slate-200 bg-slate-50/50 p-3.5 sm:p-4 dark:border-white/10 dark:bg-white/[0.025]">
+                        <p className="mb-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")} · {section.label}</p>
                         <ProfileSection member={member} section={section} />
                       </motion.section>
                     ))}
@@ -628,6 +662,23 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
           </motion.div>
         </div>
       </section>
+
+      {memberProjects.length > 0 && (
+        <section className="container mx-auto max-w-5xl px-4 py-12">
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-slate-200 pb-4 dark:border-white/10">
+            <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Dấu ấn thực chiến</p><h2 className="mt-1 text-2xl font-black uppercase text-slate-950 dark:text-white">Dự án đã tham gia</h2></div>
+            <span className="text-xs font-bold text-slate-400">{memberProjects.length} dự án</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {memberProjects.map((project) => (
+              <Link key={project.id} href={`/du-an/${project.slug}`} className="group overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-[#ed1c24] hover:shadow-lg dark:border-white/10 dark:bg-[#101010]">
+                <div className="relative aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-900">{project.image && <Image src={project.image} alt={project.title} fill unoptimized className="object-cover transition duration-500 group-hover:scale-105" />}</div>
+                <div className="p-4"><p className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24]">{project.category || "Dự án GZV"}</p><h3 className="mt-2 line-clamp-2 text-sm font-black uppercase text-slate-900 group-hover:text-[#ed1c24] dark:text-white">{project.title}</h3><p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{project.profile_contribution || project.excerpt || project.description}</p><span className="mt-4 inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#ed1c24]">Chi tiết dự án <ExternalLink className="h-3 w-3" /></span></div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {profileViewMode === "tabs" && <MemberCardShowcase member={member} />}
 
