@@ -134,8 +134,14 @@ export default function PartnersListSection({
       loadData()
     }
 
+    const channel = supabase
+      .channel("public-partners-list")
+      .on("postgres_changes", { event: "*", schema: "public", table: "partners" }, () => loadData())
+      .subscribe()
+
     return () => {
       active = false
+      void supabase.removeChannel(channel)
     }
   }, [initialPartners])
 
@@ -274,17 +280,18 @@ export default function PartnersListSection({
         transition={{ delay: index * 0.04, duration: 0.35 }}
         className="h-full"
       >
-        <Card className="group relative p-4 h-full bg-white border border-slate-200/90 rounded-none dark:border-white/10 dark:bg-slate-900 flex flex-col items-center justify-between transition-all duration-300 hover:border-[#ed1c24] hover:shadow-md overflow-hidden text-center">
+        <Card className="group relative p-3 h-full bg-white/95 border border-slate-200/90 rounded-none dark:border-white/10 dark:bg-slate-900/95 flex flex-col items-center justify-between transition-all duration-300 hover:border-[#ed1c24] hover:shadow-md overflow-hidden text-center">
           {/* Logo container */}
-          <div className="w-full h-32 flex items-center justify-center overflow-hidden p-2">
+          <div className="relative w-full aspect-[4/3] overflow-hidden border border-slate-200/80 bg-slate-50 dark:border-white/10 dark:bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={partner.logo_url || "/placeholder.jpg"}
               alt={partner.name}
-              className="max-h-full max-w-full object-contain transition-transform duration-300"
+              className="absolute inset-0 h-full w-full object-contain transition-transform duration-300"
               style={{
                 objectPosition: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
                 transform: `scale(${(partner.logo_scale ?? 100) / 100})`,
+                transformOrigin: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
               }}
               loading="lazy"
             />

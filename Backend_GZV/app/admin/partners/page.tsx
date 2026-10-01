@@ -809,12 +809,19 @@ function SortablePartnerAdminCard({
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
             {p.logo_url ? (
-              <div className="relative overflow-hidden w-12 h-12 bg-slate-50 p-1.5 rounded-none border border-slate-200 flex items-center justify-center group-hover:bg-red-50/30 transition-colors">
+              <div className="relative overflow-hidden w-16 aspect-[4/3] bg-slate-50 rounded-none border border-slate-200 flex items-center justify-center group-hover:bg-red-50/30 transition-colors dark:bg-slate-950 dark:border-white/10">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={p.logo_url}
                   alt={p.name}
-                  style={{ width: "auto", height: "100%", maxWidth: "100%", objectFit: "contain" }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    objectPosition: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
+                    transform: `scale(${(p.logo_scale ?? 100) / 100})`,
+                    transformOrigin: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
+                  }}
                   className="rounded-none group-hover:scale-105 transition-transform duration-300"
                 />
               </div>

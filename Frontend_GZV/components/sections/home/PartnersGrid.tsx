@@ -50,10 +50,11 @@ const InfiniteMarqueeRow = ({
       <img
         src={partner.logo_url || partner.image || "/placeholder.jpg"}
         alt={partner.name || partner.title || "GZV Partner"}
-        className={`object-contain ${logoClass}`}
+        className="absolute inset-0 h-full w-full object-contain transition-transform duration-300"
         style={{
           objectPosition: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
           transform: `scale(${(partner.logo_scale ?? 100) / 100})`,
+          transformOrigin: `${partner.logo_position_x ?? 50}% ${partner.logo_position_y ?? 50}%`,
         }}
         loading="lazy"
       />
@@ -74,7 +75,7 @@ const InfiniteMarqueeRow = ({
   }
 
   // ĐÃ XÓA HOVER: Không nổi viền shadow, không nổi z-index khi rê chuột
-  const logoBoxClass = `flex items-center justify-center shrink-0 relative border border-slate-200/80 bg-white -ml-px -mt-px dark:border-white/10 dark:bg-slate-900 ${sizeClass}`
+  const logoBoxClass = `flex items-center justify-center shrink-0 relative overflow-hidden border border-slate-200/80 bg-white -ml-px -mt-px dark:border-white/10 dark:bg-slate-900 ${sizeClass}`
 
   // LOGIC: Sẽ kích hoạt trượt nếu Vượt quá số ô HOẶC Admin cố tình cài đặt hướng trượt (khác "still")
   const shouldScroll = isOverflowing || direction !== "still"
@@ -201,8 +202,14 @@ export default function PartnersGrid({
       setLoading(false)
     }
 
+    const channel = supabase
+      .channel("public-partners-grid")
+      .on("postgres_changes", { event: "*", schema: "public", table: "partners" }, () => fetchData())
+      .subscribe()
+
     return () => {
       active = false
+      void supabase.removeChannel(channel)
     }
   }, [initialPartners, initialSectionConfig])
 

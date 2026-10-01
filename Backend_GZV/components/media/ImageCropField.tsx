@@ -13,6 +13,7 @@ type Props = {
   maxScale?: number
   label?: string
   cropHeightClassName?: string
+  objectFit?: "cover" | "contain"
 }
 
 /**
@@ -32,6 +33,7 @@ export function ImageCropField({
   maxScale = 200,
   label = "Căn chỉnh khung ảnh",
   cropHeightClassName = "h-56",
+  objectFit = "cover",
 }: Props) {
   if (!imageUrl) return null
 
@@ -70,8 +72,14 @@ export function ImageCropField({
         <img
           src={imageUrl}
           alt="Crop preview"
-          className="pointer-events-none h-full w-full select-none object-cover"
-          style={{ objectPosition: `${positionX}% ${positionY}%`, transform: `scale(${scale / 100})` }}
+          className={`pointer-events-none absolute inset-0 h-full w-full select-none ${
+            objectFit === "contain" ? "object-contain" : "object-cover"
+          }`}
+          style={{
+            objectPosition: `${positionX}% ${positionY}%`,
+            transform: `scale(${scale / 100})`,
+            transformOrigin: `${positionX}% ${positionY}%`,
+          }}
         />
         <div
           className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"

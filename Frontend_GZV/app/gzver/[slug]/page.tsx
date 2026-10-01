@@ -30,6 +30,8 @@ import {
   TrendingUp,
   UserRound,
   Youtube,
+  LayoutGrid,
+  Rows3,
 } from "lucide-react"
 import { api, gzver } from "@/lib/api-supabase"
 import { MemberCardShowcase, getMemberCard } from "@/components/gzver/MemberCard"
@@ -326,6 +328,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
   const [member, setMember] = useState<gzver | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("")
+  const [profileViewMode, setProfileViewMode] = useState<"one_view" | "tabs">("one_view")
 
   useEffect(() => {
     let active = true
@@ -350,6 +353,9 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
     if (!member) return []
     const customSections = sortVisible<ProfileSectionData>(member.profile_tabs)
     return (customSections.length ? customSections : defaultSections).filter((section) => sectionHasContent(member, section))
+  }, [member])
+  useEffect(() => {
+    if (member) setProfileViewMode(member.profile_view_mode === "tabs" ? "tabs" : "one_view")
   }, [member])
   const currentSection = sections.find((section, index) => (section.key || `section-${index}`) === activeTab) || sections[0]
   const badges = useMemo(() => sortVisible<ProfileBadge>(member?.profile_badges), [member])
@@ -546,9 +552,20 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 )}
               </aside>
 
-              {/* Main Content Area: tab gọn, chỉ hiện mục có nội dung */}
+              {/* Main Content Area: one-view ưu tiên, visitor vẫn có thể chuyển sang tabs */}
               <div className="min-w-0 bg-white p-5 sm:p-6 dark:bg-[#0b0b0b]">
-                {sections.length > 1 && (
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 dark:border-white/10">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{profileViewMode === "one_view" ? "Tất cả nội dung đang hiển thị" : "Đang xem theo từng mục"}</p>
+                  </div>
+                  <div className="flex border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5">
+                    <button type="button" onClick={() => setProfileViewMode("one_view")} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[10px] font-black uppercase ${profileViewMode === "one_view" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}><LayoutGrid className="h-3.5 w-3.5" /> One-view</button>
+                    <button type="button" onClick={() => setProfileViewMode("tabs")} className={`inline-flex items-center gap-1.5 px-3 py-2 text-[10px] font-black uppercase ${profileViewMode === "tabs" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}><Rows3 className="h-3.5 w-3.5" /> Tabs</button>
+                  </div>
+                </div>
+
+                {profileViewMode === "tabs" && sections.length > 1 && (
                   <div className="sticky top-20 z-20 -mx-5 mb-6 border-b border-slate-200 bg-white/95 px-5 pb-3 pt-1 backdrop-blur sm:-mx-6 sm:px-6 dark:border-white/10 dark:bg-[#0b0b0b]/95">
                     <div role="tablist" className="flex gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {sections.map((section, index) => {
@@ -579,7 +596,21 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                   </div>
                 )}
 
-                {currentSection ? (
+                {profileViewMode === "one_view" ? (
+                  <div className="space-y-5">
+                    {sections.map((section, index) => (
+                      <motion.section key={section.key || `section-${index}`} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: Math.min(index * 0.04, 0.2) }} className="border border-slate-200 bg-slate-50/50 p-4 sm:p-5 dark:border-white/10 dark:bg-white/[0.025]">
+                        <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Mục {String(index + 1).padStart(2, "0")} · {section.label}</p>
+                        <ProfileSection member={member} section={section} />
+                      </motion.section>
+                    ))}
+                    {getMemberCard(member).enabled !== false && (
+                      <section id="card-visit" className="scroll-mt-24 border border-slate-200 bg-slate-950 p-4 sm:p-5 dark:border-white/10">
+                        <MemberCardShowcase member={member} />
+                      </section>
+                    )}
+                  </div>
+                ) : currentSection ? (
                   <motion.div key={currentSection.key || currentSection.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
                     {sections.length === 1 && (
                       <p className="mb-4 text-xs font-black uppercase tracking-[0.2em] text-[#ed1c24]">{currentSection.label}</p>
@@ -598,7 +629,7 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
         </div>
       </section>
 
-      <MemberCardShowcase member={member} />
+      {profileViewMode === "tabs" && <MemberCardShowcase member={member} />}
 
       {onlineCards.length > 0 && (
         <section className="container max-w-5xl mx-auto px-4 py-16">

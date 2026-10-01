@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import {
   Check,
   CheckSquare,
+  Cloud,
   Code2,
   Copy,
   Download,
@@ -35,6 +36,7 @@ import {
 } from "lucide-react"
 
 const BUCKET = "media"
+const DEFAULT_DRIVE_URL = "https://drive.google.com/drive/folders/1PEDTMRkPQeLNXh6qE-7SKM4woQup6-Ka"
 const INITIAL_FOLDERS = [
   "all",
   "site",
@@ -57,7 +59,10 @@ type MediaItem = {
   mimetype: string
   created_at?: string
   updated_at?: string
+  source?: "storage" | "external"
 }
+
+type DriveFolder = { name: string; url: string }
 
 function formatBytes(bytes: number) {
   if (!bytes) return "0 B"
@@ -93,6 +98,12 @@ export default function AdminImagesPage() {
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
+  const [mediaSource, setMediaSource] = useState<"storage" | "drive">("storage")
+  const [driveUrl, setDriveUrl] = useState(DEFAULT_DRIVE_URL)
+  const [driveFolders, setDriveFolders] = useState<DriveFolder[]>([])
+  const [activeDriveUrl, setActiveDriveUrl] = useState(DEFAULT_DRIVE_URL)
+  const [newDriveFolderName, setNewDriveFolderName] = useState("")
+  const [newDriveFolderUrl, setNewDriveFolderUrl] = useState("")
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => ({
@@ -136,10 +147,11 @@ export default function AdminImagesPage() {
             const json = await res.json()
             if (json.success && Array.isArray(json.data?.files)) {
               for (const file of json.data.files) {
-                if (!fileItems.some((it) => it.name === (file.name || file.file_name))) {
+                const filePath = file.path || file.storage_path || `${targetF}/${file.name || file.file_name}`
+                if (!fileItems.some((it) => it.path === filePath)) {
                   fileItems.push({
                     name: file.name || file.file_name,
-                    path: file.path || file.storage_path || `${targetF}/${file.name || file.file_name}`,
+                    path: filePath,
                     folder: targetF,
                     url: file.url || file.file_url,
                     size: file.size || file.file_size_bytes || 0,
@@ -154,36 +166,76 @@ export default function AdminImagesPage() {
 
           // B. Also fetch from Supabase Storage bucket and merge unique files
           try {
-            const { data } = await supabase.storage.from(BUCKET).list(targetF, {
-              limit: 500,
-              sortBy: { column: "created_at", order: "desc" },
-            })
-            if (data && data.length > 0) {
-              const validFiles = data.filter(
-                (o) => o.name && o.name !== ".keep" && /\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov|pdf|docx?)$/i.test(o.name)
-              )
-              for (const file of validFiles) {
-                if (!fileItems.some((item) => item.name === file.name)) {
-                  const path = `${targetF}/${file.name}`
-                  const {
-                    data: { publicUrl },
-                  } = supabase.storage.from(BUCKET).getPublicUrl(path)
-                  fileItems.push({
-                    name: file.name,
-                    path,
-                    folder: targetF,
-                    url: publicUrl,
-                    size: (file.metadata as any)?.size ?? 0,
-                    mimetype: (file.metadata as any)?.mimetype ?? "",
-                    created_at: file.created_at || undefined,
-                    updated_at: file.updated_at || undefined,
-                  })
+            const collectStorageFiles = async (prefix: string, depth = 0): Promise<void> => {
+              if (depth > 8) return
+              const { data } = await supabase.storage.from(BUCKET).list(prefix, {
+                limit: 500,
+                sortBy: { column: "created_at", order: "desc" },
+              })
+              for (const file of data || []) {
+                if (!file.name || file.name === ".keep") continue
+                const path = prefix ? `${prefix}/${file.name}` : file.name
+                const isFolder = file.id === null || !file.metadata
+                if (isFolder) {
+                  await collectStorageFiles(path, depth + 1)
+                  continue
                 }
+                if (!/\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov|pdf|docx?|pptx?|xlsx?)$/i.test(file.name)) continue
+                if (fileItems.some((item) => item.path === path)) continue
+                const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(path)
+                fileItems.push({
+                  name: file.name,
+                  path,
+                  folder: path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : targetF,
+                  url: publicData.publicUrl,
+                  size: (file.metadata as any)?.size ?? 0,
+                  mimetype: (file.metadata as any)?.mimetype ?? "",
+                  created_at: file.created_at || undefined,
+                  updated_at: file.updated_at || undefined,
+                })
               }
             }
+            await collectStorageFiles(targetF)
           } catch (e) {}
         })
       )
+
+      // Include media URLs referenced directly by GZVer profiles, even when
+      // the original file lives in another CDN or was pasted as an URL.
+      if (f === "all" || f === "gzvers") {
+        const { data: gzverRows } = await supabase
+          .from("gzvers")
+          .select("id, full_name, avatar_url, cover_image_url, cv_url, member_card, online_cards")
+        const externalItems: MediaItem[] = []
+        const addExternal = (url: unknown, name: string) => {
+          if (typeof url !== "string" || !/^https?:\/\//i.test(url.trim())) return
+          const cleanUrl = url.trim()
+          if (fileItems.some((item) => item.url === cleanUrl) || externalItems.some((item) => item.url === cleanUrl)) return
+          externalItems.push({
+            name,
+            path: `external:${cleanUrl}`,
+            folder: "gzvers",
+            url: cleanUrl,
+            size: 0,
+            mimetype: "",
+            source: "external",
+          })
+        }
+        for (const row of gzverRows || []) {
+          const safeName = String(row.full_name || "gzver").trim().replace(/\s+/g, "-").toLowerCase()
+          addExternal(row.avatar_url, `${safeName}-avatar`)
+          addExternal(row.cover_image_url, `${safeName}-cover`)
+          addExternal(row.cv_url, `${safeName}-cv`)
+          const card = row.member_card && typeof row.member_card === "object" ? row.member_card : {}
+          addExternal(card.front_image_url, `${safeName}-card-front`)
+          addExternal(card.back_image_url, `${safeName}-card-back`)
+          for (const [index, credential] of (Array.isArray(row.online_cards) ? row.online_cards : []).entries()) {
+            addExternal(credential?.front_image_url, `${safeName}-credential-${index + 1}-front`)
+            addExternal(credential?.back_image_url, `${safeName}-credential-${index + 1}-back`)
+          }
+        }
+        fileItems = [...fileItems, ...externalItems]
+      }
 
       setItems(fileItems)
       setSelectedItem((prev) => (prev ? fileItems.find((it) => it.path === prev.path) || fileItems[0] || null : fileItems[0] || null))
@@ -196,6 +248,18 @@ export default function AdminImagesPage() {
 
   useEffect(() => {
     loadFolders()
+    try {
+      const savedDriveUrl = localStorage.getItem("gzv_drive_media_url")
+      if (savedDriveUrl) {
+        setDriveUrl(savedDriveUrl)
+        setActiveDriveUrl(savedDriveUrl)
+      }
+      const savedFolders = localStorage.getItem("gzv_drive_media_folders")
+      if (savedFolders) {
+        const parsed = JSON.parse(savedFolders)
+        if (Array.isArray(parsed)) setDriveFolders(parsed.filter((folder) => folder?.name && folder?.url))
+      }
+    } catch {}
   }, [loadFolders])
 
   useEffect(() => {
@@ -365,6 +429,10 @@ export default function AdminImagesPage() {
 
   // 6. Xóa tệp (đồng bộ qua API + Supabase Storage)
   const handleDelete = async (item: MediaItem) => {
+    if (item.source === "external" || item.path.startsWith("external:")) {
+      toast({ title: "Đây là URL tham chiếu", description: "Hãy chỉnh URL trong hồ sơ GZVer hoặc nguồn CDN tương ứng." })
+      return
+    }
     if (!confirm(`Xóa vĩnh viễn "${item.name}"?`)) return
     try {
       // Try DELETE via API
@@ -387,7 +455,11 @@ export default function AdminImagesPage() {
   const handleBulkDelete = async () => {
     if (!selected.size) return
     if (!confirm(`Xóa vĩnh viễn ${selected.size} file đã chọn?`)) return
-    const paths = Array.from(selected)
+    const paths = Array.from(selected).filter((path) => !path.startsWith("external:"))
+    if (!paths.length) {
+      toast({ title: "Không có file Storage để xóa", description: "Các URL tham chiếu không bị xóa khỏi nguồn gốc." })
+      return
+    }
     try {
       await supabase.storage.from(BUCKET).remove(paths)
       toast({ title: `Đã xóa ${paths.length} file` })
@@ -397,6 +469,8 @@ export default function AdminImagesPage() {
       toast({ title: "Lỗi xóa hàng loạt", description: err.message, variant: "destructive" })
     }
   }
+
+  const driveId = activeDriveUrl.match(/folders\/([a-zA-Z0-9_-]+)/)?.[1] || "1PEDTMRkPQeLNXh6qE-7SKM4woQup6-Ka"
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
@@ -477,6 +551,30 @@ export default function AdminImagesPage() {
           </div>
         </div>
       </div>
+
+      <div className="flex flex-wrap items-center gap-2 border border-slate-200 bg-white p-2 shadow-xs dark:border-white/10 dark:bg-slate-900">
+        <button
+          type="button"
+          onClick={() => setMediaSource("storage")}
+          className={`inline-flex h-10 items-center gap-2 px-4 text-xs font-black uppercase tracking-wide transition-colors ${
+            mediaSource === "storage" ? "bg-[#ed1c24] text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          }`}
+        >
+          <HardDrive className="h-4 w-4" /> GZV Storage
+        </button>
+        <button
+          type="button"
+          onClick={() => setMediaSource("drive")}
+          className={`inline-flex h-10 items-center gap-2 px-4 text-xs font-black uppercase tracking-wide transition-colors ${
+            mediaSource === "drive" ? "bg-[#ed1c24] text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Cloud className="h-4 w-4" /> Google Drive GZV
+        </button>
+      </div>
+
+      {mediaSource === "storage" ? (
+        <>
 
       {/* Toolbar & Folders */}
       <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-3">
@@ -943,6 +1041,124 @@ export default function AdminImagesPage() {
           )}
         </div>
       </div>
+
+        </>
+      ) : (
+        <section className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900">
+          <div className="border-b border-slate-200 bg-slate-50 p-5 dark:border-white/10 dark:bg-slate-950">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">GZV DIGITAL ARCHIVE</p>
+                <h3 className="mt-1 text-xl font-black uppercase text-slate-900 dark:text-white">Kho Drive trung tâm</h3>
+                <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                  Mở và quản lý ảnh, video, hồ sơ và tài liệu gốc trên Google Drive của GZV. File được chọn trong Drive vẫn có thể lấy link để dùng trong CMS.
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={() => window.open(activeDriveUrl, "_blank", "noopener,noreferrer")}
+                className="rounded-none bg-[#ed1c24] text-xs font-black uppercase text-white hover:bg-[#c91218]"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" /> Mở Drive đầy đủ
+              </Button>
+            </div>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={driveUrl}
+                onChange={(event) => setDriveUrl(event.target.value)}
+                placeholder="Dán URL thư mục Google Drive..."
+                className="h-10 rounded-none bg-white font-mono text-xs dark:border-white/10 dark:bg-slate-900 dark:text-white"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  localStorage.setItem("gzv_drive_media_url", driveUrl.trim() || DEFAULT_DRIVE_URL)
+                  setActiveDriveUrl(driveUrl.trim() || DEFAULT_DRIVE_URL)
+                  toast({ title: "Đã lưu thư mục Drive mặc định" })
+                }}
+                className="h-10 shrink-0 rounded-none text-xs font-black uppercase"
+              >
+                Lưu URL Drive
+              </Button>
+            </div>
+            <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
+              <div className="mb-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveDriveUrl(driveUrl || DEFAULT_DRIVE_URL)}
+                  className={`inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase ${activeDriveUrl === driveUrl ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"}`}
+                >
+                  <HardDrive className="h-3.5 w-3.5" /> Kho chính
+                </button>
+                {driveFolders.map((folder) => (
+                  <div key={`${folder.name}-${folder.url}`} className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setActiveDriveUrl(folder.url)}
+                      className={`inline-flex items-center gap-2 border px-3 py-2 text-[10px] font-black uppercase ${activeDriveUrl === folder.url ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-600 dark:border-white/10 dark:text-slate-300"}`}
+                    >
+                      <Folder className="h-3.5 w-3.5" /> {folder.name}
+                    </button>
+                    <button
+                      type="button"
+                      title="Xóa folder shortcut"
+                      onClick={() => {
+                        const next = driveFolders.filter((item) => item.url !== folder.url)
+                        setDriveFolders(next)
+                        localStorage.setItem("gzv_drive_media_folders", JSON.stringify(next))
+                        if (activeDriveUrl === folder.url) setActiveDriveUrl(driveUrl || DEFAULT_DRIVE_URL)
+                      }}
+                      className="border-y border-r border-slate-200 px-2 py-2 text-slate-400 hover:text-[#ed1c24] dark:border-white/10"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="grid gap-2 md:grid-cols-[180px_1fr_auto]">
+                <Input value={newDriveFolderName} onChange={(event) => setNewDriveFolderName(event.target.value)} placeholder="Tên folder" className="h-9 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
+                <Input value={newDriveFolderUrl} onChange={(event) => setNewDriveFolderUrl(event.target.value)} placeholder="Dán URL folder Drive con..." className="h-9 rounded-none font-mono text-xs dark:border-white/10 dark:bg-slate-900" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const name = newDriveFolderName.trim()
+                    const url = newDriveFolderUrl.trim()
+                    if (!name || !/^https:\/\/drive\.google\.com\//i.test(url)) {
+                      toast({ title: "URL Drive chưa hợp lệ", variant: "destructive" })
+                      return
+                    }
+                    const next = [...driveFolders.filter((item) => item.url !== url), { name, url }]
+                    setDriveFolders(next)
+                    setActiveDriveUrl(url)
+                    localStorage.setItem("gzv_drive_media_folders", JSON.stringify(next))
+                    setNewDriveFolderName("")
+                    setNewDriveFolderUrl("")
+                    toast({ title: `Đã thêm folder Drive: ${name}` })
+                  }}
+                  className="h-9 rounded-none text-xs font-black uppercase"
+                >
+                  <FolderPlus className="mr-1.5 h-3.5 w-3.5" /> Thêm folder
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="bg-slate-100 p-3 dark:bg-black/30 sm:p-5">
+            <div className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
+              <iframe
+                title="Google Drive GZV"
+                src={`https://drive.google.com/embeddedfolderview?id=${driveId}#list`}
+                className="h-[68vh] min-h-[560px] w-full"
+                loading="lazy"
+              />
+            </div>
+            <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-400">
+              Nếu trình duyệt không cho nhúng, hãy dùng nút “Mở Drive đầy đủ” để xem toàn bộ thư mục.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Lightbox / Preview Dialog */}
       <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>

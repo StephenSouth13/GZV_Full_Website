@@ -230,6 +230,7 @@
       visible?: boolean;
       sort_order?: number;
     }>;
+    profile_view_mode?: "one_view" | "tabs";
     profile_badges?: Array<{
       label?: string;
       icon?: string;

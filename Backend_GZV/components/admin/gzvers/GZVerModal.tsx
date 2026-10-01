@@ -201,6 +201,7 @@ const defaultForm = {
     { label: "Zalo", platform: "zalo", href: "", visible: true, sort_order: 30 },
   ] as SocialLink[],
   profile_tabs: defaultSections,
+  profile_view_mode: "one_view" as "one_view" | "tabs",
   profile_badges: [] as ProfileBadge[],
   online_cards: [] as OnlineCard[],
   member_card: defaultMemberCard,
@@ -568,6 +569,17 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                 >
                   Áp dụng
                 </Button>
+              </div>
+
+              <div className="flex flex-col gap-3 border border-[#ed1c24]/20 bg-red-50/60 p-4 dark:border-[#ed1c24]/30 dark:bg-red-950/10 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase text-slate-900 dark:text-white">Giao diện hồ sơ public</p>
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">One-view hiển thị toàn bộ nội dung ngay từ đầu; Tab giữ giao diện gọn.</p>
+                </div>
+                <div className="flex shrink-0 border border-slate-200 bg-white p-1 dark:border-white/10 dark:bg-slate-950">
+                  <button type="button" onClick={() => setFormData({ ...formData, profile_view_mode: "one_view" })} className={`px-3 py-2 text-[10px] font-black uppercase ${formData.profile_view_mode !== "tabs" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}>One-view</button>
+                  <button type="button" onClick={() => setFormData({ ...formData, profile_view_mode: "tabs" })} className={`px-3 py-2 text-[10px] font-black uppercase ${formData.profile_view_mode === "tabs" ? "bg-[#ed1c24] text-white" : "text-slate-600 dark:text-slate-300"}`}>Tabs gọn</button>
+                </div>
               </div>
               {formData.linked_author_id && (
                 <p className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">

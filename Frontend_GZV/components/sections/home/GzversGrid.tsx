@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { ArrowRight, Loader2 } from "lucide-react"
+import { ArrowRight, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { api, supabase } from "@/lib/api-supabase"
 
@@ -14,6 +14,8 @@ export interface GzversGridProps {
   show_all_tab?: boolean
   department_order?: string[]
   selected_departments?: string[]
+  showSearch?: boolean
+  show_search?: boolean
   [key: string]: any
 }
 
@@ -25,12 +27,15 @@ export default function GzversGrid({
   show_all_tab = true,
   department_order,
   selected_departments,
+  showSearch: propShowSearch,
+  show_search: propShowSearchSnake,
 }: GzversGridProps) {
   const [items, setItems] = useState<any[]>([])
   const [departments, setDepartments] = useState<any[]>([])
   const [dbData, setDbData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState("all")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const isDark = background ? String(background).toLowerCase() !== "#ffffff" && String(background).toLowerCase() !== "white" : false
 
@@ -210,9 +215,20 @@ export default function GzversGrid({
 
   const filteredItems = useMemo(() => {
     if (!activeTabObj) return items.slice(0, Number(limit) || 50)
-    const list = items.filter((m) => matchDepartment(m, activeTabObj))
+    const query = searchQuery.trim().toLowerCase()
+    const list = items.filter((m) => {
+      if (!matchDepartment(m, activeTabObj)) return false
+      if (!query) return true
+      return `${m.full_name || ""} ${m.position || ""} ${m.company || ""} ${m.department_name || ""} ${m.headline || ""}`.toLowerCase().includes(query)
+    })
     return list.slice(0, Number(limit) || 50)
-  }, [items, activeTabObj, limit])
+  }, [items, activeTabObj, limit, searchQuery])
+
+  const matchesSearch = (member: any) => {
+    const query = searchQuery.trim().toLowerCase()
+    if (!query) return true
+    return `${member.full_name || ""} ${member.position || ""} ${member.company || ""} ${member.department_name || ""} ${member.headline || ""}`.toLowerCase().includes(query)
+  }
 
   if (dbData?.is_visible === false && !propTitle) {
     return null
@@ -220,6 +236,7 @@ export default function GzversGrid({
 
   const title = propTitle || dbData?.title || "ĐỘI NGŨ NHÂN SỰ GZV"
   const subtitle = propSubtitle || dbData?.subtitle || "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành"
+  const showSearch = propShowSearch ?? propShowSearchSnake ?? dbData?.show_search ?? dbData?.showSearch ?? true
 
   // Description for the active department
   const currentDeptDescription = useMemo(() => {
@@ -293,6 +310,18 @@ export default function GzversGrid({
             })}
           </div>
 
+          {showSearch && (
+            <div className="relative w-full max-w-xl">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Tìm theo tên, chức danh, ban hoặc lĩnh vực..."
+                className={`h-11 w-full border bg-white pl-10 pr-4 text-xs font-bold outline-none transition focus:border-[#ed1c24] focus:ring-1 focus:ring-[#ed1c24] dark:bg-slate-900 ${isDark ? "border-white/10 text-white placeholder:text-white/40" : "border-slate-200 text-slate-900 dark:border-white/10 dark:text-white"}`}
+              />
+            </div>
+          )}
+
           {/* Department Description Card */}
           {activeFilter !== "all" && currentDeptDescription && (
             <div
@@ -322,7 +351,7 @@ export default function GzversGrid({
             {filterTabs
               .filter((tab) => tab.id !== "all")
               .map((tab) => {
-                const deptMembers = items.filter((m) => matchDepartment(m, tab))
+                const deptMembers = items.filter((m) => matchDepartment(m, tab) && matchesSearch(m)).slice(0, Number(limit) || 50)
                 if (deptMembers.length === 0) return null
 
                 return (

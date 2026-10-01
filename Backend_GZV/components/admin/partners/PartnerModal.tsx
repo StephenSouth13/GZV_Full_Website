@@ -239,16 +239,17 @@ export function PartnerModal({
                 Logo nhận diện (Tùy chọn - có thể thêm sau)
               </Label>
 
-              <div className="relative aspect-[4/3] overflow-hidden border border-slate-200 bg-white p-4 shadow-2xs dark:border-white/10 flex items-center justify-center">
+              <div className="relative aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-50 shadow-2xs dark:border-white/10 dark:bg-slate-950">
                 {form.logo_url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={form.logo_url}
                     alt="Logo preview"
-                    className="max-h-full max-w-full object-contain transition-transform duration-300"
+                    className="absolute inset-0 h-full w-full object-contain transition-transform duration-300"
                     style={{
                       objectPosition: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
                       transform: `scale(${(form.logo_scale ?? 100) / 100})`,
+                      transformOrigin: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
                     }}
                   />
                 ) : (
@@ -324,6 +325,7 @@ export function PartnerModal({
                   scale={form.logo_scale ?? 100}
                   aspect="4/3"
                   cropHeightClassName="h-40"
+                  objectFit="contain"
                   label="Căn chỉnh logo trong khung"
                   onChange={(patch) =>
                     setForm((p: any) => ({
@@ -341,18 +343,17 @@ export function PartnerModal({
                   <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Preview thật tại trang Đối tác
                   </p>
-                  <div className="w-40 border border-slate-200 bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-slate-900">
-                    <div className="w-full h-24 flex items-center justify-center overflow-hidden">
+                  <div className="relative w-40 aspect-[4/3] overflow-hidden border border-slate-200 bg-slate-50 shadow-2xs dark:border-white/10 dark:bg-slate-950">
                       <img
                         src={form.logo_url}
                         alt="Preview module"
-                        className="max-h-full max-w-full object-contain"
+                        className="absolute inset-0 h-full w-full object-contain"
                         style={{
                           objectPosition: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
                           transform: `scale(${(form.logo_scale ?? 100) / 100})`,
+                          transformOrigin: `${form.logo_position_x ?? 50}% ${form.logo_position_y ?? 50}%`,
                         }}
                       />
-                    </div>
                   </div>
                 </div>
               )}
