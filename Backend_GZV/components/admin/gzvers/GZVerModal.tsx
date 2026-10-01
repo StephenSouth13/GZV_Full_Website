@@ -35,6 +35,7 @@ import {
 import { toast } from "@/hooks/use-toast"
 import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { QRCodeSVG } from "qrcode.react"
+import { CvPreview } from "./CvPreview"
 
 type Department = {
   id: string
@@ -239,12 +240,19 @@ function sortByOrder<T extends { sort_order?: number | null }>(items: any): T[] 
 export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
   const [loading, setLoading] = useState(false)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
+  const [previewContent, setPreviewContent] = useState<"profile" | "cv">("profile")
   const [formData, setFormData] = useState<any>(defaultForm)
   const [authors, setAuthors] = useState<any[]>([])
   const [selectedAuthorId, setSelectedAuthorId] = useState("")
   const [projectOptions, setProjectOptions] = useState<any[]>([])
   const [projectHighlights, setProjectHighlights] = useState<Record<string, any>>({})
+  const [projectSearch, setProjectSearch] = useState("")
   const [projectLoadError, setProjectLoadError] = useState("")
+  const cvProjects = useMemo(() => projectOptions.filter((project) => {
+    const highlight = projectHighlights[project.id]
+    return highlight ? highlight.is_visible !== false : Boolean(formData.id && Array.isArray(project.author_ids) && project.author_ids.includes(formData.id))
+  }).map((project) => ({ ...project, contribution: projectHighlights[project.id]?.contribution })), [projectOptions, projectHighlights, formData.id])
+  const cvPerson = { ...formData, department_name: departments?.find((department: Department) => department.id === formData.department_id)?.name || formData.department_name }
 
   useEffect(() => {
     if (!open) return
@@ -274,7 +282,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         if (gzver?.id) {
           const result = await supabase.from("gzver_project_highlights").select("*").eq("gzver_id", gzver.id)
           if (result.error) {
-            setProjectLoadError(`Dự án đã tải, nhưng phần vai trò/đóng góp riêng chưa khả dụng: ${result.error.message}`)
+            setProjectLoadError(`Không đọc được danh sách dự án đã gắn: ${result.error.message}`)
           } else {
             highlights = result.data || []
           }
@@ -1315,13 +1323,15 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             {/* TAB 7: CV DOCS */}
             <TabsContent value="docs" className="mt-0">
               <div className="mb-4 grid gap-4 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900 sm:grid-cols-2">
-                <div className="sm:col-span-2"><p className="text-xs font-black uppercase text-slate-900 dark:text-white">CV tự động từ hồ sơ GZVer</p><p className="mt-1 text-[11px] text-slate-500">Dùng thông tin, ảnh, kỹ năng, kinh nghiệm và thành tựu đã nhập. Trang CV hỗ trợ In / Lưu thành PDF.</p></div>
+                <div className="sm:col-span-2"><p className="text-xs font-black uppercase text-slate-900 dark:text-white">CV tự động từ hồ sơ GZVer</p><p className="mt-1 text-[11px] text-slate-500">Xem ngay dữ liệu đang biên tập và tải PDF một trang liền mạch, kèm logo GZV. Lưu hồ sơ để cập nhật trang CV công khai.</p></div>
                 <div><Label className="text-[10px] font-black uppercase">Mẫu CV</Label><Select value={formData.cv_settings?.template || "executive"} onValueChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, template: value } }))}><SelectTrigger className="mt-1 rounded-none"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="executive">Executive / Đỏ GZV</SelectItem><SelectItem value="minimal">Minimal / Trắng</SelectItem><SelectItem value="midnight">Midnight / Đen</SelectItem></SelectContent></Select></div>
                 <div><Label className="text-[10px] font-black uppercase">Màu nhấn</Label><div className="mt-1 flex gap-2"><Input type="color" value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="h-9 w-14 rounded-none p-1" /><Input value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="rounded-none font-mono" /></div></div>
                 <div className="flex items-center justify-between border p-3"><Label>Hiện thông tin liên hệ trong CV</Label><Switch checked={formData.cv_settings?.show_contact !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_contact: value } }))} /></div>
                 <div className="flex items-center justify-between border p-3"><Label>Đưa dự án vào CV</Label><Switch checked={formData.cv_settings?.show_projects !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_projects: value } }))} /></div>
-                {formData.slug && <a href={`${FRONTEND_URL}/gzver/${formData.slug}/cv`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center justify-center border border-[#ed1c24] px-4 text-xs font-black uppercase text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white sm:col-span-2"><FileText className="mr-2 h-4 w-4" />Xem / in CV tự động</a>}
+                {formData.slug && <a href={`${FRONTEND_URL}/gzver/${formData.slug}/cv`} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center justify-center border border-[#ed1c24] px-4 text-xs font-black uppercase text-[#ed1c24] hover:bg-[#ed1c24] hover:text-white sm:col-span-2"><FileText className="mr-2 h-4 w-4" />Mở trang CV công khai đã lưu</a>}
               </div>
+              {projectLoadError && formData.cv_settings?.show_projects !== false && <p role="alert" className="mb-3 text-sm text-red-600">{projectLoadError}</p>}
+              <CvPreview person={cvPerson} projects={cvProjects} />
               <div className="flex min-h-[260px] flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-slate-900/50 p-8 text-center rounded-none">
                 <div className="mb-4 bg-red-50 dark:bg-red-950/40 p-4 border border-red-200 dark:border-red-900 rounded-none">
                   <FileText size={36} className="text-[#ed1c24]" />
@@ -1373,20 +1383,56 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             </TabsContent>
 
             <TabsContent value="projects" className="mt-0 space-y-3">
-              <div className="border-l-4 border-[#ed1c24] bg-slate-50 p-4 dark:bg-slate-900"><p className="text-xs font-black uppercase">Dự án hiển thị trên hồ sơ</p><p className="mt-1 text-[11px] text-slate-500">Chọn dự án GZVer đã tham gia, thêm vai trò hoặc nội dung đóng góp riêng. Ảnh và nội dung dự án mặc định lấy từ trang dự án.</p></div>
-              {projectLoadError && <p role="alert" className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">Không tải được dự án: {projectLoadError}</p>}
-              {projectOptions.map((project) => {
-                const selected = projectHighlights[project.id]?.is_visible !== false && Boolean(projectHighlights[project.id])
-                return <div key={project.id} className={`border p-4 ${selected ? "border-[#ed1c24]" : "border-slate-200 dark:border-white/10"}`}>
-                  <div className="flex items-start gap-3"><input type="checkbox" checked={selected} onChange={(event) => setProjectHighlights((current) => ({ ...current, [project.id]: { ...(current[project.id] || {}), project_id: project.id, is_visible: event.target.checked } }))} className="mt-1 accent-[#ed1c24]" /><div className="min-w-0 flex-1"><p className="text-sm font-black uppercase">{project.title}</p><p className="mt-1 text-[10px] text-slate-500">{project.slug}</p></div>{project.image && <img src={project.image} alt="" className="h-12 w-20 object-cover" />}</div>
-                  {selected && <div className="mt-3"><Label className="text-[10px] font-black uppercase">Vai trò / đóng góp của GZVer trong dự án</Label><Textarea value={projectHighlights[project.id]?.contribution || ""} onChange={(event) => setProjectHighlights((current) => ({ ...current, [project.id]: { ...current[project.id], project_id: project.id, is_visible: true, contribution: event.target.value } }))} className="mt-1 min-h-20 rounded-none" placeholder="Ví dụ: Tham gia chuyển đổi số hồ sơ Kỷ lục gia, chuẩn hóa dữ liệu và xây dựng trải nghiệm tra cứu..." /></div>}
+              {/* GZVer là nhân sự triển khai: chỉ chọn dự án đã tham gia, hồ sơ hiển thị lưới dự án giống trang /du-an */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-l-4 border-[#ed1c24] bg-slate-50 p-4 dark:bg-slate-900">
+                <div>
+                  <p className="text-xs font-black uppercase">Dự án đã tham gia</p>
+                  <p className="mt-1 text-[11px] text-slate-500">Tick các dự án GZVer này tham gia triển khai. Hồ sơ hiển thị ảnh, logo và tên dự án lấy từ trang Dự án.</p>
                 </div>
-              })}
+                <span className="bg-[#ed1c24] px-3 py-1 text-[11px] font-black uppercase text-white">
+                  {Object.values(projectHighlights).filter((item: any) => item?.is_visible !== false).length} đã chọn
+                </span>
+              </div>
+              {projectLoadError && <p role="alert" className="border border-red-200 bg-red-50 p-4 text-sm text-red-700">Không tải được dự án: {projectLoadError}</p>}
+              {projectOptions.length > 6 && (
+                <Input value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Tìm dự án..." className="h-9 rounded-none text-xs" />
+              )}
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+                {projectOptions
+                  .filter((project) => !projectSearch.trim() || `${project.title} ${project.category || ""}`.toLowerCase().includes(projectSearch.trim().toLowerCase()))
+                  .map((project) => {
+                    const selected = projectHighlights[project.id]?.is_visible !== false && Boolean(projectHighlights[project.id])
+                    const image = project.image || project.thumbnail_url
+                    return (
+                      <button
+                        key={project.id}
+                        type="button"
+                        onClick={() => setProjectHighlights((current) => ({ ...current, [project.id]: { ...(current[project.id] || {}), project_id: project.id, is_visible: !selected } }))}
+                        className={`group relative overflow-hidden border-2 text-left transition ${selected ? "border-[#ed1c24] shadow-md" : "border-slate-200 opacity-80 hover:opacity-100 dark:border-white/10"}`}
+                      >
+                        <div className="aspect-[16/10] bg-slate-100 dark:bg-slate-800">
+                          {image ? <img src={image} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center text-[10px] font-black uppercase text-slate-400">GZV</div>}
+                        </div>
+                        <div className="p-2.5">
+                          <p className="line-clamp-2 text-[11px] font-black uppercase leading-snug">{project.title}</p>
+                          {project.category && <p className="mt-0.5 truncate text-[10px] text-slate-500">{project.category}</p>}
+                        </div>
+                        <span className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center border-2 ${selected ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-white bg-white/80 text-transparent"}`}>
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
+                      </button>
+                    )
+                  })}
+              </div>
               {!projectLoadError && projectOptions.length === 0 && <p className="border border-dashed p-8 text-center text-sm text-slate-500">Chưa có dự án trong hệ thống.</p>}
             </TabsContent>
 
             {/* TAB 8: PREVIEW */}
             <TabsContent value="preview" className="mt-0 space-y-4">
+              <div className="flex gap-2">
+                <Button type="button" variant={previewContent === "profile" ? "default" : "outline"} onClick={() => setPreviewContent("profile")} className="rounded-none text-xs">Hồ sơ GZVer</Button>
+                <Button type="button" variant={previewContent === "cv" ? "default" : "outline"} onClick={() => setPreviewContent("cv")} className="rounded-none text-xs"><FileText size={14} className="mr-2" />CV / PDF</Button>
+              </div>
               <div className="flex items-center justify-between border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-900 p-4 rounded-none">
                 <div>
                   <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
@@ -1413,7 +1459,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                   </Button>
                 </div>
               </div>
-              <ProfilePreview formData={formData} previewMode={previewMode} />
+              {previewContent === "cv" ? <CvPreview person={cvPerson} projects={cvProjects} mobile={previewMode === "mobile"} /> : <ProfilePreview formData={formData} previewMode={previewMode} />}
             </TabsContent>
           </div>
         </Tabs>

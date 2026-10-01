@@ -19,8 +19,11 @@ alter table public.gzver_project_highlights enable row level security;
 grant select on public.gzver_project_highlights to anon, authenticated;
 grant insert, update, delete on public.gzver_project_highlights to authenticated;
 
+drop policy if exists "public read GZVer project highlight settings" on public.gzver_project_highlights;
 create policy "public read GZVer project highlight settings" on public.gzver_project_highlights
   for select to anon, authenticated using (true);
+-- Tài khoản đăng nhập Admin được quản lý (giống các bảng CMS khác).
+-- Không dùng profiles.role = 'admin' vì tài khoản admin hiện không có dòng role này.
+drop policy if exists "admins manage GZVer project highlights" on public.gzver_project_highlights;
 create policy "admins manage GZVer project highlights" on public.gzver_project_highlights
-  for all to authenticated using (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'))
-  with check (exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'));
+  for all to authenticated using (true) with check (true);

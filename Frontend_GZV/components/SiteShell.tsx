@@ -53,6 +53,9 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     return navigation.find((item) => getPageSlugFromPath(item.href) === slug && !item.is_page_enabled)
   }, [navigation, pathname])
 
+  // CV is a standalone document: site navigation and floating UI must not enter print output.
+  if (/^\/gzver\/[^/]+\/cv\/?$/.test(pathname)) return <>{children}</>
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <ScrollToTop />
