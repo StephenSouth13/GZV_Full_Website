@@ -1,5 +1,46 @@
 import { CV_TEMPLATES, normalizeTemplate, type CvTemplate } from "./cv-model"
 
+function EyeIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+function EyeOffIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+      <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+      <line x1="2" x2="22" y1="2" y2="22" />
+    </svg>
+  )
+}
+
+function LayoutGridIcon({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="7" height="7" x="3" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="3" rx="1" />
+      <rect width="7" height="7" x="14" y="14" rx="1" />
+      <rect width="7" height="7" x="3" y="14" rx="1" />
+    </svg>
+  )
+}
+
+function Rows3Icon({ size = 13 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="4" x="3" y="3" rx="1" />
+      <rect width="18" height="4" x="3" y="10" rx="1" />
+      <rect width="18" height="4" x="3" y="17" rx="1" />
+    </svg>
+  )
+}
+
 export const ACCENT_PALETTES = [
   { hex: "#ed1c24", label: "Crimson Red (Mặc định GZV)" },
   { hex: "#10b981", label: "Emerald Green" },
@@ -12,11 +53,19 @@ export const ACCENT_PALETTES = [
 export function CvTemplatePicker({
   value,
   selectedAccent,
+  showProjects = true,
+  projectLayout = "grid-1",
   onChange,
+  onToggleProjects,
+  onChangeProjectLayout,
 }: {
   value: string
   selectedAccent?: string
+  showProjects?: boolean
+  projectLayout?: "grid-1" | "grid-2" | "grid-3"
   onChange: (template: CvTemplate, accent: string) => void
+  onToggleProjects?: (show: boolean) => void
+  onChangeProjectLayout?: (layout: "grid-1" | "grid-2" | "grid-3") => void
 }) {
   const currentTemplate = normalizeTemplate(value)
 
@@ -157,11 +206,12 @@ export function CvTemplatePicker({
         })}
       </div>
 
-      {/* Accent Color Quick Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-3.5 border-t border-white/10">
+      {/* Control Bar: Accent Color & Project Options */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-3.5 border-t border-white/10">
+        {/* Accent Color Switcher */}
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-            Màu điểm nhấn (Accent Color):
+            Màu điểm nhấn:
           </span>
           <div className="flex items-center gap-2">
             {ACCENT_PALETTES.map((color) => {
@@ -190,11 +240,77 @@ export function CvTemplatePicker({
           </div>
         </div>
 
-        <span className="text-[11px] font-medium text-slate-400 italic">
-          💡 Chọn mẫu & màu sắc trực tiếp — luôn đồng bộ 100% khi in A4 hoặc tải file PDF.
-        </span>
+        {/* Project Section Display Controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Toggle Projects On/Off */}
+          {onToggleProjects && (
+            <button
+              type="button"
+              onClick={() => onToggleProjects(!showProjects)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                showProjects
+                  ? "border-emerald-500/40 bg-emerald-500/20 text-emerald-300"
+                  : "border-slate-700 bg-slate-800/80 text-slate-400 hover:text-white"
+              }`}
+            >
+              {showProjects ? <EyeIcon size={14} /> : <EyeOffIcon size={14} />}
+              <span>{showProjects ? "Đang Hiện Dự Án" : "Đã Tắt Mục Dự Án"}</span>
+            </button>
+          )}
+
+          {/* Project Grid Column Mode */}
+          {showProjects && onChangeProjectLayout && (
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-slate-900 p-1">
+              <span className="px-2 text-[10px] font-bold text-slate-400 uppercase hidden sm:inline">Bố cục dự án:</span>
+              
+              <button
+                type="button"
+                onClick={() => onChangeProjectLayout("grid-1")}
+                className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                  projectLayout === "grid-1"
+                    ? "bg-[#ed1c24] text-white shadow-xs"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="1 cột full chiều rộng"
+              >
+                <Rows3Icon size={13} />
+                <span>1 Cột</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onChangeProjectLayout("grid-2")}
+                className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                  projectLayout === "grid-2"
+                    ? "bg-[#ed1c24] text-white shadow-xs"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="2 ô / hàng"
+              >
+                <LayoutGridIcon size={13} />
+                <span>2 Ô</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onChangeProjectLayout("grid-3")}
+                className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                  projectLayout === "grid-3"
+                    ? "bg-[#ed1c24] text-white shadow-xs ring-1 ring-white/30"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Xếp gọn 3 ô dự án 1 hàng"
+              >
+                <LayoutGridIcon size={13} />
+                <span>3 Ô (Xếp gọn)</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+
 

@@ -82,7 +82,12 @@ export default function GzverCvPage() {
 
   const [exportError, setExportError] = useState("")
   const [exportSuccess, setExportSuccess] = useState("")
-  const [design, setDesign] = useState<{ template: string; accent: string } | null>(null)
+  const [design, setDesign] = useState<{
+    template: string
+    accent: string
+    show_projects?: boolean
+    project_layout?: "grid-1" | "grid-2" | "grid-3"
+  } | null>(null)
   const [showPicker, setShowPicker] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [printing, setPrinting] = useState(false)
@@ -125,6 +130,7 @@ export default function GzverCvPage() {
           accent: "#ed1c24",
           show_contact: true,
           show_projects: true,
+          project_layout: "grid-1",
           show_credentials: true,
         },
       }
@@ -139,13 +145,15 @@ export default function GzverCvPage() {
 
   const previewPerson = useMemo(() => {
     if (!person) return null
-    const baseSettings = person.cv_settings || { template: "executive", accent: "#ed1c24" }
+    const baseSettings = person.cv_settings || { template: "executive", accent: "#ed1c24", show_projects: true, project_layout: "grid-1" }
     return {
       ...person,
       cv_settings: {
         ...baseSettings,
         template: design?.template || baseSettings.template || "executive",
         accent: design?.accent || baseSettings.accent || "#ed1c24",
+        show_projects: design?.show_projects ?? baseSettings.show_projects ?? true,
+        project_layout: design?.project_layout || baseSettings.project_layout || "grid-1",
       },
     }
   }, [person, design])
@@ -307,7 +315,32 @@ export default function GzverCvPage() {
             <CvTemplatePicker
               value={previewPerson?.cv_settings?.template || "executive"}
               selectedAccent={previewPerson?.cv_settings?.accent || "#ed1c24"}
-              onChange={(template, accent) => setDesign({ template, accent })}
+              showProjects={previewPerson?.cv_settings?.show_projects !== false}
+              projectLayout={previewPerson?.cv_settings?.project_layout || "grid-1"}
+              onChange={(template, accent) =>
+                setDesign((prev) => ({
+                  template,
+                  accent,
+                  show_projects: prev?.show_projects ?? previewPerson?.cv_settings?.show_projects ?? true,
+                  project_layout: prev?.project_layout ?? previewPerson?.cv_settings?.project_layout ?? "grid-1",
+                }))
+              }
+              onToggleProjects={(show) =>
+                setDesign((prev) => ({
+                  template: prev?.template || previewPerson?.cv_settings?.template || "executive",
+                  accent: prev?.accent || previewPerson?.cv_settings?.accent || "#ed1c24",
+                  show_projects: show,
+                  project_layout: prev?.project_layout || previewPerson?.cv_settings?.project_layout || "grid-1",
+                }))
+              }
+              onChangeProjectLayout={(layout) =>
+                setDesign((prev) => ({
+                  template: prev?.template || previewPerson?.cv_settings?.template || "executive",
+                  accent: prev?.accent || previewPerson?.cv_settings?.accent || "#ed1c24",
+                  show_projects: prev?.show_projects ?? previewPerson?.cv_settings?.show_projects ?? true,
+                  project_layout: layout,
+                }))
+              }
             />
           </div>
         )}
