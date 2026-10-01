@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { QRCodeSVG } from "qrcode.react"
 
 type Department = {
   id: string
@@ -1455,12 +1456,18 @@ function RangeField({ label, value, onChange, min = 0, max = 100 }: { label: str
 }
 
 function ProfilePreview({ formData, previewMode }: { formData: any; previewMode: "desktop" | "mobile" }) {
-  const sections = useMemo(() => sortByOrder(formData.profile_tabs || []).filter((item: any) => item.visible !== false), [formData.profile_tabs])
+  const sections = useMemo(() => sortByOrder<ProfileSection>(formData.profile_tabs || []).filter((item: ProfileSection) => item.visible !== false), [formData.profile_tabs])
   const badges = useMemo(() => sortByOrder(formData.profile_badges || []).filter((item: any) => item.visible !== false), [formData.profile_badges])
   const socials = useMemo(() => sortByOrder(formData.social_links || []).filter((item: any) => item.visible !== false), [formData.social_links])
   const isMobile = previewMode === "mobile"
+  const [activeSectionKey, setActiveSectionKey] = useState("")
   const avatarStyle = { objectPosition: `${formData.avatar_position_x || 50}% ${formData.avatar_position_y || 50}%`, transform: `scale(${(formData.avatar_scale || 100) / 100})` }
   const coverStyle = { objectPosition: `${formData.cover_position_x || 50}% ${formData.cover_position_y || 50}%`, transform: `scale(${(formData.cover_scale || 100) / 100})` }
+  const currentSection = sections.find((section: any, index: number) => (section.key || `section-${index}`) === activeSectionKey) || sections[0]
+
+  useEffect(() => {
+    if (!sections.some((section: any, index: number) => (section.key || `section-${index}`) === activeSectionKey)) setActiveSectionKey(sections[0]?.key || "")
+  }, [sections, activeSectionKey])
 
   return (
     <div className="overflow-auto border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-900 p-4 rounded-none">
@@ -1507,18 +1514,44 @@ function ProfilePreview({ formData, previewMode }: { formData: any; previewMode:
               <p className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24]">Profile Sections</p>
               <h3 className="mt-0.5 text-base font-black uppercase text-slate-900 dark:text-white">Hồ sơ chi tiết</h3>
             </div>
-            {sections.map((section: any, index: number) => (
-              <div key={section.key || index} className="border border-slate-200 dark:border-white/10 p-4">
-                <p className="mb-1 text-[9px] font-black uppercase tracking-widest text-[#ed1c24]">Section {String(index + 1).padStart(2, "0")}</p>
-                <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">{section.label || "Section"}</h4>
-                <p className="mt-2 whitespace-pre-line text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">
-                  {section.content || previewSourceText(formData, section) || "Nội dung sẽ hiển thị tại đây."}
-                </p>
+            <div className="flex gap-1 overflow-x-auto border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-white/5">
+              {sections.map((section: any, index: number) => {
+                const key = section.key || `section-${index}`
+                return <button key={key} type="button" onClick={() => setActiveSectionKey(key)} className={`shrink-0 px-3 py-2 text-[9px] font-black uppercase ${currentSection === section ? "bg-[#ed1c24] text-white" : "text-slate-500 hover:bg-white dark:text-slate-300 dark:hover:bg-white/10"}`}>{section.label || `Mục ${index + 1}`}</button>
+              })}
+            </div>
+            {currentSection ? (
+              <div className="border border-slate-200 p-4 dark:border-white/10">
+                <p className="mb-1 text-[9px] font-black uppercase tracking-widest text-[#ed1c24]">Section {String(Math.max(0, sections.indexOf(currentSection)) + 1).padStart(2, "0")}</p>
+                <h4 className="text-sm font-black uppercase text-slate-900 dark:text-white">{currentSection.label || "Section"}</h4>
+                <p className="mt-2 whitespace-pre-line text-xs font-medium leading-relaxed text-slate-600 dark:text-slate-300">{currentSection.content || previewSourceText(formData, currentSection) || "Nội dung sẽ hiển thị tại đây."}</p>
               </div>
-            ))}
+            ) : <div className="border border-dashed border-slate-200 p-6 text-center text-xs text-slate-500">Chưa có section hiển thị.</div>}
           </div>
         </div>
+        <CardVisitPreview formData={formData} />
       </div>
+    </div>
+  )
+}
+
+function CardVisitPreview({ formData }: { formData: any }) {
+  const card = formData.member_card || {}
+  const qrValue = card.qr_url || `https://www.gzv.one/gzver/${formData.slug || "slug"}`
+  const surfaces: Record<string, string> = { obsidian: "linear-gradient(145deg,#171a22,#08090d 52%,#000)", crimson: "linear-gradient(145deg,#5d080d,#ed1c24 48%,#210205)", graphite: "linear-gradient(145deg,#303947,#101217 52%,#050505)", executive: "linear-gradient(145deg,#050505,#151920 60%,#4a070b)" }
+  const surface = surfaces[card.design] || surfaces.obsidian
+  const executive = Boolean(formData.is_director) || /điều hành|ceo|director/i.test(`${formData.department_name || ""} ${formData.role_level || ""}`)
+  const title = card.card_title || (executive ? "THẺ CHỨC DANH" : "THẺ THÀNH VIÊN")
+  const subtitle = card.card_subtitle || (executive ? "BAN ĐIỀU HÀNH" : "GZVER")
+  const avatarStyle = { objectPosition: `${formData.avatar_position_x || 50}% ${formData.avatar_position_y || 50}%`, transform: `scale(${(formData.avatar_scale || 100) / 100})` }
+  return (
+    <div className="border border-slate-200 bg-slate-950 p-4 text-white dark:border-white/10">
+      <div className="mb-3 flex items-center justify-between gap-3"><div><p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#ff5a60]">Live card preview</p><h4 className="mt-1 text-sm font-black uppercase">Thẻ online + QR thực tế</h4></div><span className="border border-[#ed1c24]/60 px-2 py-1 text-[9px] font-black uppercase text-[#ff6b70]">{card.design || "obsidian"}</span></div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="mx-auto flex w-full max-w-[190px] flex-col items-center overflow-hidden rounded-xl border border-[#ed1c24] p-4 text-center" style={{ aspectRatio: "54 / 85.6", background: surface }}><p className="text-[8px] font-black uppercase tracking-wide">CÔNG TY TNHH GZV</p><p className="mt-1 text-[8px] font-black text-[#ed1c24]">THE VOICE OF GENZ</p><div className="mx-auto mt-7 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#ed1c24] bg-white text-[10px] font-black tracking-widest text-[#124c96]">GZV</div><p className="mt-6 text-[13px] font-black uppercase">{title}</p><p className="mt-1 text-[20px] font-black tracking-wider text-[#ed1c24]">{subtitle}</p><span className="mt-4 bg-[#ed1c24] px-3 py-1 text-[8px] font-black uppercase">{formData.department_name || "GZVers"}</span><p className="mt-auto pt-5 text-[8px] font-bold text-white/70">{card.website_label || "WWW.GZV.ONE"}</p></div>
+        <div className="mx-auto flex w-full max-w-[190px] flex-col items-center overflow-hidden rounded-xl border border-[#ed1c24] p-4 text-center" style={{ aspectRatio: "54 / 85.6", background: surface }}><div className="h-24 w-20 overflow-hidden rounded-lg border-2 border-white bg-slate-800">{formData.avatar_url ? <img src={formData.avatar_url} alt="" className="h-full w-full object-cover" style={avatarStyle} /> : <div className="flex h-full items-center justify-center text-xl font-black">G</div>}</div><p className="mt-4 text-[8px] font-black uppercase text-[#ed1c24]">{formData.position || "GZVER"}</p><p className="mt-1 text-[13px] font-black uppercase">{formData.full_name || "TÊN GZVER"}</p><div className="mx-auto mt-6 w-fit rounded bg-white p-1.5"><QRCodeSVG value={qrValue} size={72} level="M" /></div><p className="mt-2 text-[7px] font-black uppercase text-white/70">QR xác thực hồ sơ</p></div>
+      </div>
+      <p className="mt-3 break-all text-center font-mono text-[9px] text-white/50">QR: {qrValue}</p>
     </div>
   )
 }
