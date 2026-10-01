@@ -26,9 +26,24 @@ export interface UserProfileCreate {
 }
 
 export class UserService {
+  private static async adminRequest(path: string, init: RequestInit = {}) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) throw new Error('Phiên đăng nhập admin đã hết hạn')
+    const response = await fetch(path, {
+      ...init,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}`, ...(init.headers || {}) },
+    })
+    const body = await response.json().catch(() => ({}))
+    if (!response.ok) throw new Error(body.error || 'Thao tác quản trị thất bại')
+    return body
+  }
+
   // Lấy tất cả người dùng với thông tin từ auth.users và profiles
   static async getAllUsers(): Promise<UserProfile[]> {
     try {
+      const result = await this.adminRequest('/api/admin/users')
+      return (result.users || []) as UserProfile[]
+      /* Legacy fallback below is retained only for source compatibility. */
       console.log('🔍 Bắt đầu lấy dữ liệu người dùng từ Supabase...')
       
       // Lấy dữ liệu từ bảng profiles (theo cấu trúc thực tế)
@@ -36,6 +51,7 @@ export class UserService {
         .from('profiles')
         .select('id, full_name, avatar_url, role, created_at, phone')
         .order('created_at', { ascending: false })
+      const profileRows = profiles || []
 
       console.log('📋 Dữ liệu từ bảng profiles:', profiles)
       console.log('❌ Lỗi profiles (nếu có):', profilesError)
@@ -56,10 +72,10 @@ export class UserService {
       }
 
       // Nếu có cả profiles và auth users, kết hợp chúng
-      if (profiles && profiles.length > 0 && authUsers?.users) {
+      if (profileRows.length > 0 && authUsers?.users) {
         console.log('🔄 Kết hợp dữ liệu từ profiles và auth.users...')
         
-        const combinedUsers: UserProfile[] = profiles.map(profile => {
+        const combinedUsers: UserProfile[] = profileRows.map(profile => {
           const authUser = authUsers.users.find((au: any) => au.id === profile.id)
           
           const user: UserProfile = {
@@ -86,9 +102,9 @@ export class UserService {
       }
       
       // Nếu chỉ có profiles (không có auth users)
-      if (profiles && profiles.length > 0) {
+      if (profileRows.length > 0) {
         console.log('📋 Chỉ sử dụng dữ liệu profiles...')
-        const profilesOnly: UserProfile[] = profiles.map(profile => ({
+        const profilesOnly: UserProfile[] = profileRows.map(profile => ({
           id: profile.id,
           email: 'email@example.com', // Không có email trong profiles
           full_name: profile.full_name || 'Người dùng chưa đặt tên',
@@ -134,6 +150,9 @@ export class UserService {
   // Tạo người dùng mới
   static async createUser(userData: UserProfileCreate): Promise<UserProfile | null> {
     try {
+      const result = await this.adminRequest('/api/admin/users', { method: 'POST', body: JSON.stringify(userData) })
+      return result.user as UserProfile
+      /* Legacy browser admin API below is unreachable and must never be used. */
       // Tạo user trong auth.users
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: userData.email,
@@ -145,13 +164,15 @@ export class UserService {
       })
 
       if (authError) throw authError
+      if (!authData.user) throw new Error('Không tạo được tài khoản auth')
+      const createdAuthUser = authData.user!
 
       // Tạo profile record theo cấu trúc bảng thực tế
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .insert([
           {
-            id: authData.user.id,
+            id: createdAuthUser.id,
             full_name: userData.full_name,
             role: userData.role || 'user',
             avatar_url: userData.avatar_url,
@@ -166,14 +187,14 @@ export class UserService {
       }
 
       return {
-        id: authData.user.id,
+        id: createdAuthUser.id,
         email: userData.email,
         full_name: userData.full_name,
         role: userData.role || 'user',
         status: 'active' as 'active' | 'suspended', // Mặc định active
         avatar_url: userData.avatar_url,
         phone: userData.phone,
-        created_at: authData.user.created_at,
+        created_at: createdAuthUser.created_at,
         courses_count: 0,
         projects_count: 0,
       }
@@ -186,6 +207,9 @@ export class UserService {
   // Cập nhật thông tin người dùng
   static async updateUser(userId: string, updates: Partial<UserProfileCreate>): Promise<boolean> {
     try {
+      await this.adminRequest('/api/admin/users', { method: 'PATCH', body: JSON.stringify({ id: userId, ...updates }) })
+      return true
+      /* Legacy browser admin API below is unreachable and must never be used. */
       // Cập nhật auth.users metadata nếu cần
       if (updates.full_name) {
         const { error: authError } = await supabase.auth.admin.updateUserById(
@@ -221,6 +245,9 @@ export class UserService {
   // Xóa người dùng
   static async deleteUser(userId: string): Promise<boolean> {
     try {
+      await this.adminRequest('/api/admin/users', { method: 'DELETE', body: JSON.stringify({ id: userId }) })
+      return true
+      /* Legacy browser admin API below is unreachable and must never be used. */
       const { error } = await supabase.auth.admin.deleteUser(userId)
       if (error) throw error
       return true
@@ -233,6 +260,9 @@ export class UserService {
   // Toggle user status (chỉ có thể banned/unban qua auth API)
   static async toggleUserStatus(userId: string, shouldSuspend: boolean): Promise<boolean> {
     try {
+      await this.adminRequest('/api/admin/users', { method: 'PATCH', body: JSON.stringify({ id: userId, status: shouldSuspend ? 'suspended' : 'active' }) })
+      return true
+      /* Legacy browser admin API below is unreachable and must never be used. */
       // Supabase auth API không có trường ban_duration như mong đợi
       // Thay vào đó, chúng ta có thể sử dụng user_metadata để lưu status
       const { error } = await supabase.auth.admin.updateUserById(

@@ -100,6 +100,7 @@ export type FloatingAction = {
   action_type: "link" | "chatbot"
   sort_order: number
   is_visible: boolean
+  style?: { icon_position_x?: number; icon_position_y?: number; icon_scale?: number; [key: string]: unknown } | null
 }
 
 export type BrandingSettings = {

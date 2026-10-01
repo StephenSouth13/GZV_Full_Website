@@ -190,39 +190,52 @@ function MessagesPanel() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [selected, setSelected] = useState<Message | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(50)
+  const [totalCount, setTotalCount] = useState(0)
 
   const load = async () => {
     setLoading(true)
-    const { data, error } = await supabase
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+    let query = supabase
       .from("contact_messages")
-      .select("*")
+      .select("*", { count: "exact" })
+      .range(from, to)
       .order("created_at", { ascending: false })
+    if (statusFilter !== "all") query = query.eq("status", statusFilter)
+    const q = search.trim().replace(/[(),]/g, " ")
+    if (q) query = query.or(`name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,subject.ilike.%${q}%,message.ilike.%${q}%`)
+    const { data, error, count } = await query
     if (error) {
       toast({ title: "Lỗi tải tin nhắn", description: error.message, variant: "destructive" })
     } else {
       setMessages((data || []) as any)
+      setTotalCount(count || 0)
     }
     setLoading(false)
   }
 
   useEffect(() => {
     load()
-  }, [])
+  }, [page, pageSize, statusFilter, search])
+
+  useEffect(() => {
+    const channel = supabase.channel("admin-contact-messages")
+      .on("postgres_changes", { event: "*", schema: "public", table: "contact_messages" }, () => load())
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [page, pageSize, statusFilter, search])
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
     return messages.filter((m) => {
-      if (statusFilter !== "all" && m.status !== statusFilter) return false
-      if (!q) return true
-      return [m.name, m.email, m.phone, m.subject, m.message]
-        .filter(Boolean)
-        .some((s) => String(s).toLowerCase().includes(q))
+      return statusFilter === "all" || m.status === statusFilter
     })
-  }, [messages, search, statusFilter])
+  }, [messages, statusFilter])
 
   const counts = useMemo(
     () => ({
-      total: messages.length,
+      total: totalCount,
       unread: messages.filter((m) => !m.is_read).length,
       today: messages.filter(
         (m) => new Date(m.created_at).toDateString() === new Date().toDateString()
@@ -232,7 +245,7 @@ function MessagesPanel() {
       resolved: messages.filter((m) => m.status === "resolved").length,
       spam: messages.filter((m) => m.status === "spam").length,
     }),
-    [messages]
+    [messages, totalCount]
   )
 
   const markRead = async (m: Message, read: boolean) => {
@@ -320,7 +333,7 @@ function MessagesPanel() {
             <button
               key={tabItem.key}
               type="button"
-              onClick={() => setStatusFilter(tabItem.key)}
+              onClick={() => { setStatusFilter(tabItem.key); setPage(1) }}
               className={`flex items-center justify-between p-2.5 transition-all text-left border cursor-pointer ${
                 isSelected
                   ? "border-[#ed1c24] bg-[#ed1c24] text-white shadow-xs"
@@ -353,14 +366,14 @@ function MessagesPanel() {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Tìm theo họ tên, email, số điện thoại, tiêu đề..."
             className="h-11 rounded-none border-slate-200 bg-slate-50/70 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
           />
           {search && (
             <button
               type="button"
-              onClick={() => setSearch("")}
+              onClick={() => { setSearch(""); setPage(1) }}
               className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
             >
               Xóa
@@ -371,13 +384,26 @@ function MessagesPanel() {
         <Button
           variant="outline"
           size="default"
-          onClick={load}
+              onClick={load}
           disabled={loading}
           className="h-11 px-6 rounded-none border-slate-200 bg-white text-xs font-black uppercase tracking-wider text-slate-800 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:bg-slate-950 dark:text-slate-200 shrink-0 shadow-xs cursor-pointer"
         >
           <RefreshCw className={`mr-2 h-4 w-4 text-[#ed1c24] ${loading ? "animate-spin" : ""}`} />
           LÀM MỚI
         </Button>
+      </div>
+
+      <div className="flex flex-col gap-3 border border-slate-200 bg-white px-3 py-2.5 text-xs dark:border-white/10 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+        <span className="font-bold text-slate-500">{totalCount ? `${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalCount)} / ${totalCount}` : "0 tin nhắn"}</span>
+        <div className="flex items-center gap-2">
+          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1) }}>
+            <SelectTrigger className="h-8 w-[100px] rounded-none text-[10px] font-black"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="25">25 / trang</SelectItem><SelectItem value="50">50 / trang</SelectItem><SelectItem value="100">100 / trang</SelectItem></SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)} className="h-8 rounded-none text-[10px] font-black">Trước</Button>
+          <span className="min-w-12 text-center font-black">{page} / {Math.max(1, Math.ceil(totalCount / pageSize))}</span>
+          <Button variant="outline" size="sm" disabled={page >= Math.ceil(totalCount / pageSize)} onClick={() => setPage((value) => value + 1)} className="h-8 rounded-none text-[10px] font-black">Sau</Button>
+        </div>
       </div>
 
       {/* Messages List Card */}

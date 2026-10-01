@@ -194,7 +194,8 @@ function FloatingIcon({ action }: { action: FloatingAction }) {
   const key = `${action.action_key} ${action.label}`.toLowerCase()
 
   if (action.icon_url) {
-    return <Image src={action.icon_url} alt={action.label} width={22} height={22} className="h-5 w-5 object-contain" unoptimized />
+    const style = action.style || {}
+    return <Image src={action.icon_url} alt={action.label} width={22} height={22} className="h-5 w-5 object-contain" style={{ objectPosition: `${style.icon_position_x ?? 50}% ${style.icon_position_y ?? 50}%`, transform: `scale(${(style.icon_scale ?? 100) / 100})` }} unoptimized />
   }
   if (action.action_type === "chatbot") return <Bot className="h-5 w-5" />
   if (key.includes("facebook")) return <Facebook className="h-5 w-5" />

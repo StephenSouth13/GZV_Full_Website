@@ -34,7 +34,7 @@ export function CreateUserModal({ open, onClose, onCreateUser }: CreateUserModal
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    role: 'user' as 'admin' | 'editor' | 'user',
+    role: 'user' as 'admin' | 'editor' | 'collab' | 'user',
     status: 'active' as 'active' | 'suspended',
     phone: '',
     bio: '',
@@ -204,13 +204,14 @@ export function CreateUserModal({ open, onClose, onCreateUser }: CreateUserModal
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="role">Vai trò</Label>
-                <Select value={formData.role} onValueChange={(value: 'admin' | 'editor' | 'user') => handleInputChange('role', value)}>
+                <Select value={formData.role} onValueChange={(value: 'admin' | 'editor' | 'collab' | 'user') => handleInputChange('role', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Chọn vai trò" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="user">Người dùng</SelectItem>
                     <SelectItem value="editor">Biên tập viên</SelectItem>
+                    <SelectItem value="collab">Cộng tác viên</SelectItem>
                     <SelectItem value="admin">Quản trị viên</SelectItem>
                   </SelectContent>
                 </Select>

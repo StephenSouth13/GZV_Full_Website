@@ -182,7 +182,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 overflow-hidden select-none">
+      <DialogContent className="flex w-[calc(100vw-1rem)] max-w-4xl max-h-[calc(100dvh-1rem)] flex-col overflow-hidden rounded-none border border-slate-200 bg-white p-0 shadow-2xl dark:border-white/10 dark:bg-slate-900 select-none">
         {/* Brand Accent Top Line */}
         <div className="h-1 w-full bg-[#ed1c24]" />
 
@@ -206,6 +206,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
           </div>
         </div>
 
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {/* Pull from GZVer */}
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-6 py-4 dark:border-white/10 dark:bg-slate-950/50 sm:flex-row sm:items-center">
           <Label className="flex shrink-0 items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -242,10 +243,10 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         )}
 
         {/* Modal Body */}
-        <div className="p-6">
-          <div className="grid gap-6 md:grid-cols-[240px_1fr]">
+        <div className="p-4 sm:p-6">
+          <div className="grid min-w-0 gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
             {/* Left Column: Avatar & Links */}
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 Ảnh đại diện tác giả
               </Label>
@@ -332,7 +333,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
             </div>
 
             {/* Right Column: Info Fields */}
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               <div className="space-y-1">
                 <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Họ và tên tác giả *
@@ -409,6 +410,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         {/* Modal Footer */}

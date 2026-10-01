@@ -50,6 +50,8 @@ function SettingsContent() {
   const [user, setUser] = useState<any>(null)
   const [settings, setSettings] = useState<AdminSettings>(defaultSettings)
   const [envStatus, setEnvStatus] = useState({ hasUrl: false, hasAnonKey: false })
+  const [databaseOnline, setDatabaseOnline] = useState<boolean | null>(null)
+  const [checkingSystem, setCheckingSystem] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
@@ -70,6 +72,19 @@ function SettingsContent() {
   const saveSettings = (next: AdminSettings) => {
     setSettings(next)
     localStorage.setItem(storageKey(user?.id), JSON.stringify(next))
+  }
+
+  useEffect(() => {
+    document.documentElement.dataset.adminFontSize = settings.fontSize
+  }, [settings.fontSize])
+
+  const checkSystem = async () => {
+    setCheckingSystem(true)
+    const { error } = await supabase.from("site_branding_settings").select("id").limit(1)
+    setDatabaseOnline(!error)
+    setCheckingSystem(false)
+    if (error) toast.error(`Kết nối thất bại: ${error.message}`)
+    else toast.success("Kết nối Supabase đang hoạt động")
   }
 
   const handleSettingChange = <K extends keyof AdminSettings>(key: K, value: AdminSettings[K]) => {
@@ -140,7 +155,8 @@ function SettingsContent() {
     { label: "Supabase anon key", ok: envStatus.hasAnonKey },
     { label: "Phiên đăng nhập", ok: Boolean(user?.id) },
     { label: "Lưu tùy chọn cục bộ", ok: typeof window !== "undefined" },
-  ], [envStatus, user])
+    { label: "Supabase Database", ok: databaseOnline === true },
+  ], [envStatus, user, databaseOnline])
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
@@ -353,6 +369,9 @@ function SettingsContent() {
               ))}
             </div>
             <div className="pt-2">
+              <Button variant="outline" onClick={checkSystem} disabled={checkingSystem} className="mr-2 h-10 rounded-none border-slate-200 text-xs font-black uppercase tracking-wider">
+                <Shield className={`mr-2 h-4 w-4 text-[#ed1c24] ${checkingSystem ? "animate-pulse" : ""}`} /> {checkingSystem ? "Đang kiểm tra" : "Kiểm tra kết nối"}
+              </Button>
               <Button variant="outline" onClick={exportData} className="h-10 rounded-none border-slate-200 text-xs font-black uppercase tracking-wider">
                 <Database className="mr-2 h-4 w-4 text-[#ed1c24]" /> Tải xuống tệp cấu hình JSON
               </Button>

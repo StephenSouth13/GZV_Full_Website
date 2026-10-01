@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus, Search, Users, Edit, Trash2, UserCheck, UserX, User } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
@@ -105,6 +106,17 @@ function UsersManagementContent() {
         description: "Không thể thay đổi trạng thái người dùng",
         variant: "destructive"
       })
+    }
+  }
+
+  const handleRoleChange = async (user: UserProfile, role: UserProfile['role']) => {
+    if (role === user.role) return
+    try {
+      await UserService.updateUser(user.id, { role })
+      setUsers(prev => prev.map(item => item.id === user.id ? { ...item, role } : item))
+      toast({ title: 'Đã cập nhật quyền', description: `${user.email || user.full_name} → ${role}` })
+    } catch (error: any) {
+      toast({ title: 'Không thể cập nhật quyền', description: error.message, variant: 'destructive' })
     }
   }
 
@@ -292,12 +304,24 @@ function UsersManagementContent() {
                     <TableCell className="font-medium">{user.full_name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
+                      <Select value={user.role} onValueChange={(value) => handleRoleChange(user, value as UserProfile['role'])}>
+                        <SelectTrigger className="h-8 min-w-[130px] text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Quản trị</SelectItem>
+                          <SelectItem value="editor">Biên tập</SelectItem>
+                          <SelectItem value="collab">Cộng tác viên</SelectItem>
+                          <SelectItem value="user">Người dùng</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {/* Keep the badge styling available to the existing visual language. */}
                       <Badge className={
                         user.role === 'admin' ? 'bg-red-100 text-red-800' :
                         user.role === 'editor' ? 'bg-green-100 text-green-800' :
                         user.role === 'collab' ? 'bg-purple-100 text-purple-800' : 
                         'bg-red-50 text-[#c91218]'
-                      }>
+                      } hidden>
                         {user.role === 'admin' ? 'Quản trị' :
                          user.role === 'editor' ? 'Biên tập' :
                          user.role === 'collab' ? 'Cộng tác viên' : 'Người dùng'}
