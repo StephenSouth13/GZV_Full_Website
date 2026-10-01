@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Users } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +40,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <Badge className="absolute left-4 top-4 rounded-none border border-white/30 bg-white/95 px-3 py-1 text-[10px] font-black uppercase text-[#ed1c24] shadow-lg backdrop-blur">
             {project.category || "Dự án"}
           </Badge>
+          {project.external_url && <a href={project.external_url} target="_blank" rel="noreferrer" aria-label={`Mở website ${project.title}`} className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-none border border-white/40 bg-slate-950/80 text-white shadow-lg backdrop-blur transition hover:bg-[#ed1c24]"><ArrowUpRight className="h-4 w-4" /></a>}
         </div>
       </CardHeader>
 
@@ -55,7 +56,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="rounded-none border border-slate-100 bg-slate-50/80 p-4 dark:border-neutral-700 dark:bg-neutral-800/70">
           <div className="mb-3 flex items-center justify-between gap-3">
             <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#ed1c24]">
-              Mentoring & Coaching
+              {(project as any).authors_section_title || "MENTORING & COACHING"}
             </span>
 
             <span className="rounded-none bg-white px-2.5 py-1 text-[10px] font-black text-slate-400 shadow-sm dark:bg-neutral-900">
@@ -66,7 +67,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <div className="flex items-center gap-3">
             <div className="flex -space-x-3">
               {displayMentors.map((mentor, i) => (
-                <Avatar key={i} className="h-10 w-10 rounded-md border-[3px] border-white shadow-md dark:border-neutral-900">
+                <Avatar key={i} className="h-10 w-10 rounded-full border-[3px] border-white shadow-md dark:border-neutral-900">
                   <AvatarImage src={mentor.avatar} className="object-cover" />
                   <AvatarFallback className="rounded-md bg-red-50 text-xs font-black text-[#ed1c24]">
                     {mentor.name?.charAt(0) || "G"}
@@ -74,11 +75,11 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                 </Avatar>
               ))}
 
-              {remainingCount > 0 && (
+              {mentors.length > 0 && (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button className="z-10 flex h-10 w-10 items-center justify-center rounded-md border-[3px] border-white bg-slate-950 text-[10px] font-black text-white shadow-md transition hover:bg-[#ed1c24] dark:border-neutral-900">
-                      +{remainingCount}
+                    <button className="z-10 flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-white bg-slate-950 text-[10px] font-black text-white shadow-md transition hover:bg-[#ed1c24] dark:border-neutral-900">
+                      {remainingCount > 0 ? `+${remainingCount}` : "..."}
                     </button>
                   </PopoverTrigger>
 
@@ -93,7 +94,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     <div className="max-h-[300px] space-y-4 overflow-y-auto pr-2">
                       {mentors.map((m, idx) => (
                         <Link key={idx} href={m.profile_link || "#"} className="group/item flex items-center gap-3">
-                          <Avatar className="h-10 w-10 rounded-md shadow-sm">
+                          <Avatar className="h-10 w-10 rounded-full shadow-sm">
                             <AvatarImage src={m.avatar} />
                             <AvatarFallback className="font-bold">{m.name?.[0] || "G"}</AvatarFallback>
                           </Avatar>

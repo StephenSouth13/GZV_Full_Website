@@ -358,6 +358,7 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
                       <AvatarImage src={m.avatar_url} />
                       <AvatarFallback className="rounded-none">{m.full_name[0]}</AvatarFallback>
                     </Avatar>
+                    {formData.author_ids.includes(m.id) && <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[9px] font-black">{formData.author_ids.indexOf(m.id) + 1}</span>}
                     <div className="flex flex-col">
                       <span className="text-xs font-black leading-none">{m.full_name}</span>
                       <span className={`text-[9px] uppercase font-bold ${formData.author_ids.includes(m.id) ? 'text-red-50' : 'text-slate-400'}`}>

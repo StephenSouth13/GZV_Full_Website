@@ -29,6 +29,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
     title: '',
     slug: '',
     category: '', // Chính là Tag name / Lĩnh vực hiển thị trong bảng
+    external_url: '',
     description: '',
     detailproject: '',
     image: '',
@@ -167,6 +168,12 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                 <Label className="text-[11px] font-black uppercase text-[#ed1c24] tracking-widest flex items-center gap-2"><Tag size={12} /> Tag Name (Lĩnh vực)</Label>
                 <Input className="h-12 font-bold text-xs rounded-none border-slate-200" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="VD: ĐÀO TẠO DOANH NGHIỆP" />
               </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-[11px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-2"><Globe size={12} /> Website đối tác / khách hàng (tuỳ chọn)</Label>
+              <Input className="h-11 font-mono text-xs rounded-none border-slate-200" value={formData.external_url} onChange={(e) => setFormData({ ...formData, external_url: e.target.value })} placeholder="https://website-doi-tac.com" />
+              <p className="text-[10px] font-semibold text-slate-400">Có URL: ảnh có nút mở website. Không có URL: bấm ảnh để vào chi tiết dự án.</p>
             </div>
 
             {/* SLUG & SEO TITLE (Tiêu đề nhỏ) */}
@@ -310,6 +317,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
                         <AvatarImage src={a.avatar_url} className="object-cover" />
                         <AvatarFallback className="font-black text-[10px] bg-slate-200 uppercase rounded-none">{a.full_name?.substring(0, 2)}</AvatarFallback>
                       </Avatar>
+                      {isSelected && <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#ed1c24] text-[9px] font-black text-white">{formData.author_ids.indexOf(a.id) + 1}</span>}
                       <div className="flex flex-col min-w-0">
                         <span className={`text-[11px] font-black uppercase truncate ${isSelected ? 'text-[#c91218]' : 'text-slate-700'}`}>{a.full_name}</span>
                         <span className="text-[9px] text-slate-400 font-bold italic truncate">{a.title || 'Mentor'}</span>

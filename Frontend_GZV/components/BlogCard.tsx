@@ -70,11 +70,11 @@ const BlogCard = ({ id, title, excerpt, image, authors, publishDate, category, s
                   </Avatar>
                 ))}
                 
-                {remaining > 0 && (
+                {(authors?.length || 0) > 0 && (
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="h-8 w-8 rounded-md bg-slate-900 text-white border-2 border-white flex items-center justify-center text-[9px] font-black hover:bg-[#ed1c24] transition-colors z-10 shadow-md">
-                        +{remaining}
+                        {remaining > 0 ? `+${remaining}` : "..."}
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-64 p-4 rounded-none shadow-2xl border border-slate-200 bg-white/95 backdrop-blur-md z-[100]">

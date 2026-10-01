@@ -285,6 +285,7 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
                   {members.map(m => (
                     <div key={m.id} onClick={() => { const current = formData.author_ids || []; const next = current.includes(m.id) ? current.filter((id:any) => id !== m.id) : [...current, m.id]; setFormData({...formData, author_ids: next})}} className={`flex items-center gap-3 p-2.5 rounded-none border cursor-pointer transition-all ${formData.author_ids?.includes(m.id) ? 'border-[#ed1c24] bg-[#ed1c24] text-white shadow-xs' : 'border-slate-200 bg-white hover:bg-slate-100'}`}>
                       <Avatar className="h-7 w-7 rounded-none border border-white/20"><AvatarImage src={m.avatar_url} className="object-cover" /><AvatarFallback className="rounded-none text-[9px]">{m.full_name?.charAt(0)}</AvatarFallback></Avatar>
+                      {formData.author_ids?.includes(m.id) && <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[9px] font-black">{formData.author_ids.indexOf(m.id) + 1}</span>}
                       <span className="text-xs font-bold leading-none">{m.full_name}</span>
                     </div>
                   ))}

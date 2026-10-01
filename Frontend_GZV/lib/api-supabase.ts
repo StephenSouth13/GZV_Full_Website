@@ -355,6 +355,7 @@
     status?: 'ongoing' | 'completed' | 'planning';
     slug: string;
     category?: string;
+    external_url?: string | null;
     created_at?: string;
     updated_at?: string;
   }
@@ -399,14 +400,18 @@
     views?: number;
   }
 
-  const normalizeBlogPost = (post: any): BlogPost => ({
+  const normalizeBlogPost = (post: any): BlogPost => {
+    const authorOrder = new Map<string, number>((post.author_ids || []).map((id: string, index: number) => [id, index]))
+    const authors = [...(post.authors_details || [])].sort((a: any, b: any) => (authorOrder.get(a.id) ?? 9999) - (authorOrder.get(b.id) ?? 9999))
+    return ({
     ...post,
     id: String(post.id),
-    authors: post.authors_details || [],
+    authors,
     publish_date: post.publish_date || post.created_at,
     read_time: post.read_time || '5 phút đọc',
     image: getPublicUrl(post.thumbnail_url || post.image),
-  }) as BlogPost;
+    }) as BlogPost
+  }
 
   export interface RegisterData {
     name: string;

@@ -3,7 +3,7 @@
 import { notFound, useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Users, Loader2, PlayCircle, Hash, CheckCircle2, Clock, Calendar, ExternalLink, Sparkles, FolderGit2, Cpu, ArrowUpRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Users, Loader2, PlayCircle, Hash, CheckCircle2, Clock, Calendar, ExternalLink, Sparkles, FolderGit2, Cpu, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { api, Project, supabase } from "@/lib/api-supabase"
@@ -25,6 +25,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
   const router = useRouter()
   const [project, setProject] = useState<Project | null>(initialProject)
   const [relatedProjects, setRelatedProjects] = useState<Project[]>(initialRelatedProjects)
+  const [relatedStart, setRelatedStart] = useState(0)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -44,8 +45,9 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
           if (!active) return
           const related = allProjects
             .filter((p) => p.id !== currentProject.id && (p.category === currentProject.category || !currentProject.category))
-            .slice(0, 3)
+            .slice(0, 6)
           setRelatedProjects(related)
+          setRelatedStart(0)
         }
       } catch (error) {
         console.error('Error fetching project data:', error)
@@ -106,9 +108,9 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
       </div>
 
       <div className="container max-w-7xl mx-auto px-4 mt-2">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 gap-8 items-start">
           {/* Main Left Content (8 cols) */}
-          <main className="lg:col-span-8 space-y-8">
+          <main className="space-y-8">
             {/* Hero Cover Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -130,6 +132,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                {project.external_url && <a href={project.external_url} target="_blank" rel="noreferrer" aria-label={`Mở website ${project.title}`} className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center border border-white/40 bg-slate-950/80 text-white shadow-lg backdrop-blur transition hover:bg-[#ed1c24]"><ArrowUpRight className="h-5 w-5" /></a>}
 
                 {/* Title overlay at bottom */}
                 <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8 text-white">
@@ -224,8 +227,8 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {project.project_authors.map((author, idx) => (
-                    <Link key={idx} href={author.profile_link || "#"}>
-                      <div className="group flex items-center gap-4 border border-slate-200 bg-slate-50/60 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ed1c24] hover:bg-red-50/30 hover:shadow-md dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-red-950/20">
+                    <Link key={idx} href={author.profile_link || "#"} className="block h-full">
+                      <div className="group flex h-full items-center gap-4 border border-slate-200 bg-slate-50/60 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ed1c24] hover:bg-red-50/30 hover:shadow-md dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-red-950/20">
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-white bg-slate-200 shadow-sm dark:border-slate-800">
                           <Image
                             src={author.avatar || '/placeholder-avatar.jpg'}
@@ -283,9 +286,9 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
           </main>
 
           {/* Sidebar Right (4 cols) */}
-          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+          <aside className="space-y-6">
             {/* Info Card */}
-            <div className="border border-slate-200 border-l-[5px] border-l-[#ed1c24] dark:border-white/10 dark:border-l-[#ed1c24] bg-white dark:bg-slate-900 p-6 shadow-sm space-y-5">
+            <div className="border border-slate-200 border-l-[5px] border-l-[#ed1c24] dark:border-white/10 dark:border-l-[#ed1c24] bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
               <div className="border-b border-slate-100 dark:border-white/10 pb-3">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24] block">
                   PROJECT SPECIFICATIONS
@@ -295,7 +298,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                 </h3>
               </div>
 
-              <div className="space-y-3.5 text-xs font-semibold">
+              <div className="grid gap-x-6 gap-y-2 text-xs font-semibold sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-white/5">
                   <span className="text-slate-500 dark:text-slate-400">Trạng thái:</span>
                   <span className={`px-2.5 py-0.5 text-[11px] font-bold border ${statusInfo.bg}`}>
@@ -320,7 +323,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
 
               {/* Technologies List (if any) */}
               {project.technologies && project.technologies.length > 0 && (
-                <div className="pt-2">
+                <div className="mt-4 border-t border-slate-100 pt-3 dark:border-white/5">
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">
                     Công nghệ & Nền tảng
                   </span>
@@ -338,7 +341,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
               )}
 
               {/* CTA Button */}
-              <div className="pt-2">
+              <div className="mt-4 max-w-sm pt-1">
                 <Link href="/lien-he" className="block w-full">
                   <Button className="w-full h-11 rounded-none bg-[#ed1c24] hover:bg-[#c91218] text-white text-xs font-black uppercase tracking-wider shadow-sm flex items-center justify-center gap-2">
                     <span>Liên hệ tư vấn dự án</span>
@@ -371,8 +374,10 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
               </Link>
             </div>
 
+            <div className="relative">
+              {relatedProjects.length > 3 && <div className="mb-3 flex justify-end gap-2"><Button type="button" variant="outline" size="icon" aria-label="Dự án trước" onClick={() => setRelatedStart((value) => Math.max(0, value - 1))} disabled={relatedStart === 0} className="h-9 w-9 rounded-none"><ChevronLeft className="h-4 w-4" /></Button><Button type="button" variant="outline" size="icon" aria-label="Dự án tiếp theo" onClick={() => setRelatedStart((value) => Math.min(Math.max(0, relatedProjects.length - 3), value + 1))} disabled={relatedStart >= Math.max(0, relatedProjects.length - 3)} className="h-9 w-9 rounded-none"><ChevronRight className="h-4 w-4" /></Button></div>}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedProjects.map((rp) => (
+              {relatedProjects.slice(relatedStart, relatedStart + 3).map((rp) => (
                 <Link key={rp.id} href={`/du-an/${rp.slug}`} className="group block">
                   <div className="border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-sm overflow-hidden hover:border-[#ed1c24] transition-all duration-300 flex flex-col h-full">
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
@@ -413,6 +418,7 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                   </div>
                 </Link>
               ))}
+            </div>
             </div>
           </section>
         )}

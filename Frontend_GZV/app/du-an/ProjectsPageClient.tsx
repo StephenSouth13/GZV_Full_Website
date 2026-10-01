@@ -3,7 +3,7 @@
 import { motion, Variants } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Search, X } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -203,6 +203,7 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                               <Badge className="absolute top-4 left-4 bg-white/95 text-black font-bold border-none">
                                 {project.category}
                               </Badge>
+                              {project.external_url && <a href={project.external_url} target="_blank" rel="noreferrer" aria-label={`Mở website ${project.title}`} className="absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center border border-white/40 bg-slate-950/80 text-white shadow-lg backdrop-blur transition hover:bg-[#ed1c24]"><ArrowUpRight className="h-4 w-4" /></a>}
                             </div>
                           </CardHeader>
 
@@ -219,17 +220,17 @@ export default function ProjectsPageClient({ initialProjects, initialBlocks, ini
                               <p className="text-[10px] font-black uppercase tracking-widest text-[#ed1c24] dark:text-[#ed1c24] mb-3">Mentoring & Coaching</p>
                               <div className="flex -space-x-3 items-center mb-8">
                                 {displayAuthors.map((author: any, idx: number) => (
-                                  <Avatar key={idx} className="h-10 w-10 border-2 border-white dark:border-gray-800 shadow-md">
+                                  <Avatar key={idx} className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800 shadow-md">
                                     <AvatarImage src={author.avatar} className="object-cover" />
                                     <AvatarFallback className="bg-red-50 text-[#ed1c24] text-xs font-bold">{author.name[0]}</AvatarFallback>
                                   </Avatar>
                                 ))}
 
-                                {remaining > 0 && (
+                                {authors.length > 0 && (
                                   <Popover>
                                     <PopoverTrigger asChild>
                                       <button className="h-10 w-10 rounded-full bg-slate-900 text-white border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-black hover:bg-[#ed1c24] transition-all z-10">
-                                        +{remaining}
+                                        {remaining > 0 ? `+${remaining}` : "..."}
                                       </button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-64 p-4 rounded-2xl shadow-2xl bg-white dark:bg-gray-900 border-none z-[100]">

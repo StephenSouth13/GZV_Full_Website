@@ -30,7 +30,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
 
   const relatedProjects = allProjects
     .filter((item: any) => item.id !== project.id && (item.category === project.category || !project.category))
-    .slice(0, 3)
+    .slice(0, 6)
 
   return <ProjectDetailClient initialProject={project} initialRelatedProjects={relatedProjects} />
 }
