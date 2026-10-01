@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { getBrandingSettings, getPageSlugFromPath, getSitePageContent } from "@/lib/site-content"
-import { supabase } from "@/lib/api-supabase"
+import { watchPublicTables } from "@/lib/public-realtime"
 
 const upsertMeta = (name: string, content?: string | null) => {
   if (!content) return
@@ -125,14 +125,10 @@ export default function SeoBrandingManager() {
       updateFavicons(branding.favicon_url)
     })
     loadSeo()
-    const channel = supabase
-      .channel(`site-seo:${getPageSlugFromPath(pathname)}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, loadSeo)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_pages" }, loadSeo)
-      .subscribe()
+    const stop = watchPublicTables(["site_branding_settings", "site_pages"], loadSeo)
     return () => {
       active = false
-      supabase.removeChannel(channel)
+      stop()
     }
   }, [pathname])
 

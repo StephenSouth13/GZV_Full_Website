@@ -10,15 +10,17 @@ import ScrollToTop from '@/components/ScrollToTop'
 import ManagedPageContent from '@/components/ManagedPageContent'
 import SeoBrandingManager from '@/components/SeoBrandingManager'
 import { defaultLoadingSettings, getPageSlugFromPath, getSiteLoadingSettings, getSiteNavigation, type SiteLoadingSettings, type SiteNavItem } from '@/lib/site-content'
-import { supabase } from '@/lib/api-supabase'
+import { watchPublicTables } from '@/lib/public-realtime'
 
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const standalone = /^\/gzver\/[^/]+\/cv\/?$/.test(pathname)
   const [navigation, setNavigation] = useState<SiteNavItem[]>([])
   const [loadingSettings, setLoadingSettings] = useState<SiteLoadingSettings>(defaultLoadingSettings)
   const [booting, setBooting] = useState(false)
 
   useEffect(() => {
+    if (standalone) return
     let active = true
     const started = Date.now()
     const hasShownBootLoader = sessionStorage.getItem('gzv_boot_loader_shown') === '1'
@@ -37,16 +39,12 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
       window.setTimeout(() => active && setBooting(false), wait)
     })
     loadShellSettings()
-    const channel = supabase
-      .channel('site-shell-settings')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_navigation' }, loadShellSettings)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_loading_settings' }, loadShellSettings)
-      .subscribe()
+    const stop = watchPublicTables(['site_navigation', 'site_loading_settings'], loadShellSettings)
     return () => {
       active = false
-      supabase.removeChannel(channel)
+      stop()
     }
-  }, [])
+  }, [standalone])
 
   const disabledPage = useMemo(() => {
     const slug = getPageSlugFromPath(pathname)
@@ -54,7 +52,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   }, [navigation, pathname])
 
   // CV is a standalone document: site navigation and floating UI must not enter print output.
-  if (/^\/gzver\/[^/]+\/cv\/?$/.test(pathname)) return <>{children}</>
+  if (standalone) return <>{children}</>
 
   return (
     <div className="min-h-screen bg-background text-foreground">

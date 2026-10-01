@@ -2,19 +2,7 @@
 
 import { supabase } from '@/lib/api-supabase'
 
-// ⚡ Clear any leftover stale caches from localStorage on client load
-if (typeof window !== 'undefined') {
-  try {
-    const keysToRemove: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key && (key.startsWith('gzv_cache_') || key.startsWith('gzv_api_'))) {
-        keysToRemove.push(key)
-      }
-    }
-    keysToRemove.forEach((k) => localStorage.removeItem(k))
-  } catch (e) {}
-}
+// Public configuration is cached at the fetch layer; realtime invalidates only the changed table.
 
 export type SiteNavItem = {
   id?: string

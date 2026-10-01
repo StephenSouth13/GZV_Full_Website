@@ -1,6 +1,7 @@
   'use client'
 
   import { createBrowserClient } from '@supabase/ssr'
+  import { cachedPublicFetch } from './public-fetch-cache'
 
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
@@ -13,7 +14,7 @@
    * Khởi tạo Supabase Client cho Browser
    */
   export function createClient() {
-    return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, { global: { fetch: cachedPublicFetch } })
   }
 
   // Chỉ export 1 biến duy nhất này để dùng chung toàn bộ dự án
@@ -205,7 +206,7 @@
     cover_position_y?: number;
     cover_scale?: number;
     cv_url?: string;
-    cv_settings?: { template?: "executive" | "minimal" | "midnight"; accent?: string; show_contact?: boolean; show_projects?: boolean };
+    cv_settings?: { template?: "executive" | "minimal" | "midnight" | "editorial" | "studio" | "portfolio"; accent?: string; show_contact?: boolean; show_projects?: boolean; show_project_details?: boolean; show_project_gallery?: boolean; show_credentials?: boolean };
     linked_author_id?: string | null;
     achievement_summary: string;
     testimonial: string;

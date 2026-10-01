@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowDown,
   ArrowUp,
+  Check,
   CreditCard,
   FileCheck,
   FileText,
@@ -36,6 +37,9 @@ import { toast } from "@/hooks/use-toast"
 import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { QRCodeSVG } from "qrcode.react"
 import { CvPreview } from "./CvPreview"
+import { CvTemplatePicker } from "../../../../shared/gzver/CvTemplatePicker"
+import { CV_TEMPLATES, mergeCvProjects } from "../../../../shared/gzver/cv-model"
+import { getGzverAuthors, getGzverProjectCatalog, getGzverHighlights, invalidateGzverHighlights, watchGzverCatalog } from "@/lib/gzver-catalog"
 
 type Department = {
   id: string
@@ -248,19 +252,16 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
   const [projectHighlights, setProjectHighlights] = useState<Record<string, any>>({})
   const [projectSearch, setProjectSearch] = useState("")
   const [projectLoadError, setProjectLoadError] = useState("")
-  const cvProjects = useMemo(() => projectOptions.filter((project) => {
-    const highlight = projectHighlights[project.id]
-    return highlight ? highlight.is_visible !== false : Boolean(formData.id && Array.isArray(project.author_ids) && project.author_ids.includes(formData.id))
-  }).map((project) => ({ ...project, contribution: projectHighlights[project.id]?.contribution })), [projectOptions, projectHighlights, formData.id])
+  const cvProjects = useMemo(() => mergeCvProjects(formData, projectOptions, Object.entries(projectHighlights).map(([project_id, value]) => ({ ...value, project_id }))), [projectOptions, projectHighlights, formData.id, formData.linked_author_id])
   const cvPerson = { ...formData, department_name: departments?.find((department: Department) => department.id === formData.department_id)?.name || formData.department_name }
 
   useEffect(() => {
     if (!open) return
-    supabase
-      .from("authors")
-      .select("id, full_name, avatar_url, title, bio")
-      .order("full_name", { ascending: true })
-      .then(({ data }) => data && setAuthors(data))
+    let active = true
+    const load = () => getGzverAuthors().then((data) => { if (active) setAuthors(data) }).catch(() => {})
+    void load()
+    const stop = watchGzverCatalog(() => { void load() })
+    return () => { active = false; stop() }
   }, [open])
 
   useEffect(() => {
@@ -269,23 +270,13 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
     const loadProjects = async () => {
       setProjectLoadError("")
       try {
-        const projects: any[] = []
-        for (let from = 0; ; from += 1000) {
-          const { data, error } = await supabase.from("projects").select("*").order("order_index", { ascending: true }).range(from, from + 999)
-          if (error) throw error
-          projects.push(...(data || []))
-          if (!data || data.length < 1000) break
-        }
+        const projects = await getGzverProjectCatalog()
         if (!active) return
         setProjectOptions(projects)
         let highlights: any[] = []
         if (gzver?.id) {
-          const result = await supabase.from("gzver_project_highlights").select("*").eq("gzver_id", gzver.id)
-          if (result.error) {
-            setProjectLoadError(`Không đọc được danh sách dự án đã gắn: ${result.error.message}`)
-          } else {
-            highlights = result.data || []
-          }
+          try { highlights = await getGzverHighlights(gzver.id) }
+          catch (error: any) { setProjectLoadError(`Không đọc được danh sách dự án đã gắn: ${error.message}`) }
         }
         if (!active) return
         setProjectHighlights(Object.fromEntries(highlights.map((item: any) => [item.project_id, item])))
@@ -296,7 +287,8 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
       }
     }
     loadProjects()
-    return () => { active = false }
+    const stop = watchGzverCatalog(() => { void getGzverProjectCatalog().then((rows) => { if (active) setProjectOptions(rows) }).catch((error: any) => { if (active) setProjectLoadError(error.message) }) })
+    return () => { active = false; stop() }
   }, [open, gzver?.id])
 
   const handlePullFromAuthor = () => {
@@ -505,6 +497,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         })), { onConflict: "gzver_id,project_id" })
         if (highlightError) throw highlightError
       }
+      invalidateGzverHighlights()
       toast({ title: "Đã lưu thông tin GZVer thành công!" })
       onSave()
       onClose()

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin, Send, Loader2, ArrowUpRight } from "lucide-react"
 import { supabase } from "@/lib/api-supabase"
 import { getFooterSettings, getBrandingSettings } from "@/lib/site-content"
+import { watchPublicTables } from "@/lib/public-realtime"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 
@@ -92,14 +93,10 @@ export default function Footer({ overrideConfig, activeColumn, onSelectColumn }:
       }
     })
     loadFooter()
-    const channel = supabase
-      .channel("site-shell-footer")
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_footer_settings" }, loadFooter)
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_branding_settings" }, loadFooter)
-      .subscribe()
+    const stop = watchPublicTables(["site_footer_settings", "site_branding_settings"], loadFooter)
     return () => {
       active = false
-      supabase.removeChannel(channel)
+      stop()
     }
   }, [overrideConfig])
 
