@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react"
 import { getPageBlocks, type PageBlock } from "@/lib/site-content"
 import { supabase } from "@/lib/api-supabase"
 import { localizeRecord, useLanguage } from "@/components/language-provider"
+import type { TeamData } from "@/lib/home-data"
 
 // Common Sections
 import PageBanner from "@/components/sections/common/PageBanner"
 import ContactFormBlock from "@/components/sections/common/ContactFormBlock"
 import FeatureGrid from "@/components/sections/common/FeatureGrid"
 import ProgramsGrid from "@/components/sections/common/ProgramsGrid"
-import PeopleGrid from "@/components/sections/about/PeopleGrid"
 import ImageGalleryBlock from "@/components/sections/common/ImageGalleryBlock"
 import CtaBand from "@/components/sections/common/CtaBand"
 import MscWords from "@/components/sections/common/MscWords"
@@ -41,11 +41,13 @@ export default function PageBuilderRenderer({
   fallback,
   initialBlocks,
   initialPartners,
+  initialTeam,
 }: {
   slug: string
   fallback?: React.ReactNode
   initialBlocks?: PageBlock[]
   initialPartners?: any[]
+  initialTeam?: TeamData
 }) {
   const { language } = useLanguage()
   const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || [])
@@ -108,10 +110,10 @@ export default function PageBuilderRenderer({
   if (loading) return null
   if (blocks.length === 0) return <>{fallback || null}</>
 
-  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} initialPartners={initialPartners} />)}</>
+  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} initialPartners={initialPartners} initialTeam={initialTeam} />)}</>
 }
 
-function RenderBlock({ block, language, initialPartners }: { block: PageBlock; language: "vi" | "en"; initialPartners?: any[] }) {
+function RenderBlock({ block, language, initialPartners, initialTeam }: { block: PageBlock; language: "vi" | "en"; initialPartners?: any[]; initialTeam?: TeamData }) {
   if (block.is_visible === false) return null
   const localizedProps = localizeRecord(block.props || {}, language)
   const blockTitle = language === "en"
@@ -141,9 +143,10 @@ function RenderBlock({ block, language, initialPartners }: { block: PageBlock; l
     case "why_columns":
       return <WhyColumns language={language} {...props} />
     case "about_boxes":
-      return <AboutBoxes {...props} />
+      return <AboutBoxes {...props} initialTeam={initialTeam} />
+    // Khối đội ngũ dùng chung bố cục với trang chủ: mỗi ban một khối, xếp theo thứ tự trong Admin
     case "people_grid":
-      return <PeopleGrid {...props} />
+      return <AboutBoxes title={props.title} subtitle={props.subtitle} limitPerDepartment={props.limit} initialTeam={initialTeam} />
     case "feature_grid":
       return <FeatureGrid {...props} />
     case "programs_grid":

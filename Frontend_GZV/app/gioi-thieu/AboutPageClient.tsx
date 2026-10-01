@@ -3,12 +3,14 @@
 import PageBanner from "@/components/sections/common/PageBanner"
 import BuilderPageGate from "@/components/BuilderPageGate"
 import type { PageBlock, SitePageContent } from "@/lib/site-content"
+import type { TeamData } from "@/lib/home-data"
 
 type AboutPageClientProps = {
   initialBlocks?: PageBlock[]
   initialPage?: SitePageContent | null
   initialGlobalBanner?: Record<string, any> | null
   initialSyncAllBanners?: boolean
+  initialTeam?: TeamData
 }
 
 export default function AboutPageClient({
@@ -16,6 +18,7 @@ export default function AboutPageClient({
   initialPage = null,
   initialGlobalBanner = null,
   initialSyncAllBanners = true,
+  initialTeam,
 }: AboutPageClientProps) {
   return (
     <>
@@ -24,7 +27,7 @@ export default function AboutPageClient({
         initialGlobalBanner={initialGlobalBanner}
         initialSyncAllBanners={initialSyncAllBanners}
       />
-      <BuilderPageGate slug="gioi-thieu" initialBlocks={initialBlocks} />
+      <BuilderPageGate slug="gioi-thieu" initialBlocks={initialBlocks} initialTeam={initialTeam} />
     </>
   )
 }

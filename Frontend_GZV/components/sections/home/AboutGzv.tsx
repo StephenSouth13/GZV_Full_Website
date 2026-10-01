@@ -23,13 +23,25 @@ export interface AboutGzvProps {
   button_label?: string
   button_url?: string
   show_button?: boolean
+  initialSection?: any
 }
 
+const mapAboutSection = (data: any) => ({
+  is_visible: data.is_visible,
+  title: data.title,
+  subtitle: data.subtitle,
+  body: data.description,
+  image_url: data.settings?.image_url || data.settings?.image || data.image_url,
+  ...data.settings,
+  button_label: data.button_label,
+  button_url: data.button_url,
+})
+
 export default function AboutGzv(props: AboutGzvProps) {
-  const [dbData, setDbData] = useState<any>(null)
+  const [dbData, setDbData] = useState<any>(props.initialSection ? mapAboutSection(props.initialSection) : null)
 
   useEffect(() => {
-    if (props.title || props.body || props.description) return
+    if (props.title || props.body || props.description || props.initialSection) return
     let active = true
 
     async function loadData() {
@@ -40,16 +52,7 @@ export default function AboutGzv(props: AboutGzvProps) {
         .maybeSingle()
 
       if (!active || !data) return
-      setDbData({
-        is_visible: data.is_visible,
-        title: data.title,
-        subtitle: data.subtitle,
-        body: data.description,
-        image_url: data.settings?.image_url || data.settings?.image || data.image_url,
-        ...data.settings,
-        button_label: data.button_label,
-        button_url: data.button_url,
-      })
+      setDbData(mapAboutSection(data))
     }
 
     loadData()

@@ -30,13 +30,15 @@ const getEmbedUrl = (url: string) => {
 
 const isDirectVideo = (url: string) => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
 
-const HeroVideo = () => {
+const HeroVideo = ({ initialSection }: { initialSection?: HomeSectionConfig | null }) => {
   const { language, t } = useLanguage()
   const [isPlaying, setIsPlaying] = useState(true)
-  const [hero, setHero] = useState<HomeSectionConfig | null>(null)
+  const [hero, setHero] = useState<HomeSectionConfig | null>(initialSection ?? null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
+    // Đã có dữ liệu từ server thì không tải lại -> không nháy nội dung mặc định
+    if (initialSection !== undefined) return
     let active = true
     getHomeSectionConfig("hero").then((section) => {
       if (active) setHero(section)

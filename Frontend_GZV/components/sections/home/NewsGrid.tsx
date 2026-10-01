@@ -37,10 +37,12 @@ export default function NewsGrid({
   title: propTitle,
   subtitle: propSubtitle,
   hp,
-}: NewsGridProps) {
-  const [articles, setArticles] = useState<any[]>([])
-  const [sectionConfig, setSectionConfig] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  initialConfig,
+  initialArticles,
+}: NewsGridProps & { initialConfig?: any; initialArticles?: any[] }) {
+  const [articles, setArticles] = useState<any[]>(initialArticles || [])
+  const [sectionConfig, setSectionConfig] = useState<any>(initialConfig ?? null)
+  const [loading, setLoading] = useState(!initialArticles)
 
   useEffect(() => {
     let active = true
@@ -91,7 +93,7 @@ export default function NewsGrid({
       }
     }
 
-    fetchData()
+    fetchData(!initialArticles)
 
     const channel = supabase
       .channel("home-news:sync")

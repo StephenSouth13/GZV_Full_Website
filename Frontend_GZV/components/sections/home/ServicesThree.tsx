@@ -33,11 +33,13 @@ export default function ServicesThree({
   title: propTitle,
   subtitle: propSubtitle,
   items: propItems,
-}: ServicesThreeProps) {
-  const [dbData, setDbData] = useState<any>(null)
+  initialConfig,
+}: ServicesThreeProps & { initialConfig?: any }) {
+  const [dbData, setDbData] = useState<any>(initialConfig ?? null)
   const icons = [Megaphone, TrendingUp, Cpu]
 
   useEffect(() => {
+    if (initialConfig) return
     let active = true
     Promise.all([
       supabase.from("site_home_sections").select("*").eq("section_key", "services_three").maybeSingle(),

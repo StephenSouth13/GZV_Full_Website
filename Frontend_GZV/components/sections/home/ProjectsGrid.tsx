@@ -21,7 +21,7 @@ export interface ProjectsGridProps {
   show_filter?: boolean
 }
 
-export default function ProjectsGrid(rawProps: ProjectsGridProps) {
+export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConfig?: any; initialItems?: any[] }) {
   const {
     title: propTitle,
     subtitle: propSubtitle,
@@ -29,9 +29,9 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
     background,
   } = rawProps
 
-  const [items, setItems] = useState<any[]>([])
-  const [dbProps, setDbProps] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<any[]>(rawProps.initialItems || [])
+  const [dbProps, setDbProps] = useState<any>(rawProps.initialConfig ?? null)
+  const [loading, setLoading] = useState(!rawProps.initialItems)
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -66,7 +66,8 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps) {
       }
     }
 
-    fetchData()
+    // Có dữ liệu từ server thì chỉ đồng bộ ngầm, không hiện trạng thái tải
+    fetchData(!rawProps.initialItems)
 
     const channel = supabase
       .channel('home-projects:sync')

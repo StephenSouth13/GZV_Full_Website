@@ -1,5 +1,6 @@
 import { getSupabaseServer } from "@/lib/supabase-server"
 import type { PageBlock, SitePageContent } from "@/lib/site-content"
+import type { TeamData } from "@/lib/home-data"
 
 export type ManagedPageInitialData = {
   initialBlocks: PageBlock[]
@@ -161,4 +162,51 @@ export async function getInitialProject(slug: string) {
     .eq("slug", slug)
     .maybeSingle()
   return data ? normalizeProject(data) : null
+}
+
+// Đội ngũ theo ban (Ban điều hành, Ban cố vấn, GZVers...) cho khối "Về chúng tôi"
+export async function getInitialTeam(): Promise<TeamData> {
+  const supabase = getSupabaseServer()
+  const [departmentsResult, membersResult] = await Promise.all([
+    supabase.from("gzver_departments").select("*").eq("is_active", true).order("sort_order", { ascending: true }),
+    supabase.from("gzvers").select("*").eq("is_active", true).order("order", { ascending: true }),
+  ])
+  return {
+    departments: departmentsResult.data || [],
+    members: (membersResult.data || []).map((member: any) => ({ ...member, avatar_url: publicMediaUrl(member.avatar_url || member.image) })),
+  }
+}
+
+const HOME_BLOCK_TYPES = ["services_three", "projects_grid", "news_grid", "about_boxes"]
+
+// Toàn bộ dữ liệu trang chủ tải sẵn trên server -> trang hiện đúng nội dung ngay lần đầu
+export async function getHomeInitialData() {
+  const supabase = getSupabaseServer()
+  const [sectionsResult, blocksResult, projectsResult, posts, team, partners] = await Promise.all([
+    supabase.from("site_home_sections").select("*").order("sort_order", { ascending: true }),
+    supabase.from("site_page_blocks").select("component_type, props").in("component_type", HOME_BLOCK_TYPES),
+    supabase.from("projects").select("*").order("order_index", { ascending: true }).order("created_at", { ascending: false }).limit(6),
+    getInitialBlogPosts(),
+    getInitialTeam(),
+    getInitialPartners(200),
+  ])
+
+  const blockProps: Record<string, any> = {}
+  for (const block of blocksResult.data || []) {
+    if (!(block.component_type in blockProps)) blockProps[block.component_type] = block.props
+  }
+
+  return {
+    sections: sectionsResult.data || [],
+    blockProps,
+    projects: projectsResult.data || [],
+    posts,
+    team,
+    partners,
+  }
+}
+
+// Trang builder có khối đội ngũ thì tải sẵn danh sách thành viên
+export async function getTeamIfNeeded(blocks: PageBlock[]) {
+  return blocks.some((block) => block.component_type === "about_boxes" || block.component_type === "people_grid") ? getInitialTeam() : undefined
 }
