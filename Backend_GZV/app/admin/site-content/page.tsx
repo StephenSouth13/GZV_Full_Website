@@ -379,6 +379,24 @@ function SiteContentManager() {
     }
   }
 
+  const saveFloating = async () => {
+    try {
+      setSaving(true)
+      const payload = floating.map((action, index) => ({
+        ...action,
+        sort_order: (index + 1) * 10,
+        href: action.action_type === "chatbot" ? null : (action.href || null),
+      }))
+      const { error } = await supabase.from("site_floating_actions").upsert(payload, { onConflict: "id" })
+      if (error) throw error
+      toast.success("Đã lưu các kênh Floating Contact")
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi lưu Floating Contact")
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const saveHomeSections = async () => {
     try {
       setSaving(true)
@@ -1133,7 +1151,7 @@ function SiteContentManager() {
 
           {/* TAB 6: FLOATING */}
           <TabsContent value="floating">
-            <FloatingActionsTab />
+            <FloatingActionsTab actions={floating} onChange={setFloating} onSave={saveFloating} saving={saving} />
           </TabsContent>
 
           {/* TAB 7: LOADING */}
