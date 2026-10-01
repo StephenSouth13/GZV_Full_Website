@@ -11,7 +11,7 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
@@ -22,7 +22,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar - hidden on mobile, shown on lg */}
         <div className="hidden lg:block">
           <AdminSidebar
-            isOpen={sidebarOpen}
+            isOpen={true}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           />
