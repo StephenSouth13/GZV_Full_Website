@@ -72,12 +72,20 @@ function formatBytes(bytes: number) {
 
 function isImage(mime?: string, name?: string) {
   if (mime?.startsWith("image/")) return true
-  return /\.(png|jpe?g|webp|gif|svg|avif)$/i.test(name || "")
+  return /\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|tiff?|jxl|heic|heif)$/i.test(name || "")
 }
 
 function isVideo(mime?: string, name?: string) {
   if (mime?.startsWith("video/")) return true
   return /\.(mp4|webm|mov|m4v|ogg)$/i.test(name || "")
+}
+
+function inferMimeType(name: string) {
+  const ext = name.toLowerCase().split(".").pop() || ""
+  const types: Record<string, string> = {
+    svg: "image/svg+xml", png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif", avif: "image/avif", bmp: "image/bmp", ico: "image/x-icon", tif: "image/tiff", tiff: "image/tiff", jxl: "image/jxl", heic: "image/heic", heif: "image/heif",
+  }
+  return types[ext] || "application/octet-stream"
 }
 
 export default function AdminImagesPage() {
@@ -174,7 +182,9 @@ export default function AdminImagesPage() {
                   await collectStorageFiles(path, depth + 1)
                   continue
                 }
-                if (!/\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov|pdf|docx?|pptx?|xlsx?)$/i.test(file.name)) continue
+                // Storage metadata can be empty for SVG and newly uploaded files.
+                // Keep any known media/document extension visible instead of hiding it.
+                if (!/\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|tiff?|jxl|heic|heif|mp4|webm|ogg|mov|m4v|pdf|docx?|pptx?|xlsx?|csv|txt)$/i.test(file.name) && !String((file.metadata as any)?.mimetype || "").startsWith("image/")) continue
                 if (fileItems.some((item) => item.path === path)) continue
                 const { data: publicData } = supabase.storage.from(BUCKET).getPublicUrl(path)
                 fileItems.push({
@@ -218,7 +228,7 @@ export default function AdminImagesPage() {
             folder,
             url: cleanUrl,
             size: 0,
-            mimetype: "",
+            mimetype: inferMimeType(cleanUrl.split(/[?#]/)[0]),
             source: "external",
           })
         }
@@ -328,7 +338,7 @@ export default function AdminImagesPage() {
           const { data, error: supaErr } = await supabase.storage.from(BUCKET).upload(path, file, {
             cacheControl: "3600",
             upsert: true,
-            contentType: file.type || "image/jpeg",
+            contentType: file.type || inferMimeType(file.name),
           })
 
           if (!supaErr && data) {
@@ -535,7 +545,7 @@ export default function AdminImagesPage() {
               ref={fileRef}
               type="file"
               multiple
-              accept="image/*,video/*,.pdf,.doc,.docx"
+              accept="image/*,video/*,.svg,.avif,.bmp,.ico,.tif,.tiff,.jxl,.heic,.heif,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.txt"
               className="hidden"
               onChange={(event) => {
                 handleUpload(event.target.files)

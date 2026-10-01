@@ -34,7 +34,7 @@ export interface StorageResponse {
 }
 
 const BUCKET_NAME = 'media'
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm']
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/avif', 'image/bmp', 'image/x-icon', 'image/tiff', 'image/jxl', 'image/heic', 'image/heif', 'video/mp4', 'video/webm', 'video/quicktime', 'application/pdf', 'text/plain', 'text/csv']
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
 /**
@@ -55,7 +55,8 @@ export async function uploadFile(
       }
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    const extensionAllowed = /\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|tiff?|jxl|heic|heif|mp4|webm|ogg|mov|m4v|pdf|docx?|pptx?|xlsx?|csv|txt)$/i.test(file.name)
+    if (!ALLOWED_MIME_TYPES.includes(file.type) && !extensionAllowed) {
       return {
         success: false,
         error: `File type ${file.type} is not allowed`

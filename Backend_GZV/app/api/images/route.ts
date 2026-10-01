@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 export const revalidate = 0
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'video/mp4', 'video/webm']
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/avif', 'image/bmp', 'image/x-icon', 'image/tiff', 'image/jxl', 'image/heic', 'image/heif', 'video/mp4', 'video/webm', 'video/quicktime', 'application/pdf', 'text/plain', 'text/csv']
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'File là bắt buộc' }, { status: 400 })
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.type) && !/\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov)$/i.test(file.name)) {
+    if (!ALLOWED_MIME_TYPES.includes(file.type) && !/\.(png|jpe?g|webp|gif|svg|avif|bmp|ico|tiff?|jxl|heic|heif|mp4|webm|ogg|mov|m4v|pdf|docx?|pptx?|xlsx?|csv|txt)$/i.test(file.name)) {
       return NextResponse.json({ success: false, error: `Định dạng ${file.type} không được hỗ trợ` }, { status: 400 })
     }
 
