@@ -34,8 +34,10 @@ import {
   LayoutGrid,
   Rows3,
 } from "lucide-react"
-import { api, gzver, supabase } from "@/lib/api-supabase"
+import type { gzver } from "@/lib/api-supabase"
+import { useGzverCv } from "@/hooks/use-gzver-cv"
 import { MemberCardShowcase, getMemberCard } from "@/components/gzver/MemberCard"
+import ProjectCard from "@/components/ProjectCard"
 
 type ProfileSectionData = NonNullable<gzver["profile_tabs"]>[number]
 type ProfileBadge = NonNullable<gzver["profile_badges"]>[number]
@@ -326,58 +328,10 @@ function ProfileSection({ member, section }: { member: gzver; section: ProfileSe
 }
 
 export default function GzverDetailPage({ params }: { params: { slug: string } }) {
-  const [member, setMember] = useState<gzver | null>(null)
-  const [memberProjects, setMemberProjects] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const { person: member, projects: memberProjects, loading } = useGzverCv(params.slug)
   const [activeTab, setActiveTab] = useState("")
   const [profileViewMode, setProfileViewMode] = useState<"one_view" | "tabs">("one_view")
 
-  useEffect(() => {
-    let active = true
-    const fetchDetail = async () => {
-      try {
-        setLoading(true)
-        const data = await api.getgzverBySlug(params.slug)
-        if (active) {
-          setMember(data)
-          if (data?.id) {
-            const [matches, highlightResult] = await Promise.all([
-              Promise.all([data.id, data.linked_author_id].filter((id): id is string => Boolean(id)).map((id) => supabase
-                .from("projects")
-                .select("*")
-                .contains("author_ids", [id])
-                .order("order_index", { ascending: true })
-                .limit(12))),
-              supabase.from("gzver_project_highlights").select("project_id,contribution,image_urls,is_visible,sort_order").eq("gzver_id", data.id).order("sort_order", { ascending: true }),
-            ])
-            const explicit = highlightResult.data || []
-            const excluded = new Set(explicit.filter((item: any) => item.is_visible === false).map((item: any) => item.project_id))
-            const includeIds = explicit.filter((item: any) => item.is_visible !== false).map((item: any) => item.project_id)
-            const extraResult = includeIds.length ? await supabase.from("projects").select("*").in("id", includeIds) : { data: [] as any[] }
-            const allProjects = [...matches.flatMap((result) => result.data || []), ...(extraResult.data || [])]
-            const unique = Array.from(new Map(allProjects.filter((project: any) => !excluded.has(project.id)).map((project: any) => [project.id, project])).values())
-            const highlightMap = new Map(explicit.filter((item: any) => item.is_visible !== false).map((item: any) => [item.project_id, item]))
-            const projects = unique.map((project: any) => ({ ...project, profile_contribution: (highlightMap.get(project.id) as any)?.contribution })).sort((a: any, b: any) => (a.order_index || 0) - (b.order_index || 0))
-            if (active) setMemberProjects(projects)
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching GZVer detail:", error)
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    fetchDetail()
-    const projectChannel = supabase
-      .channel(`gzver-projects:${params.slug}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, () => { void fetchDetail() })
-      .on("postgres_changes", { event: "*", schema: "public", table: "gzver_project_highlights" }, () => { void fetchDetail() })
-      .subscribe()
-    return () => {
-      active = false
-      supabase.removeChannel(projectChannel)
-    }
-  }, [params.slug])
 
   const sections = useMemo(() => {
     if (!member) return []
@@ -484,31 +438,10 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
         {/* Overlapping Main Container */}
         <div className="container relative z-10 mx-auto min-w-0 max-w-5xl -mt-20 px-4 pb-10 md:-mt-24">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="overflow-clip border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#0d0d0d]">
-            {/* Header Banner Inside Card */}
+            {/* Đầu hồ sơ: avatar nằm ngang với thông tin, nội dung đầy đủ trải rộng bên dưới */}
             <div className="border-b border-t-4 border-slate-200 border-t-[#ed1c24] p-5 dark:border-white/10 md:p-7">
-              <div className="mb-3 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 bg-[#ed1c24] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                  {departmentName}
-                </span>
-                {member.role_level && (
-                  <span className="inline-flex items-center gap-1 border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:border-white/20 dark:bg-white/5 dark:text-white">
-                    {member.role_level}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="text-3xl font-black uppercase leading-none tracking-tight text-slate-950 dark:text-white md:text-4xl">{member.full_name}</h1>
-              {member.headline && <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300 md:text-base">{member.headline}</p>}
-            </div>
-
-            {/* Layout Grid: Sidebar Left + Content Right */}
-            <div className="grid items-start gap-0 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)]">
-              {/* Sidebar Left */}
-              <aside className="h-fit self-start border-b border-slate-200 bg-slate-50/70 p-5 text-slate-900 sm:p-6 lg:border-b-0 lg:border-r lg:border-slate-200 dark:border-white/10 dark:bg-[#090909] dark:text-white">
-                {/* Điện thoại: avatar nhỏ bên trái, thông tin bên phải — máy tính: xếp dọc */}
-                <div className="flex items-start gap-4 lg:block">
-                {/* Avatar Box — cùng tỉ lệ khung ảnh 4/4.5 và bo góc như thẻ ở trang danh sách GZVers để đồng bộ hình ảnh */}
-                <div className="relative aspect-[4/4.5] w-28 shrink-0 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-36 lg:mb-5 lg:w-44 dark:border-[#0d0d0d] dark:bg-[#141414]">
+              <div className="flex flex-row items-start gap-4 sm:gap-5 md:gap-7">
+                <div className="relative aspect-[4/4.5] w-24 shrink-0 overflow-hidden border-4 border-white bg-slate-200 shadow-xl sm:w-36 md:w-44 dark:border-[#0d0d0d] dark:bg-[#141414]">
                   {member.avatar_url ? (
                     <Image
                       src={member.avatar_url}
@@ -530,64 +463,73 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                 </div>
 
                 <div className="min-w-0 flex-1">
-                {/* Kênh kết nối ngay dưới avatar */}
-                {(socials.length > 0 || member.website_url) && (
-                  <div className="mb-4 flex flex-wrap gap-2 lg:mb-5">
-                    {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
-                    {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
+                  <div className="mb-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 bg-[#ed1c24] px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">{departmentName}</span>
+                    {member.role_level && (
+                      <span className="inline-flex items-center gap-1 border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:border-white/20 dark:bg-white/5 dark:text-white">{member.role_level}</span>
+                    )}
                   </div>
-                )}
 
-                <div className="space-y-1">
-                  <h2 className="text-base font-black uppercase leading-tight text-slate-900 sm:text-lg dark:text-white">{member.position}</h2>
-                  {member.company && <p className="text-xs font-bold text-[#ed1c24]">@{member.company}</p>}
-                </div>
+                  <h1 className="text-2xl font-black uppercase leading-none tracking-tight text-slate-950 dark:text-white sm:text-3xl md:text-4xl">{member.full_name}</h1>
+                  {member.headline && <p className="mt-2 text-sm font-semibold text-slate-600 dark:text-slate-300 md:text-base">{member.headline}</p>}
 
-                {badges.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
-                  </div>
-                )}
-                </div>
-                </div>
+                  {(member.position || member.company) && (
+                    <p className="mt-3 text-sm font-black uppercase tracking-wide text-slate-900 dark:text-white">
+                      {member.position}
+                      {member.company && <span className="ml-2 font-bold normal-case text-[#ed1c24]">@{member.company}</span>}
+                    </p>
+                  )}
 
-                {(member.location || member.email || member.phone) && (
-                  <ul className="mt-5 space-y-2.5 border-t border-slate-200 pt-4 text-[13px] font-semibold text-slate-600 dark:border-white/10 dark:text-slate-300">
-                    {member.location && (
-                      <li className="flex items-center gap-2.5">
-                        <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                        <span className="truncate">{member.location}</span>
-                      </li>
-                    )}
-                    {member.email && (
-                      <li>
-                        <a href={`mailto:${member.email}`} className="flex items-center gap-2.5 hover:text-[#ed1c24]">
-                          <Mail className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                          <span className="truncate">{member.email}</span>
+                  {badges.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {badges.map((badge, index) => <BadgePill key={`${badge.label}-${index}`} badge={badge} />)}
+                    </div>
+                  )}
+
+                  {(member.location || member.email || member.phone) && (
+                    <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold text-slate-600 dark:text-slate-300">
+                      {member.location && (
+                        <li className="flex min-w-0 items-center gap-2">
+                          <MapPin className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                          <span className="truncate">{member.location}</span>
+                        </li>
+                      )}
+                      {member.email && (
+                        <li className="min-w-0">
+                          <a href={`mailto:${member.email}`} className="flex items-center gap-2 hover:text-[#ed1c24]">
+                            <Mail className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                            <span className="truncate">{member.email}</span>
+                          </a>
+                        </li>
+                      )}
+                      {member.phone && (
+                        <li>
+                          <a href={`tel:${member.phone.replace(/\s+/g, "")}`} className="flex items-center gap-2 hover:text-[#ed1c24]">
+                            <Phone className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                            <span>{member.phone}</span>
+                          </a>
+                        </li>
+                      )}
+                    </ul>
+                  )}
+
+                  {((socials.length > 0 || member.website_url) || getMemberCard(member).enabled !== false) && (
+                    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 dark:border-white/10">
+                      {socials.map((link, index) => <SocialButton key={`${link.href || link.url}-${index}`} link={link} />)}
+                      {member.website_url && <SocialButton link={{ label: "Website", platform: "website", href: member.website_url }} />}
+                      {getMemberCard(member).enabled !== false && (
+                        <a href="#card-visit" className="ml-auto inline-flex items-center gap-2 border border-[#ed1c24] bg-red-50 px-3 py-2 text-[11px] font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
+                          <CreditCard className="h-4 w-4" /> Thẻ GZVer · Xem 2 mặt
                         </a>
-                      </li>
-                    )}
-                    {member.phone && (
-                      <li>
-                        <a href={`tel:${member.phone.replace(/\s+/g, "")}`} className="flex items-center gap-2.5 hover:text-[#ed1c24]">
-                          <Phone className="h-4 w-4 shrink-0 text-[#ed1c24]" />
-                          <span className="truncate">{member.phone}</span>
-                        </a>
-                      </li>
-                    )}
-                  </ul>
-                )}
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-                {getMemberCard(member).enabled !== false && (
-                  <a href="#card-visit" className="mt-5 flex items-center justify-between border border-[#ed1c24] bg-red-50 px-3 py-3 text-xs font-black uppercase text-[#ed1c24] transition hover:bg-[#ed1c24] hover:text-white dark:bg-red-950/20">
-                    <span className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Thẻ GZVer</span>
-                    <span>Xem 2 mặt</span>
-                  </a>
-                )}
-              </aside>
-
-              {/* Main Content Area: one-view ưu tiên, visitor vẫn có thể chuyển sang tabs */}
-              <div className="min-w-0 bg-white p-4 sm:p-5 lg:p-6 dark:bg-[#0b0b0b]">
+              {/* Nội dung đầy đủ: one-view ưu tiên, visitor vẫn có thể chuyển sang tabs */}
+              <div className="min-w-0 bg-white p-4 sm:p-5 lg:p-7 dark:bg-[#0b0b0b]">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3 dark:border-white/10">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Hồ sơ đầy đủ</p>
@@ -658,7 +600,6 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
                   </div>
                 )}
               </div>
-            </div>
           </motion.div>
         </div>
       </section>
@@ -666,15 +607,15 @@ export default function GzverDetailPage({ params }: { params: { slug: string } }
       {memberProjects.length > 0 && (
         <section className="container mx-auto max-w-5xl px-4 py-12">
           <div className="mb-6 flex items-end justify-between gap-4 border-b border-slate-200 pb-4 dark:border-white/10">
-            <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Dấu ấn thực chiến</p><h2 className="mt-1 text-2xl font-black uppercase text-slate-950 dark:text-white">Dự án đã tham gia</h2></div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#ed1c24]">Nhân sự triển khai</p>
+              <h2 className="mt-1 text-2xl font-black uppercase text-slate-950 dark:text-white">Dự án đã tham gia</h2>
+            </div>
             <span className="text-xs font-bold text-slate-400">{memberProjects.length} dự án</span>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {memberProjects.map((project) => (
-              <Link key={project.id} href={`/du-an/${project.slug}`} className="group overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-[#ed1c24] hover:shadow-lg dark:border-white/10 dark:bg-[#101010]">
-                <div className="relative aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-900">{project.image && <Image src={project.image} alt={project.title} fill unoptimized className="object-cover transition duration-500 group-hover:scale-105" />}</div>
-                <div className="p-4"><p className="text-[9px] font-black uppercase tracking-widest text-[#ed1c24]">{project.category || "Dự án GZV"}</p><h3 className="mt-2 line-clamp-2 text-sm font-black uppercase text-slate-900 group-hover:text-[#ed1c24] dark:text-white">{project.title}</h3><p className="mt-2 line-clamp-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{project.profile_contribution || project.excerpt || project.description}</p><span className="mt-4 inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#ed1c24]">Chi tiết dự án <ExternalLink className="h-3 w-3" /></span></div>
-              </Link>
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         </section>

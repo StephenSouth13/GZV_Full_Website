@@ -17,6 +17,7 @@ export async function cachedPublicFetch(input: RequestInfo | URL, init?: Request
   if (!allowed.has(table) || url.origin !== new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || window.location.origin).origin) return nativeFetch(input, init)
   const method = (init?.method || request?.method || "GET").toUpperCase()
   if (method !== "GET") {
+    if (!["POST", "PATCH", "PUT", "DELETE"].includes(method)) return nativeFetch(input, init)
     invalidatePublicTable(table)
     const response = await nativeFetch(input, init)
     invalidatePublicTable(table)

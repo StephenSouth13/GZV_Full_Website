@@ -2,11 +2,11 @@
 
 import { supabase } from "@/lib/api-supabase"
 import { RequestCache } from "../../shared/data/request-cache"
-import { mergeCvProjects } from "../../shared/gzver/cv-model"
+import { CV_PROJECT_FIELDS, mergeCvProjects } from "../../shared/gzver/cv-model"
 
 export type CvSnapshot = { profile_id: string; slug: string; updated_at: string; is_active: boolean; payload: { schema_version?: number; person: any; projects: any[] }; legacy?: boolean }
 const cache = new RequestCache(12, () => typeof window !== "undefined" ? window.sessionStorage : undefined, "gzv-cv-v3:")
-export const PUBLIC_PROJECT_FIELDS = "id,title,slug,description,detailproject,image,thumbnail_url,gallery,category,status,tech_stack,hashtags,external_url,demo_url,video_url,order_index,author_ids,updated_at,image_position_x,image_position_y,image_scale"
+const PUBLIC_PROJECT_FIELDS = CV_PROJECT_FIELDS
 let legacyUntil = 0
 
 export async function getGzverCvSnapshot(slug: string): Promise<CvSnapshot | null> {
@@ -41,7 +41,7 @@ export async function getGzverCvSnapshot(slug: string): Promise<CvSnapshot | nul
 }
 
 type Listener = (snapshot: CvSnapshot | null, error?: string) => void
-type Watch = { listeners: Set<Listener>; channel?: ReturnType<typeof supabase.channel>; timer?: ReturnType<typeof setTimeout>; cleanup?: ReturnType<typeof setTimeout>; snapshot?: CvSnapshot | null; sequence: number }
+type Watch = { listeners: Set<Listener>; channel?: ReturnType<typeof supabase.channel>; source?: "legacy" | "snapshot" | "wait"; timer?: ReturnType<typeof setTimeout>; cleanup?: ReturnType<typeof setTimeout>; snapshot?: CvSnapshot | null; sequence: number }
 const watches = new Map<string, Watch>()
 
 /** One channel per viewed profile. A snapshot UPDATE carries the new CV: no refetch storm. */
@@ -60,7 +60,25 @@ export function watchGzverCv(slug: string, listener: Listener) {
       const snapshot = await getGzverCvSnapshot(slug)
       if (sequence !== current.sequence || !current.listeners.size) return
       notify(snapshot)
+      if (snapshot && current.channel && current.source !== (snapshot.legacy ? "legacy" : "snapshot")) {
+        void supabase.removeChannel(current.channel); current.channel = undefined
+      }
+      if (snapshot?.legacy && !current.channel) {
+        current.source = "legacy"
+        const schedule = () => { clearTimeout(current.timer); current.timer = setTimeout(() => { void refresh(true) }, 250) }
+        current.channel = supabase.channel(`gzver-cv-legacy:${snapshot.profile_id}`)
+          .on("postgres_changes", { event: "*", schema: "public", table: "gzvers", filter: `id=eq.${snapshot.profile_id}` }, schedule)
+          .on("postgres_changes", { event: "*", schema: "public", table: "gzver_project_highlights", filter: `gzver_id=eq.${snapshot.profile_id}` }, schedule)
+          .on("postgres_changes", { event: "*", schema: "public", table: "projects" }, (event) => {
+            const row = event.new as any
+            const previous = event.old as any
+            const person = current.snapshot?.payload.person
+            const ids = [person?.id, person?.linked_author_id].filter(Boolean)
+            if (current.snapshot?.payload.projects.some((project) => project.id === row.id || project.id === previous.id) || row.author_ids?.some((id: string) => ids.includes(id))) schedule()
+          }).subscribe()
+      }
       if (!current.channel && snapshot) {
+        current.source = "snapshot"
         current.channel = supabase.channel(`gzver-cv:${snapshot.profile_id}`)
           .on("postgres_changes", { event: "UPDATE", schema: "public", table: "gzver_cv_snapshots", filter: `profile_id=eq.${snapshot.profile_id}` }, (event) => {
             const row = event.new as CvSnapshot
@@ -80,6 +98,11 @@ export function watchGzverCv(slug: string, listener: Listener) {
               })
             }
           })
+      }
+      if (!snapshot && !current.channel) {
+        current.source = "wait"
+        current.channel = supabase.channel(`gzver-cv-wait:${slug}`)
+          .on("postgres_changes", { event: "*", schema: "public", table: Date.now() >= legacyUntil ? "gzver_cv_snapshots" : "gzvers", filter: `slug=eq.${slug}` }, () => { void refresh(true) }).subscribe()
       }
       if (snapshot?.legacy) {
         // Only migration compatibility mode polls; the installed snapshot path uses events.

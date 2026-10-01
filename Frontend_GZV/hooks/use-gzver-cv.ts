@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { watchGzverCv } from "@/lib/gzver-cv-data"
+import { safeCvImage } from "../../shared/gzver/cv-model"
 
 export function useGzverCv(slug: string) {
   const [state, setState] = useState<{ slug: string; person: any; projects: any[]; loading: boolean; error: string; updatedAt: string }>({ slug, person: null, projects: [], loading: true, error: "", updatedAt: "" })
@@ -13,7 +14,10 @@ export function useGzverCv(slug: string) {
       stop?.(); stop = undefined
       if (document.visibilityState === "hidden") return
       stop = watchGzverCv(slug, (snapshot, error) => {
-        if (active) setState({ slug, person: snapshot?.payload.person || null, projects: snapshot?.payload.projects || [], loading: false, error: error || (snapshot?.payload.person ? "" : "Không tìm thấy hồ sơ hoặc hồ sơ đã được ẩn."), updatedAt: snapshot?.updated_at || "" })
+        const raw = snapshot?.payload.person
+        const person = raw ? { ...raw, avatar_url: safeCvImage(raw.avatar_url) || "/placeholder-user.jpg", cover_image_url: safeCvImage(raw.cover_image_url) || null } : null
+        const projects = (snapshot?.payload.projects || []).map((project) => ({ ...project, image: safeCvImage(project.image || project.thumbnail_url), thumbnail_url: safeCvImage(project.thumbnail_url || project.image) }))
+        if (active) setState({ slug, person, projects, loading: false, error: error || (person ? "" : "Không tìm thấy hồ sơ hoặc hồ sơ đã được ẩn."), updatedAt: snapshot?.updated_at || "" })
       })
     }
     connect()

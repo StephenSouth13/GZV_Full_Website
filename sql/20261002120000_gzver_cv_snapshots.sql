@@ -54,7 +54,11 @@ begin
     left join public.gzver_project_highlights h on h.project_id = p.id and h.gzver_id = p_id
     where p.status is distinct from 'draft'
       and coalesce(h.is_visible, true)
-      and (h.id is not null or p.author_ids && array_remove(array[member.id, member.linked_author_id], null::uuid));
+      and p.id in (
+        select hp.project_id from public.gzver_project_highlights hp where hp.gzver_id = p_id and hp.is_visible
+        union
+        select ap.id from public.projects ap where ap.author_ids && array_remove(array[member.id, member.linked_author_id], null::uuid)
+      );
 
     doc := jsonb_build_object('schema_version', 1,
       'person', to_jsonb(member) || jsonb_build_object('department_name', coalesce(
@@ -90,7 +94,7 @@ begin
     changed := changed || rows_data;
   end if;
   if tg_table_name = 'gzvers' then
-    for target in select distinct (r->>'id')::uuid as id, r->>'slug' as slug from jsonb_array_elements(changed) r loop
+    for target in select (r->>'id')::uuid as id, max(r->>'slug') as slug from jsonb_array_elements(changed) r group by 1 loop
       perform gzv_private.rebuild_cv(target.id, target.slug);
     end loop;
   elsif tg_table_name = 'gzver_project_highlights' then
@@ -127,9 +131,12 @@ begin
     execute format('create trigger gzv_cv_delete after delete on public.%I referencing old table as cv_old_rows for each statement execute function gzv_private.refresh_cv_snapshots()',t);
   end loop;
   for g in select id from public.gzvers loop perform gzv_private.rebuild_cv(g.id); end loop;
-  if exists(select 1 from pg_publication where pubname = 'supabase_realtime')
-    and not exists(select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'gzver_cv_snapshots') then
-    alter publication supabase_realtime add table public.gzver_cv_snapshots;
+  if exists(select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach t in array array['gzver_cv_snapshots','projects','authors','gzver_project_highlights','gzvers','gzver_departments'] loop
+      if not exists(select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t) then
+        execute format('alter publication supabase_realtime add table public.%I',t);
+      end if;
+    end loop;
   end if;
 end;
 $$;

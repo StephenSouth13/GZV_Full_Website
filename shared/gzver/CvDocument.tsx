@@ -1,4 +1,4 @@
-import { cvList, cvText, normalizeTemplate, projectImages, safeCvImage, safeCvLink } from "./cv-model"
+import { cvContrastInk, cvList, cvReadableAccent, cvText, normalizeTemplate, projectImages, safeCvImage, safeCvLink } from "./cv-model"
 
 // One semantic document and the same complete data for every design and PDF.
 export function CvDocument({ person, projects = [], assetOrigin = "", compact = false }: { person: any; projects?: any[]; assetOrigin?: string; compact?: boolean }) {
@@ -9,7 +9,7 @@ export function CvDocument({ person, projects = [], assetOrigin = "", compact = 
   const skills = cvList(person.skills).map(cvText).filter(Boolean)
   const achievements = cvList(person.achievements_list).map(cvText).filter(Boolean)
   const credentials = cvList(person.online_cards).filter((card) => card.visible !== false)
-  const socialLinks = Array.isArray(person.social_links) ? person.social_links : Object.entries(person.social_links || {}).map(([label, href]) => ({ label, href }))
+  const socialLinks: any[] = Array.isArray(person.social_links) ? person.social_links : Object.entries(person.social_links || {}).map(([label, href]) => ({ label, href }))
   const sections = [
     ["Kinh nghiệm", person.background?.experience],
     ["Vai trò trước đây", person.background?.previous_role],
@@ -18,7 +18,7 @@ export function CvDocument({ person, projects = [], assetOrigin = "", compact = 
     ["Tác động cộng đồng", person.social_impact],
   ].filter(([, text]) => cvText(text))
   const extraSections = cvList(person.profile_tabs).filter((section) => section.visible !== false && section.content && !sections.some(([, text]) => cvText(text) === cvText(section.content)))
-  const style = { color: "var(--cv-ink)", "--cv-accent": accent }
+  const style = { color: "var(--cv-ink)", "--cv-accent": accent, "--cv-accent-ink": cvReadableAccent(accent, template), "--cv-hero-ink": cvContrastInk(accent) }
   return <article className={`gzv-cv gzv-cv-${template}${compact ? " gzv-cv-compact" : ""}`} style={style} data-revision={[person.updated_at || "", ...projects.map((project) => project.updated_at || "")].join("|")}>
     <div className="gzv-cv-brand"><img src={asset("/logo.webp")} alt="GZV" /><span>THE VOICE OF GENZERS</span><span className="gzv-cv-label">HỒ SƠ NĂNG LỰC</span></div>
     {template === "portfolio" && asset(person.cover_image_url) && <figure className="gzv-cv-cover"><img src={asset(person.cover_image_url)} alt={`Ảnh bìa ${person.full_name || "hồ sơ"}`} /></figure>}
@@ -84,12 +84,71 @@ export const cvStyles = `
 .gzv-cv-compact:not(.gzv-cv-export) .gzv-cv-columns{flex-direction:column}.gzv-cv-compact:not(.gzv-cv-export) .gzv-cv-sidebar{order:2;width:100%;margin:26px 0 0;border:0}.gzv-cv-compact:not(.gzv-cv-export) .gzv-cv-main{order:1}.gzv-cv-compact:not(.gzv-cv-export) .gzv-cv-gallery figure,.gzv-cv-compact:not(.gzv-cv-export) .gzv-cv-credential{width:calc(100% - 16px)}
 @media(max-width:600px){.gzv-cv:not(.gzv-cv-export){padding:26px 22px;min-height:0}.gzv-cv:not(.gzv-cv-export) h1{font-size:26px}.gzv-cv:not(.gzv-cv-export) .gzv-cv-label{display:none}.gzv-cv:not(.gzv-cv-export) .gzv-cv-header{gap:16px}.gzv-cv:not(.gzv-cv-export) .gzv-cv-avatar{width:80px;height:108px}.gzv-cv:not(.gzv-cv-export) .gzv-cv-columns{grid-template-columns:1fr;gap:24px}.gzv-cv:not(.gzv-cv-export) .gzv-cv-project-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.gzv-cv:not(.gzv-cv-export) .gzv-cv-columns{flex-direction:column}.gzv-cv:not(.gzv-cv-export) .gzv-cv-sidebar{order:2;width:100%;margin:26px 0 0;border:0}.gzv-cv:not(.gzv-cv-export) .gzv-cv-main{order:1}.gzv-cv:not(.gzv-cv-export) .gzv-cv-gallery figure,.gzv-cv:not(.gzv-cv-export) .gzv-cv-credential{width:calc(100% - 16px)}.gzv-cv:not(.gzv-cv-export) .gzv-cv-section-heading>span,.gzv-cv:not(.gzv-cv-export) .gzv-cv-footer>span{display:none}}
-@media print{.gzv-cv{box-shadow:none;max-width:none;width:210mm;padding:12mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}.gzv-cv section,.gzv-cv-project{break-inside:auto}.gzv-cv h2,.gzv-cv h3,.gzv-cv h4{break-after:avoid}.gzv-cv figure,.gzv-cv-credential{break-inside:avoid}.gzv-cv-footer{position:static}}
+.gzv-cv p,.gzv-cv li,.gzv-cv-project p{font-size:14px;line-height:1.8}.gzv-cv-sidebar p{font-size:12px}.gzv-cv h2{font-size:12px}.gzv-cv .gzv-cv-contact a{font-size:11px}.gzv-cv .gzv-cv-skills span{font-size:11px}.gzv-cv h2,.gzv-cv h4,.gzv-cv .gzv-cv-eyebrow,.gzv-cv-project-links>a,.gzv-cv-credential a{color:var(--cv-accent-ink)}.gzv-cv-studio .gzv-cv-header h1,.gzv-cv-studio .gzv-cv-header p,.gzv-cv-studio .gzv-cv-project-topline{color:var(--cv-hero-ink)}
+@media print{.gzv-cv{box-shadow:none;max-width:none;width:210mm;padding:12mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}.gzv-cv section,.gzv-cv-project{break-inside:auto}.gzv-cv h2,.gzv-cv h3,.gzv-cv h4{break-after:avoid}.gzv-cv figure,.gzv-cv-credential{break-inside:avoid}.gzv-cv figure img{max-height:250mm;object-fit:contain}.gzv-cv-footer{position:static}}
 `
 
-// Capture at a fixed desktop width, then size one PDF page to the actual canvas.
-// No CSS/legacy page-break rules and no forced A4 slicing.
+const pdfCache = new Map<string, { markup: string; blob: Blob }>()
+const pdfPending = new Map<string, { markup: string; promise: Promise<Blob> }>()
+let pdfCacheBytes = 0
+
+function saveCvBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url; link.download = filename
+  document.body.appendChild(link); link.click(); link.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 30000)
+}
+
+// Cache the completed PDF in memory. Any draft, template, image or revision change regenerates it.
 export async function downloadCvPdf(element: HTMLElement, slug: string, loadPdf: () => Promise<any>) {
+  const filename = `CV-${(slug || "GZVer").replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`
+  const markup = element.outerHTML
+  const cached = pdfCache.get(filename)
+  if (cached?.markup === markup) { saveCvBlob(cached.blob, filename); return }
+  const running = pdfPending.get(filename)
+  if (running?.markup === markup) { saveCvBlob(await running.promise, filename); return }
+  const promise = createCvPdf(element, loadPdf)
+  pdfPending.set(filename, { markup, promise })
+  try {
+    const blob = await promise
+    if (pdfPending.get(filename)?.promise !== promise) { saveCvBlob(blob, filename); return }
+    const old = pdfCache.get(filename)
+    if (old) pdfCacheBytes -= old.blob.size
+    pdfCache.delete(filename); pdfCache.set(filename, { markup, blob }); pdfCacheBytes += blob.size
+    while (pdfCache.size > 6 || pdfCacheBytes > 48 * 1024 * 1024) {
+      const key = pdfCache.keys().next().value as string
+      pdfCacheBytes -= pdfCache.get(key)!.blob.size; pdfCache.delete(key)
+    }
+    saveCvBlob(blob, filename)
+  } finally { if (pdfPending.get(filename)?.promise === promise) pdfPending.delete(filename) }
+}
+
+// Native A4 printing keeps text selectable and preserves the entire long portfolio.
+export async function printCvDocument(element: HTMLElement) {
+  const frame = document.createElement("iframe")
+  frame.title = "In CV A4"
+  frame.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;"
+  document.body.appendChild(frame)
+  const target = frame.contentWindow
+  if (!target) { frame.remove(); throw new Error("Không mở được bản in CV.") }
+  try {
+    const copy = element.cloneNode(true) as HTMLElement
+    copy.classList.remove("gzv-cv-compact")
+    copy.classList.add("gzv-cv-export")
+    target.document.open()
+    target.document.write(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><base href="${window.location.origin}/"><title>CV GZVer</title><style>@page{size:A4;margin:0}body{margin:0;background:white}</style></head><body>${copy.outerHTML}</body></html>`)
+    target.document.close()
+    await target.document.fonts.ready
+    await Promise.all(Array.from(target.document.images).map((image) => image.decode()))
+    target.addEventListener("afterprint", () => frame.remove(), { once: true })
+    target.focus(); target.print()
+    setTimeout(() => frame.remove(), 60000)
+  } catch { frame.remove(); throw new Error("Không tải được bản in CV. Vui lòng kiểm tra ảnh và thử lại.") }
+}
+
+// Capture at desktop width, then size one PDF page to the actual canvas without A4 slicing.
+async function createCvPdf(element: HTMLElement, loadPdf: () => Promise<any>): Promise<Blob> {
   const clone = element.cloneNode(true) as HTMLElement
   clone.classList.add("gzv-cv-export")
   clone.style.width = "794px"
@@ -99,28 +158,34 @@ export async function downloadCvPdf(element: HTMLElement, slug: string, loadPdf:
   host.style.cssText = "position:absolute;left:-10000px;top:0;width:794px;pointer-events:none;"
   host.appendChild(clone)
   document.body.appendChild(host)
+  let worker: any
   try {
     await document.fonts.ready
     await Promise.all(Array.from(clone.querySelectorAll("img")).map(async (img) => {
       img.crossOrigin = "anonymous"
+      img.loading = "eager"
       await img.decode().catch(() => { throw new Error("Không tải được ảnh trong CV. Vui lòng kiểm tra ảnh và thử lại.") })
     }))
     const html2pdf = await loadPdf()
     const height = Math.ceil(clone.getBoundingClientRect().height)
+    if (height * 210 / 794 > 5000) throw new Error("CV quá dài để xuất thành một trang PDF. Bạn có thể dùng In A4 để lưu đầy đủ nội dung.")
     const scale = Math.min(2, 16000 / Math.max(794, height), Math.sqrt(24000000 / (794 * height)))
-    const canvas: HTMLCanvasElement = await html2pdf().set({
+    worker = html2pdf().set({
       margin: 0, pagebreak: { mode: [] },
       html2canvas: { scale, useCORS: true, backgroundColor: null, logging: false, windowWidth: 1200, scrollX: 0, scrollY: 0 },
       jsPDF: { unit: "mm", format: [210, height * 210 / 794 + 1], orientation: "portrait" },
-    }).from(clone).toCanvas().get("canvas")
+    })
+    const canvas: HTMLCanvasElement = await worker.from(clone).toCanvas().get("canvas")
     const pageHeight = canvas.height * 210 / canvas.width + 1
     if (pageHeight > 5000) throw new Error("CV quá dài để xuất thành một trang PDF. Vui lòng rút gọn nội dung.")
-    await html2pdf().set({
-      filename: `CV-${(slug || "GZVer").replace(/[^a-zA-Z0-9_-]/g, "-")}.pdf`,
+    const blob: Blob = await html2pdf().set({
       margin: 0, image: { type: "jpeg", quality: 0.98 },
       jsPDF: { unit: "mm", format: [210, pageHeight], orientation: "portrait", compress: true },
-    }).from(canvas).save()
+    }).from(canvas).outputPdf("blob")
+    canvas.width = 0; canvas.height = 0
+    return blob
   } finally {
+    worker?.prop?.overlay?.remove()
     host.remove()
   }
 }

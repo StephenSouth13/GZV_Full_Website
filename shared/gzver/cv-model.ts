@@ -11,6 +11,17 @@ export type CvTemplate = typeof CV_TEMPLATES[number]["id"]
 export const CV_PROJECT_FIELDS = "id,title,slug,description,detailproject,image,thumbnail_url,gallery,category,status,tech_stack,hashtags,external_url,demo_url,video_url,order_index,author_ids,updated_at,image_position_x,image_position_y,image_scale"
 export const normalizeTemplate = (value: unknown): CvTemplate => CV_TEMPLATES.some((item) => item.id === value) ? value as CvTemplate : "executive"
 
+function luminance(hex: string) {
+  const channels = [1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16) / 255).map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+}
+export function cvContrastInk(accent: string) { return luminance(accent) > 0.179 ? "#172033" : "#ffffff" }
+export function cvReadableAccent(accent: string, template: CvTemplate) {
+  const background = template === "midnight" ? "#101827" : template === "editorial" ? "#f7f3ed" : "#ffffff"
+  const a = luminance(accent), b = luminance(background)
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 4.5 ? accent : template === "midnight" ? "#f2f5fb" : "#172033"
+}
+
 export function cvText(value: unknown): string {
   if (typeof value === "number") return String(value)
   if (Array.isArray(value)) return value.map(cvText).filter(Boolean).join("\n")
@@ -40,7 +51,20 @@ export function cvList(value: unknown): any[] {
 }
 
 export const safeCvLink = (value: unknown): string => typeof value === "string" && (/^https?:\/\//i.test(value.trim()) || /^\/(?!\/)/.test(value.trim())) ? value.trim() : ""
-export const safeCvImage = (value: unknown): string => safeCvLink(value) || (typeof value === "string" && /^data:image\/(?:png|jpeg|webp);base64,/i.test(value) ? value : "")
+export function safeCvImage(value: unknown): string {
+  if (typeof value !== "string") return ""
+  const source = value.trim()
+  const dashboard = source.match(/supabase\.com\/dashboard\/project\/[^/]+\/storage\/files\/buckets\/media\/(.+)$/i)
+  const direct = dashboard ? "" : safeCvLink(source)
+  if (direct) return direct
+  if (/^data:image\/(?:png|jpeg|webp);base64,/i.test(source)) return source
+  let path = source
+  try { if (dashboard) path = decodeURIComponent(dashboard[1]) } catch { return "" }
+  path = path.replace(/^media\//, "")
+  if (!/^[^:<>"]+\.(?:png|jpe?g|webp|gif|avif|svg)$/i.test(path) || path.startsWith("/") || path.split("/").some((segment) => segment === ".." || segment === ".")) return ""
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL
+  return base ? `${base}/storage/v1/object/public/media/${path.split("/").map(encodeURIComponent).join("/")}` : `/${path}`
+}
 
 export function projectImages(project: any): { src: string; caption: string }[] {
   const images: { src: string; caption: string }[] = []
