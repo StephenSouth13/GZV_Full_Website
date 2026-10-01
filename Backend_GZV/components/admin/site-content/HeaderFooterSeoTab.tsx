@@ -196,6 +196,7 @@ export function HeaderFooterSeoTab({
 }: HeaderFooterSeoTabProps) {
   const [subTab, setSubTab] = useState<"header" | "footer" | "seo">("header")
   const [activeFooterCol, setActiveFooterCol] = useState<number | string>(1)
+  const [schemaDraft, setSchemaDraft] = useState("")
 
   // Tự động đồng bộ Favicon tab trình duyệt Admin khi đổi favicon
   useEffect(() => {
@@ -203,6 +204,10 @@ export function HeaderFooterSeoTab({
       updateAdminFavicon(branding.favicon_url)
     }
   }, [branding?.favicon_url])
+
+  useEffect(() => {
+    setSchemaDraft(branding?.seo_schema_json ? JSON.stringify(branding.seo_schema_json, null, 2) : "")
+  }, [branding?.seo_schema_json])
 
   // Local helper getters & setters for Branding
   const logoUrl = branding.header_logo_url || ""
@@ -229,8 +234,8 @@ export function HeaderFooterSeoTab({
   const metaDescription = branding.default_description || ""
   const setMetaDescription = (val: string) => setBranding({ ...branding, default_description: val })
 
-  const keywords = branding.default_keywords || ""
-  const setKeywords = (val: string) => setBranding({ ...branding, default_keywords: val })
+  const keywords = branding.seo_keywords || (branding.default_keywords?.startsWith("{") ? "" : branding.default_keywords || "")
+  const setKeywords = (val: string) => setBranding({ ...branding, seo_keywords: val })
 
   const author = branding.author || "GZV Center"
   const setAuthor = (val: string) => setBranding({ ...branding, author: val })
@@ -249,6 +254,17 @@ export function HeaderFooterSeoTab({
 
   const ogUrl = branding.og_url || canonicalUrl
   const setOgUrl = (val: string) => setBranding({ ...branding, og_url: val })
+
+  const twitterCard = branding.twitter_card || "summary_large_image"
+  const setTwitterCard = (val: string) => setBranding({ ...branding, twitter_card: val })
+  const twitterTitle = branding.twitter_title || ogTitle
+  const setTwitterTitle = (val: string) => setBranding({ ...branding, twitter_title: val })
+  const twitterDescription = branding.twitter_description || ogDescription
+  const setTwitterDescription = (val: string) => setBranding({ ...branding, twitter_description: val })
+  const twitterImage = branding.twitter_image_url || ogImage
+  const setTwitterImage = (val: string) => setBranding({ ...branding, twitter_image_url: val })
+  const robotsIndex = branding.robots_index !== false
+  const robotsFollow = branding.robots_follow !== false
 
   const showLogo = branding.show_logo !== false
   const setShowLogo = (val: boolean) => setBranding({ ...branding, show_logo: val })
@@ -1862,6 +1878,61 @@ export function HeaderFooterSeoTab({
                         placeholder="https://www.gzv.one/"
                         className="mt-1.5 rounded-none border-slate-200 text-xs font-mono h-10 bg-white dark:border-white/10 dark:bg-slate-900"
                       />
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <label className="flex items-center justify-between border border-slate-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-slate-900">
+                        <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">Cho index Google</span>
+                        <Switch checked={robotsIndex} onCheckedChange={(value) => setBranding({ ...branding, robots_index: value })} />
+                      </label>
+                      <label className="flex items-center justify-between border border-slate-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-slate-900">
+                        <span className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">Cho follow link</span>
+                        <Switch checked={robotsFollow} onCheckedChange={(value) => setBranding({ ...branding, robots_follow: value })} />
+                      </label>
+                    </div>
+
+                    <div className="border-t border-slate-200 pt-4 dark:border-white/10">
+                      <Label className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Schema JSON-LD tùy chỉnh</Label>
+                      <Textarea
+                        value={schemaDraft}
+                        onChange={(event) => {
+                          setSchemaDraft(event.target.value)
+                          try {
+                            setBranding({ ...branding, seo_schema_json: event.target.value ? JSON.parse(event.target.value) : null })
+                          } catch {
+                            setBranding({ ...branding, seo_schema_json: null })
+                          }
+                        }}
+                        placeholder={'{"@context":"https://schema.org","@type":"Organization","name":"GZV LTD"}'}
+                        className="mt-1.5 min-h-[110px] rounded-none border-slate-200 bg-white font-mono text-[11px] dark:border-white/10 dark:bg-slate-900"
+                      />
+                      <p className="mt-1 text-[10px] text-slate-500">Dùng cho Organization, WebSite, LocalBusiness hoặc SearchAction.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-slate-950/40">
+                    <Label className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white"><Globe className="h-4 w-4 text-[#ed1c24]" /> Twitter/X & kích thước OG</Label>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <Label className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">Twitter card</Label>
+                        <select value={twitterCard} onChange={(event) => setTwitterCard(event.target.value)} className="mt-1.5 h-10 w-full rounded-none border border-slate-200 bg-white px-3 text-xs font-bold dark:border-white/10 dark:bg-slate-900 dark:text-white">
+                          <option value="summary_large_image">summary_large_image</option>
+                          <option value="summary">summary</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label className="text-[10px] font-black uppercase text-slate-700 dark:text-slate-300">OG alt text</Label>
+                        <Input value={branding.og_image_alt || ""} onChange={(event) => setBranding({ ...branding, og_image_alt: event.target.value })} placeholder="GZV LTD - The Voice of GenZ" className="mt-1.5 h-10 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
+                      </div>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input value={twitterTitle} onChange={(event) => setTwitterTitle(event.target.value)} placeholder="Twitter title" className="h-10 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
+                      <Input value={twitterImage} onChange={(event) => setTwitterImage(event.target.value)} placeholder="Twitter image URL" className="h-10 rounded-none font-mono text-xs dark:border-white/10 dark:bg-slate-900" />
+                    </div>
+                    <Textarea value={twitterDescription} onChange={(event) => setTwitterDescription(event.target.value)} placeholder="Twitter description" className="min-h-[65px] rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input type="number" value={branding.og_image_width || 1200} onChange={(event) => setBranding({ ...branding, og_image_width: Number(event.target.value) || 1200 })} placeholder="OG width" className="h-10 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
+                      <Input type="number" value={branding.og_image_height || 630} onChange={(event) => setBranding({ ...branding, og_image_height: Number(event.target.value) || 630 })} placeholder="OG height" className="h-10 rounded-none text-xs dark:border-white/10 dark:bg-slate-900" />
                     </div>
                   </div>
                 </div>

@@ -345,6 +345,7 @@
     tech_stack?: string[];
     featured?: boolean;
     author_ids?: string[];
+    authors_section_title?: string;
     project_authors?: {
       name: string;
       avatar: string;

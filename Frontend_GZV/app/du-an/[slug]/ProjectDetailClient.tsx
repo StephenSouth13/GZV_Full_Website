@@ -204,25 +204,29 @@ export default function ProjectDetailClient({ initialProject, initialRelatedProj
                 transition={{ duration: 0.4, delay: 0.15 }}
                 className="border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 p-6 sm:p-8 shadow-sm"
               >
-                <div className="flex items-center justify-between gap-4 mb-6 pb-3 border-b border-slate-100 dark:border-white/10">
+                <div className="mb-6 flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-white/10 sm:flex-row sm:items-end sm:justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className="h-8 w-8 bg-[#ed1c24]/10 text-[#ed1c24] flex items-center justify-center font-bold">
                       <Users className="h-4 w-4" />
                     </div>
                     <div>
                       <h2 className="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-white">
-                        Đội Ngũ Mentoring & Coaching
+                        {project.authors_section_title || "MENTORING & COACHING"}
                       </h2>
                       <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Chuyên gia & Cố vấn đồng hành</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="mb-5 border-l-2 border-[#ed1c24] bg-red-50/70 px-4 py-3 text-xs font-semibold leading-relaxed text-slate-600 dark:bg-red-950/15 dark:text-slate-300">
+                  Cùng học hỏi từ kinh nghiệm thực chiến, kết nối đúng chuyên gia và biến mỗi dự án thành một hành trình phát triển năng lực có thể nhìn thấy.
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {project.project_authors.map((author, idx) => (
                     <Link key={idx} href={author.profile_link || "#"}>
-                      <div className="flex items-center gap-4 p-4 border border-slate-200 dark:border-white/10 bg-slate-50/60 dark:bg-white/[0.02] hover:border-[#ed1c24] hover:bg-red-50/30 dark:hover:bg-red-950/20 transition-all duration-200 group">
-                        <div className="relative h-14 w-14 shrink-0 overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-200 shadow-sm">
+                      <div className="group flex items-center gap-4 border border-slate-200 bg-slate-50/60 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ed1c24] hover:bg-red-50/30 hover:shadow-md dark:border-white/10 dark:bg-white/[0.02] dark:hover:bg-red-950/20">
+                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-white bg-slate-200 shadow-sm dark:border-slate-800">
                           <Image
                             src={author.avatar || '/placeholder-avatar.jpg'}
                             alt={author.name}

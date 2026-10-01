@@ -16,6 +16,44 @@ const upsertMeta = (name: string, content?: string | null) => {
   tag.content = content
 }
 
+const upsertProperty = (property: string, content?: string | null) => {
+  if (!content) return
+  let tag = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null
+  if (!tag) {
+    tag = document.createElement("meta")
+    tag.setAttribute("property", property)
+    document.head.appendChild(tag)
+  }
+  tag.content = content
+}
+
+const upsertLink = (rel: string, href?: string | null) => {
+  if (!href) return
+  let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null
+  if (!link) {
+    link = document.createElement("link")
+    link.rel = rel
+    document.head.appendChild(link)
+  }
+  link.href = href
+}
+
+const upsertSchema = (schema?: Record<string, any> | null) => {
+  const id = "gzv-managed-schema"
+  let script = document.getElementById(id) as HTMLScriptElement | null
+  if (!schema) {
+    script?.remove()
+    return
+  }
+  if (!script) {
+    script = document.createElement("script")
+    script.id = id
+    script.type = "application/ld+json"
+    document.head.appendChild(script)
+  }
+  script.textContent = JSON.stringify(schema)
+}
+
 const updateFavicons = (faviconUrl?: string | null) => {
   if (!faviconUrl || typeof document === "undefined") return
 
@@ -63,7 +101,27 @@ export default function SeoBrandingManager() {
       }
 
       upsertMeta("description", page?.seo_description || branding.default_description)
-      upsertMeta("keywords", branding.default_keywords)
+      upsertMeta("keywords", branding.seo_keywords || (branding.default_keywords?.startsWith("{") ? undefined : branding.default_keywords))
+      upsertMeta("author", branding.author)
+      upsertMeta("robots", `${branding.robots_index === false ? "noindex" : "index"},${branding.robots_follow === false ? "nofollow" : "follow"}`)
+      const pageDescription = page?.seo_description || branding.og_description || branding.default_description
+      const pageTitle = document.title
+      const ogImage = branding.og_image_url || "/og-cover.jpg"
+      upsertProperty("og:title", branding.og_title || pageTitle)
+      upsertProperty("og:description", pageDescription)
+      upsertProperty("og:url", branding.og_url || branding.canonical_url || window.location.href)
+      upsertProperty("og:type", "website")
+      upsertProperty("og:site_name", branding.site_name || "GZV LTD")
+      upsertProperty("og:image", ogImage)
+      upsertProperty("og:image:alt", branding.og_image_alt || pageTitle)
+      upsertProperty("og:image:width", String(branding.og_image_width || 1200))
+      upsertProperty("og:image:height", String(branding.og_image_height || 630))
+      upsertMeta("twitter:card", branding.twitter_card || "summary_large_image")
+      upsertMeta("twitter:title", branding.twitter_title || branding.og_title || pageTitle)
+      upsertMeta("twitter:description", branding.twitter_description || pageDescription)
+      upsertMeta("twitter:image", branding.twitter_image_url || ogImage)
+      upsertLink("canonical", branding.canonical_url || window.location.href)
+      upsertSchema(branding.seo_schema_json)
       updateFavicons(branding.favicon_url)
     })
     loadSeo()

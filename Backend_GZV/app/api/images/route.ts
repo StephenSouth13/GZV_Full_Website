@@ -46,7 +46,10 @@ export async function GET(req: NextRequest) {
         // Try direct bucket list if DB empty
         const storageList = await listFiles(folder)
         if (storageList.success && storageList.data?.files?.length > 0) {
-          const files = storageList.data.files.slice(0, limit).map((f: any) => ({
+          // Bỏ thư mục con (id null, không có metadata): trước đây chúng hiện như file ảnh hỏng
+          // tên "pages", "avatars"... và không thể xóa vì không phải file
+          const realFiles = storageList.data.files.filter((f: any) => f.id && f.metadata && f.name !== '.emptyFolderPlaceholder')
+          const files = realFiles.slice(0, limit).map((f: any) => ({
             name: f.name,
             url: f.url || getPublicUrl(`${folder}/${f.name}`),
             size: f.metadata?.size || 0,

@@ -131,6 +131,17 @@ export type BrandingSettings = {
   og_title?: string | null
   og_description?: string | null
   og_url?: string | null
+  seo_keywords?: string | null
+  robots_index?: boolean
+  robots_follow?: boolean
+  twitter_card?: string | null
+  twitter_title?: string | null
+  twitter_description?: string | null
+  twitter_image_url?: string | null
+  og_image_alt?: string | null
+  og_image_width?: number | null
+  og_image_height?: number | null
+  seo_schema_json?: Record<string, any> | null
 }
 
 export type SectionTemplate = {

@@ -32,6 +32,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
       setFormData({
         ...project,
         author_ids: project.author_ids || [],
+        authors_section_title: project.authors_section_title || 'MENTORING & COACHING',
         featured: project.featured || false,
         seo_title: project.seo_title || project.title,
         hashtags: project.hashtags || '',
@@ -98,6 +99,7 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
           image_scale: Number(formData.image_scale),
           video_url: formData.video_url || '',
           author_ids: formData.author_ids || [],
+          authors_section_title: formData.authors_section_title?.trim() || 'MENTORING & COACHING',
           hashtags: formData.hashtags || '',
           tech_stack: formData.tech_stack || [],
           seo_title: formData.seo_title || formData.title.trim(),
@@ -294,9 +296,15 @@ export function EditProjectModal({ isOpen, onClose, project, onSuccess }: any) {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-[11px] font-black uppercase text-slate-500">Mentoring & Coaching</Label>
+                <Label className="text-[11px] font-black uppercase text-slate-500">MENTORING & COACHING / Tên khu vực</Label>
                 <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-none rounded-none">{formData.author_ids?.length || 0} Đã chọn</Badge>
               </div>
+              <Input
+                value={formData.authors_section_title || ''}
+                onChange={(e) => setFormData({ ...formData, authors_section_title: e.target.value })}
+                placeholder="MENTORING & COACHING"
+                className="h-10 rounded-none border-slate-200 text-xs font-bold"
+              />
               <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1 bg-white p-3 rounded-none border border-slate-200">
                 {authors.map(a => {
                   const isSelected = formData.author_ids?.includes(a.id);

@@ -97,7 +97,7 @@ export default function AdminImagesPage() {
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
-  const [mediaSource, setMediaSource] = useState<"storage" | "drive">("storage")
+  const [mediaSource, setMediaSource] = useState<"storage" | "embedded" | "drive">("storage")
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => ({
@@ -197,18 +197,25 @@ export default function AdminImagesPage() {
       // Include media URLs referenced directly by GZVer profiles, even when
       // the original file lives in another CDN or was pasted as an URL.
       if (f === "all" || f === "gzvers") {
-        const { data: gzverRows } = await supabase
-          .from("gzvers")
-          .select("id, full_name, avatar_url, cover_image_url, cv_url, member_card, online_cards")
+        const [gzverResult, projectResult, articleResult, partnerResult] = await Promise.all([
+          supabase.from("gzvers").select("id, full_name, avatar_url, cover_image_url, cv_url, member_card, online_cards"),
+          supabase.from("projects").select("id, title, image, thumbnail_url, video_url"),
+          supabase.from("articles").select("id, title, image, thumbnail_url"),
+          supabase.from("partners").select("id, name, logo_url"),
+        ])
+        const gzverRows = gzverResult.data || []
+        const projectRows = projectResult.data || []
+        const articleRows = articleResult.data || []
+        const partnerRows = partnerResult.data || []
         const externalItems: MediaItem[] = []
-        const addExternal = (url: unknown, name: string) => {
+        const addExternal = (url: unknown, name: string, folder = "embedded-urls") => {
           if (typeof url !== "string" || !/^https?:\/\//i.test(url.trim())) return
           const cleanUrl = url.trim()
           if (fileItems.some((item) => item.url === cleanUrl) || externalItems.some((item) => item.url === cleanUrl)) return
           externalItems.push({
             name,
             path: `external:${cleanUrl}`,
-            folder: "gzvers",
+            folder,
             url: cleanUrl,
             size: 0,
             mimetype: "",
@@ -227,6 +234,21 @@ export default function AdminImagesPage() {
             addExternal(credential?.front_image_url, `${safeName}-credential-${index + 1}-front`)
             addExternal(credential?.back_image_url, `${safeName}-credential-${index + 1}-back`)
           }
+        }
+        for (const row of projectRows || []) {
+          const safeName = String(row.title || "project").trim().replace(/\s+/g, "-").toLowerCase()
+          addExternal(row.image, `${safeName}-image`, "projects")
+          addExternal(row.thumbnail_url, `${safeName}-thumbnail`, "projects")
+          addExternal(row.video_url, `${safeName}-video`, "projects")
+        }
+        for (const row of articleRows || []) {
+          const safeName = String(row.title || "article").trim().replace(/\s+/g, "-").toLowerCase()
+          addExternal(row.image, `${safeName}-image`, "articles")
+          addExternal(row.thumbnail_url, `${safeName}-thumbnail`, "articles")
+        }
+        for (const row of partnerRows || []) {
+          const safeName = String(row.name || "partner").trim().replace(/\s+/g, "-").toLowerCase()
+          addExternal(row.logo_url, `${safeName}-logo`, "partners")
         }
         fileItems = [...fileItems, ...externalItems]
       }
@@ -251,6 +273,8 @@ export default function AdminImagesPage() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return items.filter((item) => {
+      if (mediaSource === "embedded" && item.source !== "external") return false
+      if (mediaSource === "storage" && item.source === "external") return false
       const matchSearch = !q || item.name.toLowerCase().includes(q) || item.path.toLowerCase().includes(q)
       const matchType =
         typeFilter === "all" ||
@@ -259,7 +283,7 @@ export default function AdminImagesPage() {
         (typeFilter === "file" && !isImage(item.mimetype, item.name) && !isVideo(item.mimetype, item.name))
       return matchSearch && matchType
     })
-  }, [items, search, typeFilter])
+  }, [items, search, typeFilter, mediaSource])
 
   const clearSelection = () => setSelected(new Set())
 
@@ -410,42 +434,52 @@ export default function AdminImagesPage() {
   }
 
   // 6. Xóa tệp (đồng bộ qua API + Supabase Storage)
+  // Xóa thật trên Storage + bản ghi media_files; chỉ ẩn khỏi danh sách khi đã xóa thành công
+  const deleteStoragePaths = async (paths: string[]) => {
+    const { data, error } = await supabase.storage.from(BUCKET).remove(paths)
+    if (error) throw error
+    const removed = new Set((data || []).map((object: any) => object.name))
+    // Một số mục chỉ còn bản ghi trong media_files (file gốc đã mất) — vẫn dọn bản ghi để không hiện lại
+    const { error: rowError } = await supabase.from("media_files").delete().in("storage_path", paths)
+    if (rowError) console.warn("Không dọn được bản ghi media_files:", rowError.message)
+    return { removed, missing: paths.filter((path) => !removed.has(path)) }
+  }
+
   const handleDelete = async (item: MediaItem) => {
     if (item.source === "external" || item.path.startsWith("external:")) {
-      toast({ title: "Đây là URL tham chiếu", description: "Hãy chỉnh URL trong hồ sơ GZVer hoặc nguồn CDN tương ứng." })
+      toast({ title: "Ảnh này đang được dùng trong hồ sơ GZVer", description: "Đổi hoặc xóa ảnh trong hồ sơ GZVer đó thì nó sẽ tự biến mất khỏi thư viện." })
       return
     }
     if (!confirm(`Xóa vĩnh viễn "${item.name}"?`)) return
     try {
-      // Try DELETE via API
-      try {
-        await fetch(`/api/images?path=${encodeURIComponent(item.path)}`, { method: "DELETE" })
-      } catch (e) {}
-
-      // Delete from Supabase Storage
-      await supabase.storage.from(BUCKET).remove([item.path])
-
-      toast({ title: "Đã xóa file thành công" })
+      const { missing } = await deleteStoragePaths([item.path])
+      if (missing.length) {
+        toast({ title: "Không tìm thấy file trên Storage", description: "Bản ghi đã được dọn. Tải lại thư mục để kiểm tra." })
+      } else {
+        toast({ title: "Đã xóa file thành công" })
+      }
       setItems((prev) => prev.filter((media) => media.path !== item.path))
       if (selectedItem?.path === item.path) setSelectedItem(null)
     } catch (err: any) {
-      toast({ title: "Lỗi xóa file", description: err.message, variant: "destructive" })
+      toast({ title: "Không xóa được file", description: err.message, variant: "destructive" })
     }
   }
 
-  // 7. Xóa hàng loạt
   const handleBulkDelete = async () => {
     if (!selected.size) return
-    if (!confirm(`Xóa vĩnh viễn ${selected.size} file đã chọn?`)) return
     const paths = Array.from(selected).filter((path) => !path.startsWith("external:"))
     if (!paths.length) {
-      toast({ title: "Không có file Storage để xóa", description: "Các URL tham chiếu không bị xóa khỏi nguồn gốc." })
+      toast({ title: "Các mục đã chọn đang được dùng trong hồ sơ GZVer", description: "Đổi ảnh trong hồ sơ tương ứng để gỡ chúng khỏi thư viện." })
       return
     }
+    if (!confirm(`Xóa vĩnh viễn ${paths.length} file đã chọn?`)) return
     try {
-      await supabase.storage.from(BUCKET).remove(paths)
-      toast({ title: `Đã xóa ${paths.length} file` })
-      setItems((prev) => prev.filter((item) => !selected.has(item.path)))
+      const { removed, missing } = await deleteStoragePaths(paths)
+      toast({
+        title: `Đã xóa ${removed.size} file`,
+        description: missing.length ? `${missing.length} mục không còn trên Storage, đã dọn bản ghi.` : undefined,
+      })
+      setItems((prev) => prev.filter((item) => !paths.includes(item.path)))
       clearSelection()
     } catch (err: any) {
       toast({ title: "Lỗi xóa hàng loạt", description: err.message, variant: "destructive" })
@@ -544,6 +578,15 @@ export default function AdminImagesPage() {
         </button>
         <button
           type="button"
+          onClick={() => setMediaSource("embedded")}
+          className={`inline-flex h-10 items-center gap-2 px-4 text-xs font-black uppercase tracking-wide transition-colors ${
+            mediaSource === "embedded" ? "bg-[#ed1c24] text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          }`}
+        >
+          <ExternalLink className="h-4 w-4" /> URL đã nhúng
+        </button>
+        <button
+          type="button"
           onClick={() => setMediaSource("drive")}
           className={`inline-flex h-10 items-center gap-2 px-4 text-xs font-black uppercase tracking-wide transition-colors ${
             mediaSource === "drive" ? "bg-[#ed1c24] text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -553,7 +596,7 @@ export default function AdminImagesPage() {
         </button>
       </div>
 
-      {mediaSource === "storage" ? (
+      {mediaSource !== "drive" ? (
         <>
 
       {/* Toolbar & Folders */}
@@ -816,6 +859,12 @@ export default function AdminImagesPage() {
                       </div>
                     )}
 
+                    {item.source === "external" && (
+                      <span className="absolute right-2 top-2 z-10 bg-emerald-600 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-white" title="Ảnh đang được dùng trong hồ sơ GZVer">
+                        Đang dùng
+                      </span>
+                    )}
+
                     {/* Hover Quick Overlay */}
                     <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2">
                       <Button
@@ -842,6 +891,7 @@ export default function AdminImagesPage() {
                       >
                         <Copy size={13} />
                       </Button>
+                      {item.source !== "external" && (
                       <Button
                         size="icon"
                         variant="destructive"
@@ -854,6 +904,7 @@ export default function AdminImagesPage() {
                       >
                         <Trash2 size={13} />
                       </Button>
+                      )}
                     </div>
 
                     <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5">

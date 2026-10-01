@@ -40,6 +40,7 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
     tech_stack: [] as string[],
     status: 'ongoing',
     author_ids: [] as string[],
+    authors_section_title: 'MENTORING & COACHING',
     featured: false,
     hashtags: '',
     seo_title: '',
@@ -287,9 +288,15 @@ export function CreateProjectModal({ isOpen, onClose, onSuccess }: any) {
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-[11px] font-black uppercase text-slate-500">Mentoring & Coaching</Label>
+                <Label className="text-[11px] font-black uppercase text-slate-500">MENTORING & COACHING / Tên khu vực</Label>
                 <Badge className="bg-[#ed1c24] font-black text-[9px] uppercase shadow-none rounded-none">{formData.author_ids.length} Chọn</Badge>
               </div>
+              <Input
+                value={formData.authors_section_title}
+                onChange={(e) => setFormData({ ...formData, authors_section_title: e.target.value })}
+                placeholder="MENTORING & COACHING"
+                className="h-10 rounded-none border-slate-200 text-xs font-bold"
+              />
               <div className="grid gap-2 max-h-[300px] overflow-y-auto pr-1 bg-white p-3 rounded-none border border-slate-200">
                 {authors.map(a => {
                   const isSelected = formData.author_ids.includes(a.id);
