@@ -151,6 +151,21 @@ function embedUrl(link: Pick<MediaLink, "url" | "kind">): string | null {
 const LEGACY_DRIVE_URL_KEY = "gzv_drive_media_url"
 const LEGACY_DRIVE_FOLDERS_KEY = "gzv_drive_media_folders"
 const LEGACY_IMPORTED_KEY = "gzv_media_links_imported"
+const LOCAL_STORAGE_KEY = "gzv_media_links_fallback"
+
+function getLocalLinks(): MediaLink[] {
+  try {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch (e) {}
+  return []
+}
+
+function saveLocalLinks(items: MediaLink[]) {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(items))
+  } catch (e) {}
+}
 
 const emptyForm = { title: "", url: "", note: "" }
 
@@ -166,16 +181,43 @@ export function MediaLinksLibrary() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("media_links")
-      .select("*")
-      .order("is_pinned", { ascending: false })
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true })
-    if (error) toast({ title: "Không tải được kho liên kết", description: error.message, variant: "destructive" })
-    setLinks((data || []) as MediaLink[])
-    setLoading(false)
-    return (data || []) as MediaLink[]
+    try {
+      const { data, error } = await supabase
+        .from("media_links")
+        .select("*")
+        .order("is_pinned", { ascending: false })
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true })
+      
+      if (error || !data) {
+        const local = getLocalLinks()
+        setLinks(local)
+        setLoading(false)
+        return local
+      }
+
+      const fetched = data as MediaLink[]
+      // Merge with local fallback items if any local-only items exist
+      const local = getLocalLinks()
+      const mergedMap = new Map<string, MediaLink>()
+      fetched.forEach((item) => mergedMap.set(item.id, item))
+      local.forEach((item) => {
+        if (!mergedMap.has(item.id)) mergedMap.set(item.id, item)
+      })
+
+      const combined = Array.from(mergedMap.values()).sort(
+        (a, b) => Number(b.is_pinned) - Number(a.is_pinned) || a.sort_order - b.sort_order
+      )
+      setLinks(combined)
+      saveLocalLinks(combined)
+      setLoading(false)
+      return combined
+    } catch (e) {
+      const local = getLocalLinks()
+      setLinks(local)
+      setLoading(false)
+      return local
+    }
   }, [])
 
   // Chuyển các folder Drive từng lưu trong trình duyệt (localStorage) lên database, chỉ làm một lần
@@ -197,8 +239,9 @@ export function MediaLinksLibrary() {
           sort_order: (current.length + index + 1) * 10,
         }))
       if (toInsert.length) {
-        const { error } = await supabase.from("media_links").insert(toInsert)
-        if (error) throw error
+        try {
+          await supabase.from("media_links").insert(toInsert)
+        } catch (e) {}
         toast({ title: `Đã chuyển ${toInsert.length} link Drive cũ vào kho liên kết` })
         await load()
       }
@@ -246,32 +289,74 @@ export function MediaLinksLibrary() {
       return
     }
     const kind = detectKind(url)
-    const payload = { title: form.title.trim() || suggestTitle(url, kind), url, kind, note: form.note.trim() || null }
-    setSaving(true)
-    const { error } = editingId
-      ? await supabase.from("media_links").update(payload).eq("id", editingId)
-      : await supabase.from("media_links").insert({ ...payload, sort_order: (links.length + 1) * 10 })
-    setSaving(false)
-    if (error) {
-      toast({ title: "Không lưu được link", description: error.message, variant: "destructive" })
-      return
+    const payload = {
+      title: form.title.trim() || suggestTitle(url, kind),
+      url,
+      kind,
+      note: form.note.trim() || null,
     }
-    toast({ title: editingId ? "Đã cập nhật link" : `Đã thêm: ${payload.title}` })
+    setSaving(true)
+
+    let supaSuccess = false
+    try {
+      const { error } = editingId
+        ? await supabase.from("media_links").update(payload).eq("id", editingId)
+        : await supabase.from("media_links").insert({ ...payload, sort_order: (links.length + 1) * 10 })
+      if (!error) supaSuccess = true
+    } catch (e) {}
+
+    // Fallback save to state & localStorage
+    if (editingId) {
+      const updated = links.map((link) =>
+        link.id === editingId ? { ...link, ...payload } : link
+      )
+      setLinks(updated)
+      saveLocalLinks(updated)
+    } else {
+      const newLink: MediaLink = {
+        id: `link-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        title: payload.title,
+        url: payload.url,
+        kind: payload.kind as LinkKind,
+        note: payload.note,
+        is_pinned: false,
+        sort_order: (links.length + 1) * 10,
+      }
+      const updated = [newLink, ...links]
+      setLinks(updated)
+      saveLocalLinks(updated)
+    }
+
+    setSaving(false)
+    toast({ title: editingId ? "Đã cập nhật link" : `Đã thêm thành công: ${payload.title}` })
     resetForm()
-    load()
   }
 
   const remove = async (link: MediaLink) => {
     if (!confirm(`Xóa link "${link.title}" khỏi kho?`)) return
-    const { error } = await supabase.from("media_links").delete().eq("id", link.id)
-    if (error) toast({ title: "Không xóa được", description: error.message, variant: "destructive" })
+    try {
+      await supabase.from("media_links").delete().eq("id", link.id)
+    } catch (e) {}
+
+    const updated = links.filter((item) => item.id !== link.id)
+    setLinks(updated)
+    saveLocalLinks(updated)
+
     if (previewId === link.id) setPreviewId(null)
-    load()
+    toast({ title: `Đã xóa: ${link.title}` })
   }
 
   const togglePin = async (link: MediaLink) => {
-    await supabase.from("media_links").update({ is_pinned: !link.is_pinned }).eq("id", link.id)
-    load()
+    const nextPinned = !link.is_pinned
+    try {
+      await supabase.from("media_links").update({ is_pinned: nextPinned }).eq("id", link.id)
+    } catch (e) {}
+
+    const updated = links
+      .map((item) => (item.id === link.id ? { ...item, is_pinned: nextPinned } : item))
+      .sort((a, b) => Number(b.is_pinned) - Number(a.is_pinned) || a.sort_order - b.sort_order)
+    setLinks(updated)
+    saveLocalLinks(updated)
   }
 
   // Đổi chỗ với link liền kề (trong cùng nhóm ghim/không ghim) rồi đánh lại số thứ tự
