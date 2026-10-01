@@ -1,11 +1,200 @@
 import { CV_TEMPLATES, normalizeTemplate, type CvTemplate } from "./cv-model"
 
-export function CvTemplatePicker({ value, onChange }: { value: string; onChange: (template: CvTemplate, accent: string) => void }) {
-  return <div className="cv-template-picker" role="group" aria-label="Chọn thiết kế CV">
-    {CV_TEMPLATES.map((template) => <button key={template.id} type="button" aria-pressed={normalizeTemplate(value) === template.id} className={`cv-template-option ${normalizeTemplate(value) === template.id ? "cv-template-selected" : ""}`} onClick={() => onChange(template.id, template.color)}>
-      <span className={`cv-template-mini cv-template-mini-${template.id}`} style={{ background: template.background, color: template.id === "midnight" ? "#fff" : "#172033", "--mini-accent": template.color } as any} aria-hidden="true"><span className="cv-mini-brand">GZV</span><span className="cv-mini-title">Aa<span>PORTFOLIO / CV</span></span><span className="cv-mini-photo" /><span className="cv-mini-sidebar"><i /><i /><i /></span><span className="cv-mini-main"><i /><i /><i /></span><span className="cv-mini-project" /></span>
-      <span className="cv-template-name">{template.name}<span>{normalizeTemplate(value) === template.id ? "✓" : ""}</span></span><span className="cv-template-caption">{template.caption}</span>
-    </button>)}
-    <style>{`.cv-template-picker{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cv-template-option{text-align:left;border:1px solid #dce1e8;padding:10px;background:#fff;color:#172033;cursor:pointer;border-radius:5px;transition:border-color .15s,transform .15s}.cv-template-option:hover{transform:translateY(-2px);border-color:#ed1c24}.cv-template-selected{border:2px solid #ed1c24;padding:9px}.cv-template-mini{display:block;position:relative;height:130px;border-radius:3px;overflow:hidden;padding:12px}.cv-mini-brand{position:absolute;top:10px;left:12px;font-size:8px;font-weight:900;color:var(--mini-accent)}.cv-mini-title{position:absolute;top:27px;left:12px;font-size:27px;line-height:1;font-weight:800}.cv-mini-title>span{display:block;margin-top:4px;font-size:4px;letter-spacing:1px}.cv-mini-photo{position:absolute;top:27px;right:12px;width:27px;height:35px;background:var(--mini-accent);opacity:.55;border-radius:2px}.cv-mini-sidebar{position:absolute;top:74px;left:12px;width:28%;height:44px;background:var(--mini-accent);opacity:.2;padding:5px}.cv-mini-main{position:absolute;top:74px;left:46%;right:12px;padding-top:1px}.cv-mini-sidebar i,.cv-mini-main i{display:block;height:2px;margin-bottom:6px;background:currentColor;opacity:.4}.cv-mini-project{display:none}.cv-template-mini-minimal .cv-mini-sidebar{display:none}.cv-template-mini-minimal .cv-mini-main{left:12px}.cv-template-mini-minimal .cv-mini-photo{border-radius:50%;height:27px}.cv-template-mini-midnight .cv-mini-sidebar{left:auto;right:12px}.cv-template-mini-midnight .cv-mini-main{left:12px;right:46%}.cv-template-mini-editorial .cv-mini-title{font-family:Georgia,serif;font-weight:400}.cv-template-mini-editorial .cv-mini-sidebar{background:none;border-right:1px solid currentColor}.cv-template-mini-studio .cv-mini-title{background:var(--mini-accent);color:#fff;left:8px;right:8px;padding:5px;font-size:23px}.cv-template-mini-studio .cv-mini-photo{top:31px;background:#fff;opacity:.6;border-radius:20px 20px 2px 2px}.cv-template-mini-portfolio .cv-mini-main{display:none}.cv-template-mini-portfolio .cv-mini-sidebar{width:100%;height:1px}.cv-template-mini-portfolio .cv-mini-project{display:block;position:absolute;left:12px;right:12px;bottom:10px;height:37px;background:var(--mini-accent);opacity:.25}.cv-template-name{display:flex;justify-content:space-between;margin-top:9px;font-size:12px;font-weight:800}.cv-template-name>span{color:#ed1c24}.cv-template-caption{display:block;font-size:9px;color:#637083;margin-top:3px;line-height:1.5}@media(max-width:480px){.cv-template-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.cv-template-mini{height:116px}.cv-mini-sidebar,.cv-mini-main{top:70px}}`}</style>
-  </div>
+export const ACCENT_PALETTES = [
+  { hex: "#ed1c24", label: "Crimson Red (Mặc định GZV)" },
+  { hex: "#10b981", label: "Emerald Green" },
+  { hex: "#2563eb", label: "Royal Blue" },
+  { hex: "#d97706", label: "Amber Gold" },
+  { hex: "#8b5cf6", label: "Vibrant Purple" },
+  { hex: "#475569", label: "Slate Gray" },
+]
+
+export function CvTemplatePicker({
+  value,
+  selectedAccent,
+  onChange,
+}: {
+  value: string
+  selectedAccent?: string
+  onChange: (template: CvTemplate, accent: string) => void
+}) {
+  const currentTemplate = normalizeTemplate(value)
+
+  return (
+    <div className="cv-picker-wrapper space-y-5">
+      {/* Template selector grid */}
+      <div
+        className="cv-template-picker grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6"
+        role="group"
+        aria-label="Chọn thiết kế CV"
+      >
+        {CV_TEMPLATES.map((template) => {
+          const isSelected = currentTemplate === template.id
+          const activeAccent = isSelected && selectedAccent ? selectedAccent : template.color
+
+          return (
+            <button
+              key={template.id}
+              type="button"
+              aria-pressed={isSelected}
+              className={`cv-template-option group relative flex flex-col justify-between rounded-xl p-3 text-left transition-all duration-200 border cursor-pointer ${
+                isSelected
+                  ? "border-[#ed1c24] bg-red-500/10 shadow-lg ring-2 ring-[#ed1c24]/30 dark:border-[#ed1c24] dark:bg-red-950/30"
+                  : "border-slate-800 bg-slate-900/90 hover:border-slate-700 hover:bg-slate-800/80 hover:shadow-md"
+              }`}
+              onClick={() => onChange(template.id, activeAccent)}
+            >
+              {isSelected && (
+                <span className="absolute -top-2 -right-2 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-[#ed1c24] text-[10px] font-black text-white shadow-md ring-2 ring-slate-950">
+                  ✓
+                </span>
+              )}
+
+              {/* Visual Card Mini Graphic Preview */}
+              <div
+                className={`cv-template-mini cv-template-mini-${template.id} relative h-28 w-full overflow-hidden rounded-lg border border-slate-700/50 shadow-inner transition-transform duration-200 group-hover:scale-[1.02]`}
+                style={
+                  {
+                    background: template.background,
+                    color: template.id === "midnight" ? "#f8fafc" : "#1e293b",
+                    "--mini-accent": activeAccent,
+                  } as any
+                }
+                aria-hidden="true"
+              >
+                {/* Header branding */}
+                <div className="flex items-center justify-between px-2 pt-2">
+                  <span className="cv-mini-brand font-black text-[9px] tracking-wider uppercase" style={{ color: activeAccent }}>
+                    GZV
+                  </span>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: activeAccent }} />
+                </div>
+
+                {/* Typography demo */}
+                <div className="px-2 pt-1">
+                  <span className={`cv-mini-title block font-black leading-none ${template.id === "editorial" ? "font-serif text-xl" : "text-lg"}`}>
+                    Aa
+                  </span>
+                  <span className="block text-[5px] font-bold tracking-widest text-slate-400 uppercase">
+                    PORTFOLIO / CV
+                  </span>
+                </div>
+
+                {/* Layout simulation bars */}
+                {template.id === "executive" && (
+                  <div className="absolute inset-x-2 bottom-2 flex gap-1.5">
+                    <div className="w-1/3 rounded-xs p-1" style={{ background: activeAccent, opacity: 0.2 }}>
+                      <div className="h-1 w-full bg-current opacity-60 rounded-xs mb-1" />
+                      <div className="h-1 w-2/3 bg-current opacity-40 rounded-xs" />
+                    </div>
+                    <div className="flex-1 space-y-1 pt-0.5">
+                      <div className="h-1 w-full bg-slate-400/40 rounded-xs" />
+                      <div className="h-1 w-5/6 bg-slate-400/40 rounded-xs" />
+                      <div className="h-1 w-3/4 bg-slate-400/40 rounded-xs" />
+                    </div>
+                  </div>
+                )}
+
+                {template.id === "minimal" && (
+                  <div className="absolute inset-x-2 bottom-2 space-y-1">
+                    <div className="h-0.5 w-full" style={{ background: activeAccent }} />
+                    <div className="h-1 w-full bg-slate-400/30 rounded-xs" />
+                    <div className="h-1 w-4/5 bg-slate-400/30 rounded-xs" />
+                    <div className="h-1 w-2/3 bg-slate-400/30 rounded-xs" />
+                  </div>
+                )}
+
+                {template.id === "midnight" && (
+                  <div className="absolute inset-x-2 bottom-2 flex justify-between gap-1.5">
+                    <div className="flex-1 space-y-1">
+                      <div className="h-1 w-full bg-slate-300/40 rounded-xs" />
+                      <div className="h-1 w-4/5 bg-slate-300/40 rounded-xs" />
+                    </div>
+                    <div className="w-1/3 h-6 rounded-xs border border-amber-500/40 p-0.5" style={{ background: activeAccent, opacity: 0.25 }} />
+                  </div>
+                )}
+
+                {template.id === "editorial" && (
+                  <div className="absolute inset-x-2 bottom-2 pt-1 border-t border-slate-300">
+                    <div className="h-1 w-full bg-amber-900/30 rounded-xs mb-1" />
+                    <div className="h-1 w-3/4 bg-amber-900/20 rounded-xs" />
+                  </div>
+                )}
+
+                {template.id === "studio" && (
+                  <div className="absolute inset-x-0 bottom-0 top-10 p-1.5" style={{ background: activeAccent }}>
+                    <div className="h-2 w-12 bg-white/90 rounded-xs mb-1" />
+                    <div className="h-1 w-full bg-white/50 rounded-xs mb-0.5" />
+                    <div className="h-1 w-2/3 bg-white/50 rounded-xs" />
+                  </div>
+                )}
+
+                {template.id === "portfolio" && (
+                  <div className="absolute inset-x-2 bottom-1.5">
+                    <div className="h-6 w-full rounded-xs overflow-hidden opacity-30 mb-1" style={{ background: activeAccent }} />
+                    <div className="h-1 w-full bg-slate-500/40 rounded-xs" />
+                  </div>
+                )}
+              </div>
+
+              {/* Title & Caption */}
+              <div className="mt-2.5 space-y-0.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wide text-white truncate">
+                    {template.name}
+                  </span>
+                  <span
+                    className="h-2.5 w-2.5 rounded-full border border-white/30 shrink-0"
+                    style={{ backgroundColor: activeAccent }}
+                  />
+                </div>
+                <p className="text-[10px] font-medium leading-tight text-slate-400 line-clamp-2">
+                  {template.caption}
+                </p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Accent Color Quick Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3.5 border-t border-white/10">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            Màu điểm nhấn (Accent Color):
+          </span>
+          <div className="flex items-center gap-2">
+            {ACCENT_PALETTES.map((color) => {
+              const active = (selectedAccent || "").toLowerCase() === color.hex.toLowerCase()
+              return (
+                <button
+                  key={color.hex}
+                  type="button"
+                  title={color.label}
+                  onClick={() => onChange(currentTemplate, color.hex)}
+                  className={`relative h-6 w-6 rounded-full transition-all duration-200 border-2 cursor-pointer ${
+                    active
+                      ? "scale-115 border-white ring-2 ring-[#ed1c24]/50 shadow-md"
+                      : "border-transparent opacity-75 hover:opacity-100 hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: color.hex }}
+                >
+                  {active && (
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white drop-shadow-xs">
+                      ✓
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <span className="text-[11px] font-medium text-slate-400 italic">
+          💡 Chọn mẫu & màu sắc trực tiếp — luôn đồng bộ 100% khi in A4 hoặc tải file PDF.
+        </span>
+      </div>
+    </div>
+  )
 }
+
