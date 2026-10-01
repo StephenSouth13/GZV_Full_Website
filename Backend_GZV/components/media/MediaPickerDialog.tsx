@@ -6,7 +6,8 @@ import { toast } from '@/hooks/use-toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Folder, Search, Upload, Loader2, Image as ImageIcon, Check, Video, Plus, Trash2, X } from 'lucide-react'
+import { Folder, Search, Upload, Loader2, Image as ImageIcon, Check, Video, Plus, Trash2, X, Link2, FileText } from 'lucide-react'
+import { normalizeMediaUrl } from '@/lib/media-url'
 
 const BUCKET = 'media'
 const INITIAL_FOLDERS = [
@@ -17,11 +18,23 @@ type Item = { name: string; path: string; url: string; size: number; mimetype: s
 
 export type MediaPickResult = { url: string; alt: string; width: string }
 
+export type MediaAccept = 'image' | 'video' | 'file' | 'any'
+
 type Props = {
   open: boolean
   onClose: () => void
   onSelect: (result: MediaPickResult) => void
   defaultFolder?: string
+  // 'field': chọn cho một ô (avatar, ảnh bìa...) -> ẩn chọn kích thước chèn
+  mode?: 'insert' | 'field'
+  accept?: MediaAccept
+}
+
+const ACCEPT_PATTERN: Record<MediaAccept, RegExp> = {
+  image: /\.(png|jpe?g|webp|gif|svg|avif)$/i,
+  video: /\.(mp4|webm|ogg|mov)$/i,
+  file: /\.(pdf|docx?|pptx?|xlsx?|png|jpe?g|webp)$/i,
+  any: /\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov|pdf)$/i,
 }
 
 const SIZES: Array<{ label: string; value: string }> = [
@@ -31,7 +44,7 @@ const SIZES: Array<{ label: string; value: string }> = [
   { label: 'Toàn bộ (100%)', value: '100%' },
 ]
 
-export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'site' }: Props) {
+export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'site', mode = 'insert', accept = 'any' }: Props) {
   const [folders, setFolders] = useState<string[]>(INITIAL_FOLDERS)
   const [folder, setFolder] = useState<string>(defaultFolder)
   const [items, setItems] = useState<Item[]>([])
@@ -43,6 +56,10 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
   const [isCreatingFolder, setIsCreatingFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
+  const [tab, setTab] = useState<'library' | 'url'>('library')
+  const [urlInput, setUrlInput] = useState('')
+  // Ảnh/video: đổi link Drive sang dạng hiển thị được; tài liệu (CV, PDF) giữ nguyên link gốc
+  const pastedUrl = accept === 'file' ? urlInput.trim() : normalizeMediaUrl(urlInput, accept === 'video' ? 'video' : 'image')
 
   const loadFolders = useCallback(async () => {
     let custom: string[] = []
@@ -81,37 +98,42 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
         }
       } catch (e) {}
 
-      // 2. Also fetch from Supabase Storage bucket and merge unique files
+      // 2. Duyệt Supabase Storage, gồm cả thư mục con (vd gzvers/avatars, gzvers/cards)
       try {
-        const { data } = await supabase.storage.from(BUCKET).list(f, {
-          limit: 500,
-          sortBy: { column: 'created_at', order: 'desc' },
-        })
-        if (data && data.length > 0) {
-          const validFiles = data.filter((o) => o.name && /\.(png|jpe?g|webp|gif|svg|avif|mp4|webm|ogg|mov)$/i.test(o.name))
-          for (const file of validFiles) {
-            if (!fileItems.some((item) => item.name === file.name)) {
-              const path = f ? `${f}/${file.name}` : file.name
-              const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
-              fileItems.push({
-                name: file.name,
-                path,
-                url: publicUrl,
-                size: (file.metadata as any)?.size ?? 0,
-                mimetype: (file.metadata as any)?.mimetype ?? '',
-              })
+        const collect = async (prefix: string, depth = 0): Promise<void> => {
+          if (depth > 4) return
+          const { data } = await supabase.storage.from(BUCKET).list(prefix, {
+            limit: 500,
+            sortBy: { column: 'created_at', order: 'desc' },
+          })
+          for (const file of data || []) {
+            if (!file.name || file.name === '.emptyFolderPlaceholder') continue
+            const path = prefix ? `${prefix}/${file.name}` : file.name
+            if (file.id === null || !file.metadata) {
+              await collect(path, depth + 1)
+              continue
             }
+            if (fileItems.some((item) => item.path === path)) continue
+            const { data: { publicUrl } } = supabase.storage.from(BUCKET).getPublicUrl(path)
+            fileItems.push({
+              name: prefix !== f ? path.slice(f.length + 1) : file.name,
+              path,
+              url: publicUrl,
+              size: (file.metadata as any)?.size ?? 0,
+              mimetype: (file.metadata as any)?.mimetype ?? '',
+            })
           }
         }
+        await collect(f)
       } catch (e) {}
 
-      setItems(fileItems)
+      setItems(fileItems.filter((item) => ACCEPT_PATTERN[accept].test(item.path) || ACCEPT_PATTERN[accept].test(item.name)))
     } catch (err: any) {
       toast({ title: 'Lỗi tải thư mục', description: err.message, variant: 'destructive' })
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [accept])
 
   useEffect(() => {
     if (open) {
@@ -120,6 +142,13 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
       setSelected(null)
     }
   }, [open, folder, loadFolders, loadFolder])
+
+  useEffect(() => {
+    if (open) {
+      setTab('library')
+      setUrlInput('')
+    }
+  }, [open])
 
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return
@@ -246,6 +275,15 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
   }, [items, search])
 
   const confirm = () => {
+    if (tab === 'url') {
+      if (!/^https?:\/\//i.test(pastedUrl)) {
+        toast({ title: 'URL chưa hợp lệ', description: 'Dán link đầy đủ bắt đầu bằng https://', variant: 'destructive' })
+        return
+      }
+      onSelect({ url: pastedUrl, alt: '', width })
+      onClose()
+      return
+    }
     if (!selected) return
     onSelect({ url: selected.url, alt: selected.name, width })
     onClose()
@@ -259,11 +297,68 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
             <ImageIcon size={18} /> Thư viện ảnh & Truyền thông
           </DialogTitle>
           <DialogDescription className="text-white/70 text-[11px] font-bold uppercase tracking-widest">
-            Tạo thư mục → Tải ảnh lên → Chọn ảnh → bấm Chèn ảnh
+            Chọn ảnh có sẵn, tải từ máy lên, hoặc dán URL (Google Drive, CDN...)
           </DialogDescription>
+          <div className="mt-3 flex gap-1">
+            {([
+              { key: 'library', label: 'Thư viện', icon: ImageIcon },
+              { key: 'url', label: 'Dán URL', icon: Link2 },
+            ] as const).map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setTab(item.key)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-black uppercase transition ${tab === item.key ? 'bg-[#ed1c24] text-white' : 'bg-white/10 text-white/80 hover:bg-white/20'}`}
+              >
+                <item.icon size={13} /> {item.label}
+              </button>
+            ))}
+          </div>
         </DialogHeader>
 
-        <div className="grid grid-cols-12 flex-1 min-h-0 overflow-hidden">
+        {tab === 'url' && (
+          <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-y-auto bg-slate-50/50 p-6">
+            <div>
+              <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-500">URL ảnh / video / file</p>
+              <Input
+                autoFocus
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && confirm()}
+                placeholder="https://drive.google.com/file/d/... hoặc https://...jpg"
+                className="h-11 rounded-none border-slate-200 bg-white font-mono text-xs"
+              />
+              <p className="mt-2 text-[11px] text-slate-500">
+                Link Google Drive được tự chuyển sang dạng xem trực tiếp. File Drive cần chia sẻ "Bất kỳ ai có đường liên kết".
+              </p>
+            </div>
+            {pastedUrl && pastedUrl !== urlInput.trim() && (
+              <p className="break-all text-[11px] text-slate-500">
+                Sẽ lưu: <span className="font-mono text-slate-700">{pastedUrl}</span>
+              </p>
+            )}
+            <div className="flex min-h-[260px] flex-1 items-center justify-center border border-dashed border-slate-300 bg-white p-4">
+              {!/^https?:\/\//i.test(pastedUrl) ? (
+                <p className="text-xs font-semibold text-slate-400">Xem trước sẽ hiện ở đây</p>
+              ) : /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(pastedUrl) ? (
+                <video src={pastedUrl} controls className="max-h-[50vh] max-w-full" />
+              ) : /\.(pdf|docx?|pptx?|xlsx?)(\?.*)?$/i.test(pastedUrl) ? (
+                <div className="flex flex-col items-center gap-2 text-slate-500"><FileText size={40} /><span className="text-xs font-bold">Tài liệu</span></div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={pastedUrl} alt="" className="max-h-[50vh] max-w-full object-contain" />
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={onClose} className="h-9 rounded-none px-4 text-xs font-bold">Hủy</Button>
+              <Button size="sm" onClick={confirm} disabled={!urlInput.trim()} className="h-9 rounded-none bg-[#ed1c24] px-6 text-xs font-black uppercase text-white hover:bg-[#c91218]">
+                Dùng URL này
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className={`grid-cols-12 flex-1 min-h-0 overflow-hidden ${tab === 'library' ? 'grid' : 'hidden'}`}>
           {/* Sidebar Folders */}
           <aside className="col-span-3 border-r bg-slate-50/70 p-3 flex flex-col h-full overflow-hidden">
             <div className="flex items-center justify-between px-2 pb-2 border-b border-slate-200/80 shrink-0">
@@ -449,7 +544,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
                   disabled={!selected}
                   className="rounded-none h-9 px-6 bg-[#ed1c24] hover:bg-[#c91218] text-white text-xs font-black uppercase shadow-xs"
                 >
-                  Chèn ảnh
+                  {mode === 'field' ? 'Chọn' : 'Chèn ảnh'}
                 </Button>
               </div>
             </div>

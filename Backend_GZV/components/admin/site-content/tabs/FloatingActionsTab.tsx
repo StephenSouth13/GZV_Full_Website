@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import type { FloatingAction } from "@/components/admin/site-content/types"
 import { supabase } from "@/lib/supabase"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { toast } from "@/hooks/use-toast"
 
 type Props = { actions: FloatingAction[]; onChange: (actions: FloatingAction[]) => void; onSave: () => void; saving?: boolean }
@@ -70,6 +71,7 @@ export function FloatingActionsTab({ actions, onChange, onSave, saving = false }
                     <input type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) uploadIcon(index, file); event.currentTarget.value = "" }} />
                     {uploadingIndex === index ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1.5 h-3.5 w-3.5" />} Tải logo
                   </label>
+                  <MediaLibraryButton folder="site" label="Thư viện" className="h-9 shrink-0" onSelect={(url) => onChange(patchAt(actions, index, { icon_url: url }))} />
                 </div>
                 <p className="text-[10px] text-slate-400">PNG/SVG/WebP, lưu cùng cấu hình và đồng bộ realtime.</p>
               </div>

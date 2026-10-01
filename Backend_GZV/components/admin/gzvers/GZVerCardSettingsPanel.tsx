@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowDown, ArrowUp, CreditCard, Link2, Loader2, Plus, Save, Trash2, Upload } from "lucide-react"
 import { toast } from "sonner"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { CARD_LINK_ICONS } from "./GZVerModal"
 
 type CardLink = {
@@ -196,6 +197,7 @@ export function GZVerCardSettingsPanel() {
                     {uploading === field ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Upload className="mr-1.5 h-3.5 w-3.5" />} Chèn ảnh
                     <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={!!uploading} onChange={(e) => handleUpload(e, field)} />
                   </Button>
+                  <MediaLibraryButton folder="gzvers" label="Thư viện" className="h-9 flex-1" onSelect={(url) => update({ [field]: url })} />
                   {value && (
                     <Button type="button" variant="outline" onClick={() => update({ [field]: "" })} className="h-9 rounded-none text-red-600">
                       <Trash2 className="h-3.5 w-3.5" />

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, Plus, Upload, UserPlus, Image as ImageIcon } from "lucide-react"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { toast } from "sonner"
 
 const slugify = (text: string) =>
@@ -228,6 +229,7 @@ export function GZVerQuickAddModal({
                   )}
                   Tải ảnh từ máy
                 </Button>
+                <MediaLibraryButton folder="gzvers" label="Thư viện" className="h-8" onSelect={setAvatarUrl} />
 
                 <Input
                   type="text"

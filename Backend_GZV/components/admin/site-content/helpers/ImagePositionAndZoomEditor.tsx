@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase"
 import { isVideoUrl, normalizeMediaUrl } from "@/lib/media-url"
 import { toast } from "@/hooks/use-toast"
 import { Field } from "./BasicHelpers"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 
 type MediaPatch = {
   image_url?: string
@@ -121,6 +122,16 @@ export function ImagePositionAndZoomEditor({
               {uploading === "video" ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Video className="mr-1.5 h-3.5 w-3.5" />}
               Video
             </Button>
+            <MediaLibraryButton
+              folder="site"
+              accept="any"
+              label="Thư viện"
+              className="h-9 shrink-0"
+              onSelect={(url) => {
+                const kind = isVideoUrl(url) ? "video" : "image"
+                onChange({ image_url: url, video_url: kind === "video" ? url : undefined, media_type: kind })
+              }}
+            />
           </div>
         </div>
         <input

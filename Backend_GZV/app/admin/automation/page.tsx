@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
-import { Bot, CalendarClock, CheckCircle2, Link2, Save, ShieldCheck, Sparkles } from "lucide-react"
+import { Bot, CalendarClock, CheckCircle2, Link2, Save, ShieldCheck, Sparkles, Plus, RefreshCw } from "lucide-react"
 
 const platforms = [
   { key: "facebook", label: "Facebook", note: "Pages API / Meta Business" },
@@ -22,15 +22,19 @@ const platforms = [
 export default function AutomationPage() {
   const [settings, setSettings] = useState<any>({ is_enabled: false, timezone: "Asia/Ho_Chi_Minh", ai_provider: "openai", approval_required: true, default_prompt: "", default_hashtags: "" })
   const [connections, setConnections] = useState<any[]>([])
+  const [jobs, setJobs] = useState<any[]>([])
+  const [job, setJob] = useState({ title: "", scheduled_at: "", platforms: ["facebook", "instagram"], seo_title: "", seo_description: "", caption: "", hashtags: "" })
   const [saving, setSaving] = useState(false)
 
   const load = async () => {
-    const [{ data: saved }, { data: connected }] = await Promise.all([
+    const [{ data: saved }, { data: connected }, { data: scheduled }] = await Promise.all([
       supabase.from("social_automation_settings").select("*").order("id", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("social_automation_connections").select("*").order("platform"),
+      supabase.from("social_automation_jobs").select("*").order("scheduled_at", { ascending: true, nullsFirst: false }).limit(50),
     ])
     if (saved) setSettings(saved)
     setConnections(connected || [])
+    setJobs(scheduled || [])
   }
 
   useEffect(() => { load() }, [])
@@ -50,6 +54,22 @@ export default function AutomationPage() {
     if (error) toast.error("Chưa thể tạo phiên kết nối: " + error.message)
     else setConnections((items) => [...items.filter((item) => item.platform !== platform), data])
   }
+
+  const createJob = async () => {
+    if (!job.title.trim() || !job.platforms.length) return toast.error("Cần tiêu đề và ít nhất một kênh")
+    const { data, error } = await supabase.from("social_automation_jobs").insert({
+      title: job.title.trim(), source_type: "custom", platforms: job.platforms,
+      scheduled_at: job.scheduled_at ? new Date(job.scheduled_at).toISOString() : null,
+      status: job.scheduled_at ? "scheduled" : "draft",
+      payload: { seo_title: job.seo_title, seo_description: job.seo_description, caption: job.caption, hashtags: job.hashtags },
+    }).select().single()
+    if (error) return toast.error(error.message)
+    setJobs((items) => [...items, data].sort((a, b) => String(a.scheduled_at || "").localeCompare(String(b.scheduled_at || ""))))
+    setJob({ title: "", scheduled_at: "", platforms: ["facebook", "instagram"], seo_title: "", seo_description: "", caption: "", hashtags: "" })
+    toast.success("Đã tạo lịch nội dung")
+  }
+
+  const togglePlatform = (platform: string) => setJob((current) => ({ ...current, platforms: current.platforms.includes(platform) ? current.platforms.filter((item) => item !== platform) : [...current.platforms, platform] }))
 
   return <ProtectedRoute>
     <div className="space-y-6 p-4 md:p-8">
@@ -74,6 +94,14 @@ export default function AutomationPage() {
       </div>
 
       <div className="grid gap-5 md:grid-cols-3"><Card className="rounded-none dark:bg-slate-900"><CardContent className="p-5"><CalendarClock className="h-5 w-5 text-[#ed1c24]" /><h2 className="mt-3 font-black uppercase">Lịch đăng</h2><p className="mt-1 text-xs text-slate-500">Chuẩn bị lịch đăng theo từng nền tảng và múi giờ GZV.</p></CardContent></Card><Card className="rounded-none dark:bg-slate-900"><CardContent className="p-5"><Sparkles className="h-5 w-5 text-[#ed1c24]" /><h2 className="mt-3 font-black uppercase">SEO & AI</h2><p className="mt-1 text-xs text-slate-500">Sinh caption, hashtag, tiêu đề và mô tả theo nội dung gốc.</p></CardContent></Card><Card className="rounded-none dark:bg-slate-900"><CardContent className="p-5"><ShieldCheck className="h-5 w-5 text-[#ed1c24]" /><h2 className="mt-3 font-black uppercase">Phê duyệt an toàn</h2><p className="mt-1 text-xs text-slate-500">Lưu log, retry và yêu cầu duyệt trước khi gọi API xuất bản.</p></CardContent></Card></div>
+
+      <Card className="rounded-none border-slate-200 dark:border-white/10 dark:bg-slate-900"><CardHeader><CardTitle className="flex items-center justify-between text-sm font-black uppercase"><span className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-[#ed1c24]" />Tạo lịch đăng & nội dung SEO</span><Button type="button" variant="outline" size="sm" onClick={load} className="rounded-none"><RefreshCw className="mr-2 h-3.5 w-3.5" />Làm mới</Button></CardTitle></CardHeader><CardContent className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2"><div><Label>Tiêu đề nội dung</Label><Input value={job.title} onChange={(e) => setJob({ ...job, title: e.target.value })} className="mt-2 rounded-none" placeholder="Ví dụ: GAB - Bài giới thiệu dự án" /></div><div><Label>Thời gian đăng</Label><Input type="datetime-local" value={job.scheduled_at} onChange={(e) => setJob({ ...job, scheduled_at: e.target.value })} className="mt-2 rounded-none" /></div></div>
+        <div><Label>Kênh đăng</Label><div className="mt-2 flex flex-wrap gap-2">{platforms.map((platform) => <button type="button" key={platform.key} onClick={() => togglePlatform(platform.key)} className={`border px-3 py-2 text-xs font-black uppercase ${job.platforms.includes(platform.key) ? "border-[#ed1c24] bg-[#ed1c24] text-white" : "border-slate-200 text-slate-500 dark:border-white/10"}`}>{platform.label}</button>)}</div></div>
+        <div className="grid gap-3 md:grid-cols-2"><div><Label>SEO title</Label><Input value={job.seo_title} onChange={(e) => setJob({ ...job, seo_title: e.target.value })} className="mt-2 rounded-none" placeholder="GZV - The Voice of Genzers" /></div><div><Label>SEO description</Label><Input value={job.seo_description} onChange={(e) => setJob({ ...job, seo_description: e.target.value })} className="mt-2 rounded-none" /></div><div className="md:col-span-2"><Label>Caption / nội dung AI</Label><textarea value={job.caption} onChange={(e) => setJob({ ...job, caption: e.target.value })} className="mt-2 min-h-24 w-full border border-slate-200 bg-transparent p-3 text-sm dark:border-white/10" placeholder="Để AI tạo tự động hoặc nhập nội dung đã duyệt..." /></div><div className="md:col-span-2"><Label>Hashtag</Label><Input value={job.hashtags} onChange={(e) => setJob({ ...job, hashtags: e.target.value })} className="mt-2 rounded-none" /></div></div>
+        <Button type="button" onClick={createJob} className="rounded-none bg-[#ed1c24] font-black uppercase"><Plus className="mr-2 h-4 w-4" />Tạo lịch đăng</Button>
+        <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-white/10">{jobs.length === 0 ? <p className="text-sm text-slate-500">Chưa có lịch đăng nào.</p> : jobs.map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 border p-3"><div><p className="text-sm font-black text-slate-900 dark:text-white">{item.title}</p><p className="text-[11px] text-slate-500">{item.scheduled_at ? new Date(item.scheduled_at).toLocaleString("vi-VN") : "Chưa lên lịch"} · {(item.platforms || []).join(", ")}</p></div><span className="border border-slate-200 px-2 py-1 text-[10px] font-black uppercase text-slate-500 dark:border-white/10">{item.status}</span></div>)}</div>
+      </CardContent></Card>
     </div>
   </ProtectedRoute>
 }

@@ -14,6 +14,7 @@ import {
   Linkedin, Facebook, Globe, Award, Eye, EyeOff, Wrench, 
   BookOpen, Rocket, Lightbulb, Trophy, Building2, Quote, Layout
 } from 'lucide-react'
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { toast } from '@/hooks/use-toast'
 
 const convertToSlug = (text: string) => {
@@ -141,6 +142,12 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
                       <input type="file" className="hidden" accept="image/*" onChange={handleUploadImage} disabled={uploading} />
                     </label>
                   </div>
+                  <MediaLibraryButton
+                    folder="mentors"
+                    label="Chọn từ thư viện / dán URL"
+                    className="h-9 w-full"
+                    onSelect={(url) => setFormData((prev: any) => ({ ...prev, avatar_url: url }))}
+                  />
                   
                   {/* HIỂN THỊ NGOÀI BÌA CARD */}
                   <div className="p-6 bg-[#ed1c24]/5 border border-[#ed1c24]/10 rounded-[2rem] space-y-4">

@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Link2,
 } from "lucide-react"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { toast } from "@/hooks/use-toast"
 
 interface Props {
@@ -300,6 +301,12 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
                     {uploading ? "Đang tải lên..." : "Tải ảnh từ máy"}
                   </Button>
                 </label>
+                <MediaLibraryButton
+                  folder="authors"
+                  label="Chọn từ thư viện / dán URL"
+                  className="h-9 w-full"
+                  onSelect={(url) => setFormData((prev: any) => ({ ...prev, avatar_url: url }))}
+                />
               </div>
 
               {/* Social Links */}

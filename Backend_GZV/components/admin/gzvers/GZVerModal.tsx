@@ -33,6 +33,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { QRCodeSVG } from "qrcode.react"
 
 type Department = {
@@ -1122,9 +1123,10 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                         <Input value={value} onChange={(e) => updateMemberCard({ [field]: e.target.value })} placeholder="URL ảnh thẻ" className="h-9 rounded-none font-mono text-xs" />
                         <div className="flex gap-2">
                           <Button type="button" variant="outline" className="relative h-9 flex-1 rounded-none text-[10px] font-black uppercase">
-                            <Upload className="mr-1.5 h-3.5 w-3.5" /> Chèn ảnh
+                            <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải lên
                             <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={loading} onChange={(e) => handleMemberCardUpload(e, field)} />
                           </Button>
+                          <MediaLibraryButton folder="gzvers" label="Thư viện" className="h-9 flex-1" onSelect={(url) => updateMemberCard({ [field]: url })} />
                           {value && (
                             <Button type="button" variant="outline" onClick={() => updateMemberCard({ [field]: "" })} className="h-9 rounded-none text-[10px] font-black uppercase text-red-600">
                               <Trash2 className="h-3.5 w-3.5" />
@@ -1240,10 +1242,13 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                         <Label className="text-[10px] font-black uppercase text-slate-500">{field === "front_image_url" ? "Mặt trước" : "Mặt sau (tùy chọn)"}</Label>
                         {item[field] && <img src={item[field]} alt="" className="mx-auto max-h-52 w-full object-contain" />}
                         <Input value={item[field] || ""} onChange={(e) => updateArrayItem("online_cards", index, { [field]: e.target.value })} placeholder="URL ảnh" className="h-9 rounded-none font-mono text-xs" />
-                        <Button type="button" variant="outline" className="relative h-9 w-full rounded-none text-[10px] font-black uppercase">
-                          <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải ảnh
-                          <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={loading} onChange={(e) => handleOnlineCardUpload(e, index, field)} />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" className="relative h-9 flex-1 rounded-none text-[10px] font-black uppercase">
+                            <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải ảnh
+                            <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" disabled={loading} onChange={(e) => handleOnlineCardUpload(e, index, field)} />
+                          </Button>
+                          <MediaLibraryButton folder="gzvers" label="Thư viện" className="h-9 flex-1" onSelect={(url) => updateArrayItem("online_cards", index, { [field]: url })} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1289,6 +1294,15 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                         disabled={loading}
                       />
                     </Button>
+                    <div className="flex justify-center">
+                      <MediaLibraryButton
+                        folder="gzvers"
+                        accept="file"
+                        label="Chọn từ thư viện / dán link (Drive, PDF...)"
+                        className="h-10 px-4"
+                        onSelect={(url) => setFormData((prev: any) => ({ ...prev, cv_url: url }))}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -1392,10 +1406,13 @@ function MediaEditor({ title, field, folder, formData, setFormData, handleFileUp
           <ImageIcon className="h-4 w-4 text-[#ed1c24]" />
           {title}
         </h3>
-        <Button variant="outline" size="sm" className="relative h-8 rounded-none border-[#ed1c24] text-[#ed1c24] text-xs font-bold hover:bg-[#ed1c24] hover:text-white">
-          <Upload className="mr-1.5 h-3.5 w-3.5" /> Upload File
-          <input type="file" className="absolute inset-0 cursor-pointer opacity-0" accept="image/*" onChange={(e) => handleFileUpload(e, folder, field)} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <MediaLibraryButton folder={folder} className="h-8" onSelect={(url) => setFormData((prev: any) => ({ ...prev, [field]: url }))} />
+          <Button variant="outline" size="sm" className="relative h-8 rounded-none border-[#ed1c24] text-[#ed1c24] text-xs font-bold hover:bg-[#ed1c24] hover:text-white">
+            <Upload className="mr-1.5 h-3.5 w-3.5" /> Tải từ máy
+            <input type="file" className="absolute inset-0 cursor-pointer opacity-0" accept="image/*" onChange={(e) => handleFileUpload(e, folder, field)} />
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(200px,0.9fr)_1.1fr]">
