@@ -79,7 +79,7 @@ export default function SeoBrandingManager() {
     const loadSeo = () => Promise.all([getBrandingSettings(), getSitePageContent(getPageSlugFromPath(pathname))]).then(([branding, page]) => {
       if (!active) return
       const isHome = getPageSlugFromPath(pathname) === "home" || !getPageSlugFromPath(pathname)
-      const defaultSiteTitle = branding.default_title || branding.site_name || "GZV - The Voice of Genzers"
+      const defaultSiteTitle = branding.default_title || "GZV - The Voice of Genzers"
 
       if (isHome) {
         document.title = defaultSiteTitle
@@ -96,7 +96,7 @@ export default function SeoBrandingManager() {
         }
 
         const pageTitle = page?.title || page?.seo_title || DEFAULT_PAGE_NAMES[slug] || slug
-        const siteBrand = branding.site_name || "GZV"
+        const siteBrand = "GZV - The Voice of Genzers"
         document.title = siteBrand ? `${pageTitle} | ${siteBrand}` : pageTitle
       }
 
@@ -111,7 +111,7 @@ export default function SeoBrandingManager() {
       upsertProperty("og:description", pageDescription)
       upsertProperty("og:url", branding.og_url || branding.canonical_url || window.location.href)
       upsertProperty("og:type", "website")
-      upsertProperty("og:site_name", branding.site_name || "GZV LTD")
+      upsertProperty("og:site_name", "GZV - The Voice of Genzers")
       upsertProperty("og:image", ogImage)
       upsertProperty("og:image:alt", branding.og_image_alt || pageTitle)
       upsertProperty("og:image:width", String(branding.og_image_width || 1200))

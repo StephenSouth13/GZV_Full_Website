@@ -226,7 +226,7 @@ export const defaultBrandingSettings: BrandingSettings = {
   footer_logo_url: '/logo.webp',
   favicon_url: '/logo/favicon.ico',
   default_title: 'GZV - The Voice of Genzers',
-  title_template: '%s | GZV',
+  title_template: '%s | GZV - The Voice of Genzers',
   default_description: 'GZV Center',
   default_keywords: 'GZV, đào tạo, mentoring, coaching',
   og_image_url: '/og-image.jpg',

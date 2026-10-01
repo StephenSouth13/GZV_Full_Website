@@ -16,14 +16,14 @@ const montserrat = Montserrat({
 // Nó cũng sẽ được sử dụng để tạo các thẻ OpenGraph và Twitter Card
 export const metadata: Metadata = {
   title: {
-    default: "GZV LTD - The Voice of GenZ",
-    template: "%s | GZV LTD",
+    default: "GZV - The Voice of Genzers",
+    template: "%s | GZV - The Voice of Genzers",
   },
-  description: "GZV LTD - The Voice of GenZ. Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
-  keywords: "gzv Center, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân, life long learning, Viện Đào tạo Kỹ năng cho sinh viên và người đi làm",
-  authors: [{ name: "gzv Center", url: "https://gzv.one" }],
-  creator: "GZV LTD",
-  publisher: "GZV LTD",
+  description: "GZV - The Voice of Genzers. Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
+  keywords: "GZV, The Voice of Genzers, đào tạo, coaching, mentoring, kỹ năng mềm, phát triển bản thân",
+  authors: [{ name: "GZV - The Voice of Genzers", url: "https://www.gzv.one" }],
+  creator: "GZV - The Voice of Genzers",
+  publisher: "GZV - The Voice of Genzers",
   formatDetection: {
     email: false,
     address: false,
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
   metadataBase: new URL("https://www.gzv.one"),
   openGraph: {
-    title: "GZV LTD - The Voice of GenZ",
-    description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
+    title: "GZV - The Voice of Genzers",
+    description: "GZV - The Voice of Genzers. Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
     url: "https://www.gzv.one",
     siteName: "GZV LTD",
     images: [
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
         url: "/og-cover.jpg",
         width: 1200,
         height: 630,
-        alt: "GZV LTD - The Voice of GenZ",
+        alt: "GZV - The Voice of Genzers",
       },
     ],
     locale: "vi_VN",
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GZV LTD - The Voice of GenZ",
-    description: "Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
+    title: "GZV - The Voice of Genzers",
+    description: "GZV - The Voice of Genzers. Kết nối, đào tạo và phát triển thế hệ trẻ bằng trải nghiệm thực tiễn.",
     images: ["/og-cover.jpg"],
     creator: "@gzvcenter",
   },
