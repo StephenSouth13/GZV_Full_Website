@@ -17,7 +17,7 @@ interface GZVersTableProps {
 
 export function GZVersTable({ gzvers, onEdit, onDelete, onToggleStatus }: GZVersTableProps) {
   return (
-    <div className="overflow-hidden border border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-slate-900">
+    <div className="overflow-x-auto w-full min-w-0 border border-slate-200 bg-white shadow-xs dark:border-white/10 dark:bg-slate-900">
       <Table>
         <TableHeader className="bg-slate-50 dark:bg-slate-950/60">
           <TableRow className="border-slate-200 hover:bg-transparent dark:border-white/10">

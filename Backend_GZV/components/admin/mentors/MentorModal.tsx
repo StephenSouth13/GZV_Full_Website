@@ -105,9 +105,9 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white p-0 overflow-hidden rounded-none shadow-2xl">
+      <DialogContent className="w-[calc(100vw-1rem)] max-w-6xl h-[calc(100dvh-1.5rem)] flex flex-col bg-white dark:bg-[#0a0a0a] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white p-0 overflow-hidden rounded-none shadow-2xl">
         <div className="hidden"><DialogDescription>Quản lý thông tin chi tiết Ban Cố Vấn</DialogDescription></div>
-        <DialogHeader className="p-6 pb-4 flex flex-row items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
+        <DialogHeader className="shrink-0 p-5 flex flex-row items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02]">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-[#ed1c24] rounded-none text-white shadow-md"><GraduationCap className="text-white" size={22}/></div>
             <div>
@@ -121,8 +121,8 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
           </div>
         </DialogHeader>
 
-        <Tabs defaultValue="identity" className="w-full">
-          <TabsList className="bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-white/10 w-full justify-start rounded-none px-6 h-12 gap-4 overflow-x-auto custom-scrollbar">
+        <Tabs defaultValue="identity" className="flex-1 flex flex-col min-h-0 overflow-hidden w-full">
+          <TabsList className="shrink-0 bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-white/10 w-full justify-start rounded-none px-6 h-12 gap-4 overflow-x-auto custom-scrollbar">
             <TabsTrigger value="identity" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">1. Định danh & Bìa</TabsTrigger>
             <TabsTrigger value="academic" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">2. Học vị & Quá trình</TabsTrigger>
             <TabsTrigger value="expertise" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">3. Giảng dạy & Chuyên môn</TabsTrigger>
@@ -130,7 +130,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
             <TabsTrigger value="achievements" className="rounded-none uppercase text-[10px] font-black tracking-wider data-[state=active]:text-[#ed1c24]">5. Thành tựu & Giải thưởng</TabsTrigger>
           </TabsList>
 
-          <div className="p-8 max-h-[65vh] overflow-y-auto custom-scrollbar space-y-8">
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar space-y-8 min-h-0">
             {/* TAB 1: ĐỊNH DANH & BÌA */}
             <TabsContent value="identity" className="mt-0 space-y-6 animate-in fade-in duration-500">
               <div className="grid grid-cols-12 gap-8">
@@ -305,9 +305,9 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
           </div>
         </Tabs>
 
-        <div className="p-8 bg-[#0f0f0f] border-t border-white/5 flex justify-end gap-4 shadow-2xl">
-          <Button variant="ghost" onClick={onClose} className="font-black text-gray-500 rounded-full px-10 uppercase text-[10px] tracking-widest">Hủy bỏ</Button>
-          <Button onClick={handleSave} disabled={loading || uploading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black rounded-full px-14 h-14 shadow-2xl shadow-red-600/20 transition-all hover:scale-105">
+        <div className="shrink-0 sticky bottom-0 z-50 p-4 md:p-6 bg-[#0f0f0f] border-t border-white/10 flex justify-end gap-4 shadow-2xl">
+          <Button variant="ghost" onClick={onClose} className="font-black text-gray-400 rounded-none px-6 uppercase text-xs">Hủy bỏ</Button>
+          <Button onClick={handleSave} disabled={loading || uploading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black rounded-none px-8 h-11 shadow-md text-xs uppercase">
             {loading ? <Loader2 className="animate-spin mr-2"/> : <Save className="mr-2"/>} LƯU HỒ SƠ CHUYÊN GIA
           </Button>
         </div>

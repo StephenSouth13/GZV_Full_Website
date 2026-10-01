@@ -387,7 +387,7 @@ export default function AdminGzversPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 select-none p-1.5 md:p-0">
+    <div className="w-full max-w-6xl mx-auto space-y-6 p-2 sm:p-4 md:p-6 min-w-0">
       {/* Top Header Card matching site-content */}
       <div className="relative overflow-hidden border border-slate-200 bg-white p-5 md:p-6 shadow-sm dark:border-white/10 dark:bg-slate-900">
         <div className="absolute top-0 left-0 right-0 h-1 bg-[#ed1c24] pointer-events-none" />
@@ -456,7 +456,7 @@ export default function AdminGzversPage() {
 
       {/* Main Tabs matching site-content */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900">
+        <TabsList className="flex w-full overflow-x-auto gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900 sm:grid sm:grid-cols-3">
           <TabsTrigger
             value="members"
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
