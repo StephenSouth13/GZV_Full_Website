@@ -1317,7 +1317,18 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             <TabsContent value="docs" className="mt-0">
               <div className="mb-4 grid gap-4 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900 sm:grid-cols-2">
                 <div className="sm:col-span-2"><p className="text-xs font-black uppercase text-slate-900 dark:text-white">CV tự động từ hồ sơ GZVer</p><p className="mt-1 text-[11px] text-slate-500">Xem ngay dữ liệu đang biên tập và tải PDF một trang liền mạch, kèm logo GZV. Lưu hồ sơ để cập nhật trang CV công khai.</p></div>
-                <div className="sm:col-span-2"><Label className="mb-3 block text-[10px] font-black uppercase">Bộ sưu tập thiết kế CV</Label><CvTemplatePicker value={formData.cv_settings?.template || "executive"} onChange={(template, accent) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, template, accent } }))} /></div>
+                <div className="sm:col-span-2">
+                  <Label className="mb-3 block text-[10px] font-black uppercase">Bộ sưu tập thiết kế CV</Label>
+                  <CvTemplatePicker
+                    value={formData.cv_settings?.template || "executive"}
+                    selectedAccent={formData.cv_settings?.accent || "#ed1c24"}
+                    showProjects={formData.cv_settings?.show_projects !== false}
+                    projectLayout={formData.cv_settings?.project_layout || "grid-1"}
+                    onChange={(template, accent) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, template, accent } }))}
+                    onToggleProjects={(show) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_projects: show } }))}
+                    onChangeProjectLayout={(layout) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, project_layout: layout } }))}
+                  />
+                </div>
                 <div><Label className="text-[10px] font-black uppercase">Màu nhấn</Label><div className="mt-1 flex gap-2"><Input type="color" value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="h-9 w-14 rounded-none p-1" /><Input value={formData.cv_settings?.accent || "#ed1c24"} onChange={(e) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, accent: e.target.value } }))} className="rounded-none font-mono" /></div></div>
                 <div className="flex items-center justify-between border p-3"><Label>Hiện thông tin liên hệ trong CV</Label><Switch checked={formData.cv_settings?.show_contact !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_contact: value } }))} /></div>
                 <div className="flex items-center justify-between border p-3"><Label>Đưa dự án vào CV</Label><Switch checked={formData.cv_settings?.show_projects !== false} onCheckedChange={(value) => setFormData((prev: any) => ({ ...prev, cv_settings: { ...prev.cv_settings, show_projects: value } }))} /></div>
