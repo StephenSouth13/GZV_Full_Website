@@ -221,7 +221,7 @@ export default function GzversGrid({
       if (!query) return true
       return `${m.full_name || ""} ${m.position || ""} ${m.company || ""} ${m.department_name || ""} ${m.headline || ""}`.toLowerCase().includes(query)
     })
-    return list.slice(0, Number(limit) || 50)
+    return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, Number(limit) || 50)
   }, [items, activeTabObj, limit, searchQuery])
 
   const matchesSearch = (member: any) => {
@@ -351,7 +351,10 @@ export default function GzversGrid({
             {filterTabs
               .filter((tab) => tab.id !== "all")
               .map((tab) => {
-                const deptMembers = items.filter((m) => matchDepartment(m, tab) && matchesSearch(m)).slice(0, Number(limit) || 50)
+                const deptMembers = items
+                  .filter((m) => matchDepartment(m, tab) && matchesSearch(m))
+                  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                  .slice(0, Number(limit) || 50)
                 if (deptMembers.length === 0) return null
 
                 return (

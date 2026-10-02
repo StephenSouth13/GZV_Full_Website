@@ -25,7 +25,10 @@ import {
   ExternalLink,
   Loader2,
   RefreshCcw,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react"
+import { OrderNumberInput } from "@/components/admin/OrderNumberInput"
 import { toast } from "@/hooks/use-toast"
 import { PartnerModal } from "@/components/admin/partners/PartnerModal"
 import { PartnerDeleteModal } from "@/components/admin/partners/PartnerDeleteModal"
@@ -39,6 +42,7 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
+  DragOverlay,
 } from "@dnd-kit/core"
 import {
   SortableContext,
@@ -206,7 +210,10 @@ export default function PartnersAdminPage() {
   // Grouped structure
   const groupedCategories = useMemo(() => {
     return categories.map((cat) => {
-      const groupPartners = partners.filter((p) => matchesCategory(p, cat))
+      // Luôn sắp theo số thứ tự để kéo-thả / lên-xuống tính đúng vị trí hiện tại
+      const groupPartners = partners
+        .filter((p) => matchesCategory(p, cat))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
       return {
         ...cat,
         partners: groupPartners,
@@ -273,6 +280,60 @@ export default function PartnersAdminPage() {
         toast({ title: "Lỗi cập nhật thứ tự", description: err.message, variant: "destructive" })
         fetchPartners()
       }
+    }
+  }
+
+  const handlePartnerOrderChange = async (partnerId: string, newOrder: number) => {
+    setPartners((prev) =>
+      prev
+        .map((p) => (p.id === partnerId ? { ...p, sort_order: newOrder } : p))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    )
+
+    const { error } = await supabase.from("partners").update({ sort_order: newOrder }).eq("id", partnerId)
+    if (error) {
+      toast({ title: "Lỗi cập nhật thứ tự", description: error.message, variant: "destructive" })
+      fetchPartners()
+    } else {
+      toast({ title: "Đã cập nhật thứ tự đối tác!" })
+    }
+  }
+
+  const handlePartnerMoveUp = async (partnerList: Partner[], index: number) => {
+    if (index <= 0) return
+    handlePartnerDragEnd({ active: { id: partnerList[index].id }, over: { id: partnerList[index - 1].id } } as any, partnerList)
+  }
+
+  const handlePartnerMoveDown = async (partnerList: Partner[], index: number) => {
+    if (index >= partnerList.length - 1) return
+    handlePartnerDragEnd({ active: { id: partnerList[index].id }, over: { id: partnerList[index + 1].id } } as any, partnerList)
+  }
+
+  const handleAutoRenumberGroup = async (partnerList: Partner[]) => {
+    if (!partnerList.length) return
+    if (!window.confirm("Tự động đánh lại số thứ tự (10, 20, 30...) cho các đối tác trong danh mục này?")) return
+
+    const sorted = [...partnerList].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    const updates = sorted.map((p, idx) => ({
+      id: p.id,
+      sort_order: (idx + 1) * 10,
+    }))
+
+    setPartners((prev) =>
+      prev.map((p) => {
+        const match = updates.find((u) => u.id === p.id)
+        return match ? { ...p, sort_order: match.sort_order } : p
+      })
+    )
+
+    try {
+      await Promise.all(
+        updates.map((u) => supabase.from("partners").update({ sort_order: u.sort_order }).eq("id", u.id))
+      )
+      toast({ title: "Đã đánh số thứ tự tự động thành công!" })
+    } catch (err: any) {
+      toast({ title: "Lỗi lưu thứ tự", description: err.message, variant: "destructive" })
+      fetchPartners()
     }
   }
 
@@ -442,7 +503,7 @@ export default function PartnersAdminPage() {
             <div className="lg:col-span-8 xl:col-span-9">
               {activeCategoryData ? (
                 <Card className="rounded-none border border-slate-200 overflow-hidden bg-white shadow-2xs dark:border-white/10 dark:bg-slate-900">
-                  <CardHeader className="bg-slate-50/80 dark:bg-slate-950/50 border-b border-slate-200 dark:border-white/10 flex flex-row items-center justify-between p-5 py-4">
+                  <CardHeader className="bg-slate-50/80 dark:bg-slate-950/50 border-b border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between p-5 py-4 gap-3">
                     <div>
                       <CardTitle className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-2 uppercase tracking-wider">
                         {activeCategoryData.label}
@@ -480,8 +541,27 @@ export default function PartnersAdminPage() {
                         Đang quản lý <span className="font-bold text-[#ed1c24]">{activeCategoryData.partners.length} đối tác</span> trong danh mục này.
                       </CardDescription>
                     </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAutoRenumberGroup(activeCategoryData.partners)}
+                      className="h-9 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:text-slate-200 shrink-0"
+                      title="Đánh lại số thứ tự (10, 20, 30...) cho các đối tác trong danh mục này"
+                    >
+                      <Sparkles className="mr-1.5 h-3.5 w-3.5 text-[#ed1c24]" />
+                      Tự động đánh số (10, 20, 30...)
+                    </Button>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 space-y-4">
+                    {/* Helper banner for reordering */}
+                    <div className="flex items-center gap-2.5 border border-red-500/20 bg-red-50/50 p-3 text-xs text-slate-700 dark:border-red-500/30 dark:bg-red-950/20 dark:text-slate-300">
+                      <GripVertical className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+                      <p className="leading-relaxed">
+                        <strong className="font-black uppercase text-[#ed1c24]">Thứ Tự Hiển Thị:</strong> Kéo thả biểu tượng <strong className="font-mono">≡</strong>, dùng nút <strong className="font-mono">⬆ / ⬇</strong> hoặc gõ trực tiếp số để xếp lại thứ tự đối tác. Thay đổi được đồng bộ tự động sang trang public <strong className="font-mono text-[#ed1c24]">/doi-tac</strong>.
+                      </p>
+                    </div>
+
                     {filteredPartnersInActiveGroup.length === 0 ? (
                       <div className="py-14 text-center border border-dashed border-slate-200 dark:border-white/10 p-6">
                         <Users className="h-10 w-10 text-slate-300 mx-auto mb-2" />
@@ -499,10 +579,12 @@ export default function PartnersAdminPage() {
                           strategy={rectSortingStrategy}
                         >
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {filteredPartnersInActiveGroup.map((p) => (
+                            {filteredPartnersInActiveGroup.map((p, index) => (
                               <SortablePartnerAdminCard
                                 key={p.id}
                                 p={p}
+                                index={index}
+                                totalCount={filteredPartnersInActiveGroup.length}
                                 openEdit={(item) => {
                                   setCurrent(item)
                                   setModalOpen(true)
@@ -512,6 +594,10 @@ export default function PartnersAdminPage() {
                                   setCurrent(item)
                                   setDeleteOpen(true)
                                 }}
+                                onOrderChange={handlePartnerOrderChange}
+                                // Luôn tính trên toàn bộ danh mục (không phải danh sách đang lọc) để không trùng số thứ tự
+                                onMoveUp={() => handlePartnerMoveUp(activeCategoryData.partners, activeCategoryData.partners.findIndex((item) => item.id === p.id))}
+                                onMoveDown={() => handlePartnerMoveDown(activeCategoryData.partners, activeCategoryData.partners.findIndex((item) => item.id === p.id))}
                               />
                             ))}
                           </div>
@@ -782,14 +868,24 @@ function SortableGroupItem({
 // Partner Card in Detail View with Drag and Drop
 function SortablePartnerAdminCard({
   p,
+  index,
+  totalCount,
   openEdit,
   toggleActive,
   handleDelete,
+  onOrderChange,
+  onMoveUp,
+  onMoveDown,
 }: {
   p: Partner
+  index: number
+  totalCount: number
   openEdit: (p: Partner) => void
   toggleActive: (id: string, current: boolean) => void
   handleDelete: (p: Partner) => void
+  onOrderChange: (id: string, newOrder: number) => void
+  onMoveUp: () => void
+  onMoveDown: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id })
 
@@ -806,30 +902,47 @@ function SortablePartnerAdminCard({
           !p.is_active ? "opacity-45" : ""
         } ${isDragging ? "ring-2 ring-[#ed1c24]/40 shadow-lg" : ""}`}
       >
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            {p.logo_url ? (
-              <div className="relative overflow-hidden w-16 aspect-[4/3] bg-slate-50 rounded-none border border-slate-200 flex items-center justify-center group-hover:bg-red-50/30 transition-colors dark:bg-slate-950 dark:border-white/10">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.logo_url}
-                  alt={p.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    objectPosition: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
-                    transform: `scale(${(p.logo_scale ?? 100) / 100})`,
-                    transformOrigin: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
-                  }}
-                  className="rounded-none group-hover:scale-105 transition-transform duration-300"
-                />
+        <CardContent className="p-3.5 space-y-3">
+          {/* Top Bar: Drag handle, Order input, Up/Down, Actions */}
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 dark:border-white/5">
+            <div className="flex items-center gap-1">
+              <button
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-[#ed1c24] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title="Kéo thả để sắp xếp vị trí"
+              >
+                <GripVertical className="h-4 w-4" />
+              </button>
+
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  disabled={index === 0}
+                  onClick={onMoveUp}
+                  className="p-0.5 text-slate-400 hover:text-[#ed1c24] disabled:opacity-20 transition-colors"
+                  title="Di chuyển lên"
+                >
+                  <ArrowUp className="h-3 w-3" />
+                </button>
+                <button
+                  type="button"
+                  disabled={index === totalCount - 1}
+                  onClick={onMoveDown}
+                  className="p-0.5 text-slate-400 hover:text-[#ed1c24] disabled:opacity-20 transition-colors"
+                  title="Di chuyển xuống"
+                >
+                  <ArrowDown className="h-3 w-3" />
+                </button>
               </div>
-            ) : (
-              <div className="w-12 h-12 rounded-none bg-slate-100 border border-slate-200 flex items-center justify-center">
-                <Users className="h-5 w-5 text-slate-400" />
-              </div>
-            )}
+
+              <OrderNumberInput
+                value={p.sort_order ?? (index + 1) * 10}
+                onCommit={(val) => onOrderChange(p.id, val)}
+                className="h-6 w-12 rounded-none border-slate-200 bg-slate-50 px-1 text-center font-mono text-[11px] font-bold text-slate-900 focus:border-[#ed1c24] focus:ring-[#ed1c24] dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                title="Số thứ tự hiển thị"
+              />
+            </div>
 
             <div className="flex items-center border border-slate-200 rounded-none bg-slate-50 p-0.5 dark:border-white/10 dark:bg-slate-800">
               <Button
@@ -862,39 +975,54 @@ function SortablePartnerAdminCard({
             </div>
           </div>
 
-          <div className="space-y-1">
-            <h4
-              className="font-bold text-xs text-slate-900 dark:text-white tracking-tight leading-none truncate group-hover:text-[#ed1c24] transition-colors"
-              title={p.name}
-            >
-              {p.name}
-            </h4>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] text-slate-500">
-            {p.website_url ? (
-              <a
-                href={p.website_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#ed1c24] flex items-center gap-1 hover:underline font-semibold truncate max-w-[130px]"
-              >
-                <Globe className="h-2.5 w-2.5 shrink-0" />
-                <span className="truncate">
-                  {p.website_url.replace(/https?:\/\//, "").replace(/\/$/, "").slice(0, 22)}
-                </span>
-              </a>
+          {/* Logo & Name */}
+          <div className="flex items-center gap-3">
+            {p.logo_url ? (
+              <div className="relative overflow-hidden w-16 aspect-[4/3] bg-slate-50 rounded-none border border-slate-200 flex items-center justify-center shrink-0 dark:bg-slate-950 dark:border-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={p.logo_url}
+                  alt={p.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    objectPosition: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
+                    transform: `scale(${(p.logo_scale ?? 100) / 100})`,
+                    transformOrigin: `${p.logo_position_x ?? 50}% ${p.logo_position_y ?? 50}%`,
+                  }}
+                  className="rounded-none group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
             ) : (
-              <span className="text-[9px] italic opacity-50">Không có website</span>
+              <div className="w-12 h-12 rounded-none bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
+                <Users className="h-5 w-5 text-slate-400" />
+              </div>
             )}
-            <span
-              {...attributes}
-              {...listeners}
-              className="flex items-center gap-0.5 cursor-grab active:cursor-grabbing hover:text-[#ed1c24] font-mono bg-slate-100 hover:bg-slate-200 px-1.5 py-0.5 rounded-none border border-slate-200 transition-all select-none text-[9px] shrink-0 font-bold"
-              title="Kéo thả để sắp xếp đối tác trong danh mục"
-            >
-              <GripVertical className="h-2.5 w-2.5" />#{p.sort_order}
-            </span>
+
+            <div className="min-w-0 flex-1">
+              <h4
+                className="font-bold text-xs text-slate-900 dark:text-white tracking-tight leading-snug truncate group-hover:text-[#ed1c24] transition-colors"
+                title={p.name}
+              >
+                {p.name}
+              </h4>
+              {p.website_url ? (
+                <a
+                  href={p.website_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#ed1c24] inline-flex items-center gap-1 hover:underline text-[10px] font-semibold truncate max-w-full mt-0.5"
+                >
+                  <Globe className="h-2.5 w-2.5 shrink-0" />
+                  <span className="truncate">
+                    {p.website_url.replace(/https?:\/\//, "").replace(/\/$/, "").slice(0, 20)}
+                  </span>
+                </a>
+              ) : (
+                <span className="text-[9px] italic opacity-50 block mt-0.5">Chưa gắn link</span>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

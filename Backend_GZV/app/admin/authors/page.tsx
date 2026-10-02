@@ -6,7 +6,7 @@ import { AuthorTable } from '@/components/admin/authors/AuthorTable'
 import { AuthorModal } from '@/components/admin/authors/AuthorModal'
 import { AuthorDeleteModal } from '@/components/admin/authors/AuthorDeleteModal'
 import { Button } from '@/components/ui/button'
-import { Plus, Search, RefreshCw, PenTool, Users, FileText, CheckCircle2 } from 'lucide-react'
+import { Plus, Search, RefreshCw, PenTool, Users, FileText, CheckCircle2, Sparkles } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/hooks/use-toast'
 
@@ -20,7 +20,10 @@ export default function AuthorsAdminPage() {
   const fetchAuthors = async () => {
     setLoading(true)
     try {
-      let query = supabase.from('authors').select('*').order('full_name', { ascending: true })
+      let query = supabase
+        .from('authors')
+        .select('*')
+        .order('sort_order', { ascending: true })
       
       if (searchTerm) {
         query = query.ilike('full_name', `%${searchTerm}%`)
@@ -28,7 +31,13 @@ export default function AuthorsAdminPage() {
 
       const { data, error } = await query
       if (error) throw error
-      setAuthors(data || [])
+
+      const sortedData = (data || []).map((item, idx) => ({
+        ...item,
+        sort_order: item.sort_order ?? item.order ?? (idx + 1) * 10,
+      }))
+
+      setAuthors(sortedData)
     } catch (error: any) {
       toast({ title: "Lỗi tải dữ liệu", description: error.message, variant: "destructive" })
     } finally {
@@ -45,6 +54,55 @@ export default function AuthorsAdminPage() {
     withAvatar: authors.filter(a => !!a.avatar_url).length,
     withBio: authors.filter(a => !!a.bio).length,
   }), [authors])
+
+  const handleReorderAuthors = async (reorderedAuthors: any[]) => {
+    setAuthors(reorderedAuthors)
+
+    try {
+      const updates = reorderedAuthors.map((author, index) => ({
+        id: author.id,
+        sort_order: (index + 1) * 10,
+      }))
+
+      for (const item of updates) {
+        await supabase.from("authors").update({ sort_order: item.sort_order }).eq("id", item.id)
+      }
+
+      toast({
+        title: "Đã cập nhật thứ tự",
+        description: `Đã lưu thứ tự ${updates.length} tác giả thành công.`,
+      })
+    } catch (error: any) {
+      toast({ title: "Lỗi cập nhật thứ tự", description: error.message, variant: "destructive" })
+      fetchAuthors()
+    }
+  }
+
+  const handleOrderChange = async (authorId: string, newOrder: number) => {
+    const updated = authors
+      .map((a) => (a.id === authorId ? { ...a, sort_order: newOrder } : a))
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    setAuthors(updated)
+
+    try {
+      const { error } = await supabase.from("authors").update({ sort_order: newOrder }).eq("id", authorId)
+      if (error) throw error
+      toast({ title: "Đã cập nhật thứ tự", description: `Tác giả đã được đổi sang thứ tự ${newOrder}.` })
+    } catch (error: any) {
+      toast({ title: "Lỗi cập nhật thứ tự", description: error.message, variant: "destructive" })
+      fetchAuthors()
+    }
+  }
+
+  const handleAutoRenumber = async () => {
+    const renumbered = authors.map((item, idx) => ({
+      ...item,
+      sort_order: (idx + 1) * 10,
+    }))
+
+    await handleReorderAuthors(renumbered)
+    toast({ title: "Đánh số tự động thành công", description: "Tất cả tác giả đã được gán thứ tự 10, 20, 30..." })
+  }
 
   const handleDelete = async () => {
     if (!currentAuthor) return
@@ -81,12 +139,24 @@ export default function AuthorsAdminPage() {
                 Danh Mục Tác Giả & Biên Tập Viên
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
-                Quản lý đội ngũ tác giả, chuyên gia cố vấn và biên tập viên bài viết trên website.
+                Quản lý đội ngũ tác giả, chuyên gia cố vấn, thứ tự hiển thị và biên tập viên bài viết trên website.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAutoRenumber}
+              disabled={loading || authors.length === 0}
+              className="h-9 rounded-none border-amber-300 bg-amber-50/50 text-xs font-black uppercase text-amber-700 hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-400"
+              title="Tự động gán lại thứ tự 10, 20, 30... theo danh sách hiện tại"
+            >
+              <Sparkles className="mr-1.5 h-3.5 w-3.5 text-amber-500" />
+              Đánh số tự động
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -126,6 +196,24 @@ export default function AuthorsAdminPage() {
         </div>
       </div>
 
+      {/* Helper Banner */}
+      <div className="flex items-center justify-between border border-blue-200 bg-blue-50/60 px-4 py-3 text-xs text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+          <span>
+            <strong>Mẹo sắp xếp thứ tự:</strong> Kéo biểu tượng <span className="font-mono bg-white px-1 border border-blue-200 dark:bg-slate-900 dark:border-blue-800">⋮⋮</span> để thay đổi vị trí tác giả, nhấn nút <span className="font-semibold">⬆ / ⬇</span>, hoặc nhập trực tiếp số thứ tự vào ô nhỏ để sắp xếp tức thì.
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleAutoRenumber}
+          className="h-7 text-[11px] font-black uppercase text-[#ed1c24] hover:bg-blue-100 dark:hover:bg-blue-900/40 shrink-0 ml-3"
+        >
+          Đánh số lại (10, 20, 30...)
+        </Button>
+      </div>
+
       {/* Filter Card */}
       <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900">
         <div className="relative">
@@ -154,6 +242,8 @@ export default function AuthorsAdminPage() {
           authors={authors} 
           onEdit={(a: any) => { setCurrentAuthor(a); setModalState({...modalState, addEdit: true}) }} 
           onDelete={(a: any) => { setCurrentAuthor(a); setModalState({...modalState, delete: true}) }}
+          onReorder={handleReorderAuthors}
+          onOrderChange={handleOrderChange}
         />
         <div className="flex items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
           <span>Hiển thị: {authors.length} tác giả</span>

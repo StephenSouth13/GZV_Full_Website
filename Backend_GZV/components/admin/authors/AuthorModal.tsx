@@ -51,6 +51,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
     full_name: "",
     slug: "",
     title: "",
+    sort_order: 10,
     avatar_url: "",
     bio: "",
     linkedin_url: "",
@@ -60,7 +61,10 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
 
   useEffect(() => {
     if (author && isOpen) {
-      setFormData(author)
+      setFormData({
+        ...author,
+        sort_order: author.sort_order ?? author.order ?? 10,
+      })
       setIsSlugLocked(true)
       setSelectedGzverId(author.linked_gzver_id || "")
     } else if (isOpen) {
@@ -68,6 +72,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         full_name: "",
         slug: "",
         title: "",
+        sort_order: 10,
         avatar_url: "",
         bio: "",
         linkedin_url: "",
@@ -154,6 +159,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         full_name: formData.full_name.trim(),
         slug: formData.slug?.trim() || generateSlug(formData.full_name),
         title: formData.title?.trim() || "",
+        sort_order: Number(formData.sort_order) || 0,
         avatar_url: formData.avatar_url?.trim() || null,
         bio: formData.bio?.trim() || "",
         linkedin_url: formData.linkedin_url?.trim() || null,
@@ -391,16 +397,30 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
                 />
               </div>
 
-              <div className="space-y-1">
-                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Chức danh / Chuyên môn
-                </Label>
-                <Input
-                  value={formData.title || ""}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="Ví dụ: Senior Content Strategist / Creative Director"
-                  className="h-9.5 rounded-none border-slate-200 bg-white text-xs font-bold text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Chức danh / Chuyên môn
+                  </Label>
+                  <Input
+                    value={formData.title || ""}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="Ví dụ: Senior Content Strategist"
+                    className="h-9.5 rounded-none border-slate-200 bg-white text-xs font-bold text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Thứ tự hiển thị (Sort Order)
+                  </Label>
+                  <Input
+                    type="number"
+                    value={formData.sort_order ?? 10}
+                    onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value, 10) || 0 })}
+                    placeholder="10, 20, 30..."
+                    className="h-9.5 rounded-none border-slate-200 bg-white text-xs font-mono font-bold text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">

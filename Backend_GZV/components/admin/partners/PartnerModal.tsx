@@ -441,6 +441,19 @@ export function PartnerModal({
               </div>
 
               <div className="space-y-1">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Thứ tự hiển thị (Sort Order)
+                </Label>
+                <Input
+                  type="number"
+                  value={form.sort_order ?? 10}
+                  onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value, 10) || 0 })}
+                  placeholder="10, 20, 30..."
+                  className="h-9.5 rounded-none border-slate-200 bg-white text-xs font-mono font-bold dark:border-white/10 dark:bg-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Website (Tùy chọn)

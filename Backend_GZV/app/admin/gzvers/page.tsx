@@ -216,6 +216,77 @@ export default function AdminGzversPage() {
     }
   }
 
+  const handleReorderGzvers = async (reorderedList: any[]) => {
+    setGzvers((prevGzvers) => {
+      const orderMap = new Map(reorderedList.map((g, idx) => [g.id || g.slug, (idx + 1) * 10]))
+      return prevGzvers.map((g) => {
+        const newOrder = orderMap.get(g.id || g.slug)
+        return newOrder !== undefined ? { ...g, order: newOrder } : g
+      }).sort((a, b) => (a.order || 0) - (b.order || 0))
+    })
+
+    try {
+      const updates = reorderedList
+        .filter((g) => g.id)
+        .map((g, idx) => ({
+          id: g.id,
+          order: (idx + 1) * 10,
+        }))
+
+      if (updates.length > 0) {
+        const { error } = await supabase.from("gzvers").upsert(updates, { onConflict: "id" })
+        if (error) throw error
+        toast.success("Đã cập nhật thứ tự sắp xếp GZVers!")
+      }
+    } catch (err: any) {
+      toast.error("Lỗi khi lưu thứ tự GZVers: " + err.message)
+      fetchData()
+    }
+  }
+
+  const handleOrderChange = async (gzverId: string, newOrder: number) => {
+    setGzvers((prev) =>
+      prev
+        .map((g) => (g.id === gzverId ? { ...g, order: newOrder } : g))
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+    )
+
+    const { error } = await supabase.from("gzvers").update({ order: newOrder }).eq("id", gzverId)
+    if (error) {
+      toast.error("Không thể cập nhật thứ tự: " + error.message)
+      fetchData()
+    } else {
+      toast.success("Đã cập nhật thứ tự nhân sự!")
+    }
+  }
+
+  const handleAutoRenumber = async () => {
+    if (!window.confirm("Tự động đánh số thứ tự (10, 20, 30...) cho tất cả nhân sự theo thứ tự hiện tại?")) return
+
+    const sortedList = [...gzvers].sort((a, b) => (a.order || 0) - (b.order || 0))
+    const reordered = sortedList.map((item, idx) => ({
+      ...item,
+      order: (idx + 1) * 10,
+    }))
+
+    setGzvers(reordered)
+
+    try {
+      const updates = reordered
+        .filter((g) => g.id)
+        .map((g) => ({ id: g.id, order: g.order }))
+
+      if (updates.length > 0) {
+        const { error } = await supabase.from("gzvers").upsert(updates, { onConflict: "id" })
+        if (error) throw error
+        toast.success("Đã tự động đánh lại số thứ tự thành công!")
+      }
+    } catch (err: any) {
+      toast.error("Lỗi khi đánh số thứ tự: " + err.message)
+      fetchData()
+    }
+  }
+
   const [activeDepartmentDragId, setActiveDepartmentDragId] = useState<string | null>(null)
 
   const sensors = useSensors(
@@ -480,24 +551,44 @@ export default function AdminGzversPage() {
         {/* TAB 1: MEMBERS */}
         <TabsContent value="members" className="space-y-4">
           <div className="border border-slate-200 bg-white p-5 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-4">
-            {/* Top Toolbar: Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <Input
-                className="h-11 rounded-none border-slate-200 bg-slate-50 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
-                placeholder="Tìm kiếm nhân sự theo họ tên, chức vụ, đơn vị công tác..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
-                >
-                  Xóa
-                </button>
-              )}
+            {/* Top Toolbar: Search & Auto-renumber */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  className="h-11 rounded-none border-slate-200 bg-slate-50 pl-10 pr-12 text-sm font-medium text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                  placeholder="Tìm kiếm nhân sự theo họ tên, chức vụ, đơn vị công tác..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black uppercase text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  >
+                    Xóa
+                  </button>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={handleAutoRenumber}
+                className="h-11 rounded-none border-slate-200 text-xs font-black uppercase text-slate-700 hover:border-[#ed1c24] hover:text-[#ed1c24] dark:border-white/10 dark:text-slate-200 shrink-0"
+                title="Đánh lại số thứ tự (10, 20, 30...) cho toàn bộ nhân sự theo danh sách hiện tại"
+              >
+                <Sparkles className="mr-1.5 h-4 w-4 text-[#ed1c24]" />
+                Tự động đánh số (10, 20, 30...)
+              </Button>
+            </div>
+
+            {/* Helper Banner for Reordering */}
+            <div className="flex items-center gap-3 border border-red-500/20 bg-red-50/50 p-3 text-xs text-slate-700 dark:border-red-500/30 dark:bg-red-950/20 dark:text-slate-300">
+              <GripVertical className="h-4 w-4 shrink-0 text-[#ed1c24]" />
+              <p className="leading-relaxed">
+                <strong className="font-black uppercase text-[#ed1c24]">Sắp Xếp Thứ Tự Lên Website Public:</strong> Kéo thả biểu tượng <strong className="font-mono">≡</strong> ở cột Thứ Tự, bấm nút <strong className="font-mono">⬆ / ⬇</strong> hoặc gõ trực tiếp số thứ tự để xếp lại vị trí nhân sự.
+              </p>
             </div>
 
             {/* Bottom Toolbar: Larger Department Filter Buttons */}
@@ -573,6 +664,8 @@ export default function AdminGzversPage() {
                 onEdit={handleOpenEdit}
                 onDelete={handleDelete}
                 onToggleStatus={handleToggleStatus}
+                onReorder={handleReorderGzvers}
+                onOrderChange={handleOrderChange}
               />
               <div className="flex items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 <span>Hiển thị: {filteredGzvers.length} / {gzvers.length} nhân sự</span>

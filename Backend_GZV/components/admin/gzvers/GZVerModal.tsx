@@ -659,6 +659,15 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                     onChange={(e) => setFormData({ ...formData, slug: convertToSlug(e.target.value) })}
                   />
                 </Field>
+                <Field label="Thứ tự hiển thị (Order)">
+                  <Input
+                    type="number"
+                    className="h-11 rounded-none border-slate-200 bg-white font-mono text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
+                    value={formData.order ?? 0}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value, 10) || 0 })}
+                    placeholder="0, 10, 20..."
+                  />
+                </Field>
                 <Field label="Ban chuyên môn">
                   <Select value={formData.department_id || ""} onValueChange={setDepartment}>
                     <SelectTrigger className="h-11 rounded-none border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white">
