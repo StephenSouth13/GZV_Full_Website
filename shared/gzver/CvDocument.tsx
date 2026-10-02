@@ -115,7 +115,6 @@ export const cvStyles = `
 .gzv-cv-grid-3 .gzv-cv-project-meta>span{font-size:7px!important;padding:1px 4px!important;margin:0 3px 3px 0!important}
 .gzv-cv-grid-3 .gzv-cv-project-links>a{font-size:8px!important;margin-top:4px!important}
 .gzv-cv-grid-3 .gzv-cv-project-topline{padding:8px 10px!important;font-size:7.5px!important}
-`ntial a{color:var(--cv-accent-ink)}.gzv-cv-studio .gzv-cv-header h1,.gzv-cv-studio .gzv-cv-header p,.gzv-cv-studio .gzv-cv-project-topline{color:var(--cv-hero-ink)}
 @media print{.gzv-cv{box-shadow:none;max-width:none;width:210mm;padding:12mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}.gzv-cv section,.gzv-cv-project{break-inside:auto}.gzv-cv h2,.gzv-cv h3,.gzv-cv h4{break-after:avoid}.gzv-cv figure,.gzv-cv-credential{break-inside:avoid}.gzv-cv figure img{max-height:250mm;object-fit:contain}.gzv-cv-footer{position:static}}
 `
 

@@ -283,37 +283,67 @@ export function MediaLinksLibrary() {
   }
 
   const submit = async () => {
-    const url = form.url.trim()
-    if (!/^https?:\/\//i.test(url)) {
-      toast({ title: "Link chưa hợp lệ", description: "Dán link đầy đủ bắt đầu bằng https://", variant: "destructive" })
+    let url = form.url.trim()
+    if (!url) {
+      toast({
+        title: "Vui lòng nhập link",
+        description: "Dán liên kết (Drive, Canva, Docs, Facebook...) trước khi nhấn Thêm link.",
+        variant: "destructive",
+      })
       return
     }
-    const kind = detectKind(url)
-    const payload = {
-      title: form.title.trim() || suggestTitle(url, kind),
-      url,
-      kind,
-      note: form.note.trim() || null,
+
+    // Auto-fix URL scheme if missing (e.g. drive.google.com -> https://drive.google.com)
+    if (!/^[a-z]+:\/\//i.test(url)) {
+      url = "https://" + url
     }
+
+    const kind = detectKind(url)
+    const title = form.title.trim() || suggestTitle(url, kind)
+    const note = form.note.trim() || null
+
     setSaving(true)
 
-    let supaSuccess = false
-    try {
-      const { error } = editingId
-        ? await supabase.from("media_links").update(payload).eq("id", editingId)
-        : await supabase.from("media_links").insert({ ...payload, sort_order: (links.length + 1) * 10 })
-      if (!error) supaSuccess = true
-    } catch (e) {}
+    const payload = {
+      title,
+      url,
+      kind,
+      note,
+    }
 
-    // Fallback save to state & localStorage
+    let dbItem: MediaLink | null = null
+    try {
+      if (editingId) {
+        const { data, error } = await supabase
+          .from("media_links")
+          .update(payload)
+          .eq("id", editingId)
+          .select()
+        if (!error && data && data[0]) {
+          dbItem = data[0] as MediaLink
+        }
+      } else {
+        const { data, error } = await supabase
+          .from("media_links")
+          .insert({ ...payload, sort_order: (links.length + 1) * 10 })
+          .select()
+        if (!error && data && data[0]) {
+          dbItem = data[0] as MediaLink
+        }
+      }
+    } catch (e) {
+      console.warn("Supabase insert/update warning:", e)
+    }
+
+    // Fallback & reactive state update
     if (editingId) {
       const updated = links.map((link) =>
-        link.id === editingId ? { ...link, ...payload } : link
+        link.id === editingId ? (dbItem ? { ...link, ...dbItem } : { ...link, ...payload }) : link
       )
       setLinks(updated)
       saveLocalLinks(updated)
     } else {
-      const newLink: MediaLink = {
+      const newLink: MediaLink = dbItem || {
         id: `link-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         title: payload.title,
         url: payload.url,
@@ -328,7 +358,7 @@ export function MediaLinksLibrary() {
     }
 
     setSaving(false)
-    toast({ title: editingId ? "Đã cập nhật link" : `Đã thêm thành công: ${payload.title}` })
+    toast({ title: editingId ? "Đã cập nhật link" : `Đã thêm thành công: ${title}` })
     resetForm()
   }
 
