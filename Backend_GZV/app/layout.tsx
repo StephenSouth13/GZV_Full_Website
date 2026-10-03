@@ -7,7 +7,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "gzv Backend System",
+  title: "GZV Backend System",
   description: "Hệ thống quản trị nội dung gzv",
 };
 
