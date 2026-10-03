@@ -1,6 +1,6 @@
 //D:\gzv\Backend_gzv\lib\api-auth.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from './supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: {
@@ -34,6 +34,10 @@ export async function verifyAuth(request: NextRequest): Promise<{ id: string; em
 
     const token = authHeader.slice(7)
     
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    })
     // Verify token with Supabase
     const { data, error } = await supabase.auth.getUser(token)
     
@@ -42,12 +46,13 @@ export async function verifyAuth(request: NextRequest): Promise<{ id: string; em
     }
 
     // Get user profile from database
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', data.user.id)
       .single()
 
+    if (profileError || !profile) return null
     return {
       id: data.user.id,
       email: data.user.email || '',

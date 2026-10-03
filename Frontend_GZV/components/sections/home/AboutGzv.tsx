@@ -1,4 +1,5 @@
 "use client"
+import { safeHtml } from '@/lib/safe-html'
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -80,7 +81,7 @@ export default function AboutGzv(props: AboutGzvProps) {
           {body && looksLikeHtml(body) ? (
             <div
               className="gzv-rich-content prose prose-slate max-w-3xl text-slate-600 dark:prose-invert dark:text-slate-300"
-              dangerouslySetInnerHTML={{ __html: body }}
+              dangerouslySetInnerHTML={{ __html: safeHtml(body) }}
             />
           ) : body ? (
             <div className="max-w-3xl whitespace-pre-line text-base font-semibold leading-8 text-slate-600 dark:text-slate-300">{body}</div>

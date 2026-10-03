@@ -1,3 +1,4 @@
+import { requireRole } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -14,6 +15,8 @@ cloudinary.config({
 })
 
 export async function GET(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     // Kiểm tra các biến môi trường
     const config = {

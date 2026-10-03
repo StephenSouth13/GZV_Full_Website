@@ -12,7 +12,7 @@ export default function AdminRootLayout({
 }) {
   return (
     <AdminAuthProvider>
-      <ProtectedRoute allowedRoles={["admin", "collab"]}>
+      <ProtectedRoute>
         <AdminLayout>
           {children}
         </AdminLayout>

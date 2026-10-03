@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { AuthorTable } from '@/components/admin/authors/AuthorTable'
 import { AuthorModal } from '@/components/admin/authors/AuthorModal'
@@ -17,7 +17,10 @@ export default function AuthorsAdminPage() {
   const [modalState, setModalState] = useState({ addEdit: false, delete: false })
   const [currentAuthor, setCurrentAuthor] = useState<any>(null)
 
-  const fetchAuthors = async () => {
+  const readRevision = useRef(0)
+  const savingOrder = useRef(false)
+  const fetchAuthors = useCallback(async () => {
+    const revision = ++readRevision.current
     setLoading(true)
     try {
       let query = supabase
@@ -30,7 +33,8 @@ export default function AuthorsAdminPage() {
       }
 
       const { data, error } = await query
-      if (error) throw error
+      if (revision !== readRevision.current) return
+      if (error) throw new Error(error.code === '42703' ? 'Cần áp dụng migration thứ tự tác giả trên Supabase.' : error.message)
 
       const sortedData = (data || []).map((item, idx) => ({
         ...item,
@@ -39,15 +43,17 @@ export default function AuthorsAdminPage() {
 
       setAuthors(sortedData)
     } catch (error: any) {
+      if (revision !== readRevision.current) return
       toast({ title: "Lỗi tải dữ liệu", description: error.message, variant: "destructive" })
     } finally {
-      setLoading(false)
+      if (revision === readRevision.current) setLoading(false)
     }
-  }
-
-  useEffect(() => { 
-    fetchAuthors() 
   }, [searchTerm])
+
+  useEffect(() => {
+    const timer = setTimeout(() => { void fetchAuthors() }, 250)
+    return () => { clearTimeout(timer); readRevision.current++ }
+  }, [fetchAuthors])
 
   const stats = useMemo(() => ({
     total: authors.length,
@@ -56,17 +62,21 @@ export default function AuthorsAdminPage() {
   }), [authors])
 
   const handleReorderAuthors = async (reorderedAuthors: any[]) => {
-    setAuthors(reorderedAuthors)
-
+    if (savingOrder.current) return
+    if (searchTerm.trim()) {
+      toast({ title: "Xóa bộ lọc tìm kiếm trước khi sắp xếp toàn bộ danh sách", variant: "destructive" })
+      return
+    }
+    savingOrder.current = true
     try {
       const updates = reorderedAuthors.map((author, index) => ({
         id: author.id,
         sort_order: (index + 1) * 10,
       }))
 
-      for (const item of updates) {
-        await supabase.from("authors").update({ sort_order: item.sort_order }).eq("id", item.id)
-      }
+      const { error } = await supabase.rpc('reorder_authors', { p_items: updates })
+      if (error) throw new Error(error.code === 'PGRST202' ? 'Cần áp dụng migration giao dịch CMS trên Supabase.' : error.message)
+      setAuthors(reorderedAuthors.map((author, index) => ({ ...author, sort_order: (index + 1) * 10 })))
 
       toast({
         title: "Đã cập nhật thứ tự",
@@ -74,11 +84,15 @@ export default function AuthorsAdminPage() {
       })
     } catch (error: any) {
       toast({ title: "Lỗi cập nhật thứ tự", description: error.message, variant: "destructive" })
-      fetchAuthors()
+      await fetchAuthors()
+    } finally {
+      savingOrder.current = false
     }
   }
 
   const handleOrderChange = async (authorId: string, newOrder: number) => {
+    if (savingOrder.current || !Number.isSafeInteger(newOrder)) return
+    savingOrder.current = true
     const updated = authors
       .map((a) => (a.id === authorId ? { ...a, sort_order: newOrder } : a))
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
@@ -90,7 +104,9 @@ export default function AuthorsAdminPage() {
       toast({ title: "Đã cập nhật thứ tự", description: `Tác giả đã được đổi sang thứ tự ${newOrder}.` })
     } catch (error: any) {
       toast({ title: "Lỗi cập nhật thứ tự", description: error.message, variant: "destructive" })
-      fetchAuthors()
+      await fetchAuthors()
+    } finally {
+      savingOrder.current = false
     }
   }
 
@@ -101,7 +117,6 @@ export default function AuthorsAdminPage() {
     }))
 
     await handleReorderAuthors(renumbered)
-    toast({ title: "Đánh số tự động thành công", description: "Tất cả tác giả đã được gán thứ tự 10, 20, 30..." })
   }
 
   const handleDelete = async () => {

@@ -15,7 +15,7 @@ export function AdminLayoutShell({ children, title, description }: AdminLayoutSh
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full min-h-screen flex flex-col"
+      className="w-full h-dvh min-h-0 flex flex-col"
     >
       {/* Optional header section */}
       {title && (
@@ -32,7 +32,7 @@ export function AdminLayoutShell({ children, title, description }: AdminLayoutSh
       )}
 
       {/* Main content - responsive padding */}
-      <div className="flex-1 overflow-auto">
+      <div className="min-h-0 min-w-0 flex-1 overflow-auto">
         {children}
       </div>
     </motion.div>

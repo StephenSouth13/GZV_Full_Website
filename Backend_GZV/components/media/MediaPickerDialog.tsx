@@ -1,5 +1,7 @@
 "use client"
 
+import { adminFetch } from '@/lib/admin-fetch'
+
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
@@ -85,7 +87,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
 
       // 1. Fetch from Next.js server API (reads local uploads + synced assets)
       try {
-        const res = await fetch(`/api/images?folder=${encodeURIComponent(f)}`)
+        const res = await adminFetch(`/api/images?folder=${encodeURIComponent(f)}`)
         const json = await res.json()
         if (json.success && Array.isArray(json.data?.files)) {
           fileItems = json.data.files.map((file: any) => ({
@@ -206,7 +208,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
         formData.append('file', file)
         formData.append('folder', folder)
 
-        const res = await fetch('/api/images', {
+        const res = await adminFetch('/api/images', {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: formData,
@@ -329,7 +331,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
                 className="h-11 rounded-none border-slate-200 bg-white font-mono text-xs"
               />
               <p className="mt-2 text-[11px] text-slate-500">
-                Link Google Drive được tự chuyển sang dạng xem trực tiếp. File Drive cần chia sẻ "Bất kỳ ai có đường liên kết".
+                Link Google Drive được tự chuyển sang dạng xem trực tiếp. File Drive cần chia sẻ &quot;Bất kỳ ai có đường liên kết&quot;.
               </p>
             </div>
             {pastedUrl && pastedUrl !== urlInput.trim() && (
@@ -475,7 +477,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, defaultFolder = 'si
                   <ImageIcon size={48} className="text-slate-300" />
                   <div className="text-center">
                     <p className="text-xs font-black uppercase text-slate-600">Thư mục /{folder} chưa có tệp ảnh nào</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Bấm nút "Tải ảnh vào /{folder}" ở trên để thêm hình ảnh mới</p>
+                    <p className="text-[11px] text-slate-400 mt-1">Bấm nút &quot;Tải ảnh vào /{folder}&quot; ở trên để thêm hình ảnh mới</p>
                   </div>
                 </div>
               ) : (

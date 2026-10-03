@@ -344,7 +344,7 @@ export function HomePartnersEditor({
             Các hàng logo đối tác
           </CardTitle>
           <CardDescription className="text-xs font-medium text-slate-500">
-            Gán danh mục đối tác cho từng hàng (hàng 1 logo lớn, hàng 2–3 logo vừa). Hướng trượt chỉ dùng ở kiểu Băng chuyền; chọn "đứng yên" để hàng đó hiển thị dạng lưới.
+            Gán danh mục đối tác cho từng hàng (hàng 1 logo lớn, hàng 2–3 logo vừa). Hướng trượt chỉ dùng ở kiểu Băng chuyền; chọn &quot;đứng yên&quot; để hàng đó hiển thị dạng lưới.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-5 space-y-5">    

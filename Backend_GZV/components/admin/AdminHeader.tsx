@@ -72,7 +72,7 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
   }
 
   return (
-    <header className="relative z-30 h-16 w-full border-b border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-[#0b0b0b]">
+    <header className="relative z-30 h-16 shrink-0 w-full border-b border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.05)] dark:border-white/10 dark:bg-[#0b0b0b]">
       <div className="flex h-full items-center justify-between gap-4 px-4 md:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Button

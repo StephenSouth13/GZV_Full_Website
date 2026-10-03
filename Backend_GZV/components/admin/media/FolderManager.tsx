@@ -1,5 +1,7 @@
 'use client'
 
+import { adminFetch } from '@/lib/admin-fetch'
+
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -53,7 +55,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch('/api/images/folders')
+      const response = await adminFetch('/api/images/folders')
       if (!response.ok) throw new Error('Failed to fetch folders')
       
       const data = await response.json()
@@ -76,7 +78,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
       : newFolderName.trim()
 
     try {
-      const response = await fetch('/api/images/folders', {
+      const response = await adminFetch('/api/images/folders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folderPath: folderPath })
@@ -100,7 +102,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
     if (!newFolderName.trim() || !renamingFolder) return
 
     try {
-      const response = await fetch('/api/images/folders', {
+      const response = await adminFetch('/api/images/folders', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -129,7 +131,7 @@ export default function FolderManager({ selectedFolder, onFolderSelect }: Folder
     }
 
     try {
-      const response = await fetch('/api/images/folders', {
+      const response = await adminFetch('/api/images/folders', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: folderPath })

@@ -44,7 +44,7 @@ export function DeleteArticleModal({ article, isOpen, onClose, onDeleteArticle }
           <DialogDescription className="text-slate-600 text-center text-base leading-relaxed">
             Bạn đang yêu cầu xóa vĩnh viễn bài viết: <br />
             <span className="font-black text-slate-900 text-lg block mt-2 px-4 break-words">
-              "{article?.title}"
+              &quot;{article?.title}&quot;
             </span>
           </DialogDescription>
 

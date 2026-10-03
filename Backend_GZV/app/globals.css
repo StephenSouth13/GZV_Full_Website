@@ -133,3 +133,20 @@ html[data-admin-font-size="large"] { font-size: 18px; }
 ::-webkit-scrollbar-thumb:hover {
   background: #ed1c24;
 }
+
+/* Shrink grid/flex items rather than letting an input enlarge the editor. */
+[data-admin-dialog] .grid > *, [data-admin-dialog] .flex > * { min-width: 0; }
+[data-admin-main] .grid > * { min-width: 0; }
+[data-admin-main] h1, [data-admin-main] h2, [data-admin-main] h3, [data-admin-main] p { overflow-wrap: anywhere; }
+@media (max-width: 639px) {
+  [data-admin-dialog] { max-width: calc(100vw - 1rem); }
+  [data-admin-dialog] .p-8, [data-admin-dialog] .p-10 { padding: 1rem; }
+  [data-admin-dialog] [role="tablist"] { max-width: 100%; overflow-x: auto; }
+  [data-admin-dialog] [role="tablist"]:not(.grid) { justify-content: flex-start; }
+  [data-admin-dialog] [role="tab"] { flex-shrink: 0; }
+  [data-admin-dialog] .justify-between { flex-wrap: wrap; gap: .75rem; }
+  [data-admin-dialog] input:not([type="checkbox"]):not([type="radio"]),
+  [data-admin-dialog] textarea { font-size: 16px; }
+  [data-admin-main] .flex.justify-between { flex-wrap: wrap; gap: .75rem; }
+  [data-admin-main] .p-8, [data-admin-main] .p-10 { padding: 1rem; }
+}

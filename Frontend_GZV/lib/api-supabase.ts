@@ -1,6 +1,21 @@
   'use client'
 
   import { createBrowserClient } from '@supabase/ssr'
+  import { RequestCache } from '../../shared/data/request-cache'
+  const gzverListCache = new RequestCache(1)
+  export const invalidateGzverList = () => gzverListCache.invalidate()
+
+  async function readActivePeople(table: 'gzvers' | 'mentors', fields: string) {
+    const rows: any[] = []
+    for (let from = 0; ; from += 250) {
+      const { data, error } = await supabase.from(table).select(fields).eq('is_active', true)
+        .order('order', { ascending: true }).order('id').range(from, from + 249)
+      if (error) throw error
+      rows.push(...(data || []))
+      if (!data || data.length < 250) return { data: rows, error: null }
+    }
+  }
+
   import { cachedPublicFetch } from './public-fetch-cache'
 
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -505,12 +520,14 @@
      * Lấy danh sách gzver
      */
     getGzvers: async (): Promise<gzver[]> => {
-      try {
+      return gzverListCache.get("active-cards", async () => {
         const [gzversRes, mentorsRes] = await Promise.all([
-          supabase.from('gzvers').select('*').eq('is_active', true).order('order', { ascending: true }),
-          supabase.from('mentors').select('*').eq('is_active', true).order('order', { ascending: true }),
+          readActivePeople('gzvers', 'id,full_name,slug,company,position,avatar_url,is_active,is_director,order,department_id,department_name,headline,avatar_position_x,avatar_position_y,avatar_scale,achievement_summary,testimonial'),
+          readActivePeople('mentors', 'id,full_name,slug,title,avatar_url,organizations,order,description'),
         ]);
 
+        if (gzversRes.error) throw gzversRes.error;
+        if (mentorsRes.error) throw mentorsRes.error;
         const gzversList = (gzversRes.data || []).map((m: any) => ({ ...m, avatar_url: getPublicUrl(m.avatar_url || m.image) }));
         const existingSlugs = new Set(gzversList.map((g: any) => g.slug));
 
@@ -532,10 +549,7 @@
 
         const combined = [...gzversList, ...mentorsList];
         return combined;
-      } catch (error) {
-        console.error("❌ Error fetching gzvers:", error);
-        return [];
-      }
+      }, 30000);
     },
 
     /**

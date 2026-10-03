@@ -1,3 +1,5 @@
+import { isMediaPath } from '../../../../../shared/data/media-path'
+import { requireRole } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFiles } from '@/lib/supabase-storage'
 
@@ -6,10 +8,14 @@ export const runtime = 'nodejs'
 export const revalidate = 0
 
 export async function POST(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
     const folder = (formData.get('folder') as string) || 'uploads'
+    if (!isMediaPath(folder)) return NextResponse.json({ success: false, error: 'Invalid folder' }, { status: 400 })
+    if (files.length > 10 || files.some(file => !(file instanceof File)) || files.reduce((size, file) => size + file.size, 0) > 50 * 1024 * 1024) return NextResponse.json({ success: false, error: 'Upload at most 10 files / 50MB per request' }, { status: 400 })
     const accessToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
 
     if (!files || files.length === 0) {
@@ -45,11 +51,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const { searchParams } = new URL(request.url)
     const path = searchParams.get('path')
 
-    if (!path) {
+    if (!isMediaPath(path)) {
       return NextResponse.json(
         { success: false, error: 'Path is required' },
         { status: 400 }

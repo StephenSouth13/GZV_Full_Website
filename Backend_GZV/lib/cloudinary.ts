@@ -1,3 +1,4 @@
+import { adminFetch } from '@/lib/admin-fetch'
 // Cloudinary API utility functions
 
 export interface CloudinaryResource {
@@ -73,7 +74,7 @@ class CloudinaryService {
       if (params?.limit) searchParams.set('limit', params.limit.toString())
       if (params?.nextCursor) searchParams.set('next_cursor', params.nextCursor)
 
-      const response = await fetch(`${this.baseUrl}?${searchParams}`)
+      const response = await adminFetch(`${this.baseUrl}?${searchParams}`)
       const result = await response.json()
 
       if (!response.ok) {
@@ -114,7 +115,7 @@ class CloudinaryService {
       if (options?.folder) formData.append('folder', options.folder)
       if (options?.tags?.length) formData.append('tags', options.tags.join(','))
 
-      const response = await fetch(`${this.baseUrl}/upload`, {
+      const response = await adminFetch(`${this.baseUrl}/upload`, {
         method: 'POST',
         body: formData
       })
@@ -142,7 +143,7 @@ class CloudinaryService {
   }> {
     try {
       const encodedPublicId = encodeURIComponent(publicId)
-      const response = await fetch(`${this.baseUrl}/${encodedPublicId}`, {
+      const response = await adminFetch(`${this.baseUrl}/${encodedPublicId}`, {
         method: 'DELETE'
       })
 
@@ -169,7 +170,7 @@ class CloudinaryService {
   }> {
     try {
       const encodedPublicId = encodeURIComponent(publicId)
-      const response = await fetch(`${this.baseUrl}/${encodedPublicId}`)
+      const response = await adminFetch(`${this.baseUrl}/${encodedPublicId}`)
       const result = await response.json()
 
       if (!response.ok) {
@@ -199,7 +200,7 @@ class CloudinaryService {
   }> {
     try {
       const encodedPublicId = encodeURIComponent(publicId)
-      const response = await fetch(`${this.baseUrl}/${encodedPublicId}`, {
+      const response = await adminFetch(`${this.baseUrl}/${encodedPublicId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -229,7 +230,7 @@ class CloudinaryService {
     error?: string
   }> {
     try {
-      const response = await fetch(`${this.baseUrl}/stats`)
+      const response = await adminFetch(`${this.baseUrl}/stats`)
       const result = await response.json()
 
       if (!response.ok) {

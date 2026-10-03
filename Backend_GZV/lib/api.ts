@@ -1,3 +1,4 @@
+import { requireRole } from './api-auth'
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,8 +15,10 @@ const supabaseServiceRole = createClient(
 )
 
 export async function POST(request: NextRequest) {
+  const actor = await requireRole(request, ['admin'])
+  if (actor instanceof NextResponse) return actor
   try {
-    const { email, password, name, role = 'admin' } = await request.json()
+    const { email, password, name, role = 'user' } = await request.json()
 
     if (!email || !password || !name) {
       return NextResponse.json(

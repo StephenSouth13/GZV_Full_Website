@@ -100,7 +100,7 @@ export default function DirectorsSection() {
 
                     <div className="mb-8 flex flex-grow items-center justify-center">
                       <blockquote className="px-4 text-base italic leading-relaxed text-slate-500 dark:text-slate-400">
-                        "{director.achievement_summary || director.testimonial || ""}"
+                        &quot;{director.achievement_summary || director.testimonial || ""}&quot;
                       </blockquote>
                     </div>
 

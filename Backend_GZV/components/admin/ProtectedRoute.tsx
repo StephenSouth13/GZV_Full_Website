@@ -11,9 +11,11 @@ interface ProtectedRouteProps {
   redirectTo?: string
 }
 
+const DEFAULT_ROLES: ('admin' | 'collab')[] = ['admin', 'collab']
+
 export function ProtectedRoute({ 
   children, 
-  allowedRoles = ['admin', 'collab'],
+  allowedRoles = DEFAULT_ROLES,
   redirectTo = '/admin-login'
 }: ProtectedRouteProps) {
   const [loading, setLoading] = useState(true)
@@ -41,7 +43,7 @@ export function ProtectedRoute({
 
         if (profileError) throw profileError
 
-        const role = profile?.role || 'collab'
+        const role = profile?.role || 'user'
         localStorage.setItem('user_role', role)
 
         setUserRole(role)

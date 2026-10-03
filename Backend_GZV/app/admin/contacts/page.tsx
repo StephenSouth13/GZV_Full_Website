@@ -1031,7 +1031,7 @@ function FieldsPanel() {
                       <div className="p-6">
                         <AlertDialogHeader>
                           <AlertDialogTitle className="text-lg font-black uppercase text-slate-900 dark:text-white">
-                            Xóa trường "{f.label}"?
+                            Xóa trường &quot;{f.label}&quot;?
                           </AlertDialogTitle>
                           <AlertDialogDescription className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                             Trường này sẽ không còn hiển thị trên biểu mẫu trang liên hệ.

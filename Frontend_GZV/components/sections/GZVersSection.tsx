@@ -103,7 +103,7 @@ const GZVersSection = () => {
 
                         {gzver.achievement_summary && (
                           <div className="mt-auto flex flex-grow items-center justify-center rounded-none bg-slate-50 p-4 dark:bg-slate-900">
-                            <p className="text-sm italic text-gray-600">"{gzver.achievement_summary}"</p>
+                            <p className="text-sm italic text-gray-600">&quot;{gzver.achievement_summary}&quot;</p>
                           </div>
                         )}
                       </div>

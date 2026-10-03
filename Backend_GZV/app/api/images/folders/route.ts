@@ -1,3 +1,5 @@
+import { isMediaPath } from '../../../../../shared/data/media-path'
+import { requireRole } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -14,6 +16,8 @@ cloudinary.config({
 })
 
 export async function GET(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     // Kiểm tra cấu hình Cloudinary
     const hasCloudinaryConfig = !!(
@@ -79,6 +83,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     // Kiểm tra cấu hình Cloudinary
     const hasCloudinaryConfig = !!(
@@ -100,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     const { folderPath } = await request.json()
 
-    if (!folderPath) {
+    if (!isMediaPath(folderPath)) {
       return NextResponse.json(
         { success: false, error: 'Folder path is required' },
         { status: 400 }
@@ -137,6 +143,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     // Kiểm tra cấu hình Cloudinary
     const hasCloudinaryConfig = !!(
@@ -159,7 +167,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const folderPath = searchParams.get('path')
 
-    if (!folderPath) {
+    if (!isMediaPath(folderPath)) {
       return NextResponse.json(
         { success: false, error: 'Folder path is required' },
         { status: 400 }
@@ -198,6 +206,8 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     // Kiểm tra cấu hình Cloudinary
     const hasCloudinaryConfig = !!(
@@ -219,7 +229,7 @@ export async function PUT(request: NextRequest) {
 
     const { oldPath, newPath } = await request.json()
 
-    if (!oldPath || !newPath) {
+    if (!isMediaPath(oldPath) || !isMediaPath(newPath)) {
       return NextResponse.json(
         { success: false, error: 'Both old path and new path are required' },
         { status: 400 }

@@ -88,13 +88,13 @@
             <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
               <Card className="h-full bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 shadow-lg">
                 <CardHeader><CardTitle className="flex items-center gap-3 text-2xl font-bold"><Target className="text-green-500" /> Sứ Mệnh</CardTitle></CardHeader>
-                <CardContent><p className="text-lg text-gray-700 dark:text-gray-300">"Kiến tạo tương lai số bằng việc cung cấp các chương trình đào tạo thực chiến, chất lượng cao, giúp học viên làm chủ năng lực cạnh tranh trong kỷ nguyên Marketing & Communication."</p></CardContent>
+                <CardContent><p className="text-lg text-gray-700 dark:text-gray-300">&quot;Kiến tạo tương lai số bằng việc cung cấp các chương trình đào tạo thực chiến, chất lượng cao, giúp học viên làm chủ năng lực cạnh tranh trong kỷ nguyên Marketing & Communication.&quot;</p></CardContent>
               </Card>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
               <Card className="h-full bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-500 shadow-lg">
                 <CardHeader><CardTitle className="flex items-center gap-3 text-2xl font-bold"><Eye className="text-purple-500" /> Tầm Nhìn</CardTitle></CardHeader>
-                <CardContent><p className="text-lg text-gray-700 dark:text-gray-300">"Trở thành biểu tượng của sự uy tín và chất lượng trong lĩnh vực đào tạo thực chiến tại Việt Nam, là bệ phóng vững chắc cho mọi thế hệ Marketer chuyên nghiệp."</p></CardContent>
+                <CardContent><p className="text-lg text-gray-700 dark:text-gray-300">&quot;Trở thành biểu tượng của sự uy tín và chất lượng trong lĩnh vực đào tạo thực chiến tại Việt Nam, là bệ phóng vững chắc cho mọi thế hệ Marketer chuyên nghiệp.&quot;</p></CardContent>
               </Card>
             </motion.div>
           </section>

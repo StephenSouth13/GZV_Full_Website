@@ -686,7 +686,7 @@ export default function PartnersAdminPage() {
                 <Trash2 className="h-4 w-4" /> Xóa danh mục đối tác
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500 mt-1">
-                Bạn đang chuẩn bị xóa danh mục <span className="font-bold text-slate-900 dark:text-white uppercase">"{categoryToDelete.label}"</span>.
+                Bạn đang chuẩn bị xóa danh mục <span className="font-bold text-slate-900 dark:text-white uppercase">&quot;{categoryToDelete.label}&quot;</span>.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-2">
@@ -705,7 +705,7 @@ export default function PartnersAdminPage() {
                       className="mt-0.5 accent-[#ed1c24]"
                     />
                     <div className="text-xs">
-                      <p className="font-bold text-slate-900 dark:text-white">Chuyển đối tác sang "ĐỐI TÁC KHÁC"</p>
+                      <p className="font-bold text-slate-900 dark:text-white">Chuyển đối tác sang &quot;ĐỐI TÁC KHÁC&quot;</p>
                       <p className="text-slate-500 text-[11px] mt-0.5">Giữ lại logo đối tác, chỉ xóa bỏ tên danh mục này.</p>
                     </div>
                   </label>

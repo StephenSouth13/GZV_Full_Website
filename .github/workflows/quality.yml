@@ -1,0 +1,28 @@
+name: Application checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.invalid
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-server-placeholder
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: |
+            Frontend_GZV/pnpm-lock.yaml
+            Backend_GZV/pnpm-lock.yaml
+      - run: pnpm --dir Frontend_GZV install --frozen-lockfile
+      - run: pnpm --dir Backend_GZV install --frozen-lockfile
+      - run: node scripts/check-projects.cjs

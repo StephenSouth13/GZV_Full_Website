@@ -1,5 +1,7 @@
 "use client"
 
+import { adminFetch } from '@/lib/admin-fetch'
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/hooks/use-toast"
@@ -172,7 +174,7 @@ export default function AdminImagesPage() {
         targetFolders.map(async (targetF) => {
           // A. Fetch from Next.js server API (reads local uploads + synced assets)
           try {
-            const res = await fetch(`/api/images?folder=${encodeURIComponent(targetF)}`)
+            const res = await adminFetch(`/api/images?folder=${encodeURIComponent(targetF)}`)
             const json = await res.json()
             if (json.success && Array.isArray(json.data?.files)) {
               for (const file of json.data.files) {
@@ -393,7 +395,7 @@ export default function AdminImagesPage() {
             formData.append("file", file)
             formData.append("folder", targetFolder)
 
-            const res = await fetch("/api/images", {
+            const res = await adminFetch("/api/images", {
               method: "POST",
               body: formData,
             })

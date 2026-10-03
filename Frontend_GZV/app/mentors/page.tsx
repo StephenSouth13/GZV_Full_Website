@@ -214,7 +214,7 @@ export default function MentorsPage() {
 
                               {/* Description */}
                               <p className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-10 leading-relaxed italic line-clamp-3 px-2 flex-grow">
-                                "{mentor.description || (typeof mentor.organizations === 'string' ? mentor.organizations : 'Chuyên gia tài năng')}"
+                                &quot;{mentor.description || (typeof mentor.organizations === 'string' ? mentor.organizations : 'Chuyên gia tài năng')}&quot;
                               </p>
 
                               {/* CTA Button */}
@@ -286,7 +286,7 @@ export default function MentorsPage() {
               </h2>
 
               <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed font-medium italic mb-12">
-                "Chương trình chiến lược nhằm phát hiện, bồi dưỡng và đồng hành cùng thế hệ lãnh đạo trẻ, định hướng trở thành những nhân sự cốt cán trong hệ sinh thái gzv Center."
+                &quot;Chương trình chiến lược nhằm phát hiện, bồi dưỡng và đồng hành cùng thế hệ lãnh đạo trẻ, định hướng trở thành những nhân sự cốt cán trong hệ sinh thái gzv Center.&quot;
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

@@ -1,3 +1,4 @@
+import { contactInput, readContactBody, acceptContactAttempt } from '@/lib/contact-input'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -11,41 +12,31 @@ const client = supabaseUrl && (serviceRoleKey || anonKey)
     })
   : null
 
-const cleanText = (value: unknown, max = 2000) => {
-  if (value === undefined || value === null) return null
-  const text = String(value).trim()
-  return text ? text.slice(0, max) : null
-}
-
 export async function POST(request: NextRequest) {
+  const requestId = crypto.randomUUID()
+  const response = (body: object, status: number) => NextResponse.json(body, { status, headers: { 'X-Request-ID': requestId } })
   try {
-    if (!client) {
-      return NextResponse.json({ error: 'Supabase chưa được cấu hình.' }, { status: 500 })
-    }
-
-    const body = await request.json()
-    const payload = {
-      name: cleanText(body.name, 255),
-      email: cleanText(body.email, 255),
-      phone: cleanText(body.phone, 80),
-      subject: cleanText(body.subject, 255),
-      message: cleanText(body.message, 5000),
-      data: typeof body.data === 'object' && body.data !== null ? body.data : {},
-      source: cleanText(body.source, 120) || 'lien-he',
-      user_agent: request.headers.get('user-agent') || cleanText(body.user_agent, 500),
-    }
-
-    if (!payload.name || !payload.email || !payload.message) {
-      return NextResponse.json({ error: 'Vui lòng nhập họ tên, email và nội dung.' }, { status: 400 })
-    }
-
-    const { error } = await client.from('contact_messages').insert(payload)
+    // Configure the reverse proxy to overwrite this header, never forward client values.
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
+    if (!acceptContactAttempt(ip)) return response({ error: 'Too many requests', code: 'RATE_LIMITED' }, 429)
+    const parsed = contactInput.safeParse(await readContactBody(request))
+    if (!parsed.success) return response({ error: 'Invalid contact information', code: 'INVALID_INPUT' }, 400)
+    if (!client) return response({ error: 'Contact service unavailable', code: 'UNAVAILABLE' }, 503)
+    const { error } = await client.from('contact_messages').insert({
+      ...parsed.data,
+      data: parsed.data.data || {},
+      source: parsed.data.source || 'lien-he',
+      user_agent: (request.headers.get('user-agent') || '').slice(0, 500),
+    })
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Contact write failed', { requestId, code: error.code })
+      return response({ error: 'Unable to send message', code: 'WRITE_FAILED' }, 500)
     }
-
-    return NextResponse.json({ ok: true })
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Không gửi được tin nhắn.' }, { status: 500 })
+    return response({ ok: true }, 200)
+  } catch (error) {
+    if (error instanceof RangeError) return response({ error: 'Payload too large', code: 'PAYLOAD_TOO_LARGE' }, 413)
+    if (error instanceof SyntaxError) return response({ error: 'Invalid JSON', code: 'INVALID_JSON' }, 400)
+    console.error('Contact request failed', { requestId })
+    return response({ error: 'Unable to send message', code: 'INTERNAL_ERROR' }, 500)
   }
 }

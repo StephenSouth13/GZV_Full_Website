@@ -15,10 +15,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#f4f6f8] text-slate-950 dark:bg-[#050505] dark:text-white">
+    <div className="h-dvh min-h-0 w-full overflow-hidden bg-[#f4f6f8] text-slate-950 dark:bg-[#050505] dark:text-white">
       <div className="pointer-events-none fixed inset-x-0 top-0 h-1 bg-[#ed1c24]" />
       
-      <div className="relative flex h-screen overflow-hidden w-full">
+      <div className="relative flex h-dvh overflow-hidden w-full">
         {/* Sidebar - hidden on mobile, shown on lg */}
         <div className="hidden lg:block">
           <AdminSidebar
@@ -35,7 +35,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             animate={{ x: 0 }}
             exit={{ x: -256 }}
             transition={{ duration: 0.3 }}
-            className="absolute lg:hidden z-40 h-screen"
+            className="absolute lg:hidden z-40 h-dvh"
           >
             <AdminSidebar
               isOpen={sidebarOpen}
@@ -55,7 +55,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
           {/* Page Content */}
           <motion.main
-            className="flex-1 overflow-auto w-full"
+            data-admin-main=""
+            className="min-h-0 min-w-0 flex-1 overflow-auto w-full"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}

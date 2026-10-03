@@ -479,24 +479,19 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
             .map((link, index) => ({ ...link, label: link.label.trim(), url: link.url.trim(), sort_order: (index + 1) * 10 })),
         },
       }
-      const saveResult = gzver?.id
-        ? await supabase.from("gzvers").update(cleanPayload).eq("id", gzver.id).select("id").single()
-        : await supabase.from("gzvers").insert([cleanPayload]).select("id").single()
-      if (saveResult.error) throw saveResult.error
-      const gzverId = saveResult.data.id
-      const highlights = Object.entries(projectHighlights)
-      if (highlights.length) {
-        const { error: highlightError } = await supabase.from("gzver_project_highlights").upsert(highlights.map(([projectId, item], index) => ({
-          gzver_id: gzverId,
+      const { error } = await supabase.rpc("save_gzver_profile", {
+        p_id: gzver?.id || null,
+        p_profile: cleanPayload,
+        p_expected_updated_at: gzver?.updated_at || null,
+        p_highlights: Object.entries(projectHighlights).map(([projectId, item], index) => ({
           project_id: projectId,
           contribution: item.contribution || "",
           image_urls: Array.isArray(item.image_urls) ? item.image_urls : [],
           is_visible: item.is_visible !== false,
           sort_order: (index + 1) * 10,
-          updated_at: new Date().toISOString(),
-        })), { onConflict: "gzver_id,project_id" })
-        if (highlightError) throw highlightError
-      }
+        })),
+      })
+      if (error) throw new Error(error.code === 'PGRST202' ? 'Cần áp dụng migration giao dịch CMS trên Supabase trước khi lưu.' : error.message)
       invalidateGzverHighlights()
       toast({ title: "Đã lưu thông tin GZVer thành công!" })
       onSave()

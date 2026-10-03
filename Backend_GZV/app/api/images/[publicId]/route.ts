@@ -1,3 +1,4 @@
+import { requireRole } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -23,6 +24,8 @@ export async function GET(
   request: NextRequest,
   { params }: CloudinaryParams
 ) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const publicId = decodeURIComponent(params.publicId)
 
@@ -65,6 +68,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: CloudinaryParams
 ) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const publicId = decodeURIComponent(params.publicId)
 
@@ -104,6 +109,8 @@ export async function PUT(
   request: NextRequest,
   { params }: CloudinaryParams
 ) {
+  const actor = await requireRole(request, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const publicId = decodeURIComponent(params.publicId)
     const body = await request.json()

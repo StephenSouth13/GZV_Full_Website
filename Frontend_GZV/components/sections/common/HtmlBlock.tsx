@@ -1,4 +1,5 @@
 "use client"
+import { safeHtml } from '@/lib/safe-html'
 
 export interface HtmlBlockProps {
   html: string
@@ -10,7 +11,7 @@ export default function HtmlBlock({ html, maxWidth = "960px" }: HtmlBlockProps) 
   return (
     <section className="bg-white py-16 dark:bg-gray-900">
       <div className="container px-4">
-        <div className="gzv-rich-content prose prose-lg mx-auto max-w-none dark:prose-invert" style={{ maxWidth }} dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="gzv-rich-content prose prose-lg mx-auto max-w-none dark:prose-invert" style={{ maxWidth }} dangerouslySetInnerHTML={{ __html: safeHtml(html) }} />
       </div>
     </section>
   )

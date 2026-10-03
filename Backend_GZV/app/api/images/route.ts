@@ -1,3 +1,5 @@
+import { isMediaPath } from '../../../../shared/data/media-path'
+import { requireRole } from '@/lib/api-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { uploadFile, listFiles, getPublicUrl } from '@/lib/supabase-storage'
 import { createClient } from '@supabase/supabase-js'
@@ -13,10 +15,14 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 export async function GET(req: NextRequest) {
+  const actor = await requireRole(req, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const { searchParams } = new URL(req.url)
     const folder = searchParams.get('folder') || 'site'
-    const limit = parseInt(searchParams.get('limit') || '100', 10)
+    if (!isMediaPath(folder)) return NextResponse.json({ success: false, error: 'Thư mục không hợp lệ' }, { status: 400 })
+    const rawLimit = Number(searchParams.get('limit') || 100)
+    const limit = Number.isFinite(rawLimit) ? Math.max(1, Math.min(200, Math.trunc(rawLimit))) : 100
 
     // 1. First try listing from Supabase Storage & Media Files table
     if (supabaseUrl && supabaseKey) {
@@ -24,8 +30,8 @@ export async function GET(req: NextRequest) {
         const supabase = createClient(supabaseUrl, supabaseKey)
         const { data: dbFiles } = await supabase
           .from('media_files')
-          .select('*')
-          .ilike('folder_path', `%${folder}%`)
+          .select('file_name,storage_path,file_url,file_size_bytes,mime_type')
+          .eq('folder_path', folder)
           .order('created_at', { ascending: false })
           .limit(limit)
 
@@ -112,7 +118,7 @@ export async function GET(req: NextRequest) {
       {
         success: false,
         error: 'Failed to fetch media files',
-        message: error instanceof Error ? error.message : 'Unknown error',
+
       },
       { status: 500 }
     )
@@ -120,14 +126,17 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const actor = await requireRole(req, ['admin', 'editor', 'collab'])
+  if (actor instanceof NextResponse) return actor
   try {
     const formData = await req.formData()
     const file = formData.get('file') as File | null
     const folder = (formData.get('folder') as string) || 'uploads'
+    if (!isMediaPath(folder)) return NextResponse.json({ success: false, error: 'Thư mục không hợp lệ' }, { status: 400 })
     const authHeader = req.headers.get('authorization')
     const token = authHeader?.replace('Bearer ', '')
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ success: false, error: 'File là bắt buộc' }, { status: 400 })
     }
 

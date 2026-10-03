@@ -1,10 +1,11 @@
 "use client"
 
 import React, { useEffect, useMemo, useState } from "react"
+import { createRefreshQueue } from '../../../../shared/data/refresh-queue'
 import Link from "next/link"
 import { ArrowRight, Loader2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { api, supabase } from "@/lib/api-supabase"
+import { api, supabase, invalidateGzverList } from "@/lib/api-supabase"
 
 export interface GzversGridProps {
   title?: string
@@ -70,17 +71,23 @@ export default function GzversGrid({
       })
     }
 
-    load(true)
+    const queue = createRefreshQueue(() => document.hidden ? Promise.resolve() : load(false))
+    const onVisible = () => { if (!document.hidden) queue.schedule() }
+    document.addEventListener("visibilitychange", onVisible)
+    queue.schedule()
 
     const channel = supabase
       .channel("gzvers-grid:data")
-      .on("postgres_changes", { event: "*", schema: "public", table: "gzvers" }, () => load(false))
-      .on("postgres_changes", { event: "*", schema: "public", table: "gzver_departments" }, () => load(false))
-      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => load(false))
-      .subscribe()
+      .on("postgres_changes", { event: "*", schema: "public", table: "gzvers" }, () => { invalidateGzverList(); queue.schedule() })
+      .on("postgres_changes", { event: "*", schema: "public", table: "gzver_departments" }, () => { invalidateGzverList(); queue.schedule() })
+      .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => { invalidateGzverList(); queue.schedule() })
+      .on("postgres_changes", { event: "*", schema: "public", table: "mentors" }, () => { invalidateGzverList(); queue.schedule() })
+      .subscribe((status) => { if (status === "SUBSCRIBED") { invalidateGzverList(); queue.schedule() } })
 
     return () => {
       active = false
+      queue.dispose()
+      document.removeEventListener("visibilitychange", onVisible)
       supabase.removeChannel(channel)
     }
   }, [])
@@ -230,10 +237,6 @@ export default function GzversGrid({
     return `${member.full_name || ""} ${member.position || ""} ${member.company || ""} ${member.department_name || ""} ${member.headline || ""}`.toLowerCase().includes(query)
   }
 
-  if (dbData?.is_visible === false && !propTitle) {
-    return null
-  }
-
   const title = propTitle || dbData?.title || "ĐỘI NGŨ NHÂN SỰ GZV"
   const subtitle = propSubtitle || dbData?.subtitle || "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành"
   const showSearch = propShowSearch ?? propShowSearchSnake ?? dbData?.show_search ?? dbData?.showSearch ?? true
@@ -256,6 +259,8 @@ export default function GzversGrid({
     }
     return `Bộ phận ${activeTabObj?.label || ""} trực thuộc hệ sinh thái GZV.`
   }, [activeFilter, activeTabObj])
+
+  if (dbData?.is_visible === false && !propTitle) return null
 
   return (
     <section className="bg-white py-16 dark:bg-gray-900 sm:py-20" style={background ? { background } : undefined}>

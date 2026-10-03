@@ -1581,7 +1581,7 @@ export function HeaderFooterSeoTab({
                     ))}
                     {footerLinks.length === 0 && (
                       <p className="text-xs text-slate-400 text-center py-6 font-semibold border border-dashed border-slate-200 dark:border-white/10">
-                        Chưa có liên kết nhanh nào. Bấm nút "Thêm liên kết" để tạo.
+                        Chưa có liên kết nhanh nào. Bấm nút &quot;Thêm liên kết&quot; để tạo.
                       </p>
                     )}
                   </div>

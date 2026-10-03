@@ -378,7 +378,7 @@ export default function CVPage() {
                     </div>
                   </div>
 
-                  <blockquote className="text-gray-600 italic mb-4 leading-relaxed">"{story.story}"</blockquote>
+                  <blockquote className="text-gray-600 italic mb-4 leading-relaxed">&quot;{story.story}&quot;</blockquote>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center p-3 bg-green-50 rounded-lg">

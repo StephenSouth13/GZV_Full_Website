@@ -65,7 +65,7 @@ export function MentorQuickView({ isOpen, onClose, mentor }: any) {
           <div className="space-y-4 md:w-2/3">
             {mentor.description && (
               <div className="border-l-2 border-[#ed1c24] bg-slate-50 p-3 italic text-xs text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-                "{mentor.description}"
+                &quot;{mentor.description}&quot;
               </div>
             )}
 

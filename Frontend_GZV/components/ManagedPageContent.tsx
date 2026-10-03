@@ -1,4 +1,5 @@
 'use client'
+import { safeHtml } from '@/lib/safe-html'
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
@@ -36,7 +37,7 @@ export default function ManagedPageContent() {
       <div className="container mx-auto px-4">
         <div
           className="gzv-rich-content prose prose-lg max-w-none dark:prose-invert prose-img:rounded-2xl prose-img:shadow-lg prose-a:text-[#ed1c24]"
-          dangerouslySetInnerHTML={{ __html: html }}
+          dangerouslySetInnerHTML={{ __html: safeHtml(html) }}
         />
       </div>
     </section>
