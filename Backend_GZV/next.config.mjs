@@ -18,6 +18,12 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/', destination: '/admin/dashboard', permanent: false },
+      { source: '/admin', destination: '/admin/dashboard', permanent: false },
+    ]
+  },
   // Cho phép kết nối API từ bên ngoài (CORS)
   async headers() {
     return [

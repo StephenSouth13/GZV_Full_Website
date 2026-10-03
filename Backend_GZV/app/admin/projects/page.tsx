@@ -322,7 +322,7 @@ function ProjectsManagementContent() {
 
 export default function ProjectsManagementPage() {
   return (
-    <ProtectedRoute allowedRoles={['admin', 'collab']}>
+    <ProtectedRoute allowedRoles={['admin', 'editor', 'collab']}>
       <ProjectsManagementContent />
     </ProtectedRoute>
   )

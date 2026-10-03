@@ -1474,7 +1474,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
         </Tabs>
 
         {/* Footer Actions */}
-        <div className="shrink-0 sticky bottom-0 z-50 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950 rounded-none sm:flex-row sm:items-center sm:p-4">
+        <div className="admin-dialog-footer shrink-0 sticky bottom-0 z-50 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-slate-200 bg-slate-50 p-3 dark:border-white/10 dark:bg-slate-950 rounded-none sm:flex-row sm:items-center sm:p-4">
           <Button variant="ghost" onClick={onClose} className="rounded-none px-6 text-xs font-black uppercase text-slate-500 hover:bg-slate-200/60">
             Hủy Bỏ
           </Button>

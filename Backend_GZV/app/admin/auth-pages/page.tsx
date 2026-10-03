@@ -264,7 +264,7 @@ function SwitchLine({ label, checked, onChange }: { label: string; checked: bool
 
 export default function AuthPagesPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin", "collab"]}>
+    <ProtectedRoute allowedRoles={["admin", "editor", "collab"]}>
       <AuthPagesManager />
     </ProtectedRoute>
   )

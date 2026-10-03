@@ -441,7 +441,7 @@ export function AuthorModal({ isOpen, onClose, author, onSuccess }: Props) {
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50/50 px-6 py-4 dark:border-white/10 dark:bg-slate-950/50">
+        <div className="admin-dialog-footer shrink-0 flex flex-col-reverse items-stretch justify-end gap-2 border-t border-slate-200 bg-slate-50/50 px-4 py-3 dark:border-white/10 dark:bg-slate-950/50 sm:flex-row sm:items-center sm:px-6 sm:py-4">
           <Button
             type="button"
             variant="outline"

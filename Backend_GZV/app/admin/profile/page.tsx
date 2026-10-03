@@ -406,7 +406,7 @@ function ProfileContent() {
 
 export default function ProfilePage() {
   return (
-    <ProtectedRoute allowedRoles={["admin", "collab"]}>
+    <ProtectedRoute allowedRoles={["admin", "editor", "collab"]}>
       <ProfileContent />
     </ProtectedRoute>
   )

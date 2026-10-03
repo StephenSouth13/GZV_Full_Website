@@ -305,7 +305,7 @@ export function MentorModal({ isOpen, onClose, mentor, onSuccess }: any) {
           </div>
         </Tabs>
 
-        <div className="shrink-0 sticky bottom-0 z-50 p-4 md:p-6 bg-[#0f0f0f] border-t border-white/10 flex justify-end gap-4 shadow-2xl">
+        <div className="admin-dialog-footer shrink-0 sticky bottom-0 z-50 p-4 md:p-6 bg-[#0f0f0f] border-t border-white/10 flex flex-col-reverse items-stretch justify-end gap-3 shadow-2xl sm:flex-row sm:items-center">
           <Button variant="ghost" onClick={onClose} className="font-black text-gray-400 rounded-none px-6 uppercase text-xs">Hủy bỏ</Button>
           <Button onClick={handleSave} disabled={loading || uploading} className="bg-[#ed1c24] hover:bg-[#c91218] text-white font-black rounded-none px-8 h-11 shadow-md text-xs uppercase">
             {loading ? <Loader2 className="animate-spin mr-2"/> : <Save className="mr-2"/>} LƯU HỒ SƠ CHUYÊN GIA

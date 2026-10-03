@@ -47,14 +47,14 @@ export function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
-  const [userRole, setUserRole] = useState("collab")
+  const [userRole, setUserRole] = useState("user")
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
         setUser(session.user)
-        setUserRole(localStorage.getItem("user_role") || "collab")
+        setUserRole(localStorage.getItem("user_role") || "user")
       }
     }
     getUser()

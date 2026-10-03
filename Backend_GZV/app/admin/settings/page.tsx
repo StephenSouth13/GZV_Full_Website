@@ -400,7 +400,7 @@ function SettingSwitch({ icon, title, desc, checked, onChange }: { icon: ReactNo
 
 export default function SettingsPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin", "collab"]}>
+    <ProtectedRoute allowedRoles={["admin", "editor", "collab"]}>
       <SettingsContent />
     </ProtectedRoute>
   )

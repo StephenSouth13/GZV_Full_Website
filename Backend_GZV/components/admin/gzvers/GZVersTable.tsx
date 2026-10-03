@@ -254,7 +254,7 @@ export function GZVersTable({
 
         <DragOverlay dropAnimation={{ duration: 150, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
           {activeDraggedItem ? (
-            <div className="flex items-center gap-4 border-2 border-[#ed1c24] bg-white p-3 shadow-2xl dark:bg-slate-900 opacity-95 rounded-none min-w-[500px]">
+            <div className="flex w-[calc(100vw-1rem)] max-w-[500px] items-center gap-4 border-2 border-[#ed1c24] bg-white p-3 shadow-2xl dark:bg-slate-900 opacity-95 rounded-none">
               <div className="flex items-center gap-2 shrink-0">
                 <GripVertical className="h-4 w-4 text-[#ed1c24]" />
                 <span className="flex h-6 w-8 items-center justify-center bg-[#ed1c24] text-white font-mono text-xs font-black">

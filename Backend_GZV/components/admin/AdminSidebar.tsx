@@ -34,31 +34,31 @@ interface AdminSidebarProps {
 }
 
 const adminMenuItems = [
-  { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ["admin", "collab"] },
-  { title: "Website Control", href: "/admin/site-content", icon: Blocks, roles: ["admin", "collab"] },
-  { title: "GZVers", href: "/admin/gzvers", icon: UserCircle2, roles: ["admin", "collab"] },
-  { title: "Đối tác", href: "/admin/partners", icon: Handshake, roles: ["admin", "collab"] },
-  { title: "Tác giả", href: "/admin/authors", icon: PenTool, roles: ["admin", "collab"] },
-  { title: "Tin liên hệ", href: "/admin/contacts", icon: Mail, roles: ["admin", "collab"] },
-  { title: "Dự án", href: "/admin/projects", icon: FolderOpen, roles: ["admin", "collab"] },
-  { title: "Tin tức", href: "/admin/articles", icon: Share2, roles: ["admin", "collab"] },
-  { title: "Media", href: "/admin/images", icon: Image, roles: ["admin", "collab"] },
+  { title: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, roles: ["admin", "editor", "collab"] },
+  { title: "Website Control", href: "/admin/site-content", icon: Blocks, roles: ["admin", "editor", "collab"] },
+  { title: "GZVers", href: "/admin/gzvers", icon: UserCircle2, roles: ["admin", "editor", "collab"] },
+  { title: "Đối tác", href: "/admin/partners", icon: Handshake, roles: ["admin", "editor", "collab"] },
+  { title: "Tác giả", href: "/admin/authors", icon: PenTool, roles: ["admin", "editor", "collab"] },
+  { title: "Tin liên hệ", href: "/admin/contacts", icon: Mail, roles: ["admin", "editor", "collab"] },
+  { title: "Dự án", href: "/admin/projects", icon: FolderOpen, roles: ["admin", "editor", "collab"] },
+  { title: "Tin tức", href: "/admin/articles", icon: Share2, roles: ["admin", "editor", "collab"] },
+  { title: "Media", href: "/admin/images", icon: Image, roles: ["admin", "editor", "collab"] },
   { title: "Tự động hóa", href: "/admin/automation", icon: Workflow, roles: ["admin"] },
   { title: "Người dùng", href: "/admin/users", icon: Users, roles: ["admin"] },
   { title: "Tài chính", href: "/admin/finance", icon: DollarSign, roles: ["admin"] },
 ]
 
 const userMenuItems = [
-  { title: "Hồ sơ", href: "/admin/profile", icon: UserCircle2, roles: ["admin", "collab"] },
-  { title: "Cài đặt", href: "/admin/settings", icon: Settings, roles: ["admin", "collab"] },
+  { title: "Hồ sơ", href: "/admin/profile", icon: UserCircle2, roles: ["admin", "editor", "collab"] },
+  { title: "Cài đặt", href: "/admin/settings", icon: Settings, roles: ["admin", "editor", "collab"] },
 ]
 
 export function AdminSidebar({ isCollapsed, onToggleCollapse }: AdminSidebarProps) {
   const pathname = usePathname()
-  const [userRole, setUserRole] = useState("collab")
+  const [userRole, setUserRole] = useState("user")
 
   useEffect(() => {
-    setUserRole(localStorage.getItem("user_role") || "collab")
+    setUserRole(localStorage.getItem("user_role") || "user")
   }, [])
 
   const filteredMenuItems = adminMenuItems.filter((item) => item.roles.includes(userRole))

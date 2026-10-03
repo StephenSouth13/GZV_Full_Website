@@ -995,7 +995,7 @@ function SiteContentManager() {
   }
 
   return (
-    <ProtectedRoute allowedRoles={["admin", "collab"]}>
+    <ProtectedRoute allowedRoles={["admin", "editor", "collab"]}>
       <div className="mx-auto max-w-6xl space-y-6 p-1.5 md:p-0">
 
         {/* Header Bar */}

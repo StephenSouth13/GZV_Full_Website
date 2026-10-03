@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Shield, Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { isCmsRole } from '@/lib/cms-roles'
 
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -54,28 +55,25 @@ export default function AdminLoginPage() {
           .from('profiles')
           .select('role')
           .eq('id', authData.user.id)
-          .single()
+          .maybeSingle()
 
         if (profileError) {
           console.error('Error fetching user profile:', profileError)
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              id: authData.user.id,
-              email: authData.user.email,
-              role: 'collab'
-            })
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError)
-            setError('Có lỗi xảy ra khi tạo profile người dùng')
-            return
-          }
-          
-          localStorage.setItem('user_role', 'collab')
-        } else {
-          localStorage.setItem('user_role', profile.role || 'collab')
+          localStorage.removeItem('user_role')
+          await supabase.auth.signOut({ scope: 'local' })
+          setError('Không thể kiểm tra quyền tài khoản. Vui lòng thử lại.')
+          return
         }
+
+        const role = profile?.role
+        if (!isCmsRole(role)) {
+          localStorage.removeItem('user_role')
+          await supabase.auth.signOut({ scope: 'local' })
+          setError('Tài khoản chưa được cấp quyền truy cập CMS.')
+          return
+        }
+
+        localStorage.setItem('user_role', role)
         
         router.push('/admin/dashboard')
       }

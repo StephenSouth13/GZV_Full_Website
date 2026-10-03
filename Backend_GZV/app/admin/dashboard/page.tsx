@@ -268,7 +268,7 @@ function QuickAction({ href, icon, label, value }: { href: string; icon: ReactNo
 
 export default function AdminDashboardPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin", "collab"]}>
+    <ProtectedRoute allowedRoles={["admin", "editor", "collab"]}>
       <AdminDashboardContent />
     </ProtectedRoute>
   )
