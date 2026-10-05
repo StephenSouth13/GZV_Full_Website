@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { OrderNumberInput } from "@/components/admin/OrderNumberInput"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,9 @@ import {
   Clock,
   Eye,
   ThumbsUp,
+  ArrowUp,
+  ArrowDown,
+  GripVertical,
 } from "lucide-react"
 import { format } from "date-fns"
 
@@ -33,12 +37,28 @@ export function ArticlesTable({
   articles,
   onDeleteArticle,
   onEditArticle,
+  onReorder,
+  onOrderChange,
+  orderingDisabled = false,
 }: {
   articles: any[]
   onDeleteArticle: (articleId: string) => void
   onEditArticle: (article: any) => void
   onUpdateArticle?: (article: any) => void
+  onReorder?: (articles: any[]) => void
+  onOrderChange?: (articleId: string, sortOrder: number) => void
+  orderingDisabled?: boolean
 }) {
+  const moveArticle = (index: number, direction: -1 | 1) => {
+    if (!onReorder || orderingDisabled) return
+    const targetIndex = index + direction
+    if (targetIndex < 0 || targetIndex >= articles.length) return
+    const next = [...articles]
+    const [moved] = next.splice(index, 1)
+    next.splice(targetIndex, 0, moved)
+    onReorder(next)
+  }
+
   const getCategoryBadge = (cat: string) => {
     const lowerCat = cat?.toLowerCase()
     const config: Record<string, string> = {
@@ -66,6 +86,9 @@ export function ArticlesTable({
       <Table>
         <TableHeader className="bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-white/10">
           <TableRow className="hover:bg-transparent border-none">
+            <TableHead className="w-[125px] py-4 pl-4 font-black text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider">
+              Thứ tự
+            </TableHead>
             <TableHead className="w-[420px] font-black text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider py-4 pl-6">
               Tác phẩm & Nội dung
             </TableHead>
@@ -86,16 +109,48 @@ export function ArticlesTable({
         <TableBody className="divide-y divide-slate-100 dark:divide-white/5">
           {articles.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-12 text-slate-400 text-xs font-semibold">
+              <TableCell colSpan={6} className="text-center py-12 text-slate-400 text-xs font-semibold">
                 Không tìm thấy bài viết nào phù hợp.
               </TableCell>
             </TableRow>
           ) : (
-            articles.map((article: any) => (
+            articles.map((article: any, index: number) => (
               <TableRow
                 key={article.id}
                 className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 border-none transition-colors group"
               >
+                <TableCell className="py-4 pl-4">
+                  <div className="flex items-center gap-1.5">
+                    <GripVertical className={`h-4 w-4 ${orderingDisabled ? 'text-slate-200' : 'text-slate-400'}`} />
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        type="button"
+                        disabled={orderingDisabled || index === 0}
+                        onClick={() => moveArticle(index, -1)}
+                        className="p-0.5 text-slate-400 hover:text-[#ed1c24] disabled:opacity-20"
+                        title="Di chuyển bài viết lên"
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={orderingDisabled || index === articles.length - 1}
+                        onClick={() => moveArticle(index, 1)}
+                        className="p-0.5 text-slate-400 hover:text-[#ed1c24] disabled:opacity-20"
+                        title="Di chuyển bài viết xuống"
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </button>
+                    </div>
+                    <OrderNumberInput
+                      value={article.sort_order ?? (index + 1) * 10}
+                      onCommit={(value) => article.id && onOrderChange?.(article.id, value)}
+                      disabled={orderingDisabled}
+                      className="h-7 w-14 rounded-none border-slate-200 px-1 text-center font-mono text-xs font-bold"
+                      title={orderingDisabled ? "Xóa bộ lọc trước khi đổi thứ tự" : "Nhập thứ tự và nhấn Enter"}
+                    />
+                  </div>
+                </TableCell>
                 <TableCell className="py-4 pl-6">
                   <div className="flex items-start gap-4">
                     <div className="relative h-18 w-28 shrink-0 rounded-none overflow-hidden border border-slate-200 bg-slate-100 dark:border-white/10 dark:bg-slate-800">
@@ -131,12 +186,16 @@ export function ArticlesTable({
                       </div>
                       <Badge
                         className={`w-fit text-[8px] h-4 font-black shadow-none border-none rounded-none uppercase px-1.5 ${
-                          article.status === "published"
+                          article.status === "published" && article.published_at && new Date(article.published_at) > new Date()
+                            ? "bg-blue-600 text-white"
+                            : article.status === "published"
                             ? "bg-emerald-600 text-white"
                             : "bg-amber-500 text-white"
                         }`}
                       >
-                        {article.status === "published" ? "XUẤT BẢN" : "BẢN NHÁP"}
+                        {article.status === "published" && article.published_at && new Date(article.published_at) > new Date()
+                          ? "LÊN LỊCH"
+                          : article.status === "published" ? "XUẤT BẢN" : "BẢN NHÁP"}
                       </Badge>
                     </div>
                   </div>

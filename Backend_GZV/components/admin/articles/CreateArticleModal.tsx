@@ -13,12 +13,30 @@ import {
   X, Plus, Loader2, Send, Save,
   Wand2, Globe,
   Sparkles, Layout, UserCheck, Type,
-  FolderOpen, Link as LinkIcon
+  FolderOpen, Link as LinkIcon, CalendarClock, ListOrdered
 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
 import { ImageCropField } from '@/components/media/ImageCropField'
+import { toDateTimeLocal, toIsoDateTime } from '@/lib/datetime-local'
+
+const createEmptyArticleForm = () => ({
+  title: '',
+  slug: '',
+  excerpt: '',
+  content: '',
+  category: '',
+  image: '',
+  image_position_x: 50,
+  image_position_y: 50,
+  image_scale: 100,
+  author_ids: [] as string[],
+  featured: false,
+  status: 'published',
+  sort_order: 0,
+  published_at: toDateTimeLocal(new Date()),
+})
 
 export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -26,25 +44,18 @@ export function CreateArticleModal({ open, onClose, onCreateArticle }: any) {
   const [members, setMembers] = useState<any[]>([])
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
 
-  const [formData, setFormData] = useState({
-    title: '',
-    slug: '',
-    excerpt: '',
-    content: '',
-    category: '',
-    image: '',
-    image_position_x: 50,
-    image_position_y: 50,
-    image_scale: 100,
-    author_ids: [] as string[], // Nâng cấp: Mảng đa tác giả
-    featured: false,
-    status: 'published'
-  })
+  const [formData, setFormData] = useState(createEmptyArticleForm)
 
   useEffect(() => {
     if (open) {
-      supabase.from('authors').select('id, full_name, avatar_url, title').order('full_name', { ascending: true })
-        .then(({ data }) => data && setMembers(data))
+      Promise.all([
+        supabase.from('authors').select('id, full_name, avatar_url, title').order('full_name', { ascending: true }),
+        supabase.from('articles').select('sort_order').order('sort_order', { ascending: false }).limit(1),
+      ]).then(([authorsResult, orderResult]) => {
+        if (authorsResult.data) setMembers(authorsResult.data)
+        const nextOrder = Number(orderResult.data?.[0]?.sort_order || 0) + 10
+        setFormData(prev => ({ ...prev, sort_order: prev.sort_order || nextOrder }))
+      })
     }
   }, [open])
 
@@ -97,6 +108,10 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
     : (members.length > 0 ? [members[0].id] : []);
 
   const safeSlug = generateSlug(formData.slug || formData.title) || `article-${Date.now()}`;
+  const selectedPublishDate = toIsoDateTime(formData.published_at)
+  if (status === 'published' && !selectedPublishDate) {
+    return toast({ title: "Ngày xuất bản không hợp lệ", variant: "destructive" })
+  }
 
   setLoading(true);
   try {
@@ -122,7 +137,8 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
       author_id: authorIds[0] || null,
       status,
       featured: !!formData.featured,
-      published_at: status === 'published' ? new Date().toISOString() : null
+      sort_order: Number(formData.sort_order) || 0,
+      published_at: status === 'published' ? selectedPublishDate : null
     };
 
     const { data, error } = await supabase
@@ -139,6 +155,7 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
     if (data && data[0]) {
       onCreateArticle(data[0]);
     }
+    setFormData(createEmptyArticleForm());
     onClose();
   } catch (err: any) {
     console.error("Lỗi xuất bản:", err);
@@ -159,7 +176,7 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
         <DialogDescription className="sr-only">Biểu mẫu soạn thảo và xuất bản bài viết</DialogDescription>
         
         {/* TOP NAVIGATION BAR */}
-        <div className="h-16 bg-white border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-6 sticky top-0 z-50">
+        <div className="min-h-16 bg-white border-b border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sticky top-0 z-50">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-[#ed1c24] rounded-none">
               <Wand2 className="text-white h-5 w-5" />
@@ -168,7 +185,7 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
             <Badge variant="outline" className="ml-2 bg-red-50 text-[#ed1c24] border-red-200 rounded-none font-bold text-[10px]">v3.0 PRO</Badge>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
             <Button variant="ghost" className="text-slate-500 font-bold rounded-none text-xs uppercase" onClick={onClose}>Hủy bỏ</Button>
             <Button
               variant="outline"
@@ -190,10 +207,10 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
           </div>
         </div>
 
-        <div className="flex h-[calc(95vh-64px)] overflow-hidden">
+        <div className="flex h-[calc(95vh-64px)] flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
           
           {/* MAIN EDITOR AREA */}
-          <div className="flex-1 overflow-y-auto bg-white p-8 lg:p-12 space-y-8">
+          <div className="flex-1 overflow-visible bg-white p-4 sm:p-8 lg:overflow-y-auto lg:p-12 space-y-8">
             <div className="max-w-4xl mx-auto space-y-8">
               {/* Title input */}
               <div className="space-y-4">
@@ -234,7 +251,7 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
 
 
           {/* RIGHT SIDEBAR: SETTINGS */}
-          <aside className="w-[380px] border-l border-slate-200 bg-slate-50/50 p-8 overflow-y-auto hidden lg:block space-y-8">
+          <aside className="block w-full border-t border-slate-200 bg-slate-50/50 p-4 sm:p-8 lg:w-[380px] lg:border-l lg:border-t-0 lg:overflow-y-auto space-y-8">
             
             {/* THUMBNAIL SECTION */}
             <div className="space-y-4">
@@ -385,6 +402,32 @@ const handleSubmit = async (status: 'draft' | 'published' = 'published') => {
 
             {/* CATEGORY & OPTIONS */}
             <div className="space-y-6 pt-4 border-t border-slate-200">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    <ListOrdered className="h-3.5 w-3.5" /> Thứ tự hiển thị
+                  </Label>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    value={formData.sort_order}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sort_order: Number(e.target.value) || 0 }))}
+                    className="h-10 rounded-none border-slate-200 bg-white font-mono text-xs font-bold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    <CalendarClock className="h-3.5 w-3.5" /> Ngày giờ xuất bản
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    value={formData.published_at}
+                    onChange={(e) => setFormData(prev => ({ ...prev, published_at: e.target.value }))}
+                    className="h-10 rounded-none border-slate-200 bg-white text-xs font-bold"
+                  />
+                  <p className="text-[10px] text-slate-400">Chọn thời điểm tương lai để lên lịch tự động hiển thị.</p>
+                </div>
+              </div>
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Danh mục & Lĩnh vực</Label>
                 <Input 

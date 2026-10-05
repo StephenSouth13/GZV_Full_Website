@@ -9,12 +9,13 @@ type Props = {
   onCommit: (value: number) => void
   className?: string
   title?: string
+  disabled?: boolean
 }
 
 // Ô số thứ tự: giữ giá trị đang gõ, chỉ lưu khi Enter/blur, Esc để hủy.
 // Trước đây lưu theo từng phím gõ: gõ "25" thì "2" đã được lưu và danh sách sắp xếp lại ngay,
 // ô nhảy chỗ nên mất phím tiếp theo -> số thứ tự sai, trông như mất dữ liệu.
-export function OrderNumberInput({ value, onCommit, className = "", title = "Số thứ tự hiển thị (Enter để lưu)" }: Props) {
+export function OrderNumberInput({ value, onCommit, className = "", title = "Số thứ tự hiển thị (Enter để lưu)", disabled = false }: Props) {
   const [draft, setDraft] = useState(String(value))
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function OrderNumberInput({ value, onCommit, className = "", title = "S�
       inputMode="numeric"
       value={draft}
       title={title}
+      disabled={disabled}
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}
       onKeyDown={(event) => {

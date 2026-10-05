@@ -1,7 +1,7 @@
 //D:\gzv\Backend_gzv\app\admin\articles\page.tsx
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { BlogPost } from '@/lib/supabase'
 import { BlogService } from '@/lib/blog-service'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ import { DeleteArticleModal } from '@/components/admin/articles/DeleteArticleMod
 import { supabase } from '@/lib/supabase'
 import { Search, Plus, Filter, FileText, Eye, ThumbsUp, Clock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { createRefreshQueue } from '../../../../shared/data/refresh-queue'
 
 export default function ArticlesPage() {
   const [articles, setArticles] = useState<BlogPost[]>([])
@@ -34,6 +35,7 @@ export default function ArticlesPage() {
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<BlogPost | null>(null)
   const [articleToDelete, setArticleToDelete] = useState<BlogPost | null>(null)
+  const savingOrder = useRef(false)
 
   const loadArticles = useCallback(async (showLoading = true) => {
     try {
@@ -54,14 +56,16 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     loadArticles()
+    const refreshQueue = createRefreshQueue(() => loadArticles(false), 250)
 
     const channel = supabase
       .channel('admin-articles:sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, () => loadArticles(false))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, () => loadArticles(false))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, refreshQueue.schedule)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, refreshQueue.schedule)
       .subscribe()
 
     return () => {
+      refreshQueue.dispose()
       supabase.removeChannel(channel)
     }
   }, [loadArticles])
@@ -129,6 +133,41 @@ export default function ArticlesPage() {
   const handleEditArticle = (article: BlogPost) => {
     setSelectedArticle(article)
     setEditModalOpen(true)
+  }
+
+  const hasActiveFilter = Boolean(searchTerm.trim()) || statusFilter !== 'all' || categoryFilter !== 'all'
+
+  const saveArticleOrder = async (updates: Array<{ id: string; sort_order: number }>, nextArticles?: BlogPost[]) => {
+    if (savingOrder.current) return
+    if (hasActiveFilter) {
+      toast({ title: "Xóa bộ lọc trước khi sắp xếp toàn bộ bài viết", variant: "destructive" })
+      return
+    }
+    savingOrder.current = true
+    try {
+      const { error } = await supabase.rpc('reorder_articles', { p_items: updates })
+      if (error) throw new Error(error.code === 'PGRST202' ? 'Cần áp dụng migration thứ tự bài viết trên Supabase.' : error.message)
+      if (nextArticles) setArticles(nextArticles)
+      else await loadArticles(false)
+      toast({ title: "Đã lưu thứ tự bài viết" })
+    } catch (error: any) {
+      toast({ title: "Không thể lưu thứ tự", description: error.message, variant: "destructive" })
+      await loadArticles(false)
+    } finally {
+      savingOrder.current = false
+    }
+  }
+
+  const handleReorderArticles = async (reordered: BlogPost[]) => {
+    const normalized = reordered.map((article, index) => ({ ...article, sort_order: (index + 1) * 10 }))
+    await saveArticleOrder(
+      normalized.map(article => ({ id: article.id, sort_order: article.sort_order || 0 })),
+      normalized
+    )
+  }
+
+  const handleArticleOrderChange = async (articleId: string, sortOrder: number) => {
+    await saveArticleOrder([{ id: articleId, sort_order: sortOrder }])
   }
 
   const getStats = () => {
@@ -294,6 +333,9 @@ export default function ArticlesPage() {
             onUpdateArticle={handleUpdateArticle}
             onDeleteArticle={handleDeleteArticle}
             onEditArticle={handleEditArticle}
+            onReorder={handleReorderArticles}
+            onOrderChange={handleArticleOrderChange}
+            orderingDisabled={hasActiveFilter}
           />
         </div>
         <div className="flex items-center justify-between px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">

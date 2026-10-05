@@ -89,6 +89,7 @@ export async function getInitialBlogPosts() {
     .select("*")
     .eq("status", "published")
     .lte("published_at", new Date().toISOString())
+    .order("sort_order", { ascending: true })
     .order("publish_date", { ascending: false })
   return (data || []).map(normalizePost)
 }

@@ -677,6 +677,7 @@
           .select('*')
           .eq('status', 'published')
           .lte('published_at', new Date().toISOString())
+          .order('sort_order', { ascending: true })
           .order('publish_date', { ascending: false });
         if (error) throw error;
         return (data || []).map(normalizeBlogPost);
@@ -726,6 +727,7 @@
           .eq('status', 'published')
           .lte('published_at', new Date().toISOString())
           .eq('category', category)
+          .order('sort_order', { ascending: true })
           .order('publish_date', { ascending: false });
 
         if (error) throw error;

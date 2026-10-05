@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Loader2, Edit3, Upload, CheckCircle2, Globe, FolderOpen, Link as LinkIcon, Trash2, Save } from 'lucide-react'
+import { Loader2, Edit3, Upload, CheckCircle2, Globe, FolderOpen, Link as LinkIcon, Trash2, Save, CalendarClock, ListOrdered } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { GZVRichEditor } from '@/components/editor/GZVRichEditor'
 import { MediaPickerDialog } from '@/components/media/MediaPickerDialog'
 import { ImageCropField } from '@/components/media/ImageCropField'
+import { toDateTimeLocal, toIsoDateTime } from '@/lib/datetime-local'
 
 export function EditArticleModal({ open, onClose, article, onUpdateArticle }: any) {
   const [loading, setLoading] = useState(false)
@@ -35,7 +36,9 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
     if (article && open) {
       setFormData({
         ...article,
-        author_ids: article.author_ids || (article.author_id ? [article.author_id] : [])
+        author_ids: article.author_ids || (article.author_id ? [article.author_id] : []),
+        sort_order: article.sort_order ?? 0,
+        published_at: toDateTimeLocal(article.published_at || article.publish_date || new Date())
       })
       supabase.from('authors').select('id, full_name, avatar_url, title').order('full_name', { ascending: true }).then(({ data }) => data && setMembers(data))
     }
@@ -84,6 +87,10 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
         : (formData.author_id ? [formData.author_id] : (members.length > 0 ? [members[0].id] : []))
       // Loại các author_id đã bị xóa khỏi bảng authors để tránh vi phạm khóa ngoại (lỗi 409 khi xuất bản)
       const authorIds = requestedIds.filter((id) => validMemberIds.has(id))
+      const selectedPublishDate = toIsoDateTime(formData.published_at)
+      if (status === 'published' && !selectedPublishDate) {
+        throw new Error('Ngày xuất bản không hợp lệ.')
+      }
 
       const { data, error } = await supabase
         .from('articles')
@@ -100,9 +107,10 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
           image_position_y: Number.isFinite(Number(formData.image_position_y)) ? Number(formData.image_position_y) : 50,
           image_scale: Number.isFinite(Number(formData.image_scale)) ? Number(formData.image_scale) : 100,
           featured: Boolean(formData.featured),
+          sort_order: Number(formData.sort_order) || 0,
           status,
           updated_at: new Date().toISOString(),
-          published_at: status === 'published' ? (article.published_at || new Date().toISOString()) : null
+          published_at: status === 'published' ? selectedPublishDate : null
         })
         .eq('id', article.id).select()
 
@@ -300,6 +308,33 @@ export function EditArticleModal({ open, onClose, article, onUpdateArticle }: an
               <div className="space-y-3">
                 <Label className="text-[10px] font-black uppercase tracking-wider text-slate-500">Danh mục</Label>
                 <Input className="bg-white border-slate-200 h-10 rounded-none font-semibold text-xs shadow-xs" value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} />
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    <ListOrdered className="h-3.5 w-3.5" /> Thứ tự hiển thị
+                  </Label>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    value={formData.sort_order ?? 0}
+                    onChange={(e) => setFormData({ ...formData, sort_order: Number(e.target.value) || 0 })}
+                    className="h-10 rounded-none border-slate-200 bg-white font-mono text-xs font-bold shadow-xs"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                    <CalendarClock className="h-3.5 w-3.5" /> Ngày giờ xuất bản
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    value={formData.published_at || ''}
+                    onChange={(e) => setFormData({ ...formData, published_at: e.target.value })}
+                    className="h-10 rounded-none border-slate-200 bg-white text-xs font-bold shadow-xs"
+                  />
+                  <p className="text-[10px] text-slate-400">Có thể đặt lịch tương lai; website chỉ hiển thị khi tới thời điểm này.</p>
+                </div>
               </div>
 
               <label className="flex cursor-pointer items-center justify-between border border-slate-200 bg-white p-3">

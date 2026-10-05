@@ -98,6 +98,7 @@ export interface BlogPost {
   comments?: number
   shares?: number
   featured?: boolean
+  sort_order?: number
   seo?: {
     title?: string
     description?: string
@@ -125,6 +126,7 @@ export interface BlogPostCreate {
   image_scale?: number
   tags?: string[]
   featured?: boolean
+  sort_order?: number
   status?: string
   published_at?: string
   publish_date?: string

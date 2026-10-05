@@ -103,6 +103,7 @@ export default function NewsGrid({
             .select("*")
             .eq("status", "published")
             .lte("published_at", new Date().toISOString())
+            .order("sort_order", { ascending: true })
             .order("publish_date", { ascending: false })
             .limit(4)
           if (active && data) {

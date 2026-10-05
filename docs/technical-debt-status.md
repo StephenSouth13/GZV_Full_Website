@@ -8,6 +8,7 @@
 - Route gốc của backend (`/`) và `/admin` chuyển thẳng tới `/admin/dashboard`; khách chưa đăng nhập tiếp tục được `ProtectedRoute` đưa về `/admin-login`. Đã loại bỏ dashboard demo cũ nằm ngoài lớp bảo vệ.
 - Đường dẫn media từ chối traversal, đường dẫn tuyệt đối, wildcard và segment rỗng; giới hạn số file/tổng dung lượng cho upload nhiều file và giới hạn số kết quả API.
 - Đổi thứ tự tác giả dùng RPC nguyên tử; kiểm tra lỗi và không báo thành công hai lần. Search debounce, response cũ không ghi đè; không đánh lại thứ tự toàn danh sách khi đang lọc tìm kiếm.
+- Bài viết có `sort_order`, nút lên/xuống và ô nhập thứ tự; việc đổi thứ tự dùng RPC nguyên tử, bị khóa khi danh sách đang lọc và các sự kiện realtime được gộp trước khi tải lại. Form tạo/sửa cho phép chỉnh ngày giờ xuất bản hoặc đặt lịch tương lai; truy vấn website công khai ưu tiên thứ tự đã lưu.
 - Lưu hồ sơ GZVer và highlights qua cùng giao dịch, có kiểm tra revision để tránh ghi đè một hồ sơ đã được người khác sửa. Thiếu RPC được báo rõ, không âm thầm quay về đường lưu nhiều bước.
 - HTML các block CMS đi qua sanitizer dùng chung; loại script, event handler, URL nguy hiểm và style ngoài allowlist.
 - Contact API kiểm tra schema/body 32KiB khi đọc stream, giới hạn object bổ sung, trả mã lỗi ổn định và request ID. Có bộ hạn chế 5 lần/phút theo IP trên từng instance.
@@ -39,6 +40,8 @@ node scripts/apply-cms-db.cjs --apply
 Runner kiểm tra có profile thuộc nhóm CMS (admin/editor/collab). Đã xác minh tài khoản thử có quyền collab và áp dụng migration thành công trên database thực tế; không thay đổi role tài khoản. Luồng chống ghi đè trả PT409 (HTTP 409) để client nhận lỗi xung đột ngay.
 
 Migration snapshot CV `sql/20261002120000_gzver_cv_snapshots.sql` đã qua kiểm thử trên database thực tế và đã áp dụng thành công: 14 snapshot, gồm hồ sơ active và tombstone. Phần này không đổi role hoặc quyền ghi CMS.
+
+Migration bài viết `sql/20261005100000_articles_order_and_publish_date.sql` đã áp dụng thành công: backfill thứ tự hiện có, thêm RPC `reorder_articles`, cập nhật view `allblogposts` và guard quyền ghi cho bảng `articles`.
 
 ## Kiểm thử với tài khoản thật
 

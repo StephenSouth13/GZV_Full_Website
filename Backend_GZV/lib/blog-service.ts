@@ -12,6 +12,7 @@ const ARTICLE_WRITE_COLUMNS = [
   'author_ids',
   'category',
   'featured',
+  'sort_order',
   'status',
   'published_at',
   'updated_at',
@@ -43,7 +44,8 @@ export class BlogService {
     const { data, error } = await supabase
       .from('allblogposts')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('sort_order', { ascending: true })
+      .order('published_at', { ascending: false })
 
     if (error) throw error
     return data || []
