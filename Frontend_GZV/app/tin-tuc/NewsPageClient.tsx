@@ -25,6 +25,14 @@ import { useLanguage } from "@/components/language-provider"
 import { summarize } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { resolveNewsLayout } from '../../../shared/data/news-layout'
+
+const NEWS_GRID_CLASSES: Record<number, string> = {
+  1: 'grid grid-cols-1 gap-6',
+  2: 'grid grid-cols-1 md:grid-cols-2 gap-6',
+  3: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6',
+  4: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6',
+}
 
 function AuthorStack({ authors }: { authors?: any[] }) {
   const list = Array.isArray(authors) ? authors : []
@@ -120,7 +128,7 @@ const copyByLanguage = {
   },
 }
 
-export default function NewsPageClient({ initialArticles, initialPage, initialGlobalBanner, initialSyncAllBanners }: any) {
+export default function NewsPageClient({ initialArticles, initialPage, initialGlobalBanner, initialSyncAllBanners, initialNewsSettings }: any) {
   const { language } = useLanguage()
   const copy = copyByLanguage[language]
   const [articles, setArticles] = useState<BlogPost[]>(initialArticles)
@@ -131,9 +139,11 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
   const [isSubscribing, setIsSubscribing] = useState(false)
   const [subscribed, setSubscribed] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [categoryLayout, setCategoryLayout] = useState<"compact" | "normal">("compact")
+  const [categoryLayout, setCategoryLayout] = useState<"compact" | "normal">(initialNewsSettings?.category_layout === "normal" ? "normal" : "compact")
+  const [newsLayout, setNewsLayout] = useState(() => resolveNewsLayout(initialNewsSettings))
 
-  const pageSize = 6
+  const pageSize = newsLayout.columns * newsLayout.rows
+  const gridClassName = NEWS_GRID_CLASSES[newsLayout.columns]
 
   useEffect(() => {
     let active = true
@@ -148,6 +158,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
         if (active) {
           setArticles(data || [])
           setCategoryLayout(section.data?.settings?.category_layout === "normal" ? "normal" : "compact")
+          if (!section.error) setNewsLayout(resolveNewsLayout(section.data?.settings))
         }
       } catch (err) {
         console.error("Error fetching blog posts:", err)
@@ -211,12 +222,17 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
     )
   }, [articles, filtered])
 
-  // Non-featured are all other items in the filtered list
-  const nonFeatured = filtered.filter((a) => a.id !== featured?.id)
+  // Include every matching article when the featured block is hidden by filters.
+  const showFeatured = Boolean(featured && !search && !category)
+  const nonFeatured = showFeatured ? filtered.filter((a) => a.id !== featured?.id) : filtered
 
   // Paginate non-featured
   const totalPages = Math.max(1, Math.ceil(nonFeatured.length / pageSize))
-  const paginatedArticles = nonFeatured.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const activePage = Math.min(currentPage, totalPages)
+  const paginatedArticles = nonFeatured.slice((activePage - 1) * pageSize, activePage * pageSize)
+
+  useEffect(() => { setCurrentPage(1) }, [pageSize])
+  useEffect(() => { setCurrentPage(page => Math.min(page, totalPages)) }, [totalPages])
 
   const getPaginationItems = () => {
     const items = []
@@ -347,7 +363,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
             </div>
 
             {/* ── SECTION 2: FEATURED ARTICLE ── */}
-            {featured && !search && !category && (
+            {featured && showFeatured && (
               <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 border-t-4 border-t-[#ed1c24] rounded-none p-5 md:p-6 group relative overflow-hidden transition-all space-y-4 shadow-xs">
                 <div className="pb-1">
                   <h3 className="text-base md:text-xl font-black uppercase tracking-wider text-[#ed1c24]">
@@ -427,7 +443,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
               </div>
 
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={gridClassName}>
                   {[...Array(pageSize)].map((_, i) => (
                     <Card key={i} className="overflow-hidden border border-slate-200 dark:border-white/10 rounded-none bg-white dark:bg-slate-900">
                       <div className="aspect-[16/10] bg-slate-100 dark:bg-slate-800 animate-pulse border-b border-slate-200 dark:border-white/10 rounded-none" />
@@ -439,7 +455,7 @@ export default function NewsPageClient({ initialArticles, initialPage, initialGl
                   ))}
                 </div>
               ) : paginatedArticles.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={gridClassName}>
                   {paginatedArticles.map((article) => (
                     <Card
                       key={article.id}

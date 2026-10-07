@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { ArticlesTable } from '@/components/admin/articles/ArticlesTable'
+import { NewsLayoutSettings } from '@/components/admin/articles/NewsLayoutSettings'
 import { CreateArticleModal } from '@/components/admin/articles/CreateArticleModal'
 import { EditArticleModal } from '@/components/admin/articles/EditArticleModal'
 import { DeleteArticleModal } from '@/components/admin/articles/DeleteArticleModal'
@@ -267,6 +268,8 @@ export default function ArticlesPage() {
           </div>
         </div>
       </div>
+
+      <NewsLayoutSettings />
 
       {/* Filter Toolbar Card */}
       <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900 space-y-3">
