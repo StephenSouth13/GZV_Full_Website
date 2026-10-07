@@ -21,13 +21,17 @@ export function combineSectionConfig(homeRow?: any, blockProps?: any) {
   return { ...(blockProps || {}), ...(homeRow || {}), ...(homeRow?.settings || {}) }
 }
 
-// Chọn bài viết cho khối tin tức trang chủ: ưu tiên danh sách chọn tay, còn lại lấy mới nhất
+// Chọn bài viết cho khối tin tức trang chủ: ưu tiên danh sách chọn tay, còn lại lấy mới nhất.
+// Bố cục cần tối thiểu 4 bài (1 lớn + 3 cột phải) nên không cắt xuống dưới mức đó.
 export function pickHomeArticles(config: any, posts: any[]) {
-  const limit = Number(config?.item_limit) || 4
+  const limit = Math.max(4, Number(config?.item_limit) || 4)
   const selectedIds: string[] = config?.selected_article_ids || []
   if (selectedIds.length > 0 && posts.length > 0) {
     const sorted = selectedIds.map((id) => posts.find((post) => String(post.id) === String(id) || post.slug === id)).filter(Boolean)
-    if (sorted.length > 0) return sorted
+    if (sorted.length > 0) {
+      const remaining = posts.filter((post) => !sorted.some((item: any) => item.id === post.id))
+      return [...sorted, ...remaining].slice(0, limit)
+    }
   }
   return posts.slice(0, limit)
 }

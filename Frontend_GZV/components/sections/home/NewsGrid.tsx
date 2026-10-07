@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Clock, ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, BookOpen, Clock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,20 +13,21 @@ import { summarize } from "@/lib/utils"
 
 const summaryOf = (article: any, max = 180) => summarize([article?.excerpt, article?.content], max)
 
-function AuthorStack({ authors }: { authors?: any[] }) {
+function AuthorStack({ authors, compact = false }: { authors?: any[]; compact?: boolean }) {
   const list = Array.isArray(authors) ? authors : []
   if (!list.length) return null
   const visible = list.slice(0, 2)
   const extra = Math.max(0, list.length - visible.length)
+  const size = compact ? "h-6 w-6" : "h-7 w-7"
   return <div className="flex items-center gap-2" onClick={(event) => event.stopPropagation()}>
     <div className="flex -space-x-2">
-      {visible.map((author: any, index: number) => <Avatar key={`${author.id || author.full_name}-${index}`} className="h-7 w-7 border-2 border-white dark:border-slate-900"><AvatarImage src={author.avatar_url || author.avatar} /><AvatarFallback className="text-[9px]">{(author.full_name || author.name || "G").slice(0, 1)}</AvatarFallback></Avatar>)}
+      {visible.map((author: any, index: number) => <Avatar key={`${author.id || author.full_name}-${index}`} className={`${size} border-2 border-white dark:border-slate-900`}><AvatarImage src={author.avatar_url || author.avatar} /><AvatarFallback className="text-[9px]">{(author.full_name || author.name || "G").slice(0, 1)}</AvatarFallback></Avatar>)}
       <Popover>
-        <PopoverTrigger asChild><button type="button" className="h-7 w-7 rounded-full border-2 border-white bg-slate-950 text-[9px] font-black text-white dark:border-slate-900">{extra ? `+${extra}` : "..."}</button></PopoverTrigger>
+        <PopoverTrigger asChild><button type="button" className={`${size} rounded-full border-2 border-white bg-slate-950 text-[9px] font-black text-white dark:border-slate-900`}>{extra ? `+${extra}` : "..."}</button></PopoverTrigger>
         <PopoverContent className="w-64 rounded-none p-3"><p className="mb-2 text-[10px] font-black uppercase tracking-widest text-[#ed1c24]">Tác giả / đội ngũ</p>{list.map((author: any, index: number) => <div key={`${author.id || author.full_name}-full-${index}`} className="flex items-center gap-2 py-1"><Avatar className="h-6 w-6"><AvatarImage src={author.avatar_url || author.avatar} /></Avatar><span className="text-xs font-bold">{author.full_name || author.name}</span></div>)}</PopoverContent>
       </Popover>
     </div>
-    <div><p className="max-w-[150px] truncate text-[10px] font-black uppercase text-slate-700 dark:text-slate-200">{list[0].full_name || list[0].name}</p>{list.length > 1 && <p className="text-[9px] font-bold uppercase text-slate-400">& {list.length - 1} tác giả khác</p>}</div>
+    <div className="min-w-0"><p className={`${compact ? "max-w-[110px]" : "max-w-[150px]"} truncate text-[10px] font-black uppercase text-slate-700 dark:text-slate-200`}>{list[0].full_name || list[0].name}</p>{list.length > 1 && <p className="text-[9px] font-bold uppercase text-slate-400">& {list.length - 1} tác giả khác</p>}</div>
   </div>
 }
 
@@ -84,18 +85,20 @@ export default function NewsGrid({
 
         const selectedIds: string[] = combined?.selected_article_ids || []
 
+        // Bố cục cần tối thiểu 4 bài (1 lớn + 3 cột phải). Nếu cấu hình đặt thấp hơn
+        // thì nâng lên cho đủ ô, tránh để trống một mảng lớn bên phải.
+        const limit = Math.max(4, Number(combined?.item_limit) || 4)
+
         if (selectedIds.length > 0 && blogPosts && blogPosts.length > 0) {
           const pinned = selectedIds
             .map((id) => blogPosts.find((a: any) => String(a.id) === String(id) || a.slug === id))
             .filter(Boolean)
-          const rest = blogPosts.filter((article: any) => !pinned.some((item: any) => item.id === article.id))
-          const limit = Number(combined?.item_limit || 4)
-          setArticles(pinned.length > 0 ? [...pinned, ...rest].slice(0, limit) : blogPosts.slice(0, limit))
+          const remaining = blogPosts.filter((article: any) => !pinned.some((item: any) => item.id === article.id))
+          setArticles(pinned.length > 0 ? [...pinned, ...remaining].slice(0, limit) : blogPosts.slice(0, limit))
         } else if (blogPosts && blogPosts.length > 0) {
-          const limit = combined?.item_limit || 4
           const featuredPosts = blogPosts.filter((article: any) => article.featured)
           const ordered = featuredPosts.length ? [...featuredPosts, ...blogPosts.filter((article: any) => !featuredPosts.includes(article))] : blogPosts
-          setArticles(ordered.slice(0, Number(limit) || 4))
+          setArticles(ordered.slice(0, limit))
         } else {
           // Fallback direct query on allblogposts
           const { data } = await supabase
@@ -161,8 +164,15 @@ export default function NewsGrid({
     )
   }
 
-  const featured = articles[0]
-  const rest = articles.slice(1, 4)
+  // Bố cục chuẩn: 1 bài lớn bên trái + 3 bài vừa xếp chồng bên phải.
+  // Chỉ lấy tối đa 3 bài cho cột phải, không kéo giãn khi thiếu bài.
+  const list = articles.filter((article: any) => article && (article.title || article.slug))
+  const featured = list[0]
+  const rest = list.slice(1, 4)
+
+  // Cột phải dùng 3 ô có chiều cao bằng nhau; khi chỉ có 2 bài thì hàng thứ ba
+  // tự thu về đúng chiều cao nội dung thay vì phình ra.
+  const rightCards = useMemo(() => (rest.length ? rest : []), [rest.length])
 
   return (
     <section className="py-20 md:py-28 relative bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-white/10 select-none">
@@ -200,141 +210,33 @@ export default function NewsGrid({
           )}
         </motion.div>
 
-        {/* Blog Grid */}
+        {/* Blog Grid: hai cột cao bằng nhau, cột phải chia đều chiều cao cho từng thẻ
+            nên nội dung giãn khít và không còn khoảng trống ở đáy. */}
         {loading ? (
           <div className="py-20 flex justify-center items-center">
             <div className="h-10 w-10 animate-spin border-2 border-[#ed1c24] border-t-transparent" />
           </div>
         ) : (
-          <div className="grid lg:grid-cols-12 gap-6 items-stretch">
-            {/* Main Featured Article (Left Side - 7 Cols) */}
-            {featured && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="lg:col-span-7 flex"
-              >
-                <Link
-                  href={`/tin-tuc/${featured.slug}`}
-                  className="group relative flex flex-col justify-between w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-none overflow-hidden hover:border-[#ed1c24] transition-colors"
-                >
-                  {/* Image Area */}
-                  <div className="relative h-72 sm:h-80 md:h-96 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                    {featured.thumbnail_url || featured.image ? (
-                      <img
-                        src={featured.thumbnail_url || featured.image}
-                        alt={featured.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
-                        style={{
-                          objectPosition: `${featured.image_position_x ?? 50}% ${featured.image_position_y ?? 50}%`,
-                          transform: `scale(${(featured.image_scale ?? 100) / 100})`,
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#ed1c24]/10 to-slate-100 dark:to-slate-800 flex items-center justify-center text-slate-400 font-black text-xs uppercase">
-                        GZV News
-                      </div>
-                    )}
-                    {/* Gradient for date contrast */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="grid gap-6 lg:grid-cols-12 lg:items-stretch">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="flex lg:col-span-6"
+            >
+              <FeaturedCard article={featured} />
+            </motion.div>
 
-                    {/* Category Badge Top-Left */}
-                    <div className="absolute top-3 left-3 z-10">
-                      <Badge className="bg-slate-900 text-white font-black text-[10px] uppercase tracking-wider rounded-none px-3 py-1 border-0">
-                        {featured.category || "TIN TỨC"}
-                      </Badge>
-                    </div>
-
-                    {/* Published Date Bottom-Left */}
-                    {(featured.published_at || featured.created_at || featured.publish_date) && (
-                      <div className="absolute bottom-3 left-3 z-10 text-white text-xs font-bold flex items-center gap-1.5 drop-shadow-sm">
-                        <Clock className="w-3.5 h-3.5 text-[#ed1c24]" />
-                        <span>{formatDate(featured.published_at || featured.created_at || featured.publish_date)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Text Content Area */}
-                  <div className="p-6 md:p-7 bg-white dark:bg-slate-900 space-y-4 flex-1 flex flex-col justify-between">
-                    <h3 className="font-black text-xl sm:text-2xl uppercase tracking-tight text-slate-950 dark:text-white group-hover:text-[#ed1c24] transition-colors line-clamp-2 leading-snug">
-                      {featured.title}
-                    </h3>
-                    {summaryOf(featured, 220) && (
-                      <p className="line-clamp-3 text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">{summaryOf(featured, 220)}</p>
-                    )}
-
-                    <AuthorStack authors={featured.authors_details || featured.authors} />
-
-                    <div className="pt-2 flex items-center text-xs font-black uppercase text-[#ed1c24] tracking-wider">
-                      <span>ĐỌC BÀI</span>
-                      <ArrowUpRight className="ml-1 h-4 w-4" />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            )}
-
-            {/* Secondary Articles List (Right Side - 5 Cols) */}
-            <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-5">
-              {rest.map((article: any, i: number) => (
-                <motion.div
-                  key={article.id || article.slug || i}
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <Link
-                    href={`/tin-tuc/${article.slug}`}
-                    className="group grid grid-cols-[130px_minmax(0,1fr)] sm:grid-cols-[160px_minmax(0,1fr)] min-h-[145px] border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-none overflow-hidden hover:border-[#ed1c24] transition-colors"
-                  >
-                    {/* Thumbnail Image Left (Fixed 160px grid col) */}
-                    <div className="w-full h-full relative overflow-hidden bg-slate-100 dark:bg-slate-800">
-                      {article.thumbnail_url || article.image ? (
-                        <img
-                          src={article.thumbnail_url || article.image}
-                          alt={article.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
-                          style={{
-                            objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
-                            transform: `scale(${(article.image_scale ?? 100) / 100})`,
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[9px] font-black text-slate-400 uppercase">
-                          GZV
-                        </div>
-                      )}
-
-                      {/* Category Badge Top-Left of Image */}
-                      <div className="absolute top-2 left-2 z-10">
-                        <span className="inline-block px-2 py-0.5 text-[8px] font-black uppercase tracking-wider bg-slate-900 text-white rounded-none">
-                          {article.category || "TIN TỨC"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Content Right */}
-                    <div className="min-w-0 p-4 sm:p-5 flex flex-col justify-between">
-                      <h4 className="font-black text-sm sm:text-base uppercase line-clamp-3 text-slate-950 dark:text-white group-hover:text-[#ed1c24] transition-colors leading-snug">
-                        {article.title}
-                      </h4>
-                      {summaryOf(article, 120) && (
-                        <p className="mt-1.5 hidden text-xs font-medium leading-relaxed text-slate-500 line-clamp-2 dark:text-slate-400 sm:block">{summaryOf(article, 120)}</p>
-                      )}
-
-                      <AuthorStack authors={article.authors_details || article.authors} />
-
-                      {(article.published_at || article.created_at || article.publish_date) && (
-                        <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase flex items-center gap-1.5 pt-2">
-                          <Clock className="w-3 h-3 text-[#ed1c24] shrink-0" />
-                          <span>{formatDate(article.published_at || article.created_at || article.publish_date)}</span>
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                </motion.div>
+            {/* Cột phải: 3 bài vừa xếp chồng, chia đều chiều cao thẻ lớn bên trái.
+                Mỗi ô là một hàng riêng cao bằng nhau nên luôn khít, không hở đáy. */}
+            <div className="flex flex-col gap-6 lg:col-span-6">
+              {rightCards.map((article: any, index) => (
+                <MediumCard
+                  key={`${article.id || article.slug || "card"}-${index}`}
+                  article={article}
+                  delay={index * 0.08}
+                  fill
+                />
               ))}
             </div>
           </div>
@@ -362,5 +264,145 @@ export default function NewsGrid({
         )}
       </div>
     </section>
+  )
+}
+
+/* ══════════════════ Các khối thẻ dùng chung cho mọi chế độ bố cục ══════════════════ */
+
+const cardImage = (article: any) => article?.thumbnail_url || article?.image
+const cardDate = (article: any) => article?.published_at || article?.created_at || article?.publish_date
+const cardHasMore = (article: any) => Boolean(article?.__repeat)
+const cardLink = (article: any) => `/tin-tuc/${article?.slug}`
+
+// Thẻ lớn: ảnh tràn viền phía trên, nội dung đầy đủ bên dưới.
+// Ảnh dùng flex-1 nên tự co giãn theo chiều cao cột, giúp hai cột luôn cân nhau.
+function FeaturedCard({ article }: { article: any }) {
+  return (
+    <Link
+      href={cardLink(article)}
+      className="group relative flex flex-col w-full h-full border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-none overflow-hidden hover:border-[#ed1c24] transition-colors"
+    >
+      <div className="relative h-64 sm:h-72 md:h-80 lg:h-auto lg:min-h-[300px] lg:flex-1 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+        {cardImage(article) ? (
+          <img
+            src={cardImage(article)}
+            alt={article.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
+            style={{
+              objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
+              transform: `scale(${(article.image_scale ?? 100) / 100})`,
+            }}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#ed1c24]/10 to-slate-100 dark:to-slate-800 flex items-center justify-center text-slate-400 font-black text-xs uppercase">
+            GZV News
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+        <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-2">
+          <Badge className="bg-slate-900 text-white font-black text-[10px] uppercase tracking-wider rounded-none px-3 py-1 border-0">
+            {article.category || "TIN TỨC"}
+          </Badge>
+          {cardHasMore(article) && (
+            <Badge className="bg-[#ed1c24] text-white font-black text-[10px] uppercase tracking-wider rounded-none px-3 py-1 border-0">
+              Tiêu điểm
+            </Badge>
+          )}
+        </div>
+
+        {cardDate(article) && (
+          <div className="absolute bottom-3 left-3 z-10 text-white text-xs font-bold flex items-center gap-1.5 drop-shadow-sm">
+            <Clock className="w-3.5 h-3.5 text-[#ed1c24]" />
+            <span>{formatDate(cardDate(article))}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="p-5 md:p-7 bg-white dark:bg-slate-900 space-y-4 shrink-0 flex flex-col justify-between">
+        <h3 className="font-black text-xl sm:text-2xl uppercase tracking-tight text-slate-950 dark:text-white group-hover:text-[#ed1c24] transition-colors line-clamp-2 leading-snug">
+          {article.title}
+        </h3>
+        {summaryOf(article, 220) && (
+          <p className="line-clamp-3 text-sm font-medium leading-relaxed text-slate-600 dark:text-slate-300">{summaryOf(article, 220)}</p>
+        )}
+
+        <AuthorStack authors={article.authors_details || article.authors} />
+
+        <div className="pt-2 flex items-center text-xs font-black uppercase text-[#ed1c24] tracking-wider">
+          <span>{cardHasMore(article) ? "ĐỌC LẠI BÀI" : "ĐỌC BÀI"}</span>
+          <ArrowUpRight className="ml-1 h-4 w-4" />
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// Thẻ vừa: ảnh bên trái, nội dung bên phải.
+// Thẻ vừa: ảnh bên trái, nội dung bên phải.
+// fill=true (dùng cho 3 ô cột phải) cho thẻ tự chia đều chiều cao cột, khít thẻ lớn.
+function MediumCard({ article, delay = 0, compact = false, fill = false }: { article: any; delay?: number; compact?: boolean; fill?: boolean }) {
+  const hasImage = Boolean(cardImage(article))
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay }}
+      className={fill ? "flex min-h-0 w-full flex-1" : "w-full"}
+    >
+      <Link
+        href={cardLink(article)}
+        className={`group flex w-full border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-none overflow-hidden hover:border-[#ed1c24] transition-colors ${fill ? "h-full" : "min-h-[230px]"}`}
+      >
+        <div className="relative w-[36%] max-w-[180px] shrink-0 self-stretch overflow-hidden bg-slate-100 dark:bg-slate-800">
+          {hasImage ? (
+            <img
+              src={cardImage(article)}
+              alt={article.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-none"
+              style={{
+                objectPosition: `${article.image_position_x ?? 50}% ${article.image_position_y ?? 50}%`,
+                transform: `scale(${(article.image_scale ?? 100) / 100})`,
+              }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 text-slate-300 dark:from-slate-800 dark:to-slate-900 dark:text-slate-600">
+              <BookOpen className="h-7 w-7" />
+            </div>
+          )}
+
+          <div className="absolute top-2 left-2 z-10">
+            <span className="inline-block px-2 py-0.5 text-[8px] font-black uppercase tracking-wider bg-slate-900 text-white rounded-none">
+              {article.category || "TIN TỨC"}
+            </span>
+          </div>
+        </div>
+
+        <div className={`flex min-w-0 flex-1 flex-col gap-3 p-4 sm:p-5 ${fill || compact ? "justify-center" : "justify-between"}`}>
+          <div className="space-y-1.5">
+            <h4 className={`font-black uppercase leading-snug text-slate-950 transition-colors group-hover:text-[#ed1c24] dark:text-white line-clamp-3 ${compact ? "text-sm" : "text-sm sm:text-base"}`}>
+              {article.title}
+            </h4>
+            {summaryOf(article, compact ? 90 : 120) && (
+              <p className={`hidden font-medium leading-relaxed text-slate-500 dark:text-slate-400 sm:line-clamp-2 ${compact ? "text-[11px]" : "text-xs"}`}>
+                {summaryOf(article, compact ? 90 : 120)}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-auto flex flex-col gap-3">
+            <AuthorStack compact authors={article.authors_details || article.authors} />
+
+            {cardDate(article) && (
+              <p className="flex items-center gap-1.5 text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400">
+                <Clock className="h-3 w-3 shrink-0 text-[#ed1c24]" />
+                <span>{formatDate(cardDate(article))}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   )
 }
