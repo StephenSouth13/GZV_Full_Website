@@ -1,18 +1,16 @@
 "use client"
 
-import { forwardRef, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
+import { forwardRef, useEffect, useState, type CSSProperties, type ReactNode } from "react"
 import { QRCodeSVG } from "qrcode.react"
 import {
   Calendar,
   ContactRound,
   CreditCard,
-  Download,
   Facebook,
   Globe2,
   Instagram,
   Link2,
   Linkedin,
-  Loader2,
   Mail,
   MessageCircle,
   Music2,
@@ -433,10 +431,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
   const card = getMemberCard(member)
   const [settings, setSettings] = useState<GzverCardSettings>(DEFAULT_SETTINGS)
   const [flipped, setFlipped] = useState(false)
-  const [downloading, setDownloading] = useState<Side | "both" | null>(null)
-  const frontExportRef = useRef<HTMLDivElement>(null)
-  const backExportRef = useRef<HTMLDivElement>(null)
-  const bothExportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let active = true
@@ -452,30 +446,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
 
   const c = resolveCard(member, card, settings)
   const profileUrl = `${SITE_URL}/gzver/${member.slug}`
-  const fileBase = `the-gzver-${member.slug}`
-
-  const download = async (target: Side | "both") => {
-    const node = target === "front" ? frontExportRef.current : target === "back" ? backExportRef.current : bothExportRef.current
-    if (!node) return
-    setDownloading(target)
-    try {
-      const { toPng } = await import("html-to-image")
-      // CR80 54 × 85.6 mm at 300 DPI = approximately 638 × 1011 px.
-      // Use the node width to guarantee print resolution without resampling the source upload.
-      const targetWidth = target === "both" ? 1276 : 638
-      const pixelRatio = Math.max(2, targetWidth / Math.max(1, node.offsetWidth))
-      const dataUrl = await toPng(node, { pixelRatio, cacheBust: true })
-      const link = document.createElement("a")
-      link.download = `${fileBase}-${target === "front" ? "mat-truoc" : target === "back" ? "mat-sau" : "2-mat"}.png`
-      link.href = dataUrl
-      link.click()
-    } catch (error) {
-      console.error("Không xuất được ảnh thẻ:", error)
-      alert("Chưa tải được ảnh thẻ. Vui lòng thử lại sau.")
-    } finally {
-      setDownloading(null)
-    }
-  }
 
   const saveContact = () => {
     const blob = new Blob([buildVcard(member, c)], { type: "text/vcard;charset=utf-8" })
@@ -584,15 +554,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
           <button type="button" onClick={() => setFlipped((value) => !value)} className={`${buttonClass} md:hidden`}>
             <RotateCw className="h-4 w-4" /> Lật thẻ
           </button>
-          <button type="button" onClick={() => download("both")} disabled={!!downloading} className={`${buttonClass} border-[#ed1c24] bg-[#ed1c24]`}>
-            {downloading === "both" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Tải in 2 mặt · 300 DPI
-          </button>
-          <button type="button" onClick={() => download("front")} disabled={!!downloading} className={buttonClass}>
-            {downloading === "front" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Mặt trước
-          </button>
-          <button type="button" onClick={() => download("back")} disabled={!!downloading} className={buttonClass}>
-            {downloading === "back" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Mặt sau
-          </button>
           {c.showVcard && (
             <button type="button" onClick={saveContact} className={buttonClass}>
               <ContactRound className="h-4 w-4" /> Lưu danh bạ
@@ -632,23 +593,6 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
         )}
       </div>
 
-      {/* Bản dựng ngoài màn hình, cỡ cố định, chỉ dùng để xuất ảnh PNG sắc nét */}
-      <div aria-hidden className="pointer-events-none fixed left-[-10000px] top-0">
-        <div ref={frontExportRef} style={{ width: 540 }}>
-          <CardFace member={member} c={c} side="front" />
-        </div>
-        <div ref={backExportRef} style={{ width: 540 }}>
-          <CardFace member={member} c={c} side="back" />
-        </div>
-        <div ref={bothExportRef} className="flex gap-10 bg-[#07090f] p-10" style={{ width: 1240 }}>
-          <div style={{ width: 560 }}>
-            <CardFace member={member} c={c} side="front" />
-          </div>
-          <div style={{ width: 560 }}>
-            <CardFace member={member} c={c} side="back" />
-          </div>
-        </div>
-      </div>
     </section>
   )
 }

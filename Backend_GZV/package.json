@@ -87,6 +87,7 @@
     "gray-matter": "^4.0.3",
     "html2pdf.js": "^0.10.3",
     "input-otp": "1.4.1",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.454.0",
     "next": "14.2.35",
     "next-mdx-remote": "^6.0.0",
@@ -105,6 +106,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
