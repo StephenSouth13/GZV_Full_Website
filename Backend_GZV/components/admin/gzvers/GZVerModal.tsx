@@ -1049,16 +1049,7 @@ export function GZVerModal({ open, onClose, gzver, departments, positions = [], 
                     Card visit GZVer (2 mặt)
                   </div>
                   <div className="flex items-center gap-4">
-                    {formData.slug && (
-                      <a
-                        href={`${FRONTEND_URL}/gzver/${formData.slug}#card-visit`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#124c96] hover:text-[#ed1c24]"
-                      >
-                        <Link2 className="h-3.5 w-3.5" /> Xuất in CR80 · 300 DPI
-                      </a>
-                    )}
+                    <span className="text-[10px] font-black uppercase text-[#124c96]">In hàng loạt tại tab Xuất &amp; Backup</span>
                     <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500">
                       Hiển thị
                       <Switch checked={formData.member_card?.enabled !== false} onCheckedChange={(checked) => updateMemberCard({ enabled: checked })} />

@@ -10,7 +10,8 @@ create table if not exists public.gzver_positions (
 );
 
 alter table public.gzver_positions enable row level security;
-grant select on public.gzver_positions to anon, authenticated;
+grant usage on schema public to anon, authenticated, service_role;
+grant select on public.gzver_positions to anon, authenticated, service_role;
 grant insert, update, delete on public.gzver_positions to authenticated;
 
 drop policy if exists "Public read active GZVer positions" on public.gzver_positions;
@@ -27,3 +28,5 @@ insert into public.gzver_positions(name, sort_order)
 select distinct trim(position), row_number() over(order by trim(position)) * 10
 from public.gzvers where nullif(trim(position), '') is not null
 on conflict (name) do nothing;
+
+notify pgrst, 'reload schema';

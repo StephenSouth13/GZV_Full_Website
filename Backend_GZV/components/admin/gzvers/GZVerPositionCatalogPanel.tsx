@@ -24,7 +24,13 @@ export function GZVerPositionCatalogPanel({ positions, onRefresh }: { positions:
   const save = async () => {
     const rows = items.map((item, index) => ({ ...(item.id ? { id: item.id } : {}), name: item.name.trim(), sort_order: (index + 1) * 10, is_active: item.is_active !== false })).filter((item) => item.name)
     setSaving(true)
-    const { error } = await supabase.from("gzver_positions").upsert(rows, { onConflict: "id" })
+    const existing = rows.filter((row) => row.id)
+    const additions = rows.filter((row) => !row.id).map(({ id: _id, ...row }) => row)
+    const results = await Promise.all([
+      ...existing.map(({ id, ...row }) => supabase.from("gzver_positions").update(row).eq("id", id)),
+      ...(additions.length ? [supabase.from("gzver_positions").insert(additions)] : []),
+    ])
+    const error = results.find((result) => result.error)?.error
     setSaving(false)
     if (error) toast.error(error.message); else { toast.success("Đã cập nhật danh mục chức danh"); await onRefresh() }
   }

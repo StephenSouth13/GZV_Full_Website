@@ -8,6 +8,7 @@ import { GZVerQuickAddModal } from "@/components/admin/gzvers/GZVerQuickAddModal
 import { GZVerCardSettingsPanel } from "@/components/admin/gzvers/GZVerCardSettingsPanel"
 import { GZVerGridSettingsPanel } from "@/components/admin/gzvers/GZVerGridSettingsPanel"
 import { GZVerPositionCatalogPanel } from "@/components/admin/gzvers/GZVerPositionCatalogPanel"
+import { GZVerExportPanel } from "@/components/admin/gzvers/GZVerExportPanel"
 import type { GZVerPosition } from "@/components/admin/gzvers/PositionPicker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ArrowDown,
   ArrowUp,
+  Archive,
   Building2,
   BriefcaseBusiness,
   CheckCircle2,
@@ -89,7 +91,7 @@ export default function AdminGzversPage() {
   const [savingDepartments, setSavingDepartments] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeDepartment, setActiveDepartment] = useState("all")
-  const [activeTab, setActiveTab] = useState<"members" | "departments" | "positions" | "grid-settings" | "card-template">("members")
+  const [activeTab, setActiveTab] = useState<"members" | "departments" | "positions" | "grid-settings" | "card-template" | "export">("members")
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedGzver, setSelectedGzver] = useState<any>(null)
@@ -535,7 +537,7 @@ export default function AdminGzversPage() {
 
       {/* Main Tabs matching site-content */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900 lg:grid lg:grid-cols-5">
+        <TabsList className="flex w-full overflow-x-auto gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900 xl:grid xl:grid-cols-6">
           <TabsTrigger
             value="members"
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
@@ -565,6 +567,12 @@ export default function AdminGzversPage() {
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
           >
             <CreditCard className="h-3.5 w-3.5 shrink-0" /> Mẫu Card Visit
+          </TabsTrigger>
+          <TabsTrigger
+            value="export"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <Archive className="h-3.5 w-3.5 shrink-0" /> Xuất & Backup
           </TabsTrigger>
         </TabsList>
 
@@ -805,6 +813,10 @@ export default function AdminGzversPage() {
         {/* TAB 4: CARD VISIT TEMPLATE */}
         <TabsContent value="card-template" className="space-y-4">
           <GZVerCardSettingsPanel />
+        </TabsContent>
+
+        <TabsContent value="export" className="space-y-4">
+          <GZVerExportPanel gzvers={gzvers} />
         </TabsContent>
       </Tabs>
 

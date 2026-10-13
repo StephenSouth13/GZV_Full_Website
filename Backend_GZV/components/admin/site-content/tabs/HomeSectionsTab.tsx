@@ -594,7 +594,7 @@ export function HomeSectionsTab({
 
                     <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 p-3 dark:border-white/5 dark:bg-slate-950">
                       <div>
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Tab "Tất cả"</p>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Tab &quot;Tất cả&quot;</p>
                         <p className="text-[10px] text-slate-400">Nút lọc tổng hợp toàn bộ nhân sự</p>
                       </div>
                       <Switch
