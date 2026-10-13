@@ -60,6 +60,7 @@ export default function AboutGzv(props: AboutGzvProps) {
     return () => {
       active = false
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.title, props.body, props.description])
 
   const data = { ...dbData, ...props }

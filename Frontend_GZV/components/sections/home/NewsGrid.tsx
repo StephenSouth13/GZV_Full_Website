@@ -134,7 +134,20 @@ export default function NewsGrid({
       active = false
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Bố cục chuẩn: 1 bài lớn bên trái + 3 bài vừa xếp chồng bên phải.
+  // Chỉ lấy tối đa 3 bài cho cột phải, không kéo giãn khi thiếu bài.
+  // NOTE: Hooks must be called before any conditional returns.
+  const list = articles.filter((article: any) => article && (article.title || article.slug))
+  const featured = list[0]
+  const rest = list.slice(1, 4)
+
+  // Cột phải dùng 3 ô có chiều cao bằng nhau; khi chỉ có 2 bài thì hàng thứ ba
+  // tự thu về đúng chiều cao nội dung thay vì phình ra.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rightCards = useMemo(() => (rest.length ? rest : []), [rest.length])
 
   if (sectionConfig?.is_visible === false && !propTitle) {
     return null
@@ -163,16 +176,6 @@ export default function NewsGrid({
       </section>
     )
   }
-
-  // Bố cục chuẩn: 1 bài lớn bên trái + 3 bài vừa xếp chồng bên phải.
-  // Chỉ lấy tối đa 3 bài cho cột phải, không kéo giãn khi thiếu bài.
-  const list = articles.filter((article: any) => article && (article.title || article.slug))
-  const featured = list[0]
-  const rest = list.slice(1, 4)
-
-  // Cột phải dùng 3 ô có chiều cao bằng nhau; khi chỉ có 2 bài thì hàng thứ ba
-  // tự thu về đúng chiều cao nội dung thay vì phình ra.
-  const rightCards = useMemo(() => (rest.length ? rest : []), [rest.length])
 
   return (
     <section className="py-20 md:py-28 relative bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-white/10 select-none">

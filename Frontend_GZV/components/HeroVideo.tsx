@@ -46,6 +46,7 @@ const HeroVideo = ({ initialSection }: { initialSection?: HomeSectionConfig | nu
     return () => {
       active = false
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleVideo = () => {

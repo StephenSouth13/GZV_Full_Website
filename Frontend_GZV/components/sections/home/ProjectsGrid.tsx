@@ -100,6 +100,7 @@ export default function ProjectsGrid(rawProps: ProjectsGridProps & { initialConf
       active = false
       supabase.removeChannel(channel)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit, propTitle, propSubtitle])
 
   const title = propTitle || dbProps?.title || "DỰ ÁN ĐÃ TRIỂN KHAI"

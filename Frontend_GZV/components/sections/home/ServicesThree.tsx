@@ -59,6 +59,7 @@ export default function ServicesThree({
     return () => {
       active = false
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (dbData?.is_visible === false && !propTitle) {
