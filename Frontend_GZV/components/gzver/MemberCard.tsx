@@ -109,7 +109,7 @@ const formatDate = (value?: string) => {
 
 const pick = (...values: Array<string | null | undefined>) => values.find((value) => value && value.trim())?.trim() || ""
 
-type FaceSource = { image?: string; overlay: boolean }
+type FaceSource = { image?: string; overlay: boolean; positionX: number; positionY: number; scale: number }
 
 type ResolvedCard = {
   isDemo: boolean
@@ -137,10 +137,13 @@ type ResolvedCard = {
 // Gộp cấu hình: riêng từng GZVer > mẫu chung (gzver_card_settings) > mặc định trong code
 function resolveCard(member: gzver, card: GzverMemberCard, settings: GzverCardSettings): ResolvedCard {
   const profileUrl = `${SITE_URL}/gzver/${member.slug}`
-  const faceSource = (personal?: string, template?: string | null): FaceSource => {
-    if (personal?.trim()) return { image: personal.trim(), overlay: false }
-    if (template?.trim()) return { image: template.trim(), overlay: settings.template_overlay !== false }
-    return { overlay: true }
+  const faceSource = (side: Side, personal?: string, template?: string | null): FaceSource => {
+    const positionX = card[`${side}_position_x`] ?? 50
+    const positionY = card[`${side}_position_y`] ?? 50
+    const scale = card[`${side}_scale`] ?? 100
+    if (personal?.trim()) return { image: personal.trim(), overlay: false, positionX, positionY, scale }
+    if (template?.trim()) return { image: template.trim(), overlay: settings.template_overlay !== false, positionX: 50, positionY: 50, scale: 100 }
+    return { overlay: true, positionX: 50, positionY: 50, scale: 100 }
   }
 
   const personalLinks = sortLinks(card.links)
@@ -169,8 +172,8 @@ function resolveCard(member: gzver, card: GzverMemberCard, settings: GzverCardSe
     notice: isDemo
       ? pick(settings.demo_notice, DEFAULT_SETTINGS.demo_notice)
       : pick(card.notice, settings.official_notice, DEFAULT_SETTINGS.official_notice),
-    front: faceSource(card.front_image_url, settings.template_front_image_url),
-    back: faceSource(card.back_image_url, settings.template_back_image_url),
+    front: faceSource("front", card.front_image_url, settings.template_front_image_url),
+    back: faceSource("back", card.back_image_url, settings.template_back_image_url),
     links: [...personalLinks, ...(card.hide_default_links ? [] : sortLinks(settings.links))],
     showVcard: settings.show_vcard !== false,
     design: (card.design && card.design in CARD_THEMES ? card.design : "obsidian") as CardThemeKey,
@@ -379,6 +382,7 @@ const CardFace = forwardRef<HTMLDivElement, FaceProps>(function CardFace({ membe
             alt={`${member.full_name} - ${side === "front" ? "mặt trước" : "mặt sau"}`}
             crossOrigin="anonymous"
             className="h-full w-full object-cover"
+            style={{ objectPosition: `${source.positionX}% ${source.positionY}%`, transform: `scale(${source.scale / 100})`, transformOrigin: `${source.positionX}% ${source.positionY}%` }}
           />
           {c.isDemo && <DemoStamp />}
         </div>
@@ -456,7 +460,11 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
     setDownloading(target)
     try {
       const { toPng } = await import("html-to-image")
-      const dataUrl = await toPng(node, { pixelRatio: 2, cacheBust: true })
+      // CR80 54 × 85.6 mm at 300 DPI = approximately 638 × 1011 px.
+      // Use the node width to guarantee print resolution without resampling the source upload.
+      const targetWidth = target === "both" ? 1276 : 638
+      const pixelRatio = Math.max(2, targetWidth / Math.max(1, node.offsetWidth))
+      const dataUrl = await toPng(node, { pixelRatio, cacheBust: true })
       const link = document.createElement("a")
       link.download = `${fileBase}-${target === "front" ? "mat-truoc" : target === "back" ? "mat-sau" : "2-mat"}.png`
       link.href = dataUrl
@@ -577,7 +585,7 @@ export function MemberCardShowcase({ member }: { member: gzver }) {
             <RotateCw className="h-4 w-4" /> Lật thẻ
           </button>
           <button type="button" onClick={() => download("both")} disabled={!!downloading} className={`${buttonClass} border-[#ed1c24] bg-[#ed1c24]`}>
-            {downloading === "both" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Tải thẻ 2 mặt
+            {downloading === "both" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Tải in 2 mặt · 300 DPI
           </button>
           <button type="button" onClick={() => download("front")} disabled={!!downloading} className={buttonClass}>
             {downloading === "front" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Mặt trước

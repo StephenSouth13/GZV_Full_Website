@@ -24,6 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Loader2, Plus, Upload, UserPlus, Image as ImageIcon } from "lucide-react"
 import { MediaLibraryButton } from "@/components/media/MediaLibraryButton"
 import { toast } from "sonner"
+import { PositionPicker, type GZVerPosition } from "./PositionPicker"
 
 const slugify = (text: string) =>
   text
@@ -40,6 +41,7 @@ interface GZVerQuickAddModalProps {
   open: boolean
   onClose: () => void
   departments: Array<{ id?: string; name: string; slug: string }>
+  positions: GZVerPosition[]
   onSuccess: () => void
 }
 
@@ -47,6 +49,7 @@ export function GZVerQuickAddModal({
   open,
   onClose,
   departments,
+  positions,
   onSuccess,
 }: GZVerQuickAddModalProps) {
   const [fullName, setFullName] = useState("")
@@ -177,7 +180,7 @@ export function GZVerQuickAddModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg rounded-none border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-white">
+      <DialogContent className="max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-lg overflow-y-auto overscroll-contain rounded-none border border-slate-200 bg-white p-4 text-slate-900 shadow-2xl dark:border-white/10 dark:bg-slate-950 dark:text-white sm:p-6">
         <DialogHeader className="border-b border-slate-200 pb-3 dark:border-white/10">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center bg-[#ed1c24] text-white">
@@ -299,12 +302,7 @@ export function GZVerQuickAddModal({
               <Label className="text-xs font-bold text-slate-900 dark:text-white">
                 Chức vụ / Vị trí
               </Label>
-              <Input
-                value={position}
-                onChange={(e) => setPosition(e.target.value)}
-                placeholder="Ví dụ: Trưởng ban, Co-Founder..."
-                className="h-9 rounded-none text-xs border-slate-200 dark:border-white/10"
-              />
+              <PositionPicker id="quick-gzver-positions" value={position} onChange={setPosition} positions={positions} />
             </div>
 
             <div className="space-y-1.5">

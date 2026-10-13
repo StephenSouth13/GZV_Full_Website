@@ -15,6 +15,9 @@ export interface GzversGridProps {
   show_all_tab?: boolean
   department_order?: string[]
   selected_departments?: string[]
+  grid_columns_mode?: "shared" | "per_tab"
+  columns_per_row?: number
+  tab_columns?: Record<string, number>
   showSearch?: boolean
   show_search?: boolean
   [key: string]: any
@@ -28,6 +31,9 @@ export default function GzversGrid({
   show_all_tab = true,
   department_order,
   selected_departments,
+  grid_columns_mode = "shared",
+  columns_per_row = 3,
+  tab_columns,
   showSearch: propShowSearch,
   show_search: propShowSearchSnake,
 }: GzversGridProps) {
@@ -237,6 +243,20 @@ export default function GzversGrid({
     return `${member.full_name || ""} ${member.position || ""} ${member.company || ""} ${member.department_name || ""} ${member.headline || ""}`.toLowerCase().includes(query)
   }
 
+  const normalizeColumns = (value: unknown) => {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? Math.min(6, Math.max(1, Math.round(parsed))) : 3
+  }
+
+  const columnsForTab = (tabId: string) => normalizeColumns(
+    grid_columns_mode === "per_tab" ? tab_columns?.[tabId] ?? columns_per_row : columns_per_row
+  )
+
+  const gridColumnsClass = (count: number) => ({
+    1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3",
+    4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6",
+  }[normalizeColumns(count)] || "lg:grid-cols-3")
+
   const title = propTitle || dbData?.title || "ĐỘI NGŨ NHÂN SỰ GZV"
   const subtitle = propSubtitle || dbData?.subtitle || "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành"
   const showSearch = propShowSearch ?? propShowSearchSnake ?? dbData?.show_search ?? dbData?.showSearch ?? true
@@ -380,7 +400,7 @@ export default function GzversGrid({
                     </div>
 
                     {/* Lưới danh sách thành viên */}
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${gridColumnsClass(columnsForTab("all"))}`}>
                       {deptMembers.map((item, index) => (
                         <GzverCardItem key={item.id || item.slug || index} item={item} />
                       ))}
@@ -392,7 +412,7 @@ export default function GzversGrid({
         ) : filteredItems.length > 0 ? (
           /* Khi chọn một Ban cụ thể */
           <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 dark:border-white/10 dark:bg-slate-950 lg:p-8">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${gridColumnsClass(columnsForTab(activeTabObj.id))}`}>
               {filteredItems.map((item, index) => (
                 <GzverCardItem key={item.id || item.slug || index} item={item} />
               ))}

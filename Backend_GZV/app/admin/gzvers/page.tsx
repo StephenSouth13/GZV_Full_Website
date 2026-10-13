@@ -6,6 +6,9 @@ import { GZVersTable } from "@/components/admin/gzvers/GZVersTable"
 import { GZVerModal } from "@/components/admin/gzvers/GZVerModal"
 import { GZVerQuickAddModal } from "@/components/admin/gzvers/GZVerQuickAddModal"
 import { GZVerCardSettingsPanel } from "@/components/admin/gzvers/GZVerCardSettingsPanel"
+import { GZVerGridSettingsPanel } from "@/components/admin/gzvers/GZVerGridSettingsPanel"
+import { GZVerPositionCatalogPanel } from "@/components/admin/gzvers/GZVerPositionCatalogPanel"
+import type { GZVerPosition } from "@/components/admin/gzvers/PositionPicker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,10 +20,12 @@ import {
   ArrowDown,
   ArrowUp,
   Building2,
+  BriefcaseBusiness,
   CheckCircle2,
   CreditCard,
   FileCheck2,
   Layers,
+  LayoutGrid,
   Plus,
   RefreshCcw,
   Save,
@@ -79,11 +84,12 @@ const slugify = (text: string) =>
 export default function AdminGzversPage() {
   const [gzvers, setGzvers] = useState<any[]>([])
   const [departments, setDepartments] = useState<Department[]>([])
+  const [positions, setPositions] = useState<GZVerPosition[]>([])
   const [loading, setLoading] = useState(true)
   const [savingDepartments, setSavingDepartments] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [activeDepartment, setActiveDepartment] = useState("all")
-  const [activeTab, setActiveTab] = useState<"members" | "departments" | "card-template">("members")
+  const [activeTab, setActiveTab] = useState<"members" | "departments" | "positions" | "grid-settings" | "card-template">("members")
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedGzver, setSelectedGzver] = useState<any>(null)
@@ -91,10 +97,11 @@ export default function AdminGzversPage() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const [gzversResult, departmentsResult, mentorsResult] = await Promise.all([
+      const [gzversResult, departmentsResult, mentorsResult, positionsResult] = await Promise.all([
         supabase.from("gzvers").select("*").order("order", { ascending: true }),
         supabase.from("gzver_departments").select("*").order("sort_order", { ascending: true }),
         supabase.from("mentors").select("*").order("order", { ascending: true }),
+        supabase.from("gzver_positions").select("*").order("sort_order", { ascending: true }),
       ])
       if (gzversResult.error) throw gzversResult.error
       if (departmentsResult.error) throw departmentsResult.error
@@ -149,6 +156,7 @@ export default function AdminGzversPage() {
 
       setGzvers(members)
       setDepartments(depts)
+      if (!positionsResult.error) setPositions(positionsResult.data || [])
     } catch (error: any) {
       toast.error(error.message || "Không tải được dữ liệu GZVers")
     } finally {
@@ -527,7 +535,7 @@ export default function AdminGzversPage() {
 
       {/* Main Tabs matching site-content */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900 sm:grid sm:grid-cols-3">
+        <TabsList className="flex w-full overflow-x-auto gap-1 border border-slate-200 bg-slate-100 p-1.5 rounded-none shadow-xs dark:border-white/10 dark:bg-slate-900 lg:grid lg:grid-cols-5">
           <TabsTrigger
             value="members"
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
@@ -539,6 +547,18 @@ export default function AdminGzversPage() {
             className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
           >
             <Layers className="h-3.5 w-3.5 shrink-0" /> Cơ Cấu Ban ({departments.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="positions"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <BriefcaseBusiness className="h-3.5 w-3.5 shrink-0" /> Chức Danh ({positions.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="grid-settings"
+            className="rounded-none py-2.5 px-2 text-[11px] font-black uppercase tracking-wider transition-all data-[state=active]:bg-[#ed1c24] data-[state=active]:text-white data-[state=active]:shadow-xs flex items-center justify-center gap-1.5"
+          >
+            <LayoutGrid className="h-3.5 w-3.5 shrink-0" /> Hiển Thị /gzver
           </TabsTrigger>
           <TabsTrigger
             value="card-template"
@@ -774,7 +794,15 @@ export default function AdminGzversPage() {
           </Card>
         </TabsContent>
 
-        {/* TAB 3: CARD VISIT TEMPLATE */}
+        <TabsContent value="grid-settings" className="space-y-4">
+          <GZVerGridSettingsPanel departments={departments} />
+        </TabsContent>
+
+        <TabsContent value="positions" className="space-y-4">
+          <GZVerPositionCatalogPanel positions={positions} onRefresh={fetchData} />
+        </TabsContent>
+
+        {/* TAB 4: CARD VISIT TEMPLATE */}
         <TabsContent value="card-template" className="space-y-4">
           <GZVerCardSettingsPanel />
         </TabsContent>
@@ -785,6 +813,7 @@ export default function AdminGzversPage() {
         open={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
         departments={departments.filter((d) => d.is_active)}
+        positions={positions}
         onSuccess={fetchData}
       />
 
@@ -794,6 +823,7 @@ export default function AdminGzversPage() {
         onClose={() => setIsEditModalOpen(false)}
         gzver={selectedGzver}
         departments={departments.filter((d) => d.is_active)}
+        positions={positions}
         onSave={fetchData}
       />
     </div>

@@ -176,6 +176,14 @@
     back_image_url?: string;
     links?: GzverCardLink[];
     hide_default_links?: boolean;
+    chip_enabled?: boolean;
+    chip_uid?: string;
+    front_position_x?: number;
+    front_position_y?: number;
+    front_scale?: number;
+    back_position_x?: number;
+    back_position_y?: number;
+    back_scale?: number;
   }
 
   export interface GzverCardSettings {

@@ -40,6 +40,8 @@ import { CvPreview } from "./CvPreview"
 import { CvTemplatePicker } from "../../../../shared/gzver/CvTemplatePicker"
 import { mergeCvProjects } from "../../../../shared/gzver/cv-model"
 import { getGzverAuthors, getGzverProjectCatalog, getGzverHighlights, invalidateGzverHighlights, watchGzverCatalog } from "@/lib/gzver-catalog"
+import { PositionPicker, type GZVerPosition } from "./PositionPicker"
+import { ImageCropField } from "@/components/media/ImageCropField"
 
 type Department = {
   id: string
@@ -108,6 +110,14 @@ type MemberCard = {
   back_image_url: string
   links: CardLink[]
   hide_default_links: boolean
+  chip_enabled: boolean
+  chip_uid: string
+  front_position_x: number
+  front_position_y: number
+  front_scale: number
+  back_position_x: number
+  back_position_y: number
+  back_scale: number
 }
 
 type CardLink = {
@@ -152,6 +162,14 @@ const defaultMemberCard: MemberCard = {
   back_image_url: "",
   links: [],
   hide_default_links: false,
+  chip_enabled: false,
+  chip_uid: "",
+  front_position_x: 50,
+  front_position_y: 50,
+  front_scale: 100,
+  back_position_x: 50,
+  back_position_y: 50,
+  back_scale: 100,
 }
 
 const FRONTEND_URL = "https://www.gzv.one"
@@ -241,7 +259,7 @@ function sortByOrder<T extends { sort_order?: number | null }>(items: any): T[] 
   return [...normalizeArray<T>(items)].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
 }
 
-export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
+export function GZVerModal({ open, onClose, gzver, departments, positions = [], onSave }: any & { positions?: GZVerPosition[] }) {
   const [loading, setLoading] = useState(false)
   const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
   const [previewContent, setPreviewContent] = useState<"profile" | "cv">("profile")
@@ -689,11 +707,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                   />
                 </Field>
                 <Field label="Chức danh / Vị trí đảm nhiệm">
-                  <Input
-                    className="h-11 rounded-none border-slate-200 bg-white text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white"
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  />
+                  <PositionPicker id="edit-gzver-positions" value={formData.position} onChange={(position) => setFormData({ ...formData, position })} positions={positions} />
                 </Field>
                 <Field label="Đơn vị / Công ty">
                   <Input
@@ -1042,7 +1056,7 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                         rel="noreferrer"
                         className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-[#124c96] hover:text-[#ed1c24]"
                       >
-                        <Link2 className="h-3.5 w-3.5" /> Xem thẻ trên web
+                        <Link2 className="h-3.5 w-3.5" /> Xuất in CR80 · 300 DPI
                       </a>
                     )}
                     <label className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500">
@@ -1050,6 +1064,14 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                       <Switch checked={formData.member_card?.enabled !== false} onCheckedChange={(checked) => updateMemberCard({ enabled: checked })} />
                     </label>
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-3 border border-dashed border-[#124c96]/30 bg-blue-50/50 p-3 dark:bg-blue-950/10 sm:flex-row sm:items-center">
+                  <label className="flex shrink-0 items-center gap-2 text-[10px] font-black uppercase text-slate-600 dark:text-slate-300">
+                    <Switch checked={!!formData.member_card?.chip_enabled} onCheckedChange={(chip_enabled) => updateMemberCard({ chip_enabled })} /> Sẵn sàng tích hợp chip/NFC
+                  </label>
+                  <Input value={formData.member_card?.chip_uid || ""} onChange={(e) => updateMemberCard({ chip_uid: e.target.value })} disabled={!formData.member_card?.chip_enabled} placeholder="UID chip (để trống cho đến khi cấp chip vật lý)" className="h-9 min-w-0 rounded-none font-mono text-xs" />
+                  <span className="text-[10px] text-slate-500">Dữ liệu dự phòng, chưa ghi trực tiếp lên chip.</span>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
@@ -1194,6 +1216,13 @@ export function GZVerModal({ open, onClose, gzver, departments, onSave }: any) {
                             </Button>
                           )}
                         </div>
+                        {value && (() => {
+                          const prefix = field === "front_image_url" ? "front" : "back"
+                          const xKey = `${prefix}_position_x`
+                          const yKey = `${prefix}_position_y`
+                          const scaleKey = `${prefix}_scale`
+                          return <ImageCropField imageUrl={value} positionX={formData.member_card?.[xKey] ?? 50} positionY={formData.member_card?.[yKey] ?? 50} scale={formData.member_card?.[scaleKey] ?? 100} aspect="54 / 85.6" cropHeightClassName="h-72" minScale={100} maxScale={250} label="Crop ảnh thẻ CR80 (giữ nguyên ảnh gốc)" onChange={(patch) => updateMemberCard({ [xKey]: patch.position_x ?? formData.member_card?.[xKey] ?? 50, [yKey]: patch.position_y ?? formData.member_card?.[yKey] ?? 50, [scaleKey]: patch.scale ?? formData.member_card?.[scaleKey] ?? 100 } as Partial<MemberCard>)} />
+                        })()}
                       </div>
                     )
                   })}
