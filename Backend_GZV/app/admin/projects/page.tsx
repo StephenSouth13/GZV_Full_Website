@@ -9,6 +9,7 @@ import { CreateProjectModal } from '@/components/admin/projects/CreateProjectMod
 import { EditProjectModal } from '@/components/admin/projects/EditProjectModal'
 import { DeleteProjectModal } from '@/components/admin/projects/DeleteProjectModal'
 import { ProjectGzverAssignmentsDialog } from '@/components/admin/projects/ProjectGzverAssignmentsDialog'
+import { ProjectExportPanel } from '@/components/admin/projects/ProjectExportPanel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -189,6 +190,8 @@ function ProjectsManagementContent() {
           </div>
         </div>
       </div>
+
+      <ProjectExportPanel />
 
       {/* Filter Card */}
       <div className="border border-slate-200 bg-white p-4 shadow-xs dark:border-white/10 dark:bg-slate-900">
