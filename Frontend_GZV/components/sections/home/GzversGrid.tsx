@@ -46,6 +46,18 @@ export default function GzversGrid({
 
   const isDark = background ? String(background).toLowerCase() !== "#ffffff" && String(background).toLowerCase() !== "white" : false
 
+  // Effective settings: prop has priority, fallback to dbData.settings loaded from DB
+  // These must be declared before useMemo/useEffect that use them.
+  const effectiveColumnsPerRow: number = columns_per_row !== 3
+    ? columns_per_row
+    : Number(dbData?.settings?.columns_per_row ?? dbData?.columns_per_row ?? 3)
+  const effectiveLimit: number = Number(limit) !== 50
+    ? Number(limit)
+    : Number(dbData?.settings?.limit ?? dbData?.limit ?? 50)
+  const effectiveShowAllTab: boolean = show_all_tab !== true
+    ? show_all_tab
+    : (dbData?.settings?.show_all_tab ?? dbData?.show_all_tab ?? true)
+
   useEffect(() => {
     let active = true
     const load = (showLoading = false) => {
@@ -142,7 +154,7 @@ export default function GzversGrid({
   // Build filter tabs
   const filterTabs = useMemo(() => {
     const tabs: Array<{ id: string; label: string; dept?: any }> = []
-    if (show_all_tab !== false) {
+    if (effectiveShowAllTab !== false) {
       tabs.push({ id: "all", label: "Tất cả" })
     }
 
@@ -155,7 +167,7 @@ export default function GzversGrid({
     })
 
     return tabs
-  }, [show_all_tab, orderedDepts])
+  }, [effectiveShowAllTab, orderedDepts])
 
   // Ensure activeFilter is valid
   useEffect(() => {
@@ -227,15 +239,15 @@ export default function GzversGrid({
   }, [filterTabs, activeFilter])
 
   const filteredItems = useMemo(() => {
-    if (!activeTabObj) return items.slice(0, Number(limit) || 50)
+    if (!activeTabObj) return items.slice(0, effectiveLimit || 50)
     const query = searchQuery.trim().toLowerCase()
     const list = items.filter((m) => {
       if (!matchDepartment(m, activeTabObj)) return false
       if (!query) return true
       return `${m.full_name || ""} ${m.position || ""} ${m.company || ""} ${m.department_name || ""} ${m.headline || ""}`.toLowerCase().includes(query)
     })
-    return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, Number(limit) || 50)
-  }, [items, activeTabObj, limit, searchQuery])
+    return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).slice(0, effectiveLimit || 50)
+  }, [items, activeTabObj, effectiveLimit, searchQuery])
 
   const matchesSearch = (member: any) => {
     const query = searchQuery.trim().toLowerCase()
@@ -248,8 +260,10 @@ export default function GzversGrid({
     return Number.isFinite(parsed) ? Math.min(6, Math.max(1, Math.round(parsed))) : 3
   }
 
+  // Effective settings are declared above (before useMemo/useEffect)
+
   const columnsForTab = (tabId: string) => normalizeColumns(
-    grid_columns_mode === "per_tab" ? tab_columns?.[tabId] ?? columns_per_row : columns_per_row
+    grid_columns_mode === "per_tab" ? tab_columns?.[tabId] ?? effectiveColumnsPerRow : effectiveColumnsPerRow
   )
 
   const gridColumnsClass = (count: number) => ({
@@ -259,7 +273,7 @@ export default function GzversGrid({
 
   const title = propTitle || dbData?.title || "ĐỘI NGŨ NHÂN SỰ GZV"
   const subtitle = propSubtitle || dbData?.subtitle || "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành"
-  const showSearch = propShowSearch ?? propShowSearchSnake ?? dbData?.show_search ?? dbData?.showSearch ?? true
+  const showSearch = propShowSearch ?? propShowSearchSnake ?? dbData?.settings?.show_search ?? dbData?.show_search ?? dbData?.showSearch ?? true
 
   // Description for the active department
   const currentDeptDescription = useMemo(() => {
@@ -379,7 +393,7 @@ export default function GzversGrid({
                 const deptMembers = items
                   .filter((m) => matchDepartment(m, tab) && matchesSearch(m))
                   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-                  .slice(0, Number(limit) || 50)
+                  .slice(0, effectiveLimit || 50)
                 if (deptMembers.length === 0) return null
 
                 return (

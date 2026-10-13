@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic"
 async function getInitialGzverData() {
   const supabase = getSupabaseServer()
 
-  const [blocksResult, pageResult, brandingResult] = await Promise.all([
+  const [blocksResult, pageResult, brandingResult, gzverSectionResult] = await Promise.all([
     supabase
       .from("site_page_blocks")
       .select("*")
@@ -20,6 +20,8 @@ async function getInitialGzverData() {
       .order("sort_order", { ascending: true }),
     supabase.from("site_pages").select("*").eq("slug", "gzver").maybeSingle(),
     supabase.from("site_branding_settings").select("*").eq("id", 1).maybeSingle(),
+    // Load cấu hình section gzvers từ site_home_sections để SSR truyền vào component
+    supabase.from("site_home_sections").select("*").eq("section_key", "gzvers").maybeSingle(),
   ])
 
   let globalBanner: Record<string, any> | null = null
@@ -43,39 +45,50 @@ async function getInitialGzverData() {
     initialPage: (pageResult.data || null) as SitePageContent | null,
     initialGlobalBanner: globalBanner,
     initialSyncAllBanners: syncAllBanners,
+    initialGzversSection: gzverSectionResult.data || null,
   }
 }
 
 export default async function GzverPage() {
   const initialData = await getInitialGzverData()
+  const gzverSection = initialData.initialGzversSection as any
+
+  // Đọc stats từ section settings nếu có, fallback về mặc định
+  const statsConfig = gzverSection?.settings?.stats || null
 
   return (
     <>
       <PageBanner
         badge="GZV ORGANIZATION"
         title="GZVers"
-        subtitle="He sinh thai nhan su GZV duoc chia theo tung ban de the hien ro vai tro, trach nhiem va nang luc trien khai."
+        subtitle="Hệ sinh thái nhân sự GZV được chia theo từng ban để thể hiện rõ vai trò, trách nhiệm và năng lực triển khai."
         initialPage={initialData.initialPage}
         initialGlobalBanner={initialData.initialGlobalBanner}
         initialSyncAllBanners={initialData.initialSyncAllBanners}
       />
       <BuilderPageGate slug="gzver" initialBlocks={initialData.initialBlocks}>
         <StatsBar
-          stats={[
-            { value: "50+", label: "GZVers", description: "Nhan su tre trung, nhiet huyet" },
-            { value: "10+", label: "Co van & Mentor", description: "Chuyen gia dau nganh" },
-            { value: "5+", label: "Ban chuyen mon", description: "Van hanh chuyen nghiep" },
-            { value: "100%", label: "Thuc chien", description: "Cam ket dong hanh" },
-          ]}
+          stats={
+            statsConfig || [
+              { value: "50+", label: "GZVers", description: "Nhân sự trẻ trung, nhiệt huyết" },
+              { value: "10+", label: "Cố vấn & Mentor", description: "Chuyên gia đầu ngành" },
+              { value: "5+", label: "Ban chuyên môn", description: "Vận hành chuyên nghiệp" },
+              { value: "100%", label: "Thực chiến", description: "Cam kết đồng hành" },
+            ]
+          }
         />
-        <GzversGrid title="DOI NGU NHAN SU GZV" subtitle="Doi ngu nhan su, co van va chuyen gia dong hanh" />
+        {/* Không truyền title/subtitle cứng — component tự đọc từ site_home_sections (section_key = "gzvers") */}
+        <GzversGrid />
         <CtaBand
-          title="GIA NHAP GZV"
-          subtitle="Tro thanh mot phan cua cong dong tre nang dong, sang tao va but pha gioi han."
-          button_label="Ung tuyen ngay"
-          button_url="/lien-he"
-          background_from="#050505"
-          background_to="#ed1c24"
+          title={gzverSection?.settings?.cta_title || "GIA NHẬP GZV"}
+          subtitle={
+            gzverSection?.settings?.cta_subtitle ||
+            "Trở thành một phần của cộng đồng trẻ năng động, sáng tạo và bứt phá giới hạn."
+          }
+          button_label={gzverSection?.settings?.cta_button_label || "Ứng tuyển ngay"}
+          button_url={gzverSection?.settings?.cta_button_url || "/lien-he"}
+          background_from={gzverSection?.settings?.cta_bg_from || "#050505"}
+          background_to={gzverSection?.settings?.cta_bg_to || "#ed1c24"}
         />
       </BuilderPageGate>
     </>

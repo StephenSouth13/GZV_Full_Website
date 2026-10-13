@@ -110,6 +110,21 @@ export const defaultHomeSections: HomeSection[] = [
     },
   },
   {
+    section_key: "gzvers",
+    title: "ĐỘI NGŨ NHÂN SỰ GZV",
+    subtitle: "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành cùng hệ sinh thái GZV.",
+    description: "GZVers là những bạn trẻ tài năng, nhiệt huyết đang trực tiếp thực thi dự án và phát triển cùng GZV.",
+    sort_order: 65,
+    item_limit: 50,
+    is_visible: true,
+    settings: {
+      columns_per_row: 3,
+      show_search: true,
+      show_all_tab: true,
+      limit: 50,
+    },
+  },
+  {
     section_key: "news",
     title: "TIN TỨC & BÀI VIẾT MỚI NHẤT",
     subtitle: "Cập nhật những thông tin, sự kiện và bài viết chia sẻ tri thức mới nhất từ GZV.",

@@ -569,6 +569,73 @@ export function HomeSectionsTab({
                 />
               )}
 
+              {/* 4.2. GZVERS GRID CONTROLS ON HOME */}
+              {selectedSection.section_key === "gzvers" && (
+                <div className="space-y-4 border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
+                  <div className="flex items-center gap-2 border-b border-slate-200 pb-2 dark:border-white/10">
+                    <Filter className="h-4 w-4 text-[#ed1c24]" />
+                    <div>
+                      <p className="text-xs font-black uppercase text-slate-950 dark:text-white">Cấu hình Lưới GZVers (Trang Chủ)</p>
+                      <p className="text-[11px] text-slate-500">Chỉnh số cột, tìm kiếm và số lượng nhân sự hiển thị trên trang chủ.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 p-3 dark:border-white/5 dark:bg-slate-950">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Hiện thanh tìm kiếm</p>
+                        <p className="text-[10px] text-slate-400">Ô gõ tìm theo tên, chức danh…</p>
+                      </div>
+                      <Switch
+                        checked={selectedSection.settings?.show_search !== false && selectedSection.settings?.showSearch !== false}
+                        onCheckedChange={(checked) => updateSectionSettings({ show_search: checked, showSearch: checked })}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between border border-slate-100 bg-slate-50/50 p-3 dark:border-white/5 dark:bg-slate-950">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200">Tab "Tất cả"</p>
+                        <p className="text-[10px] text-slate-400">Nút lọc tổng hợp toàn bộ nhân sự</p>
+                      </div>
+                      <Switch
+                        checked={selectedSection.settings?.show_all_tab !== false}
+                        onCheckedChange={(checked) => updateSectionSettings({ show_all_tab: checked })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Số người mỗi hàng (Cột lưới)">
+                      <select
+                        value={String(selectedSection.settings?.columns_per_row ?? 3)}
+                        onChange={(e) => updateSectionSettings({ columns_per_row: Number(e.target.value) })}
+                        className="h-9 w-full border border-slate-200 bg-white px-3 text-xs font-bold dark:border-white/10 dark:bg-slate-950 dark:text-white"
+                      >
+                        {[1, 2, 3, 4, 5, 6].map((n) => (
+                          <option key={n} value={n}>{n} người / hàng</option>
+                        ))}
+                      </select>
+                    </Field>
+
+                    <Field label="Số lượng hiển thị tối đa">
+                      <Input
+                        type="number"
+                        value={selectedSection.settings?.limit ?? 50}
+                        onChange={(e) => updateSectionSettings({ limit: Number(e.target.value) })}
+                        placeholder="50"
+                        className="rounded-none text-xs w-full"
+                        min={1}
+                        max={200}
+                      />
+                    </Field>
+                  </div>
+
+                  <p className="border-l-2 border-[#ed1c24] pl-3 text-[11px] leading-relaxed text-slate-500">
+                    Cài đặt này áp dụng cho khu vực GZVers trên trang chủ. Để cấu hình chi tiết hơn (thứ tự ban, từng tab), vào <strong>Admin → GZVers</strong>.
+                  </p>
+                </div>
+              )}
+
               {/* 5. CTA SECTION CONTROLS ON HOME */}
               {(selectedSection.section_key === "cta" || selectedSection.section_key === "cta_band") && (
                 <div className="space-y-4">

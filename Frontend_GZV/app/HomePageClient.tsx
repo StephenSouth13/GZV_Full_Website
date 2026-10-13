@@ -6,6 +6,7 @@ import ProjectsGrid from "@/components/sections/home/ProjectsGrid"
 import ServicesThree from "@/components/sections/home/ServicesThree"
 import AboutBoxes from "@/components/sections/home/AboutBoxes"
 import PartnersGrid from "@/components/sections/home/PartnersGrid"
+import GzversGrid from "@/components/sections/home/GzversGrid"
 import NewsGrid from "@/components/sections/home/NewsGrid"
 import { combineSectionConfig, pickHomeArticles, type TeamData } from "@/lib/home-data"
 
@@ -16,6 +17,7 @@ const HOME_SECTION_KEYS = new Set([
   "services_three",
   "about_boxes",
   "partners",
+  "gzvers",
   "news",
 ])
 
@@ -49,6 +51,9 @@ export default function HomePageClient({
         return <AboutBoxes key="about_boxes" initialConfig={combineSectionConfig(sec, blockProps.about_boxes)} initialTeam={team} />
       case "partners":
         return <PartnersGrid key="partners" initialPartners={initialPartners} initialSectionConfig={sec} />
+      case "gzvers":
+        // GzversGrid đọc cấu hình từ site_home_sections qua Supabase Realtime — không cần truyền props cứng
+        return <GzversGrid key="gzvers" />
       case "news": {
         const config = combineSectionConfig(sec, blockProps.news_grid)
         return <NewsGrid key="news" initialConfig={config} initialArticles={pickHomeArticles(config, posts)} />

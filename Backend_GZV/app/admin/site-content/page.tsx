@@ -203,7 +203,7 @@ function SiteContentManager() {
         })
         setPages(nextPages)
         setSelectedSlug((current) => nextPages.some((page) => page.slug === current) ? current : (nextPages[0]?.slug || "gioi-thieu"))
-        const validHomeKeys = ["hero", "about_gzv", "projects", "services_three", "about_boxes", "partners", "news"]
+        const validHomeKeys = ["hero", "about_gzv", "projects", "services_three", "about_boxes", "partners", "gzvers", "news"]
         const rawFetchedSections = (sectionsResult.data || []).filter((s: any) => validHomeKeys.includes(s.section_key)) as HomeSection[]
         const mergedHomeSections = defaultHomeSections.map((defSec) => {
           const found = rawFetchedSections.find((s) => s.section_key === defSec.section_key)
@@ -400,7 +400,7 @@ function SiteContentManager() {
   const saveHomeSections = async () => {
     try {
       setSaving(true)
-      const validHomeKeys = ["hero", "about_gzv", "projects", "services_three", "about_boxes", "partners", "news"]
+      const validHomeKeys = ["hero", "about_gzv", "projects", "services_three", "about_boxes", "partners", "gzvers", "news"]
       const { data: existingDbSections } = await supabase.from("site_home_sections").select("section_key")
       if (existingDbSections && existingDbSections.length > 0) {
         const invalidKeys = existingDbSections.map((s: any) => s.section_key).filter((k: string) => !validHomeKeys.includes(k))
@@ -429,7 +429,7 @@ function SiteContentManager() {
       const blocksSync = filteredHomeSections.map((sec, idx) => ({
         page_slug: "home",
         block_key: sec.section_key,
-        component_type: sec.section_key === "hero" ? "hero_stats" : sec.section_key === "projects" ? "projects_grid" : sec.section_key === "partners" ? "partners_grid" : sec.section_key === "news" ? "news_grid" : sec.section_key,
+        component_type: sec.section_key === "hero" ? "hero_stats" : sec.section_key === "projects" ? "projects_grid" : sec.section_key === "partners" ? "partners_grid" : sec.section_key === "news" ? "news_grid" : sec.section_key === "gzvers" ? "gzvers_grid" : sec.section_key,
         title: sec.title,
         sort_order: (idx + 1) * 10,
         is_visible: sec.is_visible,
@@ -447,7 +447,7 @@ function SiteContentManager() {
       }))
       await supabase.from("site_page_blocks").upsert(blocksSync, { onConflict: "page_slug,block_key" })
 
-      toast.success("Đã lưu thành công 7 Section Trang Chủ vào Database!")
+      toast.success("Đã lưu thành công các Section Trang Chủ vào Database!")
     } catch (err: any) {
       toast.error(err.message || "Lỗi khi lưu section")
     } finally {

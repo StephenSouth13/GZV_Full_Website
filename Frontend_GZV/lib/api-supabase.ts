@@ -557,7 +557,7 @@
 
         const combined = [...gzversList, ...mentorsList];
         return combined;
-      }, 30000);
+      }, 5000);
     },
 
     /**
