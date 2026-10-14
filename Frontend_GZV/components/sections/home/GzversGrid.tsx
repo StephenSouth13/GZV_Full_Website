@@ -17,7 +17,13 @@ export interface GzversGridProps {
   selected_departments?: string[]
   grid_columns_mode?: "shared" | "per_tab"
   columns_per_row?: number
+  columns_per_row_mobile?: number
+  columns_per_row_tablet?: number
   tab_columns?: Record<string, number>
+  tab_columns_responsive?: Record<string, { mobile?: number; tablet?: number; desktop?: number }>
+  initialItems?: any[]
+  initialDepartments?: any[]
+  initialConfig?: any
   showSearch?: boolean
   show_search?: boolean
   [key: string]: any
@@ -33,14 +39,20 @@ export default function GzversGrid({
   selected_departments,
   grid_columns_mode = "shared",
   columns_per_row = 3,
+  columns_per_row_mobile = 1,
+  columns_per_row_tablet = 2,
   tab_columns,
+  tab_columns_responsive,
+  initialItems,
+  initialDepartments,
+  initialConfig,
   showSearch: propShowSearch,
   show_search: propShowSearchSnake,
 }: GzversGridProps) {
-  const [items, setItems] = useState<any[]>([])
-  const [departments, setDepartments] = useState<any[]>([])
-  const [dbData, setDbData] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const [items, setItems] = useState<any[]>(initialItems || [])
+  const [departments, setDepartments] = useState<any[]>(initialDepartments || [])
+  const [dbData, setDbData] = useState<any>(initialConfig || null)
+  const [loading, setLoading] = useState(initialItems === undefined)
   const [activeFilter, setActiveFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -92,7 +104,7 @@ export default function GzversGrid({
     const queue = createRefreshQueue(() => document.hidden ? Promise.resolve() : load(false))
     const onVisible = () => { if (!document.hidden) queue.schedule() }
     document.addEventListener("visibilitychange", onVisible)
-    queue.schedule()
+    if (initialItems === undefined) queue.schedule()
 
     const channel = supabase
       .channel("gzvers-grid:data")
@@ -100,7 +112,7 @@ export default function GzversGrid({
       .on("postgres_changes", { event: "*", schema: "public", table: "gzver_departments" }, () => { invalidateGzverList(); queue.schedule() })
       .on("postgres_changes", { event: "*", schema: "public", table: "site_home_sections" }, () => { invalidateGzverList(); queue.schedule() })
       .on("postgres_changes", { event: "*", schema: "public", table: "mentors" }, () => { invalidateGzverList(); queue.schedule() })
-      .subscribe((status) => { if (status === "SUBSCRIBED") { invalidateGzverList(); queue.schedule() } })
+      .subscribe((status) => { if (status === "SUBSCRIBED" && initialItems === undefined) { invalidateGzverList(); queue.schedule() } })
 
     return () => {
       active = false
@@ -108,7 +120,7 @@ export default function GzversGrid({
       document.removeEventListener("visibilitychange", onVisible)
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [initialItems])
 
   // Order active departments based strictly on section configuration
   const orderedDepts = useMemo(() => {
@@ -262,14 +274,21 @@ export default function GzversGrid({
 
   // Effective settings are declared above (before useMemo/useEffect)
 
-  const columnsForTab = (tabId: string) => normalizeColumns(
-    grid_columns_mode === "per_tab" ? tab_columns?.[tabId] ?? effectiveColumnsPerRow : effectiveColumnsPerRow
-  )
+  const columnsForTab = (tabId: string) => {
+    const responsive = grid_columns_mode === "per_tab" ? tab_columns_responsive?.[tabId] : undefined
+    return {
+      mobile: normalizeColumns(responsive?.mobile ?? columns_per_row_mobile),
+      tablet: normalizeColumns(responsive?.tablet ?? columns_per_row_tablet),
+      desktop: normalizeColumns(responsive?.desktop ?? (grid_columns_mode === "per_tab" ? tab_columns?.[tabId] : effectiveColumnsPerRow)),
+    }
+  }
 
-  const gridColumnsClass = (count: number) => ({
-    1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3",
-    4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6",
-  }[normalizeColumns(count)] || "lg:grid-cols-3")
+  const gridColumnsClass = (columns: { mobile: number; tablet: number; desktop: number }) => {
+    const mobile = ({ 1: "grid-cols-1", 2: "grid-cols-2" } as Record<number, string>)[columns.mobile] || "grid-cols-1"
+    const tablet = ({ 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3", 4: "sm:grid-cols-4" } as Record<number, string>)[columns.tablet] || "sm:grid-cols-2"
+    const desktop = ({ 1: "lg:grid-cols-1", 2: "lg:grid-cols-2", 3: "lg:grid-cols-3", 4: "lg:grid-cols-4", 5: "lg:grid-cols-5", 6: "lg:grid-cols-6" } as Record<number, string>)[columns.desktop] || "lg:grid-cols-3"
+    return `${mobile} ${tablet} ${desktop}`
+  }
 
   const title = propTitle || dbData?.title || "ĐỘI NGŨ NHÂN SỰ GZV"
   const subtitle = propSubtitle || dbData?.subtitle || "Đội ngũ nhân sự, cố vấn và chuyên gia đồng hành"
@@ -414,7 +433,7 @@ export default function GzversGrid({
                     </div>
 
                     {/* Lưới danh sách thành viên */}
-                    <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${gridColumnsClass(columnsForTab("all"))}`}>
+                    <div className={`grid gap-4 sm:gap-6 ${gridColumnsClass(columnsForTab("all"))}`}>
                       {deptMembers.map((item, index) => (
                         <GzverCardItem key={item.id || item.slug || index} item={item} />
                       ))}
@@ -426,7 +445,7 @@ export default function GzversGrid({
         ) : filteredItems.length > 0 ? (
           /* Khi chọn một Ban cụ thể */
           <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 dark:border-white/10 dark:bg-slate-950 lg:p-8">
-            <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 ${gridColumnsClass(columnsForTab(activeTabObj.id))}`}>
+            <div className={`grid gap-4 sm:gap-6 ${gridColumnsClass(columnsForTab(activeTabObj.id))}`}>
               {filteredItems.map((item, index) => (
                 <GzverCardItem key={item.id || item.slug || index} item={item} />
               ))}

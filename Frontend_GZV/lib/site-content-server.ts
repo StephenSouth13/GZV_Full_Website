@@ -152,12 +152,22 @@ async function normalizeProject(project: any) {
 }
 
 export async function getInitialProjects() {
-  const { data } = await getSupabaseServer()
+  const supabase = getSupabaseServer()
+  const { data } = await supabase
     .from("projects")
     .select("*")
     .order("order_index", { ascending: true })
     .order("created_at", { ascending: false })
-  return Promise.all((data || []).map(normalizeProject))
+  const projects = data || []
+  const authorIds = [...new Set(projects.flatMap((project: any) => project.author_ids || []))]
+  const { data: authors } = authorIds.length ? await supabase.from("authors").select("id,full_name,avatar_url,slug,title,position").in("id", authorIds) : { data: [] as any[] }
+  const authorMap = new Map((authors || []).map((author: any) => [author.id, author]))
+  return projects.map((project: any) => ({
+    ...project,
+    image: publicMediaUrl(project.image || project.thumbnail_url),
+    technologies: project.tech_stack || project.technologies || [],
+    project_authors: (project.author_ids || []).map((id: string) => authorMap.get(id)).filter(Boolean).map((author: any) => ({ name: author.full_name, avatar: publicMediaUrl(author.avatar_url), profile_link: `/mentors/${author.slug}`, title: author.title || author.position })),
+  }))
 }
 
 export async function getInitialProject(slug: string) {
@@ -182,17 +192,32 @@ export async function getInitialTeam(): Promise<TeamData> {
   }
 }
 
+export async function getInitialGzverGridData() {
+  const supabase = getSupabaseServer()
+  const [departmentsResult, membersResult, mentorsResult] = await Promise.all([
+    supabase.from("gzver_departments").select("id,name,slug,description,is_active,sort_order").eq("is_active", true).order("sort_order", { ascending: true }),
+    supabase.from("gzvers").select("id,full_name,slug,company,position,avatar_url,is_active,is_director,order,department_id,department_name,headline,avatar_position_x,avatar_position_y,avatar_scale,achievement_summary,testimonial").eq("is_active", true).order("order", { ascending: true }),
+    supabase.from("mentors").select("id,full_name,slug,title,avatar_url,organizations,order,description,is_active").eq("is_active", true).order("order", { ascending: true }),
+  ])
+  const members = (membersResult.data || []).map((member: any) => ({ ...member, avatar_url: publicMediaUrl(member.avatar_url) }))
+  const existingSlugs = new Set(members.map((member: any) => member.slug))
+  const mentors = (mentorsResult.data || []).filter((mentor: any) => !existingSlugs.has(mentor.slug)).map((mentor: any) => ({
+    id: mentor.id, full_name: mentor.full_name, slug: mentor.slug, position: mentor.title || "Cố vấn chuyên môn", company: mentor.organizations?.[0] || "GZV Center", avatar_url: publicMediaUrl(mentor.avatar_url), department_name: "BAN CỐ VẤN", is_active: true, is_advisor: true, order: mentor.order || 0, testimonial: mentor.description || "",
+  }))
+  return { items: [...members, ...mentors], departments: departmentsResult.data || [], team: { members, departments: departmentsResult.data || [] } as TeamData }
+}
+
 const HOME_BLOCK_TYPES = ["services_three", "projects_grid", "news_grid", "about_boxes"]
 
 // Toàn bộ dữ liệu trang chủ tải sẵn trên server -> trang hiện đúng nội dung ngay lần đầu
 export async function getHomeInitialData() {
   const supabase = getSupabaseServer()
-  const [sectionsResult, blocksResult, projectsResult, posts, team, partners] = await Promise.all([
+  const [sectionsResult, blocksResult, projectsResult, posts, gzverData, partners] = await Promise.all([
     supabase.from("site_home_sections").select("*").order("sort_order", { ascending: true }),
     supabase.from("site_page_blocks").select("component_type, props").in("component_type", HOME_BLOCK_TYPES),
     supabase.from("projects").select("*").order("order_index", { ascending: true }).order("created_at", { ascending: false }).limit(6),
     getInitialBlogPosts(),
-    getInitialTeam(),
+    getInitialGzverGridData(),
     getInitialPartners(200),
   ])
 
@@ -206,7 +231,8 @@ export async function getHomeInitialData() {
     blockProps,
     projects: projectsResult.data || [],
     posts,
-    team,
+    team: gzverData.team,
+    gzverData: { items: gzverData.items, departments: gzverData.departments },
     partners,
   }
 }

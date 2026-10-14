@@ -44,13 +44,14 @@ export async function addRemoteAssetsToZip(zip: any, assets: { folder: string; u
   let cursor = 0
   const workers = Array.from({ length: Math.min(6, unique.length) }, async () => {
     while (cursor < unique.length) {
-      const asset = unique[cursor++]
+      const assetIndex = cursor++
+      const asset = unique[assetIndex]
       try {
         const response = await fetch(asset.url)
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const blob = await response.blob()
         const extension = extensionFor(asset.url, response.headers.get("content-type") || blob.type)
-        zip.file(`${asset.folder}/${safeBackupName(asset.label || "image")}-${cursor}.${extension}`, blob)
+        zip.file(`${asset.folder}/${safeBackupName(asset.label || "image")}-${assetIndex + 1}.${extension}`, blob)
       } catch (error: any) {
         failures.push(`${asset.url}\t${error?.message || "Không tải được"}`)
       }

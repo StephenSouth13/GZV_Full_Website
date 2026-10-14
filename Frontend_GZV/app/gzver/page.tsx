@@ -5,13 +5,14 @@ import GzversGrid from "@/components/sections/home/GzversGrid"
 import CtaBand from "@/components/sections/common/CtaBand"
 import { getSupabaseServer } from "@/lib/supabase-server"
 import type { PageBlock, SitePageContent } from "@/lib/site-content"
+import { getInitialGzverGridData } from "@/lib/site-content-server"
 
 export const dynamic = "force-dynamic"
 
 async function getInitialGzverData() {
   const supabase = getSupabaseServer()
 
-  const [blocksResult, pageResult, brandingResult, gzverSectionResult] = await Promise.all([
+  const [blocksResult, pageResult, brandingResult, gzverSectionResult, gzverData] = await Promise.all([
     supabase
       .from("site_page_blocks")
       .select("*")
@@ -22,6 +23,7 @@ async function getInitialGzverData() {
     supabase.from("site_branding_settings").select("*").eq("id", 1).maybeSingle(),
     // Load cấu hình section gzvers từ site_home_sections để SSR truyền vào component
     supabase.from("site_home_sections").select("*").eq("section_key", "gzvers").maybeSingle(),
+    getInitialGzverGridData(),
   ])
 
   let globalBanner: Record<string, any> | null = null
@@ -46,6 +48,7 @@ async function getInitialGzverData() {
     initialGlobalBanner: globalBanner,
     initialSyncAllBanners: syncAllBanners,
     initialGzversSection: gzverSectionResult.data || null,
+    initialGzverData: { items: gzverData.items, departments: gzverData.departments, config: gzverSectionResult.data || null },
   }
 }
 
@@ -66,7 +69,7 @@ export default async function GzverPage() {
         initialGlobalBanner={initialData.initialGlobalBanner}
         initialSyncAllBanners={initialData.initialSyncAllBanners}
       />
-      <BuilderPageGate slug="gzver" initialBlocks={initialData.initialBlocks}>
+      <BuilderPageGate slug="gzver" initialBlocks={initialData.initialBlocks} initialGzverData={initialData.initialGzverData}>
         <StatsBar
           stats={
             statsConfig || [
@@ -78,7 +81,7 @@ export default async function GzverPage() {
           }
         />
         {/* Không truyền title/subtitle cứng — component tự đọc từ site_home_sections (section_key = "gzvers") */}
-        <GzversGrid />
+        <GzversGrid initialItems={initialData.initialGzverData.items} initialDepartments={initialData.initialGzverData.departments} initialConfig={initialData.initialGzverData.config} />
         <CtaBand
           title={gzverSection?.settings?.cta_title || "GIA NHẬP GZV"}
           subtitle={

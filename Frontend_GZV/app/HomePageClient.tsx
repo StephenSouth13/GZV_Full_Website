@@ -28,6 +28,7 @@ export default function HomePageClient({
   projects,
   posts,
   team,
+  gzverData,
   partners: initialPartners,
 }: {
   sections: any[]
@@ -35,6 +36,7 @@ export default function HomePageClient({
   projects: any[]
   posts: any[]
   team: TeamData
+  gzverData: { items: any[]; departments: any[] }
   partners: any[]
 }) {
   const renderSection = (sec: any) => {
@@ -53,7 +55,7 @@ export default function HomePageClient({
         return <PartnersGrid key="partners" initialPartners={initialPartners} initialSectionConfig={sec} />
       case "gzvers":
         // GzversGrid đọc cấu hình từ site_home_sections qua Supabase Realtime — không cần truyền props cứng
-        return <GzversGrid key="gzvers" />
+        return <GzversGrid key="gzvers" initialItems={gzverData.items} initialDepartments={gzverData.departments} initialConfig={sec} />
       case "news": {
         const config = combineSectionConfig(sec, blockProps.news_grid)
         return <NewsGrid key="news" initialConfig={config} initialArticles={pickHomeArticles(config, posts)} />

@@ -11,12 +11,14 @@ export default function BuilderPageGate({
   initialBlocks,
   initialPartners,
   initialTeam,
+  initialGzverData,
 }: {
   slug: string
   children?: React.ReactNode
   initialBlocks?: PageBlock[]
   initialPartners?: any[]
   initialTeam?: TeamData
+  initialGzverData?: { items: any[]; departments: any[]; config?: any }
 }) {
-  return <PageBuilderRenderer slug={slug} fallback={children} initialBlocks={initialBlocks} initialPartners={initialPartners} initialTeam={initialTeam} />
+  return <PageBuilderRenderer slug={slug} fallback={children} initialBlocks={initialBlocks} initialPartners={initialPartners} initialTeam={initialTeam} initialGzverData={initialGzverData} />
 }

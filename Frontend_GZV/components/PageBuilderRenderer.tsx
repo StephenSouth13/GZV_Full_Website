@@ -42,12 +42,14 @@ export default function PageBuilderRenderer({
   initialBlocks,
   initialPartners,
   initialTeam,
+  initialGzverData,
 }: {
   slug: string
   fallback?: React.ReactNode
   initialBlocks?: PageBlock[]
   initialPartners?: any[]
   initialTeam?: TeamData
+  initialGzverData?: { items: any[]; departments: any[]; config?: any }
 }) {
   const { language } = useLanguage()
   const [blocks, setBlocks] = useState<PageBlock[]>(initialBlocks || [])
@@ -110,10 +112,10 @@ export default function PageBuilderRenderer({
   if (loading) return null
   if (blocks.length === 0) return <>{fallback || null}</>
 
-  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} initialPartners={initialPartners} initialTeam={initialTeam} />)}</>
+  return <>{blocks.map((block) => <RenderBlock key={block.id || block.block_key} block={block} language={language} initialPartners={initialPartners} initialTeam={initialTeam} initialGzverData={initialGzverData} />)}</>
 }
 
-function RenderBlock({ block, language, initialPartners, initialTeam }: { block: PageBlock; language: "vi" | "en"; initialPartners?: any[]; initialTeam?: TeamData }) {
+function RenderBlock({ block, language, initialPartners, initialTeam, initialGzverData }: { block: PageBlock; language: "vi" | "en"; initialPartners?: any[]; initialTeam?: TeamData; initialGzverData?: { items: any[]; departments: any[]; config?: any } }) {
   if (block.is_visible === false) return null
   const localizedProps = localizeRecord(block.props || {}, language)
   const blockTitle = language === "en"
@@ -158,7 +160,7 @@ function RenderBlock({ block, language, initialPartners, initialTeam }: { block:
     case "mentors_grid":
       return <MentorsGrid {...props} />
     case "gzvers_grid":
-      return <GzversGrid {...props} />
+      return <GzversGrid {...props} initialItems={initialGzverData?.items} initialDepartments={initialGzverData?.departments} initialConfig={initialGzverData?.config} />
     case "partners_grid":
     case "partners_list":
       return <PartnersListSection {...props} initialPartners={initialPartners} />
